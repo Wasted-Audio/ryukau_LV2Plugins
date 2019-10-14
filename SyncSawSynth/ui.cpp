@@ -46,6 +46,7 @@ constexpr float knobWidth = 50.0f;
 constexpr float knobHeight = 40.0f;
 constexpr float knobX = 60.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
+constexpr float checkboxWidth = 60.0f;
 constexpr uint32_t defaultWidth = uint32_t(10.0 * knobX + 50.0);
 constexpr uint32_t defaultHeight = uint32_t(20.0 + 3.0 * labelY + 6.0 * knobY);
 
@@ -73,10 +74,10 @@ public:
     const auto oscTop2 = 4.0 * labelY + 2.0 * knobY + 2.0 * knobHeight - margin;
     addCheckbox(
       oscLeft2 - knobX / 2.0, oscTop + labelY + (knobHeight - labelHeight) / 2.0 + margin,
-      "Unison", ParameterID::unison);
+      checkboxWidth, "Unison", ParameterID::unison);
     addCheckbox(
       oscLeft2 + margin + knobX,
-      oscTop2 + labelY + (knobHeight - labelHeight) / 2.0 - 10.0, "Invert",
+      oscTop2 + labelY + (knobHeight - labelHeight) / 2.0 - 10.0, checkboxWidth, "Invert",
       ParameterID::osc2Invert);
 
     // Cross modulation.
@@ -161,7 +162,8 @@ public:
     const auto filterLeft = modLeft;
     addGroupLabel(filterLeft, filterTop, 4.0 * knobX - 10.0, "Filter");
     addCheckbox(
-      filterLeft + 4.0 * knobX, filterTop, "Dirty Buffer", ParameterID::filterDirty);
+      filterLeft + 4.0 * knobX, filterTop, checkboxWidth, "Dirty Buffer",
+      ParameterID::filterDirty);
 
     const auto filterTop1 = filterTop + labelY;
     addKnob(
@@ -322,7 +324,8 @@ private:
     auto oscTop6 = oscTop5 + labelY;
     addKnob(knobLeft, oscTop6, knobWidth, colorBlue, "Phase", idPhase);
     addCheckbox(
-      knobLeft + knobX, oscTop6 + (knobHeight - labelHeight) / 2.0, "Lock", idPhaseLock);
+      knobLeft + knobX, oscTop6 + (knobHeight - labelHeight) / 2.0, checkboxWidth, "Lock",
+      idPhaseLock);
   }
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)
@@ -337,10 +340,8 @@ private:
     valueWidget.push_back(button);
   }
 
-  void addCheckbox(float left, float top, const char *title, uint32_t id)
+  void addCheckbox(float left, float top, float width, const char *title, uint32_t id)
   {
-    auto width = 100.0f;
-
     auto checkbox = std::make_shared<CheckBox>(this, this, title);
     checkbox->id = id;
     checkbox->setSize(width, labelHeight);
