@@ -18,6 +18,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "dsp/scale.hpp"
 #include "value.hpp"
