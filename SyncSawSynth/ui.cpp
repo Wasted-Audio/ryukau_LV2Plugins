@@ -26,6 +26,7 @@
 
 #include "ui.hpp"
 
+#include "gui/TinosBoldItalic.hpp"
 #include "gui/button.hpp"
 #include "gui/checkbox.hpp"
 #include "gui/knob.hpp"
@@ -55,6 +56,10 @@ public:
   SyncSawSynthUI() : PluginUI(defaultWidth, defaultHeight)
   {
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
+
+    fontId = createFontFromMemory(
+      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
+      TinosBoldItalic::TinosBoldItalicDataSize, false);
 
     // Oscillators.
     const auto oscWidth = 2.0 * knobWidth + 4.0 * margin;
@@ -273,6 +278,8 @@ private:
   Color colorGreen{19, 193, 54};
   Color colorOrange{252, 192, 79};
 
+  FontId fontId = -1;
+
   std::vector<std::shared_ptr<Widget>> widget;
   std::vector<std::shared_ptr<ValueWidget>> valueWidget;
 
@@ -330,7 +337,7 @@ private:
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)
   {
-    auto button = std::make_shared<ToggleButton>(this, this, title);
+    auto button = std::make_shared<ToggleButton>(this, this, title, fontId);
     button->id = id;
     button->setSize(width, labelHeight);
     button->setAbsolutePos(left, top);
@@ -342,7 +349,7 @@ private:
 
   void addCheckbox(float left, float top, float width, const char *title, uint32_t id)
   {
-    auto checkbox = std::make_shared<CheckBox>(this, this, title);
+    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
     checkbox->id = id;
     checkbox->setSize(width, labelHeight);
     checkbox->setAbsolutePos(left, top);
@@ -354,7 +361,7 @@ private:
 
   void addGroupLabel(int left, int top, float width, const char *name)
   {
-    auto label = std::make_shared<Label>(this, name);
+    auto label = std::make_shared<Label>(this, name, fontId);
     label->setSize(width, labelHeight);
     label->setAbsolutePos(left, top);
     label->setForegroundColor(colorFore);
@@ -406,7 +413,7 @@ private:
         break;
     }
 
-    auto label = std::make_shared<Label>(this, name);
+    auto label = std::make_shared<Label>(this, name, fontId);
     label->setSize(width, height);
     label->setAbsolutePos(left, top);
     label->setForegroundColor(colorFore);
@@ -423,7 +430,7 @@ private:
     uint32_t id,
     const std::vector<const char *> &items)
   {
-    auto menu = std::make_shared<OptionMenu>(this, this, items);
+    auto menu = std::make_shared<OptionMenu>(this, this, items, fontId);
     menu->id = id;
     menu->setSize(width, labelHeight);
     menu->setAbsolutePos(left, top);
@@ -446,7 +453,7 @@ private:
     float splashHeight,
     const char *name)
   {
-    auto button = std::make_shared<SplashButton>(this, name);
+    auto button = std::make_shared<SplashButton>(this, name, fontId);
     button->setSize(buttonWidth, buttonHeight);
     button->setAbsolutePos(buttonLeft, buttonTop);
     button->setForegroundColor(colorFore);
@@ -454,7 +461,7 @@ private:
     button->setTextSize(pluginNameTextSize);
     widget.push_back(button);
 
-    auto credit = std::make_shared<CreditSplash>(this, name);
+    auto credit = std::make_shared<CreditSplash>(this, name, fontId);
     credit->setSize(splashWidth, splashHeight);
     credit->setAbsolutePos(splashLeft, splashTop);
     button->setSplashWidget(credit);
@@ -482,7 +489,7 @@ private:
 
     top += sliderHeight + 10.0;
 
-    auto label = std::make_shared<Label>(this, name);
+    auto label = std::make_shared<Label>(this, name, fontId);
     label->setSize(width, labelHeight);
     label->setAbsolutePos(left, top);
     label->setForegroundColor(colorFore);

@@ -21,18 +21,13 @@
 #include <sstream>
 #include <string>
 
-#include "TinosBoldItalic.hpp"
 #include "Widget.hpp"
 
 class CreditSplash : public NanoWidget {
 public:
-  explicit CreditSplash(NanoWidget *group, const char *name)
-    : NanoWidget(group), name(name)
+  explicit CreditSplash(NanoWidget *group, const char *name, FontId fontId)
+    : NanoWidget(group), name(name), fontId(fontId)
   {
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
-
     hide();
   }
 
@@ -96,21 +91,18 @@ protected:
 
   bool isMouseEntered = false;
 
+  const char *name = nullptr;
+  FontId fontId = -1;
   int align = ALIGN_BASELINE | ALIGN_MIDDLE;
   float borderWidth = 8.0f;
   float textSize = 18.0f;
-  FontId fontId = -1;
-  const char *name = nullptr;
 };
 
 class SplashButton : public NanoWidget {
 public:
-  explicit SplashButton(NanoWidget *group, const char *labelText)
-    : NanoWidget(group), labelText(labelText)
+  explicit SplashButton(NanoWidget *group, const char *labelText, FontId fontId)
+    : NanoWidget(group), labelText(labelText), fontId(fontId)
   {
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
   }
 
   void onNanoDisplay() override

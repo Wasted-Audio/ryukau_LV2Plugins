@@ -17,17 +17,14 @@
 
 #pragma once
 
-#include "TinosBoldItalic.hpp"
 #include "valuewidget.hpp"
 
 class OptionMenu : public ValueWidget {
 public:
-  explicit OptionMenu(NanoWidget *group, PluginUI *ui, std::vector<const char *> item)
-    : ValueWidget(group, ui, 0.0f), item(item)
+  explicit OptionMenu(
+    NanoWidget *group, PluginUI *ui, std::vector<const char *> item, FontId fontId)
+    : ValueWidget(group, ui, 0.0f), item(item), fontId(fontId)
   {
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
   }
 
   void onNanoDisplay() override

@@ -17,17 +17,13 @@
 
 #pragma once
 
-#include "TinosBoldItalic.hpp"
 #include "valuewidget.hpp"
 
 class Button : public ValueWidget {
 public:
-  explicit Button(NanoWidget *group, PluginUI *ui, const char *labelText)
-    : ValueWidget(group, ui, 0.0f), labelText(labelText)
+  explicit Button(NanoWidget *group, PluginUI *ui, const char *labelText, FontId fontId)
+    : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId)
   {
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
   }
 
   void onNanoDisplay() override
@@ -111,8 +107,9 @@ protected:
 
 class ToggleButton : public Button {
 public:
-  explicit ToggleButton(NanoWidget *group, PluginUI *ui, const char *labelText)
-    : Button(group, ui, labelText)
+  explicit ToggleButton(
+    NanoWidget *group, PluginUI *ui, const char *labelText, FontId fontId)
+    : Button(group, ui, labelText, fontId)
   {
   }
 

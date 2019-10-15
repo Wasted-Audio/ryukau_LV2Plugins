@@ -17,17 +17,13 @@
 
 #pragma once
 
-#include "TinosBoldItalic.hpp"
 #include "valuewidget.hpp"
 
 class CheckBox : public ValueWidget {
 public:
-  explicit CheckBox(NanoWidget *group, PluginUI *ui, const char *labelText)
-    : ValueWidget(group, ui, 0.0f), labelText(labelText)
+  explicit CheckBox(NanoWidget *group, PluginUI *ui, const char *labelText, FontId fontId)
+    : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId)
   {
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
   }
 
   void onNanoDisplay() override

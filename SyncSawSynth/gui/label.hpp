@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "TinosBoldItalic.hpp"
 #include "Widget.hpp"
 
 class Label : public NanoWidget {
@@ -25,12 +24,9 @@ public:
   bool drawBorder = false;
   bool drawUnderline = false;
 
-  explicit Label(NanoWidget *group, const char *labelText)
-    : NanoWidget(group), labelText(labelText)
+  explicit Label(NanoWidget *group, const char *labelText, FontId fontId)
+    : NanoWidget(group), labelText(labelText), fontId(fontId)
   {
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
   }
 
   void onNanoDisplay() override
@@ -83,8 +79,8 @@ protected:
   Color colorBack{0xff, 0xff, 0xff};
 
   const char *labelText = nullptr;
+  FontId fontId = -1;
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
   float borderWidth = 1.0f;
   float textSize = 18.0f;
-  FontId fontId = -1;
 };
