@@ -31,6 +31,7 @@
 #include "gui/checkbox.hpp"
 #include "gui/knob.hpp"
 #include "gui/label.hpp"
+#include "gui/numberknob.hpp"
 #include "gui/optionmenu.hpp"
 #include "gui/splash.hpp"
 #include "gui/vslider.hpp"
@@ -304,7 +305,8 @@ private:
 
     auto oscTop2 = top + knobY;
     auto knobLeft = margin + left;
-    addKnob(knobLeft, oscTop2, knobWidth, colorBlue, "Semi", idSemi);
+    addNumberKnob<SomeDSP::LinearScale<double>>(
+      knobLeft, oscTop2, knobWidth, colorBlue, "Semi", idSemi, Scales::semi);
     addKnob(knobLeft + knobX, oscTop2, knobWidth, colorBlue, "Cent", idCent);
 
     auto oscTop3 = oscTop2 + knobY;
@@ -399,6 +401,43 @@ private:
     knob->setValue(defaultValue);
     valueWidget.push_back(knob);
 
+    addKnobLabel(left, top, width, height, name, labelPosition);
+  }
+
+  template<typename Scale>
+  void addNumberKnob(
+    float left,
+    float top,
+    float width,
+    Color highlightColor,
+    const char *name,
+    uint32_t id,
+    Scale &scale,
+    LabelPosition labelPosition = LabelPosition::bottom)
+  {
+    auto height = width - 2.0f * margin;
+
+    auto knob = std::make_shared<NumberKnob<Scale>>(this, this, fontId, scale);
+    knob->id = id;
+    knob->setSize(width - 2.0f * margin, height);
+    knob->setAbsolutePos(left + margin, top + margin);
+    knob->setHighlightColor(highlightColor);
+    auto defaultValue = param.value[id]->getDefaultNormalized();
+    knob->setDefaultValue(defaultValue);
+    knob->setValue(defaultValue);
+    valueWidget.push_back(knob);
+
+    addKnobLabel(left, top, width, height, name, labelPosition);
+  }
+
+  void addKnobLabel(
+    float left,
+    float top,
+    float width,
+    float height,
+    const char *name,
+    LabelPosition labelPosition)
+  {
     switch (labelPosition) {
       default:
       case LabelPosition::bottom:
