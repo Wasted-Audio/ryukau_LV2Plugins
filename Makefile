@@ -1,5 +1,4 @@
-# all: dpf SevenDelay SyncSawSynth
-all: dpf SyncSawSynth
+all: dpf SevenDelay SyncSawSynth
 
 # DEBUG=true
 # export DEBUG
