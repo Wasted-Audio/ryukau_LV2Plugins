@@ -17,8 +17,11 @@
   ==============================================================================
 
   Modified by Takamitsu Endo (ryukau@gmai.com), 2019.
+  - Added include guard.
   - Added stddef.h because editor made warning that size_t was not defined.
 */
+
+#pragma once
 
 #include <stddef.h> // Just in case.
 

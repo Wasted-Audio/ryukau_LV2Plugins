@@ -20,8 +20,8 @@
 #include <array>
 #include <memory>
 
+#include "../../lib/juce_FastMathApproximations.h"
 #include "constants.hpp"
-#include "juce_FastMathApproximations.h"
 #include "somemath.hpp"
 
 namespace SomeDSP {
