@@ -17,8 +17,11 @@
 
 #pragma once
 
+#ifndef TEST_BUILD
 #include "DistrhoPlugin.hpp"
+#endif
 
+#ifndef TEST_BUILD
 template<typename Scale> class ScaledParameterRanges : public ParameterRanges {
 public:
   ScaledParameterRanges(double defaultNormalized, Scale &scale)
@@ -45,9 +48,12 @@ public:
 protected:
   Scale &scale;
 };
+#endif
 
 struct ValueInterface {
+#ifndef TEST_BUILD
   virtual void setParameterRange(Parameter &parameter) = 0;
+#endif
   virtual double getRaw() const = 0;
   virtual double getNormalized() = 0;
   virtual double getDefaultRaw() = 0;
@@ -72,12 +78,14 @@ template<typename Scale> struct InternalValue : public ValueInterface {
   {
   }
 
+#ifndef TEST_BUILD
   void setParameterRange(Parameter &parameter) override
   {
     parameter.name = name;
     parameter.hints = hints;
     parameter.ranges = ScaledParameterRanges<Scale>(defaultNormalized, scale);
   }
+#endif
 
   inline double getRaw() const override { return raw; }
   double getNormalized() override { return scale.invmap(raw); }

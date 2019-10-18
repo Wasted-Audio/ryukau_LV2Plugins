@@ -23,6 +23,13 @@
 #include "dsp/scale.hpp"
 #include "value.hpp"
 
+#ifdef TEST_BUILD
+static const uint32_t kParameterIsAutomable = 0x01;
+static const uint32_t kParameterIsBoolean = 0x02;
+static const uint32_t kParameterIsInteger = 0x04;
+static const uint32_t kParameterIsLogarithmic = 0x08;
+#endif
+
 namespace ParameterID {
 enum ID {
   bypass,
@@ -273,11 +280,13 @@ struct GlobalParameter {
       0.5, Scales::defaultScale, "PitchBend", kParameterIsAutomable);
   }
 
+#ifndef TEST_BUILD
   void initParameter(uint32_t index, Parameter &parameter)
   {
     if (index >= value.size()) return;
     value[index]->setParameterRange(parameter);
   }
+#endif
 
   double getParameterValue(uint32_t index) const
   {
