@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "constants.hpp"
+#include "juce_FastMathApproximations.h"
 #include "somemath.hpp"
 
 namespace SomeDSP {
@@ -34,7 +35,7 @@ enum class BiquadType {
 
 enum class ShaperType { hardclip, tanh, sinRunge, cubicExpDecayAbs };
 
-template<typename Sample, size_t nFilter> class SerialFilter {
+template<typename Sample> class SerialFilter4 {
 public:
   BiquadType type = BiquadType::lowpass;
   Sample fs;
@@ -53,17 +54,18 @@ public:
   Sample sin_w0 = 0.0;
   Sample alpha = 0.0;
 
-  std::array<Sample, nFilter> x1{};
-  std::array<Sample, nFilter> x2{};
-  std::array<Sample, nFilter> y1{};
-  std::array<Sample, nFilter> y2{};
+  std::array<Sample, 4> x0{};
+  std::array<Sample, 4> x1{};
+  std::array<Sample, 4> x2{};
+  std::array<Sample, 4> y0{};
+  std::array<Sample, 4> y1{};
+  std::array<Sample, 4> y2{};
 
-  Sample output = 0.0;
   Sample feedback = 0.0;
   Sample saturation = 1.0;
   ShaperType shaper = ShaperType::sinRunge;
 
-  SerialFilter(Sample sampleRate, Sample cutoff, Sample resonance)
+  SerialFilter4(Sample sampleRate, Sample cutoff, Sample resonance)
     : fs(sampleRate), f0(cutoff), q(resonance)
   {
   }
@@ -77,7 +79,6 @@ public:
 
   void clear()
   {
-    output = 0.0;
     feedback = 0.0;
     x1.fill(0);
     x2.fill(0);
@@ -115,7 +116,7 @@ public:
   void setBandpass()
   {
     // 0.34657359027997264 = log(2) / 2.
-    alpha = sin_w0 * somesinh<Sample>(0.34657359027997264 * q * w0 / sin_w0);
+    alpha = sin_w0 * somesinh<Sample>(Sample(0.34657359027997264) * q * w0 / sin_w0);
     b0 = alpha;
     b1 = 0.0;
     b2 = -alpha;
@@ -126,7 +127,7 @@ public:
 
   void setNotch()
   {
-    alpha = sin_w0 * somesinh<Sample>(0.34657359027997264 * q * w0 / sin_w0);
+    alpha = sin_w0 * somesinh<Sample>(Sample(0.34657359027997264) * q * w0 / sin_w0);
     b0 = Sample(1.0);
     b1 = -Sample(2.0) * cos_w0;
     b2 = Sample(1.0);
@@ -141,8 +142,8 @@ public:
     this->q = clamp(q, Sample(1e-5), Sample(1.0));
 
     w0 = twopi * f0 / fs;
-    cos_w0 = somecos<Sample>(w0);
-    sin_w0 = somesin<Sample>(w0);
+    cos_w0 = juce::dsp::FastMathApproximations::cos<Sample>(w0);
+    sin_w0 = juce::dsp::FastMathApproximations::sin<Sample>(w0);
     switch (type) {
       default:
       case BiquadType::lowpass:
@@ -173,7 +174,7 @@ public:
     // Solve x for: diff(x^3*exp(-x), x) = 0,
     // then we get: x = 0, 27 * math.exp(-3).
     // 0.7439087749328765 = 1 / (27 * math.exp(-3))
-    return 0.7439087749328765 * x * x * x * someexp<Sample>(-somefabs<Sample>(x));
+    return Sample(0.7439087749328765) * x * x * x * someexp<Sample>(-somefabs<Sample>(x));
   }
 
   Sample shaperHardclip(Sample x)
@@ -183,7 +184,7 @@ public:
 
   Sample process(Sample input)
   {
-    input = saturation * (input - feedback * output);
+    input = saturation * (input - feedback * y0[3]);
     switch (shaper) {
       default:
       case ShaperType::hardclip:
@@ -191,7 +192,8 @@ public:
         break;
 
       case ShaperType::tanh:
-        input = sometanh<Sample>(input);
+        // input = sometanh<Sample>(input);
+        input = juce::dsp::FastMathApproximations::tanh<Sample>(input);
         break;
 
       case ShaperType::sinRunge:
@@ -203,19 +205,37 @@ public:
         break;
     }
 
-    for (size_t i = 0; i < nFilter; ++i) {
-      output = (b0 * input + b1 * x1[i] + b2 * x2[i] - a1 * y1[i] - a2 * y2[i]) / a0;
+    x0[0] = input;
+    x0[1] = y0[0];
+    x0[2] = y0[1];
+    x0[3] = y0[2];
 
-      x2[i] = x1[i];
-      x1[i] = input;
+    y0[0] = (b0 * x0[0] + b1 * x1[0] + b2 * x2[0] - a1 * y1[0] - a2 * y2[0]) / a0;
+    y0[1] = (b0 * x0[1] + b1 * x1[1] + b2 * x2[1] - a1 * y1[1] - a2 * y2[1]) / a0;
+    y0[2] = (b0 * x0[2] + b1 * x1[2] + b2 * x2[2] - a1 * y1[2] - a2 * y2[2]) / a0;
+    y0[3] = (b0 * x0[3] + b1 * x1[3] + b2 * x2[3] - a1 * y1[3] - a2 * y2[3]) / a0;
 
-      y2[i] = y1[i];
-      y1[i] = output;
+    x2[0] = x1[0];
+    x2[1] = x1[1];
+    x2[2] = x1[2];
+    x2[3] = x1[3];
 
-      input = output;
-    }
+    x1[0] = x0[0];
+    x1[1] = x0[1];
+    x1[2] = x0[2];
+    x1[3] = x0[3];
 
-    if (std::isfinite(output)) return output;
+    y2[0] = y1[0];
+    y2[1] = y1[1];
+    y2[2] = y1[2];
+    y2[3] = y1[3];
+
+    y1[0] = y0[0];
+    y1[1] = y0[1];
+    y1[2] = y0[2];
+    y1[3] = y0[3];
+
+    if (std::isfinite(y0[3])) return y0[3];
     clear();
     return 0.0;
   }

@@ -224,7 +224,7 @@ template<typename Sample> Sample Note<Sample>::process(NoteProcessInfo<Sample> &
   gain = velocity
     * (gainEnv
        + info.gainEnvelopeCurve
-         * (tanhf(3.0f * info.gainEnvelopeCurve * gainEnv) - gainEnv));
+         * (juce::dsp::FastMathApproximations::tanh(3.0f * info.gainEnvelopeCurve * gainEnv) - gainEnv));
 
   if (bypassFilter) return gain * (info.osc1Gain * outSaw1 + info.osc2Gain * outSaw2);
 

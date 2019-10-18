@@ -89,7 +89,7 @@ public:
   PTRSyncSaw<Sample> saw2;
   std::array<float, 2> oscBuffer = {0.0, 0.0};
 
-  SerialFilter<Sample, 4> filter;
+  SerialFilter4<Sample> filter;
 
   ExpADSREnvelope<float> gainEnvelope;
   LinearEnvelope<float> filterEnvelope;
