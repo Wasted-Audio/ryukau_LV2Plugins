@@ -77,10 +77,16 @@ public:
       ParameterID::osc2Cent, ParameterID::osc2Sync, ParameterID::osc2SyncType,
       ParameterID::osc2PTROrder, ParameterID::osc2Phase, ParameterID::osc2PhaseLock);
 
-    const auto oscTop2 = 4.0 * labelY + 2.0 * knobY + 2.0 * knobHeight - margin;
+    std::vector<const char *> nVoiceOptions
+      = {"Mono", "2 Voices", "4 Voices", "8 Voices", "16 Voices", "32 Voices"};
+    addOptionMenu(
+      oscLeft2 - knobX / 2.0, oscTop + labelY, checkboxWidth, ParameterID::nVoice,
+      nVoiceOptions);
     addCheckbox(
-      oscLeft2 - knobX / 2.0, oscTop + labelY + (knobHeight - labelHeight) / 2.0 + margin,
-      checkboxWidth, "Unison", ParameterID::unison);
+      oscLeft2 - knobX / 2.0, oscTop + 2.0 * labelY, checkboxWidth, "Unison",
+      ParameterID::unison);
+
+    const auto oscTop2 = 4.0 * labelY + 2.0 * knobY + 2.0 * knobHeight - margin;
     addCheckbox(
       oscLeft2 + margin + knobX,
       oscTop2 + labelY + (knobHeight - labelHeight) / 2.0 - 10.0, checkboxWidth, "Invert",

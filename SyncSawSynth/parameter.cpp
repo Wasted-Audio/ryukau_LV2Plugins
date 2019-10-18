@@ -54,3 +54,5 @@ LogScale<double> Scales::modEnvelopeCurve(1.0, 96.0, 0.5, 8.0);
 LogScale<double> Scales::modLFOFrequency(0.01, 20.0, 0.5, 1.0);
 LogScale<double> Scales::modToFreq(0.0, 16.0, 0.5, 1.0);
 LogScale<double> Scales::modToSync(0.0, 16.0, 0.5, 1.0);
+
+IndexScale<double> Scales::nVoice(5);

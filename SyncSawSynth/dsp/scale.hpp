@@ -34,6 +34,7 @@ public:
   T getMax() { return T(true); }
 };
 
+// If there are elements of 0, 1, 2, then max is 2.
 template<typename T> class IndexScale {
 public:
   IndexScale(uint32_t max) : max(max) {}

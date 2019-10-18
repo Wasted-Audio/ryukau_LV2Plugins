@@ -16,6 +16,7 @@
 // along with SyncSawSynth.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "dspcore.hpp"
+#include <iostream>
 
 inline float clamp(float value, float min, float max)
 {
@@ -317,6 +318,21 @@ void DSPCore::setParameters()
     param.value[ParameterID::filterResonanceAmount]->getRaw());
   interpFilterKeyToCutoff.push(param.value[ParameterID::filterKeyToCutoff]->getRaw());
   interpFilterKeyToFeedback.push(param.value[ParameterID::filterKeyToFeedback]->getRaw());
+
+  switch (uint32_t(param.value[ParameterID::nVoice]->getRaw())) {
+    case 0:
+      nVoice = 1;
+      break;
+
+    case 1:
+      nVoice = 16;
+      break;
+
+    default:
+    case 2:
+      nVoice = 32;
+      break;
+  }
 }
 
 void DSPCore::process(const size_t length, float *out0, float *out1)
@@ -408,7 +424,7 @@ void DSPCore::noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity
   size_t i = 0;
   size_t mostSilent = 0;
   float gain = 1.0f;
-  for (; i < notes.size(); ++i) {
+  for (; i < nVoice; ++i) {
     if (notes[i][0]->id == noteId) break;
     if (notes[i][0]->state == NoteState::rest) break;
     if (!notes[i][0]->gainEnvelope.isAttacking() && notes[i][0]->gain < gain) {
@@ -416,7 +432,7 @@ void DSPCore::noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity
       mostSilent = i;
     }
   }
-  if (i >= notes.size()) {
+  if (i >= nVoice) {
     isTransitioning = true;
 
     i = mostSilent;

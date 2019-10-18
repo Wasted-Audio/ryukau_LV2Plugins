@@ -96,6 +96,7 @@ enum ID {
   modLFOToSync2,
 
   pitchBend,
+  nVoice,
 
   ID_ENUM_LENGTH,
 };
@@ -136,6 +137,8 @@ struct Scales {
   static SomeDSP::LogScale<double> modLFOFrequency;
   static SomeDSP::LogScale<double> modToFreq;
   static SomeDSP::LogScale<double> modToSync;
+
+  static SomeDSP::IndexScale<double> nVoice;
 };
 
 struct GlobalParameter {
@@ -168,7 +171,7 @@ struct GlobalParameter {
     value[ID::osc1SyncType] = std::make_unique<ValueIndex>(
       0, Scales::syncType, "Osc1SyncType", kParameterIsAutomable | kParameterIsInteger);
     value[ID::osc1PTROrder] = std::make_unique<ValueIndex>(
-      7.0 / Scales::ptrOrder.getMax(), Scales::ptrOrder, "Osc1PTROrder",
+      16.0 / Scales::ptrOrder.getMax(), Scales::ptrOrder, "Osc1PTROrder",
       kParameterIsAutomable | kParameterIsInteger);
     value[ID::osc1Phase] = std::make_unique<ValueLinear>(
       0.0, Scales::defaultScale, "Osc1Phase", kParameterIsAutomable);
@@ -187,7 +190,7 @@ struct GlobalParameter {
     value[ID::osc2SyncType] = std::make_unique<ValueIndex>(
       0, Scales::syncType, "Osc2SyncType", kParameterIsAutomable | kParameterIsInteger);
     value[ID::osc2PTROrder] = std::make_unique<ValueIndex>(
-      7.0 / Scales::ptrOrder.getMax(), Scales::ptrOrder, "Osc2PTROrder",
+      16.0 / Scales::ptrOrder.getMax(), Scales::ptrOrder, "Osc2PTROrder",
       kParameterIsAutomable | kParameterIsInteger);
     value[ID::osc2Phase] = std::make_unique<ValueLinear>(
       0.0, Scales::defaultScale, "Osc2Phase", kParameterIsAutomable);
@@ -278,6 +281,9 @@ struct GlobalParameter {
 
     value[ID::pitchBend] = std::make_unique<ValueLinear>(
       0.5, Scales::defaultScale, "PitchBend", kParameterIsAutomable);
+    value[ID::nVoice] = std::make_unique<ValueIndex>(
+      5.0 / Scales::nVoice.getMax(), Scales::nVoice, "nVoice",
+      kParameterIsAutomable | kParameterIsInteger);
   }
 
 #ifndef TEST_BUILD

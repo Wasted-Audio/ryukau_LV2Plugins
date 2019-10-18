@@ -118,6 +118,7 @@ public:
 
 class DSPCore {
 public:
+  static const size_t maxVoice = 32;
   GlobalParameter param;
 
   void setup(double sampleRate);
@@ -128,7 +129,6 @@ public:
   void process(const size_t length, float *out0, float *out1);
   void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);
   void noteOff(int32_t noteId);
-  size_t maxPoly() { return notes.size(); }
 
 private:
   float sampleRate = 44100.0f;
@@ -169,7 +169,8 @@ private:
   LinearSmoother<float> interpFilterKeyToCutoff;
   LinearSmoother<float> interpFilterKeyToFeedback;
 
-  std::array<std::array<std::unique_ptr<Note<float>>, 2>, 32> notes;
+  size_t nVoice = 32;
+  std::array<std::array<std::unique_ptr<Note<float>>, 2>, maxVoice> notes;
 
   // Transition happens when synth is playing all notes and user send a new note on.
   // transitionBuffer is used to store a release of a note to reduce pop noise.

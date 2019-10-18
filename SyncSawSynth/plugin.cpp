@@ -30,11 +30,11 @@ START_NAMESPACE_DISTRHO
 class SyncSawSynth : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
-  SyncSawSynth() : Plugin(55, 1, 0)
+  SyncSawSynth() : Plugin(ParameterID::ID_ENUM_LENGTH, 1, 0)
   {
     sampleRateChanged(getSampleRate());
-    lastNoteId.reserve(dsp.maxPoly() + 1);
-    alreadyRecievedNote.reserve(dsp.maxPoly());
+    lastNoteId.reserve(dsp.maxVoice + 1);
+    alreadyRecievedNote.reserve(dsp.maxVoice);
   }
 
 protected:
