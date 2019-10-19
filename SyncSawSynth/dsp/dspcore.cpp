@@ -325,11 +325,23 @@ void DSPCore::setParameters()
       break;
 
     case 1:
+      nVoice = 2;
+      break;
+
+    case 2:
+      nVoice = 4;
+      break;
+
+    case 3:
+      nVoice = 8;
+      break;
+
+    case 4:
       nVoice = 16;
       break;
 
     default:
-    case 2:
+    case 5:
       nVoice = 32;
       break;
   }
