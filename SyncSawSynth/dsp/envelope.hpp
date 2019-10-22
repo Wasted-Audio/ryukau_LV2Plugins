@@ -80,7 +80,6 @@ public:
 
     sustainLevel = std::max<Sample>(0.0, std::min<Sample>(sustainLevel, Sample(1.0)));
     sustain.push(sustainLevel);
-    decayRange = Sample(1.0) - sustainLevel;
 
     declickLength = int32_t(declickTime * sampleRate);
 
@@ -117,7 +116,7 @@ public:
         break;
 
       case State::decay:
-        releaseRange = value * decayRange + sustain.getValue();
+        releaseRange = value - value * sustain.getValue() + sustain.getValue();
         break;
 
       case State::terminated:
@@ -145,6 +144,7 @@ public:
       case State::attack:
         value *= alpha;
         if (value >= Sample(1.0)) {
+          value = Sample(1.0);
           state = State::decay;
           alpha = somepow<Sample>(threshold, Sample(1.0) / (decayTime * sampleRate));
         }
@@ -153,7 +153,7 @@ public:
 
       case State::decay:
         value *= alpha;
-        output = value * decayRange + sustain.getValue();
+        output = value - value * sustain.getValue() + sustain.getValue();
         if (output > sustain.getValue() + threshold) break;
         state = State::sustain;
         break;
@@ -188,7 +188,7 @@ public:
 
     if (state != State::declickOut && declickCounter < declickLength) {
       declickCounter += 1;
-      return output * cosinterp<Sample>(declickCounter / (Sample)declickLength);
+      output *= cosinterp<Sample>(declickCounter / (Sample)declickLength);
     }
 
     return output;
@@ -203,7 +203,6 @@ protected:
   State state = State::attack;
   Sample sampleRate;
   Sample decayTime;
-  Sample decayRange = 1.0;
   Sample releaseAlpha;
   Sample releaseRange = 1.0;
   Sample alpha;
