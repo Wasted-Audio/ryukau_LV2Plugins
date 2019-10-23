@@ -1,5 +1,7 @@
 # LV2Plugins
-Porting of VST3 Plugins from https://github.com/ryukau/VSTPlugins .
+Audio plugins for Linux.
+
+VST3 version is available at https://github.com/ryukau/VSTPlugins .
 
 # Building
 On Linux, open terminal and run following command.
