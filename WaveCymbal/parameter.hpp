@@ -66,6 +66,7 @@ struct Scales {
   static SomeDSP::LinearScale<double> defaultScale;
 
   static SomeDSP::IntScale<double> seed;
+  static SomeDSP::LogScale<double> randomAmount;
   static SomeDSP::IntScale<double> nCymbal;
   static SomeDSP::LogScale<double> decay;
   static SomeDSP::LogScale<double> damping;
@@ -98,8 +99,8 @@ struct GlobalParameter {
 
     value[ID::seed] = std::make_unique<IntValue>(
       6583421, Scales::seed, "seed", kParameterIsAutomable | kParameterIsInteger);
-    value[ID::randomAmount] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "randomAmount", kParameterIsAutomable);
+    value[ID::randomAmount] = std::make_unique<LogValue>(
+      1.0, Scales::randomAmount, "randomAmount", kParameterIsAutomable);
     value[ID::nCymbal] = std::make_unique<IntValue>(
       3, Scales::nCymbal, "nCymbal", kParameterIsAutomable | kParameterIsInteger);
     value[ID::stack] = std::make_unique<IntValue>(

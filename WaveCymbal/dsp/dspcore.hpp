@@ -50,6 +50,8 @@ public:
   void noteOff(int32_t noteId);
 
 private:
+  void setSystem();
+
   float sampleRate = 44100.0f;
 
   // Top of this stack is current note.

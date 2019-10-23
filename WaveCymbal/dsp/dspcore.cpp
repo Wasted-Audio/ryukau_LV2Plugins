@@ -29,6 +29,28 @@ inline float midiNoteToFrequency(float pitch, float tuning)
 
 float paramToPitch(float bend) { return powf(2.0f, ((bend - 0.5f) * 400.0f) / 1200.0f); }
 
+void DSPCore::setSystem()
+{
+  excitor.set(
+    param.value[ParameterID::pickCombTime]->getFloat(),
+    param.value[ParameterID::pickCombFeedback]->getFloat(),
+    param.value[ParameterID::randomAmount]->getFloat());
+
+  cymbal->set(
+    1 + param.value[ParameterID::nCymbal]->getInt(),
+    1 + param.value[ParameterID::stack]->getInt(),
+    param.value[ParameterID::minFrequency]->getFloat(),
+    param.value[ParameterID::maxFrequency]->getFloat(),
+    param.value[ParameterID::distance]->getFloat(),
+    param.value[ParameterID::damping]->getFloat(),
+    param.value[ParameterID::pulsePosition]->getFloat(),
+    param.value[ParameterID::pulseWidth]->getFloat(),
+    param.value[ParameterID::decay]->getFloat(),
+    param.value[ParameterID::bandpassQ]->getFloat(),
+    static_cast<CrossoverType>(param.value[ParameterID::cutoffMap]->getInt()),
+    param.value[ParameterID::randomAmount]->getFloat());
+}
+
 void DSPCore::setup(double sampleRate)
 {
   this->sampleRate = sampleRate;
@@ -44,22 +66,7 @@ void DSPCore::setup(double sampleRate)
 
   excitor.setup(sampleRate);
   cymbal = std::make_unique<WaveHat<float>>(sampleRate);
-
-  excitor.set(
-    param.value[ParameterID::pickCombTime]->getFloat(),
-    param.value[ParameterID::pickCombFeedback]->getFloat());
-
-  cymbal->set(
-    1 + param.value[ParameterID::nCymbal]->getInt(),
-    param.value[ParameterID::stack]->getInt(),
-    param.value[ParameterID::minFrequency]->getFloat(),
-    param.value[ParameterID::maxFrequency]->getFloat(),
-    param.value[ParameterID::distance]->getFloat(),
-    param.value[ParameterID::damping]->getFloat(),
-    param.value[ParameterID::pulsePosition]->getFloat(),
-    param.value[ParameterID::pulseWidth]->getFloat(),
-    param.value[ParameterID::decay]->getFloat(),
-    param.value[ParameterID::bandpassQ]->getFloat(), CrossoverType::log);
+  setSystem();
 
   startup();
 }
@@ -90,22 +97,7 @@ void DSPCore::setParameters()
     cymbal->trigger(rnd);
   }
 
-  excitor.set(
-    param.value[ParameterID::pickCombTime]->getFloat(),
-    param.value[ParameterID::pickCombFeedback]->getFloat());
-
-  cymbal->set(
-    1 + param.value[ParameterID::nCymbal]->getInt(),
-    1 + param.value[ParameterID::stack]->getInt(),
-    param.value[ParameterID::minFrequency]->getFloat(),
-    param.value[ParameterID::maxFrequency]->getFloat(),
-    param.value[ParameterID::distance]->getFloat(),
-    param.value[ParameterID::damping]->getFloat(),
-    param.value[ParameterID::pulsePosition]->getFloat(),
-    param.value[ParameterID::pulseWidth]->getFloat(),
-    param.value[ParameterID::decay]->getFloat(),
-    param.value[ParameterID::bandpassQ]->getFloat(),
-    static_cast<CrossoverType>(param.value[ParameterID::cutoffMap]->getInt()));
+  setSystem();
 
   if (param.value[ParameterID::oscType]->getInt() >= 2 && !noteStack.empty()) {
     const auto freq = noteStack.back().frequency

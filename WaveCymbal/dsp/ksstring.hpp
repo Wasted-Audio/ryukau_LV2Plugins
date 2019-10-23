@@ -255,7 +255,8 @@ public:
     Sample pulseWidth,
     Sample decay,
     Sample bandpassQ,
-    CrossoverType crossoverType)
+    CrossoverType crossoverType,
+    Sample randomAmount)
   {
     this->stack = stack < maxStack ? stack : maxStack;
 
@@ -264,10 +265,12 @@ public:
     Sample low = 20;
     Sample high = 20;
     for (size_t i = 0; i < this->stack; ++i) {
-      string[i]->set(stringRnd[i] * maxFrequency + minFrequency, decay);
+      string[i]->set(
+        (Sample(1.0) - randomAmount * stringRnd[i]) * maxFrequency + minFrequency, decay);
 
       high = getCrossoverFrequency(20, 20000, i + 1, this->stack, crossoverType);
-      bandpass[i]->setCutoffQ(low + (high - low) * bandpassRnd[i], bandpassQ);
+      bandpass[i]->setCutoffQ(
+        low + (high - low) * (Sample(1.0) - randomAmount * bandpassRnd[i]), bandpassQ);
       low = high;
     }
   }
@@ -333,7 +336,8 @@ public:
     Sample pulseWidth,
     Sample decay,
     Sample bandpassQ,
-    CrossoverType crossoverType)
+    CrossoverType crossoverType,
+    Sample randomAmount)
   {
     this->nCymbal = nCymbal > maxCymbal ? maxCymbal : nCymbal;
     this->distance = distance;
@@ -341,7 +345,7 @@ public:
     for (size_t i = 0; i < nCymbal; ++i) {
       string[i]->set(
         stack, minFrequency, maxFrequency, damping, pulsePosition, pulseWidth, decay,
-        bandpassQ, crossoverType);
+        bandpassQ, crossoverType, randomAmount);
     }
   }
 
@@ -382,11 +386,11 @@ public:
   // random is in [0, 1].
   void trigger(Sample random) { this->random = random; }
 
-  void set(Sample timeSec, Sample gain, Sample feedback)
+  void set(Sample timeSec, Sample gain, Sample feedback, Sample randomAmount)
   {
     this->gain = gain;
     this->feedback = feedback;
-    interpDelayTime.push(timeSec * random);
+    interpDelayTime.push(timeSec * (Sample(1.0) - randomAmount * random));
   }
 
   void reset()
@@ -428,9 +432,9 @@ public:
     for (auto &cmb : comb) cmb->trigger(rnd.process());
   }
 
-  void set(Sample pickCombTime, Sample pickCombFB)
+  void set(Sample pickCombTime, Sample pickCombFB, Sample randomAmount)
   {
-    for (auto &cmb : comb) cmb->set(pickCombTime, -Sample(1.0), pickCombFB);
+    for (auto &cmb : comb) cmb->set(pickCombTime, -Sample(1.0), pickCombFB, randomAmount);
   }
 
   Sample process(Sample input)

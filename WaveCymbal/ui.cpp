@@ -133,7 +133,7 @@ public:
     addNumberKnob(
       leftRandom, topRandom, knobWidth, colorBlue, "Seed", ID::seed, Scales::seed);
     addKnob(
-      leftRandom + knobX, topRandom, knobWidth, colorBlue, "Amount", ID::randomAmount);
+      leftRandom + knobX, topRandom, knobWidth, colorRed, "Amount", ID::randomAmount);
 
     // Bandpass.
     const auto leftBandpass = leftRandom + 2.0f * knobX + 4.0f * margin;
