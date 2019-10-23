@@ -51,8 +51,12 @@ public:
   {
     if (ev.press && contains(ev.pos)) {
       if (ev.button == 1) {
-        value = float(getHeight() - ev.pos.getY()) / getHeight();
-        value = value > 1.0 ? 1.0 : value < 0.0 ? 0.0 : value;
+        if (ev.mod & kModifierControl) {
+          value = defaultValue;
+        } else {
+          value = float(getHeight() - ev.pos.getY()) / getHeight();
+          value = value > 1.0 ? 1.0 : value < 0.0 ? 0.0 : value;
+        }
         updateValue();
         anchorPoint = ev.pos;
         isMouseLeftDown = true;
@@ -68,7 +72,9 @@ public:
   bool onMotion(const MotionEvent &ev) override
   {
     if (isMouseLeftDown) {
-      if (ev.mod & kModifierShift)
+      if (ev.mod & kModifierControl)
+        value = defaultValue;
+      else if (ev.mod & kModifierShift)
         value += double(anchorPoint.getY() - ev.pos.getY()) / 16.0 / getHeight();
       else
         value = double(int(getHeight()) - ev.pos.getY()) / getHeight();
