@@ -17,6 +17,29 @@ Binaries are built into `LV2Plugins/bin`.
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To be stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 
+## WaveCymbal
+<figure>
+<img src="docs/img/lv2_wavecymbal.png" alt="Image of WaveCymbal GUI."/>
+</figure>
+
+WaveCymbal is a banded wave-guide synthesizer. This one was aiming to make cymbal sounds, but result is more like dragging bunch of empty cans on asphalt. Be cautious tweaking controls that turns red when pointing. They can drastically change output gain.
+
+WaveCymbal can be used as a effect. To turn off oscillator, change Oscillator->Sustain to Off.
+
+Block diagram of WaveCymbal.
+
+<figure>
+<img src="docs/img/wavecymbal_block_diagram.svg" alt="Image of block diagram of WaveCymbal."/>
+</figure>
+
+JavaScript version is available. Requires browser that supports Web Worker and Web Audio.
+
+- [WaveCymbal Demo](https://ryukau.github.io/WaveCymbal/)
+
+The idea of banded wave-guide is based on Figure 4 in this paper.
+
+- Essl, Georg, et al. "[Theory of banded waveguides.](https://cpb-us-w2.wpmucdn.com/sites.uwm.edu/dist/0/236/files/2016/09/CMJ04-theory-2ib3uzx.pdf)" Computer Music Journal 28.1 (2004): 37-50.
+
 ## SyncSawSynth
 <figure>
 <img src="docs/img/lv2_syncsawsynth.png" alt="Image of SyncSawSynth GUI."/>
