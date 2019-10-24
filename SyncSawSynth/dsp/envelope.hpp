@@ -58,6 +58,8 @@ public:
   {
     state = State::attack;
     value = threshold;
+    lastAttack = value;
+    adTransitionCounter = adTransitionLength - 1;
     set(attackTime, decayTime, sustainLevel, releaseTime, declickTime, threshold);
   }
 
@@ -95,6 +97,7 @@ public:
           Sample(1.0) / threshold, Sample(1.0) / (attackTime * sampleRate));
         break;
 
+      case State::adTransition:
       case State::decay:
         alpha = somepow<Sample>(threshold, Sample(1.0) / (decayTime * sampleRate));
         break;
@@ -112,6 +115,7 @@ public:
   {
     switch (state) {
       case State::attack:
+      case State::adTransition:
         releaseRange = value;
         break;
 
@@ -142,9 +146,23 @@ public:
     Sample output;
     switch (state) {
       case State::attack:
+        lastAttack = value;
         value *= alpha;
         if (value >= Sample(1.0)) {
-          value = Sample(1.0);
+          state = State::adTransition;
+          value = lastAttack;
+          adRange = Sample(1.0) - lastAttack;
+          goto AD_TRANSITION;
+        }
+        output = value;
+        break;
+
+      case State::adTransition:
+      AD_TRANSITION:
+        adRange *= Sample(0.5);
+        value += adRange;
+        adTransitionCounter -= 1;
+        if (adTransitionCounter < 0) {
           state = State::decay;
           alpha = somepow<Sample>(threshold, Sample(1.0) / (decayTime * sampleRate));
         }
@@ -195,13 +213,26 @@ public:
   }
 
 protected:
-  enum class State : int32_t { attack, decay, sustain, release, declickOut, terminated };
+  enum class State : int32_t {
+    attack,
+    adTransition,
+    decay,
+    sustain,
+    release,
+    declickOut,
+    terminated
+  };
+
+  static const int32_t adTransitionLength = 16;
 
   int32_t declickLength;
   int32_t declickCounter = 0;
+  int32_t adTransitionCounter = 0;
 
   State state = State::attack;
   Sample sampleRate;
+  Sample lastAttack;
+  Sample adRange;
   Sample decayTime;
   Sample releaseAlpha;
   Sample releaseRange = 1.0;
