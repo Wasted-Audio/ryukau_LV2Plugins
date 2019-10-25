@@ -85,7 +85,8 @@ void DSPCore::setParameters()
 {
   LinearSmoother<float>::setTime(param.value[ParameterID::smoothness]->getFloat());
 
-  interpMasterGain.push(param.value[ParameterID::gain]->getFloat());
+  if (!noteStack.empty()) velocity = noteStack.back().velocity;
+  interpMasterGain.push(velocity * param.value[ParameterID::gain]->getFloat());
 
   if (trigger) {
     trigger = false;

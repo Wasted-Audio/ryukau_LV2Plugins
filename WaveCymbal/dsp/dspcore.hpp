@@ -55,6 +55,7 @@ private:
   float sampleRate = 44100.0f;
 
   // Top of this stack is current note.
+  float velocity = 0;
   std::vector<NoteInfo> noteStack;
 
   Pulsar<float> pulsar{44100.0f, 0};
