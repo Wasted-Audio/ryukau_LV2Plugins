@@ -112,62 +112,59 @@ public:
       leftWave + 2.0f * knobX, topWave, knobWidth, colorBlue, "PulseWidth",
       ID::pulseWidth);
 
-    // String.
-    const auto top1 = top0 + knobY + 3.0f * margin;
-    const auto leftString = leftExcitation;
-    addGroupLabel(leftString, top1, knobX, "String");
-
-    const auto topString = top1 + labelHeight + margin;
-    addKnob(leftString, topString, knobWidth, colorBlue, "Decay", ID::decay);
 
     // Collision.
-    const auto leftCollision = leftString + knobX + 2.0 * margin;
+    const auto top1 = top0 + knobY + 3.0f * margin;
+
+    const auto leftCollision = leftExcitation;
     addButton(leftCollision, top1, checkboxWidth, "Collision", ID::collision);
-    addKnob(leftCollision, topString, knobWidth, colorRed, "Distance", ID::distance);
+
+    const auto topCollision = top1 + labelHeight + margin;
+    addKnob(leftCollision, topCollision, knobWidth, colorRed, "Distance", ID::distance);
 
     // Random.
-    const auto leftRandom = leftString + 2.0f * knobX + 4.0f * margin;
+    const auto leftRandom = leftCollision + knobX + 4.0f * margin;
     addGroupLabel(leftRandom, top1, 2.0f * knobX, "Random");
 
     const auto topRandom = top1 + labelHeight + margin;
     addNumberKnob(
-      leftRandom, topRandom, knobWidth, colorBlue, "Seed", ID::seed, Scales::seed);
+      leftRandom, topRandom, knobWidth, colorBlue, "Seed", ID::seed, Scales::seed, 0);
     addKnob(
       leftRandom + knobX, topRandom, knobWidth, colorRed, "Amount", ID::randomAmount);
 
-    // Bandpass.
-    const auto leftBandpass = leftRandom + 2.0f * knobX + 4.0f * margin;
-    addGroupLabel(leftBandpass, top1, 3.0f * knobX, "Bandpass");
+    // String.
+    const auto leftString = leftRandom + 2.0f * knobX + 4.0f * margin;
+    addGroupLabel(leftString, top1, 4.0f * knobX, "String");
 
-    const auto topBandpass = top1 + labelHeight + margin;
+    const auto topString = top1 + labelHeight + margin;
+    addKnob(leftString, topString, knobWidth, colorBlue, "MinHz", ID::minFrequency);
     addKnob(
-      leftBandpass, topBandpass, knobWidth, colorBlue, "MinCutoff", ID::minFrequency);
+      leftString + knobX, topString, knobWidth, colorBlue, "MaxHz", ID::maxFrequency);
     addKnob(
-      leftBandpass + knobX, topBandpass, knobWidth, colorBlue, "MaxCutoff",
-      ID::maxFrequency);
+      leftString + 2.0f * knobX, topString, knobWidth, colorBlue, "Decay", ID::decay);
     addKnob(
-      leftBandpass + 2.0f * knobX, topBandpass, knobWidth, colorBlue, "Q", ID::bandpassQ);
+      leftString + 3.0f * knobX, topString, knobWidth, colorBlue, "Q", ID::bandpassQ);
 
     // Oscillator.
     const auto top2 = top1 + labelHeight + knobY;
 
-    addGroupLabel(leftString, top2, 3.0f * knobX + 2.0f * margin, "Oscillator");
+    addGroupLabel(leftExcitation, top2, 3.0f * knobX + 2.0f * margin, "Oscillator");
 
     const auto topOscillator = top2 + labelHeight + margin;
-    addCheckbox(leftString, topOscillator, checkboxWidth, "Retrigger", ID::retrigger);
+    addCheckbox(leftExcitation, topOscillator, checkboxWidth, "Retrigger", ID::retrigger);
 
     std::vector<const char *> itemOscType
       = {"Off", "Impulse", "Sustain", "Velvet Noise", "Brown Noise"};
     addOptionMenu(
-      leftString + knobX, topOscillator, checkboxWidth, ID::oscType, itemOscType);
+      leftExcitation + knobX, topOscillator, checkboxWidth, ID::oscType, itemOscType);
 
     std::vector<const char *> itemCutoffMap = {"Log", "Linear"};
     addOptionMenu(
-      leftString + 2.0f * knobX + 2.0f * margin, topOscillator, checkboxWidth,
+      leftExcitation + 2.0f * knobX + 2.0f * margin, topOscillator, checkboxWidth,
       ID::cutoffMap, itemCutoffMap);
 
     // Smoothness.
-    const auto leftSmoothness = leftString + 3.0f * knobX + 4.0f * margin;
+    const auto leftSmoothness = leftExcitation + 3.0f * knobX + 4.0f * margin;
     addKnob(
       leftSmoothness + 22.5f, top2 - margin, 50.0f, colorBlue, "Smoothness",
       ID::smoothness);
