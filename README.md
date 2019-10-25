@@ -24,11 +24,11 @@ Note that some parameter configuration leads to massive DC offset. To be stay sa
 <img src="docs/img/lv2_wavecymbal.png" alt="Image of WaveCymbal GUI."/>
 </figure>
 
-WaveCymbal is a banded wave-guide synthesizer. This one was aiming to make cymbal sounds, but result is more like dragging bunch of empty cans on asphalt. Be cautious tweaking controls that turns red when pointing. They can drastically change output gain.
+WaveCymbal is a banded wave-guide synthesizer. This is an attempt to make cymbal sounds, but result is more like dragging bunch of empty cans on asphalt. Be cautious tweaking controls that turns red when pointing. They can drastically change output gain.
 
 WaveCymbal can be used as a effect. To turn off oscillator, change Oscillator->Sustain to Off.
 
-Block diagram of WaveCymbal.
+Block diagram of WaveCymbal. BP is short for Band-pass.
 
 <figure>
 <img src="docs/img/wavecymbal_block_diagram.svg" alt="Image of block diagram of WaveCymbal."/>
