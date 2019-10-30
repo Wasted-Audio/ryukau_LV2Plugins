@@ -7,6 +7,7 @@
 
 namespace SomeDSP {
 
+// Simulates 1D wave equation using explicit finite difference method.
 template<typename Sample, size_t maxLength> class Wave1D {
 public:
   size_t length = 1;
@@ -35,11 +36,13 @@ public:
     size_t pw = size_t(pulseWidth * this->length);
     this->pulseWidth = pw < 4 ? 4 : pw;
 
-    // alpha = 0.5 when sampleRate = 44100.0
+    // alpha = 0.5 when sampleRate = 44100.0. Assuming dx = 1, then:
     // 0.5 = A^2 * dt^2
-    // sqrt(0.5) / dt = A
-    // A = 31183.409050326747
-    // A = 972405000
+    //     = A^2 * (1 / sampleRate)^2
+    //
+    // Solving for A^2:
+    // A^2 = 0.5 / (1 / 44100)^2
+    //     = 972405000
 
     alpha = 972405000 / (sampleRate * sampleRate);
     beta = 2 - 2 * alpha;
