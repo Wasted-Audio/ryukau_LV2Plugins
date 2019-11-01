@@ -143,6 +143,7 @@ void DSPCore::process(
   for (auto &section : serialAP2)
     for (auto &ap : section->allpass) ap->delayTime.refresh();
 
+  const bool enableFDN = param.value[ParameterID::fdn]->getInt();
   for (size_t i = 0; i < length; ++i) {
     float sample = pulsar.process();
     if (in0 != nullptr) sample += in0[i];
@@ -156,28 +157,31 @@ void DSPCore::process(
     }
 
     // FDN.
-    const float fdnFeedback = interpFDNFeedback.process();
-    fdnSig = fdnCascade[0]->process(
-      juce::dsp::FastMathApproximations::tanh<float>(sample + fdnFeedback * fdnSig));
-    const float fdnCascadeMix = interpFDNCascadeMix.process();
-    for (size_t j = 1; j < fdnCascade.size(); ++j)
-      fdnSig = fdnSig + fdnCascadeMix * (fdnCascade[j]->process(fdnSig * 2.0f) - fdnSig);
-    const float fdnOut = fdnSig * 1024.0;
+    if (enableFDN) {
+      const float fdnFeedback = interpFDNFeedback.process();
+      fdnSig = fdnCascade[0]->process(
+        juce::dsp::FastMathApproximations::tanh<float>(sample + fdnFeedback * fdnSig));
+      const float fdnCascadeMix = interpFDNCascadeMix.process();
+      for (size_t j = 1; j < fdnCascade.size(); ++j)
+        fdnSig
+          = fdnSig + fdnCascadeMix * (fdnCascade[j]->process(fdnSig * 2.0f) - fdnSig);
+      sample = fdnSig * 1024.0;
+    }
 
     // Allpass.
     const float allpass1Feedback = interpAllpass1Feedback.process();
-    serialAP1Sig = serialAP1->process(fdnOut + allpass1Feedback * serialAP1Sig);
-    const float ap1Out = serialAP1Highpass->process(serialAP1Sig);
+    serialAP1Sig = serialAP1->process(sample + allpass1Feedback * serialAP1Sig);
+    float apOut = serialAP1Highpass->process(serialAP1Sig);
 
     const float allpass2Feedback = interpAllpass2Feedback.process();
-    serialAP2Sig = ap1Out + allpass2Feedback * serialAP2Sig;
+    serialAP2Sig = apOut + allpass2Feedback * serialAP2Sig;
     float sum = 0.0f;
     for (auto &ap : serialAP2) sum += ap->process(serialAP2Sig);
     serialAP2Sig = sum / serialAP2.size();
-    sample = ap1Out + 4.0f * serialAP2Highpass->process(serialAP2Sig);
+    apOut += 4.0f * serialAP2Highpass->process(serialAP2Sig);
 
     const float allpassMix = interpAllpassMix.process();
-    sample = fdnOut + allpassMix * (sample - fdnOut);
+    sample += allpassMix * (apOut - sample);
 
     // Tremolo.
     tremoloPhase += interpTremoloFrequency.process() * float(twopi) / sampleRate;

@@ -105,7 +105,7 @@ public:
 
     // FDN.
     const auto leftFDN = leftRandom + 2.0f * knobX + 2.0f * margin;
-    addGroupLabel(leftFDN, top0, 3.0f * knobX, "FDN");
+    addButton(leftFDN, top0, 3.0f * knobX, "FDN", ID::fdn);
 
     const auto topFDN = top0 + labelHeight + margin;
     addKnob(leftFDN, topFDN, knobWidth, colorBlue, "Time", ID::fdnTime);

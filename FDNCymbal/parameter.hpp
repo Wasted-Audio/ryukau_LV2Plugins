@@ -37,6 +37,7 @@ enum ID {
   retriggerTime,
   retriggerStick,
   retriggerTremolo,
+  fdn,
   fdnTime,
   fdnFeedback,
   fdnCascadeMix,
@@ -114,6 +115,8 @@ struct GlobalParameter {
       false, Scales::boolScale, "retriggerTremolo",
       kParameterIsAutomable | kParameterIsBoolean);
 
+    value[ID::fdn] = std::make_unique<IntValue>(
+      true, Scales::boolScale, "fdn", kParameterIsAutomable | kParameterIsBoolean);
     value[ID::fdnTime] = std::make_unique<LogValue>(
       0.2, Scales::fdnTime, "fdnTime", kParameterIsAutomable);
     value[ID::fdnFeedback] = std::make_unique<LogValue>(
