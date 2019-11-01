@@ -19,6 +19,21 @@ Binaries are built into `LV2Plugins/bin`.
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To be stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 
+## FDNCymbal
+<figure>
+<img src="docs/img/lv2_fdncymbal.png" alt="Image of FDNCymbal GUI."/>
+</figure>
+
+FDNCymbal is another attempt to make cymbal sounds. This one at least sounds like hitting a metal plate. Unlike the name, most of metalic texture comes from [Schroeder allpass section](https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html) rather than [FDN](https://ccrma.stanford.edu/~jos/cfdn/Feedback_Delay_Networks.html) (feedback delay network). FDN section makes nice impact sound when FDN->Time is short.
+
+Caution:
+- When HP Cutoff is moving fast, it may output massive DC.
+- When FDN->Feedback is non zero, it may possibly blow up. If that happens, turn FDN->Feedback to leftmost.
+
+JavaScript version is available. Requires browser that supports Web Worker and Web Audio. This is not exactly the same as plugin version, but using similar structure.
+
+- [FDNCymbal](https://ryukau.github.io/FDNCymbal/)
+
 ## WaveCymbal
 <figure>
 <img src="docs/img/lv2_wavecymbal.png" alt="Image of WaveCymbal GUI."/>
