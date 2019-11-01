@@ -19,6 +19,8 @@ Binaries are built into `LV2Plugins/bin`.
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To be stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 
+Some controls turns red when pointing. They can be the cause of potential blow up. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
+
 ## FDNCymbal
 <figure>
 <img src="docs/img/lv2_fdncymbal.png" alt="Image of FDNCymbal GUI."/>
