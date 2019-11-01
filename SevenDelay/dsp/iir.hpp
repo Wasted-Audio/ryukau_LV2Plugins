@@ -23,15 +23,10 @@ constexpr double pi = 3.14159265358979323846;
 constexpr double twopi = 6.28318530717958647692;
 
 inline double somesin(double x) { return ::sin(x); }
-
 inline float somesin(float x) { return ::sinf(x); }
-
 inline double somecos(double x) { return ::cos(x); }
-
 inline float somecos(float x) { return ::cosf(x); }
-
 inline double sometan(double x) { return ::tan(x); }
-
 inline float sometan(float x) { return ::tanf(x); }
 
 template<typename Sample> class SVF {
@@ -50,27 +45,18 @@ public:
     d = Sample(1.0) / (Sample(1.0) + Sample(2.0) * resonance + g * g);
   }
 
-  void setCutoff(Sample hz)
+  // q in (0, 1].
+  void setCutoffQ(Sample hz, Sample q)
   {
     cutoff = hz > 0.0 ? hz : 0.0;
-    setCoefficient();
-  }
-
-  // value is (0, 1].
-  void setQ(Sample value)
-  {
-    resonance = value < Sample(1e-5) ? Sample(1e-5) : value;
+    resonance = q < Sample(1e-5) ? Sample(1e-5) : q;
     setCoefficient();
   }
 
   void reset()
   {
-    yLP = 0.0;
-    yBP = 0.0;
-    yHP = 0.0;
-
-    s1 = 0.0;
-    s2 = 0.0;
+    yLP = yBP = yHP = 0.0;
+    s1 = s2 = 0.0;
   }
 
   Sample process(Sample input)
@@ -152,17 +138,11 @@ public:
     a0 = Sample(1.0) + alpha;
     a1 = -Sample(2.0) * cos_w0;
     a2 = Sample(1.0) - alpha;
-
-    b0 /= a0;
-    b1 /= a0;
-    b2 /= a0;
-    a1 /= a0;
-    a2 /= a0;
   }
 
   Sample process(Sample input)
   {
-    Sample output = b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+    Sample output = (b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2) / a0;
 
     x2 = x1;
     x1 = input;

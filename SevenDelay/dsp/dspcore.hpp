@@ -48,6 +48,8 @@ protected:
   const float pi = 3.14159265358979323846;
 
   std::array<LinearSmoother<float>, 2> interpTime{};
+  std::array<LinearSmoother<float>, 2> interpPanIn{};
+  std::array<LinearSmoother<float>, 2> interpPanOut{};
   LinearSmoother<float> interpWetMix;
   LinearSmoother<float> interpDryMix;
   LinearSmoother<float> interpFeedback;
@@ -55,8 +57,6 @@ protected:
   LinearSmoother<float> interpLfoToneAmount;
   LinearSmoother<float> interpLfoFrequency;
   LinearSmoother<float> interpLfoShape;
-  std::array<LinearSmoother<float>, 2> interpPanIn{};
-  std::array<LinearSmoother<float>, 2> interpPanOut{};
   LinearSmoother<float> interpToneCutoff;
   LinearSmoother<float> interpToneQ;
   LinearSmoother<float> interpToneMix;

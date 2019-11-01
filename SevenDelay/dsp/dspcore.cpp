@@ -37,6 +37,8 @@ void DSPCore::setup(double sampleRate)
   for (size_t i = 0; i < dcKiller.size(); ++i)
     dcKiller[i] = std::make_unique<DCKillerTypeName>(sampleRate, minDCKillFrequency, 0.1);
 
+  delayOut.fill(0.0f);
+
   lfoPhaseTick = 2.0 * pi / sampleRate;
 
   startup();
@@ -58,6 +60,12 @@ void DSPCore::reset()
     filter[i]->reset();
     dcKiller[i]->reset();
   }
+
+  delayOut.fill(0.0f);
+
+  interpToneMix.reset(0);
+  interpDCKillMix.reset(0);
+
   startup();
 }
 
@@ -132,6 +140,8 @@ void DSPCore::setParameters(double tempo)
 void DSPCore::process(
   const size_t length, const float *in0, const float *in1, float *out0, float *out1)
 {
+  LinearSmoother<float>::setBufferSize(length);
+
   for (size_t i = 0; i < length; ++i) {
     auto sign = (pi < lfoPhase) - (lfoPhase < pi);
     const float lfo = sign * powf(fabsf(sin(lfoPhase)), interpLfoShape.process());
@@ -150,13 +160,11 @@ void DSPCore::process(
     float toneCutoff = interpToneCutoff.process() * lfoTone * lfoTone;
     if (toneCutoff < 20.0f) toneCutoff = 20.0f;
     const float toneQ = interpToneQ.process();
-    filter[0]->setCutoff(toneCutoff);
-    filter[0]->setQ(toneQ);
-    filter[1]->setCutoff(toneCutoff);
-    filter[1]->setQ(toneQ);
+    filter[0]->setCutoffQ(toneCutoff, toneQ);
+    filter[1]->setCutoffQ(toneCutoff, toneQ);
     float filterOutL = filter[0]->process(delayOut[0]);
     float filterOutR = filter[1]->process(delayOut[1]);
-    const float toneMix = interpToneMix.process() * lfoTone;
+    const float toneMix = interpToneMix.process();
     delayOut[0] = filterOutL + toneMix * (delayOut[0] - filterOutL);
     delayOut[1] = filterOutR + toneMix * (delayOut[1] - filterOutR);
 
