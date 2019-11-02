@@ -165,12 +165,13 @@ void DSPCore::process(
       for (size_t j = 1; j < fdnCascade.size(); ++j)
         fdnSig
           = fdnSig + fdnCascadeMix * (fdnCascade[j]->process(fdnSig * 2.0f) - fdnSig);
-      sample = fdnSig * 1024.0;
+      sample = 3.0f * fdnSig * 1024.0;
     }
 
     // Allpass.
     const float allpass1Feedback = interpAllpass1Feedback.process();
-    serialAP1Sig = serialAP1->process(sample + allpass1Feedback * serialAP1Sig);
+    serialAP1Sig = serialAP1->process(
+      sample + juce::dsp::FastMathApproximations::tanh(allpass1Feedback * serialAP1Sig));
     float apOut = serialAP1Highpass->process(serialAP1Sig);
 
     const float allpass2Feedback = interpAllpass2Feedback.process();
