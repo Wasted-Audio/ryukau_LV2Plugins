@@ -112,6 +112,7 @@ void DSPCore::setParameters()
 
   interpFDNFeedback.push(param.value[ParameterID::fdnFeedback]->getFloat());
   interpFDNCascadeMix.push(param.value[ParameterID::fdnCascadeMix]->getFloat());
+
   interpAllpassMix.push(param.value[ParameterID::allpassMix]->getFloat());
   interpAllpass1Feedback.push(param.value[ParameterID::allpass1Feedback]->getFloat());
   interpAllpass2Feedback.push(param.value[ParameterID::allpass2Feedback]->getFloat());
@@ -144,6 +145,7 @@ void DSPCore::process(
     for (auto &ap : section->allpass) ap->delayTime.refresh();
 
   const bool enableFDN = param.value[ParameterID::fdn]->getInt();
+  const bool allpass1Saturation = param.value[ParameterID::allpass1Saturation]->getInt();
   for (size_t i = 0; i < length; ++i) {
     float sample = pulsar.process();
     if (in0 != nullptr) sample += in0[i];
@@ -165,13 +167,14 @@ void DSPCore::process(
       for (size_t j = 1; j < fdnCascade.size(); ++j)
         fdnSig
           = fdnSig + fdnCascadeMix * (fdnCascade[j]->process(fdnSig * 2.0f) - fdnSig);
-      sample = 3.0f * fdnSig * 1024.0;
+      sample = fdnSig * 1024.0;
     }
 
     // Allpass.
-    const float allpass1Feedback = interpAllpass1Feedback.process();
-    serialAP1Sig = serialAP1->process(
-      sample + juce::dsp::FastMathApproximations::tanh(allpass1Feedback * serialAP1Sig));
+    serialAP1Sig = allpass1Saturation
+      ? juce::dsp::FastMathApproximations::tanh(serialAP1Sig)
+      : serialAP1Sig;
+    serialAP1Sig = serialAP1->process(sample + serialAP1Sig);
     float apOut = serialAP1Highpass->process(serialAP1Sig);
 
     const float allpass2Feedback = interpAllpass2Feedback.process();

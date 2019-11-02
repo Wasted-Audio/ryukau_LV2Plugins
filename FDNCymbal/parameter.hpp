@@ -42,6 +42,7 @@ enum ID {
   fdnFeedback,
   fdnCascadeMix,
   allpassMix,
+  allpass1Saturation,
   allpass1Time,
   allpass1Feedback,
   allpass1HighpassCutoff,
@@ -126,6 +127,9 @@ struct GlobalParameter {
 
     value[ID::allpassMix] = std::make_unique<LinearValue>(
       0.75, Scales::defaultScale, "allpassMix", kParameterIsAutomable);
+    value[ID::allpass1Saturation] = std::make_unique<IntValue>(
+      true, Scales::boolScale, "allpass1Saturation",
+      kParameterIsAutomable | kParameterIsBoolean);
     value[ID::allpass1Time] = std::make_unique<LogValue>(
       0.5, Scales::allpassTime, "allpass1Time", kParameterIsAutomable);
     value[ID::allpass1Feedback] = std::make_unique<LogValue>(

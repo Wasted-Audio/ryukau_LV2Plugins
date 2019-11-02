@@ -124,6 +124,9 @@ public:
 
     const auto leftAP1 = leftAP + knobX + 2.0f * margin;
     addGroupLabel(leftAP1, top1, 3.0f * knobX, "Stage 1");
+    addCheckbox(
+      leftAP1 + knobX + 3.5 * margin, topAP + knobHeight + labelHeight + 0.5f * margin,
+      checkboxWidth, "Tanh", ID::allpass1Saturation);
 
     addKnob(leftAP1, topAP, knobWidth, colorBlue, "Time", ID::allpass1Time);
     addKnob(
