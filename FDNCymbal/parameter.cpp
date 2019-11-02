@@ -37,4 +37,4 @@ LogScale<double> Scales::stickToneMix(0.0, 0.002, 0.5, 0.0001);
 
 LogScale<double> Scales::smoothness(0.0, 0.5, 0.2, 0.02);
 
-LogScale<double> Scales::gain(0.0, 4.0, 0.75, 1.0);
+LogScale<double> Scales::gain(0.0, 4.0, 0.75, 0.5);

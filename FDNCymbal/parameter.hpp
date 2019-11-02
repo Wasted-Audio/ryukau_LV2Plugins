@@ -167,7 +167,7 @@ struct GlobalParameter {
       0.1, Scales::smoothness, "smoothness", kParameterIsAutomable);
 
     value[ID::gain]
-      = std::make_unique<LogValue>(0.4, Scales::gain, "gain", kParameterIsAutomable);
+      = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
     value[ID::pitchBend] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "pitchBend", kParameterIsAutomable);
   }
