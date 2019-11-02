@@ -26,11 +26,13 @@ Some controls turns red when pointing. They can be the cause of potential blow u
 <img src="docs/img/lv2_fdncymbal.png" alt="Image of FDNCymbal GUI."/>
 </figure>
 
-FDNCymbal is another attempt to make cymbal sounds. This one at least sounds like hitting a metal plate. Unlike the name, most of metalic texture comes from [Schroeder allpass section](https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html) rather than [FDN](https://ccrma.stanford.edu/~jos/cfdn/Feedback_Delay_Networks.html) (feedback delay network). FDN section makes nice impact sound when FDN->Time is short.
+FDNCymbal is another attempt to make cymbal sounds. This one at least sounds like hitting a metal plate. Unlike the name, most of metalic texture comes from stage 1 of [Schroeder allpass section](https://ccrma.stanford.edu/~jos/pasp/Schroeder_Allpass_Sections.html) rather than [FDN](https://ccrma.stanford.edu/~jos/cfdn/Feedback_Delay_Networks.html) (feedback delay network). FDN section makes nice impact sound when `FDN->Time` is short. Tremolo is added to simulate wobbling of cymbal.
+
+FDNCymbal can be used as both synth/effect. To turn off oscillator, click `Stick` button.
 
 Caution:
-- When HP Cutoff is moving fast, it may output massive DC.
-- When FDN->Feedback is non zero, it may possibly blow up. If that happens, turn FDN->Feedback to leftmost.
+- When HP Cutoff is moving fast, it may output massive DC. To avoid this, use <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd> or turn up `Smooth`.
+- When FDN->Feedback is non zero, it may possibly blow up. If that happens, turn `FDN->Feedback` to leftmost.
 
 JavaScript version is available. Requires browser that supports Web Worker and Web Audio. This is not exactly the same as plugin version, but using similar structure.
 
@@ -43,7 +45,7 @@ JavaScript version is available. Requires browser that supports Web Worker and W
 
 WaveCymbal is a banded wave-guide synthesizer. This is an attempt to make cymbal sounds, but result is more like dragging bunch of empty cans on asphalt. Be cautious tweaking controls that turns red when pointing. They can drastically change output gain.
 
-WaveCymbal can be used as a effect. To turn off oscillator, change Oscillator->Sustain to Off.
+WaveCymbal can be used as a effect. To turn off oscillator, change `Oscillator->Sustain` to `Off`.
 
 Block diagram of WaveCymbal. BP is short for Band-pass.
 
