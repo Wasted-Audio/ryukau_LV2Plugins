@@ -7,7 +7,7 @@ VST3 version is available at https://github.com/ryukau/VSTPlugins .
 On Ubuntu 18.04, open terminal and run following command.
 
 ```bash
-sudo apt install git make pkg-config libjack-jackd2-dev libgl-dev liblo-dev
+sudo apt install git pkg-config libjack-jackd2-dev libgl-dev liblo-dev
 git clone --recursive <this repository url>
 cd LV2Plugins
 make -j
