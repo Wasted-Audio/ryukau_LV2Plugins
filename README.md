@@ -4,12 +4,12 @@ Audio plugins for Linux.
 VST3 version is available at https://github.com/ryukau/VSTPlugins .
 
 # Building
-On Linux, open terminal and run following command.
+On Ubuntu 18.04, open terminal and run following command.
 
 ```bash
-git clone <this repository url>
+sudo apt install git make pkg-config libjack-jackd2-dev libgl-dev liblo-dev
+git clone --recursive <this repository url>
 cd LV2Plugins
-git submodule update --init --recursive
 make -j
 make install # Copy *.lv2 to ~/.lv2
 ```
