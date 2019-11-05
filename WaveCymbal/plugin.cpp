@@ -51,7 +51,7 @@ protected:
   {
     return d_version(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
   }
-  int64_t getUniqueId() const override { return d_cconst('u', 's', 'y', 'n'); }
+  int64_t getUniqueId() const override { return d_cconst('u', 'w', 'c', 'y'); }
 
   void initParameter(uint32_t index, Parameter &parameter) override
   {
