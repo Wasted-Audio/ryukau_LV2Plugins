@@ -374,6 +374,8 @@ void DSPCore::process(const size_t length, float *out0, float *out1)
   noteInfo.osc2SyncType = param.value[ParameterID::osc2SyncType]->getRaw();
   noteInfo.osc2PTROrder = param.value[ParameterID::osc2PTROrder]->getRaw();
   for (size_t i = 0; i < length; ++i) {
+    processMidiNote(i);
+
     noteInfo.osc1Gain = interpOsc1Gain.process();
     noteInfo.osc1Pitch = interpOsc1Pitch.process();
     noteInfo.osc1Sync = interpOsc1Sync.process();

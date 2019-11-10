@@ -130,6 +130,40 @@ public:
   void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);
   void noteOff(int32_t noteId);
 
+  struct MidiNote {
+    uint32_t frame;
+    int32_t id;
+    int16_t pitch;
+    float tuning;
+    float velocity;
+  };
+
+  std::vector<MidiNote> midiNotes;
+
+  void pushMidiNote(
+    uint32_t frame, int32_t noteId, int16_t pitch, float tuning, float velocity)
+  {
+    MidiNote note;
+    note.frame = frame;
+    note.id = noteId;
+    note.pitch = pitch;
+    note.tuning = tuning;
+    note.velocity = velocity;
+    midiNotes.push_back(note);
+  }
+
+  void processMidiNote(uint32_t frame)
+  {
+    while (true) {
+      auto it = std::find_if(midiNotes.begin(), midiNotes.end(), [&](const MidiNote &nt) {
+        return nt.frame == frame;
+      });
+      if (it == std::end(midiNotes)) return;
+      noteOn(it->id, it->pitch, it->tuning, it->velocity);
+      midiNotes.erase(it);
+    }
+  }
+
 private:
   float sampleRate = 44100.0f;
   float lfoPhase = 0.0f;

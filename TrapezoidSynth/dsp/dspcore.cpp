@@ -372,6 +372,8 @@ void DSPCore::process(const size_t length, float *out0, float *out1)
 
   float sample = 0;
   for (size_t i = 0; i < length; ++i) {
+    processMidiNote(i);
+
     sample = tpz1.process(length);
     const float masterGain = interpMasterGain.process();
     out0[i] = masterGain * sample;

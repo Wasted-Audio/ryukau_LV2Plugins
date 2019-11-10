@@ -49,14 +49,47 @@ public:
   void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);
   void noteOff(int32_t noteId);
 
+  struct MidiNote {
+    uint32_t frame;
+    int32_t id;
+    int16_t pitch;
+    float tuning;
+    float velocity;
+  };
+
+  std::vector<MidiNote> midiNotes;
+
+  void pushMidiNote(
+    uint32_t frame, int32_t noteId, int16_t pitch, float tuning, float velocity)
+  {
+    MidiNote note;
+    note.frame = frame;
+    note.id = noteId;
+    note.pitch = pitch;
+    note.tuning = tuning;
+    note.velocity = velocity;
+    midiNotes.push_back(note);
+  }
+
+  void processMidiNote(uint32_t frame)
+  {
+    while (true) {
+      auto it = std::find_if(midiNotes.begin(), midiNotes.end(), [&](const MidiNote &nt) {
+        return nt.frame == frame;
+      });
+      if (it == std::end(midiNotes)) return;
+      noteOn(it->id, it->pitch, it->tuning, it->velocity);
+      midiNotes.erase(it);
+    }
+  }
+
 private:
   void setSystem();
 
   float sampleRate = 44100.0f;
 
-  // Top of this stack is current note.
   float velocity = 0;
-  std::vector<NoteInfo> noteStack;
+  std::vector<NoteInfo> noteStack; // Top of this stack is current note.
 
   Pulsar<float> pulsar{44100.0f, 0};
   VelvetNoise<float> velvetNoise{44100.0f, 100.0f, 0};

@@ -125,7 +125,8 @@ protected:
           for (const auto &noteNo : alreadyRecievedNote) {
             if (noteNo == ev.data[1]) goto NoteAlreadyPressed;
           }
-          dsp.noteOn(noteId, ev.data[1], 0.0f, ev.data[2] / float(INT8_MAX));
+          dsp.pushMidiNote(
+            ev.frame, noteId, ev.data[1], 0.0f, ev.data[2] / float(INT8_MAX));
           lastNoteId.push_back(std::pair<uint8_t, uint32_t>(ev.data[1], noteId));
           alreadyRecievedNote.push_back(ev.data[1]);
           noteId += 1;
