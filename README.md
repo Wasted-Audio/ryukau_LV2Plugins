@@ -32,7 +32,7 @@ AM pitch shifter algorithm described by Scott Wardle.
 
 - [WAR19 - Audio_Hilbert_WAR19.pdf](https://www.mikrocontroller.net/attachment/33905/Audio_Hilbert_WAR19.pdf)
 
-Hilbert filter by Olli Niemitalo. This filter is used in AM pitch shifter.
+IIR Hilbert filter by Olli Niemitalo. This filter is used in AM pitch shifter to approximate Hilbert transform.
 
 - [Hilbert transform – iki.fi/o](http://yehar.com/blog/?p=368)
 
