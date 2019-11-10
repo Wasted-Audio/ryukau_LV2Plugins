@@ -42,10 +42,13 @@ protected:
   const char *getLabel() const override { return "WaveCymbal"; }
   const char *getDescription() const override
   {
-    return "A synthesizer equipped with up to 10th order PTR sawtooth oscillator.";
+    return "A banded-waveguide synthesizer with 1D wave interaction. This can also be used as FX.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
-  const char *getHomePage() const override { return "https://example.com"; }
+  const char *getHomePage() const override
+  {
+    return "https://github.com/ryukau/LV2Plugins";
+  }
   const char *getLicense() const override { return "GPLv3"; }
   uint32_t getVersion() const override
   {

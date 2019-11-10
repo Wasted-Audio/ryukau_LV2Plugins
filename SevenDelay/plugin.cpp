@@ -38,7 +38,10 @@ protected:
     return "A stereo delay tuned towards short delay.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
-  const char *getHomePage() const override { return "https://example.com"; }
+  const char *getHomePage() const override
+  {
+    return "https://github.com/ryukau/LV2Plugins";
+  }
   const char *getLicense() const override { return "GPLv3"; }
   uint32_t getVersion() const override
   {
@@ -210,15 +213,9 @@ protected:
 
   void sampleRateChanged(double newSampleRate) { dsp.setup(newSampleRate); }
 
-  void activate()
-  {
-    dsp.startup();
-  }
+  void activate() { dsp.startup(); }
 
-  void deactivate()
-  {
-    dsp.reset();
-  }
+  void deactivate() { dsp.reset(); }
 
   void run(const float **inputs, float **outputs, uint32_t frames) override
   {
