@@ -1,4 +1,4 @@
-all: dpf SevenDelay SyncSawSynth WaveCymbal FDNCymbal
+all: dpf SevenDelay SyncSawSynth WaveCymbal FDNCymbal TrapezoidSynth
 
 # DEBUG=true
 # export DEBUG
@@ -6,6 +6,10 @@ all: dpf SevenDelay SyncSawSynth WaveCymbal FDNCymbal
 .PHONY: dpf
 dpf:
 	$(MAKE) -C lib/DPF
+
+.PHONY: TrapezoidSynth
+TrapezoidSynth: dpf
+	$(MAKE) -C TrapezoidSynth
 
 .PHONY: FDNCymbal
 FDNCymbal: dpf
