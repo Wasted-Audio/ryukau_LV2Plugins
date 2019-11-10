@@ -21,6 +21,21 @@ Note that some parameter configuration leads to massive DC offset. To stay safe,
 
 Some controls turns red when pointing. They can be the cause of potential blow up. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
 
+## TrapezoidSynth
+<figure>
+<img src="docs/img/lv2_trapezoidsynth.png" alt="Image of TrapezoidSynth GUI."/>
+</figure>
+
+TrapezoidSynth a monophonic synthesizer equipped with trapezoid oscillator which is made from 5th order PTR ramp function. In other words, it's just a fancy version of tri-pulse oscillator. 8 times oversampled to overcome a limitation of trapezoid oscillator. This is the reason why this synth is monophonic. To compensate the limitation, 2 pitch shifters are added to make some chord.
+
+AM pitch shifter algorithm described by Scott Wardle.
+
+- [WAR19 - Audio_Hilbert_WAR19.pdf](https://www.mikrocontroller.net/attachment/33905/Audio_Hilbert_WAR19.pdf)
+
+Hilbert filter by Olli Niemitalo. This filter is used in AM pitch shifter.
+
+- [Hilbert transform – iki.fi/o](http://yehar.com/blog/?p=368)
+
 ## FDNCymbal
 <figure>
 <img src="docs/img/lv2_fdncymbal.png" alt="Image of FDNCymbal GUI."/>
