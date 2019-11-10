@@ -256,8 +256,8 @@ struct GlobalParameter {
       0.0, Scales::modEnvelopeA, "modEnv1Attack", kParameterIsAutomable);
     value[ID::modEnv1Curve] = std::make_unique<LogValue>(
       0.5, Scales::modEnvelopeCurve, "modEnv1Curve", kParameterIsAutomable);
-    value[ID::modEnv1ToPhaseMod] = std::make_unique<LinearValue>(
-      0.0, Scales::defaultScale, "modEnv1ToPhaseMod", kParameterIsAutomable);
+    value[ID::modEnv1ToPhaseMod] = std::make_unique<LogValue>(
+      0.0, Scales::phaseModulation, "modEnv1ToPhaseMod", kParameterIsAutomable);
     value[ID::modEnv1Retrigger] = std::make_unique<IntValue>(
       true, Scales::boolScale, "modEnv1Retrigger",
       kParameterIsAutomable | kParameterIsBoolean);
