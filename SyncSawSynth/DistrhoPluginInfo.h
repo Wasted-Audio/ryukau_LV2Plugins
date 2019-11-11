@@ -25,7 +25,7 @@
 
 #define DISTRHO_PLUGIN_BRAND "Uhhyou"
 #define DISTRHO_PLUGIN_NAME "SyncSawSynth"
-#define DISTRHO_PLUGIN_URI "https://example.com/SyncSawSynth"
+#define DISTRHO_PLUGIN_URI "https://github.com/ryukau/LV2Plugins/tree/master/SyncSawSynth"
 
 #define DISTRHO_PLUGIN_HAS_UI 1
 #define DISTRHO_PLUGIN_IS_RT_SAFE 1
