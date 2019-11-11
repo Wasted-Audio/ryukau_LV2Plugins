@@ -55,6 +55,9 @@ template<typename Sample> void TpzMono<Sample>::reset()
 {
   decimationLP.reset();
   filter.reset();
+  shifter1.reset();
+  shifter2.reset();
+  gainEnvelope.terminate();
 
   startup();
 }
