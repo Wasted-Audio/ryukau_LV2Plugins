@@ -203,6 +203,7 @@ public:
     state = State::release;
   }
 
+  void terminate() { state = State::terminated; }
   bool isReleasing() { return state == State::release; }
   bool isTerminated() { return state == State::terminated; }
   Sample getValue() { return output; }
@@ -273,10 +274,7 @@ protected:
 template<typename Sample> class PolyExpEnvelope {
 public:
   // attack is in seconds. curve is arbitrary value.
-  void setup(Sample sampleRate)
-  {
-    this->sampleRate = sampleRate;
-  }
+  void setup(Sample sampleRate) { this->sampleRate = sampleRate; }
 
   bool isReleasing() { return time >= attack; }
 
