@@ -117,23 +117,23 @@ protected:
           lastNoteId.begin(), lastNoteId.end(),
           [&](const std::pair<uint8_t, uint32_t> &p) { return p.first == ev.data[1]; });
         if (it == std::end(lastNoteId)) break;
-        dsp.noteOff(it->second);
+        dsp.pushMidiNote(false, ev.frame, it->second, 0, 0, 0);
         lastNoteId.erase(it);
       } break;
 
       // Note on. data[1]: note number, data[2] velocity.
       case 0x90:
         if (ev.data[2] > 0) {
-          for (const auto &noteNo : alreadyRecievedNote) {
-            if (noteNo == ev.data[1]) goto NoteAlreadyPressed;
-          }
+          auto it = std::find_if(
+            alreadyRecievedNote.begin(), alreadyRecievedNote.end(),
+            [&](const uint8_t &noteNo) { return noteNo == ev.data[1]; });
+          if (it != std::end(alreadyRecievedNote)) break;
           dsp.pushMidiNote(
-            ev.frame, noteId, ev.data[1], 0.0f, ev.data[2] / float(INT8_MAX));
+            true, ev.frame, noteId, ev.data[1], 0.0f, ev.data[2] / float(INT8_MAX));
           lastNoteId.push_back(std::pair<uint8_t, uint32_t>(ev.data[1], noteId));
           alreadyRecievedNote.push_back(ev.data[1]);
           noteId += 1;
         }
-      NoteAlreadyPressed:
         break;
 
       // Pitch bend. Center is 8192 (0x2000).

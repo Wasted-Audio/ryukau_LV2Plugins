@@ -59,6 +59,7 @@ public:
   void noteOff(int32_t noteId);
 
   struct MidiNote {
+    bool isNoteOn;
     uint32_t frame;
     int32_t id;
     int16_t pitch;
@@ -69,9 +70,15 @@ public:
   std::vector<MidiNote> midiNotes;
 
   void pushMidiNote(
-    uint32_t frame, int32_t noteId, int16_t pitch, float tuning, float velocity)
+    bool isNoteOn,
+    uint32_t frame,
+    int32_t noteId,
+    int16_t pitch,
+    float tuning,
+    float velocity)
   {
     MidiNote note;
+    note.isNoteOn = isNoteOn;
     note.frame = frame;
     note.id = noteId;
     note.pitch = pitch;
@@ -87,7 +94,10 @@ public:
         return nt.frame == frame;
       });
       if (it == std::end(midiNotes)) return;
-      noteOn(it->id, it->pitch, it->tuning, it->velocity);
+      if (it->isNoteOn)
+        noteOn(it->id, it->pitch, it->tuning, it->velocity);
+      else
+        noteOff(it->id);
       midiNotes.erase(it);
     }
   }
