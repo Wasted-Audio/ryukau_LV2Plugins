@@ -1,4 +1,4 @@
-all: dpf SevenDelay SyncSawSynth WaveCymbal FDNCymbal TrapezoidSynth
+all: dpf SevenDelay SyncSawSynth WaveCymbal FDNCymbal TrapezoidSynth IterativeSinCluster
 
 # DEBUG=true
 # export DEBUG
@@ -6,6 +6,10 @@ all: dpf SevenDelay SyncSawSynth WaveCymbal FDNCymbal TrapezoidSynth
 .PHONY: dpf
 dpf:
 	$(MAKE) -C lib/DPF
+
+.PHONY: IterativeSinCluster
+IterativeSinCluster: dpf
+	$(MAKE) -C IterativeSinCluster
 
 .PHONY: TrapezoidSynth
 TrapezoidSynth: dpf
