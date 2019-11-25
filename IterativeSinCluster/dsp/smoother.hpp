@@ -64,4 +64,28 @@ template<typename Sample> Sample LinearSmoother<Sample>::sampleRate = 44100.0;
 template<typename Sample> Sample LinearSmoother<Sample>::timeInSamples = 0.0;
 template<typename Sample> Sample LinearSmoother<Sample>::bufferSize = 44100.0;
 
+// PID controller without I and D.
+template<typename Sample> class PController {
+public:
+  // p in [0, 1].
+  void setup(Sample sampleRate, Sample p)
+  {
+    this->sampleRate = sampleRate;
+    kp = p;
+  };
+
+  void reset() { value = 0; }
+
+  Sample process(Sample input)
+  {
+    value += kp * (input - value);
+    return value;
+  }
+
+private:
+  Sample sampleRate = 44100;
+  Sample kp;
+  Sample value = 0;
+};
+
 } // namespace SomeDSP

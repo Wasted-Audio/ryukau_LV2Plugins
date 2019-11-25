@@ -93,10 +93,12 @@ public:
   LinearSmoother<Sample> interpDepth;
   LinearSmoother<Sample> interpDelayTimeRange;
   LinearSmoother<Sample> interpMinDelayTime;
+  PController<Sample> delayTimeLowpass;
 
   void setup(double sampleRate, Sample time, Sample maxTime)
   {
     delay.setup(sampleRate, time, maxTime);
+    delayTimeLowpass.setup(sampleRate, 0.1);
   }
 
   // frequency can be negative.
@@ -121,6 +123,7 @@ public:
     delay.reset();
     phase = 0;
     feedbackBuffer = 0;
+    delayTimeLowpass.reset();
   }
 
   std::array<Sample, 2> process(Sample input)
@@ -134,7 +137,8 @@ public:
     const auto phaseDelta = interpPhase.process();
 
     const Sample lfo = Sample(0.5) * (Sample(1) + somesin<Sample>(phase + phaseDelta));
-    delay.setTime(interpMinDelayTime.process() + lfo * interpDelayTimeRange.process());
+    delay.setTime(delayTimeLowpass.process(
+      interpMinDelayTime.process() + lfo * interpDelayTimeRange.process()));
     feedbackBuffer = delay.process(input + interpFeedback.process() * feedbackBuffer);
 
     const Sample lfoDepth

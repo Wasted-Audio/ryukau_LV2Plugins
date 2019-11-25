@@ -208,7 +208,10 @@ void DSPCore::free() {}
 void DSPCore::reset()
 {
   for (auto &note : notes) note.rest();
+  lastNoteFreq = 1.0f;
+
   for (auto &chrs : chorus) chrs.reset();
+
   startup();
 }
 
@@ -244,7 +247,7 @@ void DSPCore::setParameters()
       param.value[ID::chorusDepth]->getFloat(),
       param.value[ID::chorusDelayTimeRange0 + i]->getFloat(),
       param.value[ID::chorusKeyFollow]->getInt()
-        ? 200 * param.value[ID::chorusMinDelayTime0 + i]->getFloat() / lastNoteFreq
+        ? 200.0f * param.value[ID::chorusMinDelayTime0 + i]->getFloat() / lastNoteFreq
         : param.value[ID::chorusMinDelayTime0 + i]->getFloat());
   }
 }
@@ -259,7 +262,6 @@ void DSPCore::process(const size_t length, float *out0, float *out1)
     processMidiNote(i);
 
     frame.fill(0.0f);
-    chorusOut.fill(0.0f);
 
     for (auto &note : notes) {
       if (note.state == NoteState::rest) continue;
@@ -277,7 +279,7 @@ void DSPCore::process(const size_t length, float *out0, float *out1)
     }
 
     const auto chorusIn = frame[0] + frame[1];
-
+    chorusOut.fill(0.0f);
     for (auto &chrs : chorus) {
       const auto out = chrs.process(chorusIn);
       chorusOut[0] += out[0];

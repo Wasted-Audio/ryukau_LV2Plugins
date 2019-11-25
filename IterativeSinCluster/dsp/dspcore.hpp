@@ -135,7 +135,7 @@ private:
 
   size_t nVoice = 32;
   std::array<Note<float>, maxVoice> notes;
-  float lastNoteFreq = 0;
+  float lastNoteFreq = 1.0f;
 
   std::array<Chorus<float>, 3> chorus;
 
