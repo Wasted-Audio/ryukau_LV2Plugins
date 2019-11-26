@@ -35,7 +35,10 @@ public:
   void push(Sample newTarget)
   {
     target = newTarget;
-    ramp = (target - value) / timeInSamples;
+    if (timeInSamples < bufferSize)
+      value = target;
+    else
+      ramp = (target - value) / timeInSamples;
   }
 
   inline Sample getValue() { return value; }
