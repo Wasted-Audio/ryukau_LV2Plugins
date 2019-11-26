@@ -386,10 +386,10 @@ void DSPCore::noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity
 
       auto frame = notes[noteIdx].process();
       auto idx = (mptIndex + bufIdx) % transitionBuffer.size();
-      auto cosInterp
-        = (0.5 + 0.5 * cosf(float(pi) * float(bufIdx) / transitionBuffer.size()));
-      transitionBuffer[idx][0] += frame[0] * cosInterp;
-      transitionBuffer[idx][1] += frame[1] * cosInterp;
+      auto interp = 1.0f - float(bufIdx) / transitionBuffer.size();
+
+      transitionBuffer[idx][0] += frame[0] * interp;
+      transitionBuffer[idx][1] += frame[1] * interp;
     }
   }
 
