@@ -41,7 +41,7 @@ IntScale<double> Scales::oscSemi(120);
 IntScale<double> Scales::oscMilli(1000);
 IntScale<double> Scales::oscOctave(8);
 
-LogScale<double> Scales::gain(0.0, 4.0, 0.75, 1.0);
+LogScale<double> Scales::gain(0.0, 4.0, 0.5, 1.0);
 LinearScale<double> Scales::gainBoost(1.0, 16.0);
 DecibelScale<double> Scales::gainDecibel(-40.0, 0.0, true);
 
