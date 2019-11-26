@@ -19,7 +19,7 @@ include ../Makefile.plugins.mk
 ifeq ($(DEBUG),true)
 BUILD_CXX_FLAGS += -std=c++17 -g -Wall
 else
-BUILD_CXX_FLAGS += -std=c++17 -O3 -mavx2 -mfma -Wall
+BUILD_CXX_FLAGS += -std=c++17 -O3 -mavx2 -mfma -Wall -Wno-unused-but-set-parameter
 endif
 
 # Enable all possible plugin types
