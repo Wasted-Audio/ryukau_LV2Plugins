@@ -76,6 +76,77 @@ void Note<Sample>::noteOn(
     = param.value[ID::negativeSemi]->getInt() ? Sample(-1) : Sample(1);
   const Sample eqTemp = param.value[ID::equalTemperament]->getInt();
 
+  const Sample nyquist = sampleRate / 2;
+  const Sample randGainAmt = param.value[ID::randomGainAmount]->getFloat();
+  const Sample randFreqAmt = param.value[ID::randomFrequencyAmount]->getFloat();
+  const Sample pitchMultiply = param.value[ID::pitchMultiply]->getFloat();
+  const Sample pitchModulo
+    = semiToPitch(param.value[ID::pitchModulo]->getFloat(), eqTemp);
+
+  frequency
+    *= somepow<Sample>(2, somefloor<Sample>(param.value[ID::masterOctave]->getFloat()));
+  const Sample lowShelfFreq = frequency
+    * semiToPitch(semiSign * param.value[ID::lowShelfPitch]->getFloat(), eqTemp);
+  const Sample lowShelfGain = param.value[ID::lowShelfGain]->getFloat();
+  const Sample highShelfFreq = frequency
+    * semiToPitch(semiSign * param.value[ID::highShelfPitch]->getFloat(), eqTemp);
+  const Sample highShelfGain = param.value[ID::highShelfGain]->getFloat();
+
+  const auto enableAliasing = param.value[ID::aliasing]->getInt();
+
+#ifdef __AVX2__
+
+  Vec8f columnPitch;
+  Vec8f columnGain;
+  for (size_t i = 0; i < nPitch; ++i) {
+    columnPitch.insert(
+      i,
+      paramMilliToPitch(
+        semiSign * param.value[ID::semi0 + i]->getFloat(),
+        param.value[ID::milli0 + i]->getFloat(), eqTemp));
+    columnGain.insert(i, param.value[ID::gain0 + i]->getFloat());
+  }
+
+  std::array<Sample, nOvertone> overtoneGain;
+  for (size_t i = 0; i < overtoneGain.size(); ++i)
+    overtoneGain[i] = param.value[ID::overtone0 + i]->getFloat();
+
+  for (size_t chord = 0; chord < nChord; ++chord) {
+    auto chordFreq = frequency
+      * paramMilliToPitch(
+                       semiSign * param.value[ID::chordSemi0 + chord]->getFloat(),
+                       param.value[ID::chordMilli0 + chord]->getFloat(), eqTemp);
+    auto chordGain = param.value[ID::chordGain0 + chord]->getFloat();
+
+    for (size_t overtone = 0; overtone < nOvertone; ++overtone) {
+      auto ot = overtone + 1;
+      auto rndPt = randFreqAmt
+        * Vec8f(rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
+                rng.process(), rng.process(), rng.process());
+      auto modPt = pitchMultiply * (rndPt + ot + rndPt * ot);
+      if (pitchModulo != 1) // Modulo operation. modf isn't available in vcl.
+        modPt = modPt - pitchModulo * floor(modPt / pitchModulo);
+
+      auto oscFreq = chordFreq * columnPitch * (1 + modPt);
+      oscillator[chord].frequency[overtone] = oscFreq;
+
+      Vec8f shelving(1.0f);
+      shelving = select(oscFreq <= lowShelfFreq, shelving * lowShelfGain, shelving);
+      shelving = select(oscFreq >= highShelfFreq, shelving * highShelfGain, shelving);
+      auto rndGn = Vec8f(
+        rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
+        rng.process(), rng.process(), rng.process());
+
+      Vec8f oscGain(columnGain);
+      if (!enableAliasing) oscGain = select(oscFreq >= nyquist, 0.0f, oscGain);
+
+      oscillator[chord].gain[overtone] = oscGain * chordGain * overtoneGain[overtone]
+        * shelving * (Sample(1) + randGainAmt * rndGn);
+    }
+  }
+
+#else
+
   std::array<Sample, nPitch> columnPitch;
   std::array<Sample, nPitch> columnGain;
   for (size_t i = 0; i < nPitch; ++i) {
@@ -89,20 +160,6 @@ void Note<Sample>::noteOn(
   for (size_t i = 0; i < overtoneGain.size(); ++i)
     overtoneGain[i] = param.value[ID::overtone0 + i]->getFloat();
 
-  const Sample nyquist = sampleRate / 2;
-  const Sample randGainAmt = param.value[ID::randomGainAmount]->getFloat();
-  const Sample randFreqAmt = param.value[ID::randomFrequencyAmount]->getFloat();
-  const Sample pitchMultiply = param.value[ID::pitchMultiply]->getFloat();
-  const Sample pitchModulo
-    = semiToPitch(param.value[ID::pitchModulo]->getFloat(), eqTemp);
-  frequency
-    *= somepow<Sample>(2, somefloor<Sample>(param.value[ID::masterOctave]->getFloat()));
-  const Sample lowShelfFreq = frequency
-    * semiToPitch(semiSign * param.value[ID::lowShelfPitch]->getFloat(), eqTemp);
-  const Sample lowShelfGain = param.value[ID::lowShelfGain]->getFloat();
-  const Sample highShelfFreq = frequency
-    * semiToPitch(semiSign * param.value[ID::highShelfPitch]->getFloat(), eqTemp);
-  const Sample highShelfGain = param.value[ID::highShelfGain]->getFloat();
   for (size_t chord = 0; chord < nChord; ++chord) {
     auto chordFreq = frequency
       * paramMilliToPitch(
@@ -112,8 +169,6 @@ void Note<Sample>::noteOn(
     for (size_t pitch = 0; pitch < nPitch; ++pitch) {
       auto pitchFreq = chordFreq * columnPitch[pitch];
       for (size_t overtone = 0; overtone < nOvertone; ++overtone) {
-        const size_t index = nOvertone * pitch + overtone;
-
         // Equation to calculate a sine wave frquency.
         // freq = noteFreq * (overtone + 1) * (pitch + 1)
         //      = noteFreq * (1 + pitch + overtone + pitch * overtone);
@@ -123,21 +178,26 @@ void Note<Sample>::noteOn(
         auto modPt = pitchMultiply * (rnd + ot + rnd * ot);
         if (pitchModulo != 1) modPt = somefmod<Sample>(modPt, pitchModulo);
         auto freq = pitchFreq * (1 + modPt);
+
+        const size_t index = nOvertone * pitch + overtone;
         oscillator[chord].frequency[index] = freq;
 
-        if (!param.value[ID::aliasing]->getInt() && freq >= nyquist) {
+        if (!enableAliasing && freq >= nyquist) {
           oscillator[chord].gain[index] = 0;
         } else {
           Sample shelving = Sample(1);
           if (freq <= lowShelfFreq) shelving *= lowShelfGain;
           if (freq >= highShelfFreq) shelving *= highShelfGain;
-          oscillator[chord].gain[index] = chordGain * columnGain[pitch]
-            * overtoneGain[overtone] * shelving
-            * (Sample(1) + randGainAmt * rng.process());
+          const auto oscGain = chordGain * columnGain[pitch] * overtoneGain[overtone]
+            * shelving * (Sample(1) + randGainAmt * rng.process());
+          oscillator[chord].gain[index] = oscGain;
         }
       }
     }
   }
+
+#endif
+
   for (auto &osc : oscillator) osc.setup(sampleRate);
 
   for (size_t i = 0; i < nChord; ++i)

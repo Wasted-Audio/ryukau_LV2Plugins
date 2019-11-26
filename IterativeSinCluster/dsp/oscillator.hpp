@@ -17,13 +17,50 @@
 
 #pragma once
 
+#include "../../lib/vcl/vectorclass.h"
+#include "../../lib/vcl/vectormath_trig.h"
 #include "constants.hpp"
 #include "somemath.hpp"
 
 #include <array>
-#include <numeric>
+#include <iostream>
 
 namespace SomeDSP {
+
+#ifdef __AVX2__
+
+template<size_t size> struct BiquadOscAVX2 {
+public:
+  std::array<Vec8f, size> frequency;
+  std::array<Vec8f, size> gain;
+  std::array<Vec8f, size> u1;
+  std::array<Vec8f, size> u0;
+  std::array<Vec8f, size> k;
+
+  void setup(float sampleRate)
+  {
+    for (size_t i = 0; i < size; ++i) {
+      u1[i] = 0;
+      auto omega = float(twopi) * frequency[i] / sampleRate;
+      u0[i] = -sin(omega);
+      k[i] = 2.0f * cos(omega);
+    }
+  }
+
+  float process()
+  {
+    float sum = 0;
+    for (size_t i = 0; i < size; ++i) {
+      auto out = k[i] * u1[i] - u0[i];
+      u0[i] = u1[i];
+      u1[i] = out;
+      sum += horizontal_add(gain[i] * out);
+    }
+    return sum / (8 * size);
+  }
+};
+
+#else
 
 // Mostly uniform gain range.
 // - double : freq > 0.25Hz.
@@ -58,5 +95,7 @@ template<typename Sample, size_t size> struct BiquadOscN {
     return sum / size;
   }
 };
+
+#endif
 
 } // namespace SomeDSP

@@ -15,11 +15,11 @@ FILES_UI  = \
 # Do some magic
 include ../Makefile.plugins.mk
 
-# Enable c++17.
+# Enable c++17 and avx2.
 ifeq ($(DEBUG),true)
 BUILD_CXX_FLAGS += -std=c++17 -g -Wall
 else
-BUILD_CXX_FLAGS += -std=c++17 -O3 -Wall
+BUILD_CXX_FLAGS += -std=c++17 -O3 -mavx2 -mfma -Wall
 endif
 
 # Enable all possible plugin types
