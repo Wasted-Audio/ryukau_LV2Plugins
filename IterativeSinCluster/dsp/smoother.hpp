@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "somemath.hpp"
+
 #include <array>
 
 namespace SomeDSP {
@@ -32,7 +34,7 @@ public:
   static void setTime(Sample seconds) { timeInSamples = seconds * sampleRate; }
   static void setBufferSize(Sample _bufferSize) { bufferSize = _bufferSize; }
 
-  void push(Sample newTarget)
+  virtual void push(Sample newTarget)
   {
     target = newTarget;
     ramp = (target - value) / timeInSamples;
@@ -40,14 +42,13 @@ public:
 
   inline Sample getValue() { return value; }
 
-  Sample process()
+  virtual Sample process()
   {
     if (value == target) return value;
     value += ramp;
 
     auto diff = value - target;
-    if (diff < 0) diff = -diff;
-    if (diff < 1e-5) value = target;
+    if (somefabs<Sample>(diff) < 1e-5) value = target;
     return value;
   }
 

@@ -32,6 +32,7 @@
 #include "gui/knob.hpp"
 #include "gui/label.hpp"
 #include "gui/optionmenu.hpp"
+#include "gui/rotaryknob.hpp"
 #include "gui/splash.hpp"
 #include "gui/vslider.hpp"
 
@@ -204,7 +205,8 @@ public:
       chorusLeft2, chorusTop3, knobWidth, colorBlue, "Time2", ID::chorusMinDelayTime2);
 
     const float chorusTop4 = chorusTop3 + knobY;
-    addKnob(chorusLeft0, chorusTop4, knobWidth, colorBlue, "Phase", ID::chorusPhase);
+    addRotaryKnob(
+      chorusLeft0, chorusTop4, knobWidth, colorBlue, "Phase", ID::chorusPhase);
     addKnob(chorusLeft1, chorusTop4, knobWidth, colorBlue, "Offset", ID::chorusOffset);
     addKnob(
       chorusLeft2, chorusTop4, knobWidth, colorBlue, "Feedback", ID::chorusFeedback);
@@ -380,17 +382,19 @@ protected:
     for (auto &vWidget : valueWidget) {
       if (vWidget->id != id) continue;
       vWidget->setValue(normalized);
-      break;
+      repaint();
+      return;
     }
 
     for (auto &aWidget : arrayWidget) {
       auto &idVec = aWidget->id;
       auto iter = std::find(idVec.begin(), idVec.end(), id);
-      if (iter != idVec.end())
+      if (iter != idVec.end()) {
         aWidget->setValueAt(std::distance(idVec.begin(), iter), normalized);
+        repaint();
+        return;
+      }
     }
-
-    repaint();
   }
 
   void updateValue(uint32_t id, float normalized) override
@@ -527,6 +531,30 @@ private:
     auto height = width - 2.0f * margin;
 
     auto knob = std::make_shared<NumberKnob<Scale>>(this, this, fontId, scale);
+    knob->id = id;
+    knob->setSize(width - 2.0f * margin, height);
+    knob->setAbsolutePos(left + margin, top + margin);
+    knob->setHighlightColor(highlightColor);
+    auto defaultValue = param.value[id]->getDefaultNormalized();
+    knob->setDefaultValue(defaultValue);
+    knob->setValue(defaultValue);
+    valueWidget.push_back(knob);
+
+    addKnobLabel(left, top, width, height, name, labelPosition);
+  }
+
+  void addRotaryKnob(
+    float left,
+    float top,
+    float width,
+    Color highlightColor,
+    const char *name,
+    uint32_t id,
+    LabelPosition labelPosition = LabelPosition::bottom)
+  {
+    auto height = width - 2.0f * margin;
+
+    auto knob = std::make_shared<RotaryKnob>(this, this);
     knob->id = id;
     knob->setSize(width - 2.0f * margin, height);
     knob->setAbsolutePos(left + margin, top + margin);
