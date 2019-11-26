@@ -88,7 +88,7 @@ public:
   Sample phase = 0;
   Sample feedbackBuffer = 0;
   LinearSmoother<Sample> interpTick;
-  LinearSmoother<Sample> interpPhase;
+  RotarySmoother<Sample> interpPhase;
   LinearSmoother<Sample> interpFeedback;
   LinearSmoother<Sample> interpDepth;
   LinearSmoother<Sample> interpDelayTimeRange;
@@ -99,6 +99,7 @@ public:
   {
     delay.setup(sampleRate, time, maxTime);
     delayTimeLowpass.setup(sampleRate, 0.1);
+    interpPhase.setRange(twopi);
   }
 
   // frequency can be negative.

@@ -68,6 +68,52 @@ template<typename Sample> Sample LinearSmoother<Sample>::sampleRate = 44100.0;
 template<typename Sample> Sample LinearSmoother<Sample>::timeInSamples = 0.0;
 template<typename Sample> Sample LinearSmoother<Sample>::bufferSize = 44100.0;
 
+// Unlike LinearSmoother, value is normalized in [0, 1].
+template<typename Sample> class RotarySmoother : public LinearSmoother<Sample> {
+public:
+  void setRange(Sample max) { this->max = max; }
+
+  void push(Sample newTarget) override
+  {
+    this->target = newTarget;
+    if (this->timeInSamples < this->bufferSize) {
+      this->value = this->target;
+      return;
+    }
+
+    auto dist1 = this->target - this->value;
+
+    if (dist1 < 0) {
+      auto dist2 = this->target + max - this->value;
+      if (somefabs<Sample>(dist1) > dist2) {
+        this->ramp = dist2 / this->timeInSamples;
+        return;
+      }
+    } else {
+      auto dist2 = this->target - max - this->value;
+      if (dist1 > somefabs<Sample>(dist2)) {
+        this->ramp = dist2 / this->timeInSamples;
+        return;
+      }
+    }
+    this->ramp = dist1 / this->timeInSamples;
+  }
+
+  Sample process() override
+  {
+    if (this->value == this->target) return this->value;
+    this->value += this->ramp;
+    this->value -= max * somefloor<Sample>(this->value / max);
+
+    auto diff = this->value - this->target;
+    if (somefabs<Sample>(diff) < 1e-5) this->value = this->target;
+    return this->value;
+  }
+
+private:
+  Sample max = 1;
+};
+
 // PID controller without I and D.
 template<typename Sample> class PController {
 public:
