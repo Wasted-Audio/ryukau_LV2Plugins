@@ -1,3 +1,6 @@
 [submodule "lib/DPF"]
 	path = lib/DPF
 	url = https://github.com/DISTRHO/DPF.git
+[submodule "lib/vcl"]
+	path = lib/vcl
+	url = https://github.com/vectorclass/version2.git
