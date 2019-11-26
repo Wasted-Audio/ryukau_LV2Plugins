@@ -17,13 +17,16 @@
 
 #pragma once
 
-#include "../../lib/vcl/vectorclass.h"
-#include "../../lib/vcl/vectormath_trig.h"
+#include <array>
+#include <iostream>
+
 #include "constants.hpp"
 #include "somemath.hpp"
 
-#include <array>
-#include <iostream>
+#ifdef __AVX2__
+#include "../../lib/vcl/vectorclass.h"
+#include "../../lib/vcl/vectormath_trig.h"
+#endif
 
 namespace SomeDSP {
 
@@ -42,8 +45,8 @@ public:
     for (size_t i = 0; i < size; ++i) {
       u1[i] = 0;
       auto omega = float(twopi) * frequency[i] / sampleRate;
-      u0[i] = -sin(omega);
-      k[i] = 2.0f * cos(omega);
+      u0[i] = -sincos(&k[i], omega);
+      k[i] *= 2.0f;
     }
   }
 
