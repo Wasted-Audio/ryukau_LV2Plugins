@@ -63,9 +63,20 @@ public:
 
     fontSize(textSize);
     text(20.0f, 90.0f, "© 2019 Takamitsu Endo (ryukau@gmail.com)", nullptr);
-    text(20.0f, 150.0f, "Shift + Drag: Fine Adjustment", nullptr);
-    text(20.0f, 180.0f, "Ctrl + Click: Reset to Default", nullptr);
-    text(20.0f, 240.0f, "Have a nice day!", nullptr);
+
+    text(20.0f, 150.0f, "- Knob -", nullptr);
+    text(20.0f, 180.0f, "Shift + Left Drag: Fine Adjustment", nullptr);
+    text(20.0f, 210.0f, "Ctrl + Left Click: Reset to Default", nullptr);
+
+    text(20.0f, 270.0f, "- Number -", nullptr);
+    text(20.0f, 300.0f, "Shares same controls with knob, and:", nullptr);
+    text(20.0f, 330.0f, "Right Click: Flip Minimum and Maximum", nullptr);
+
+    text(380.0f, 150.0f, "- Overtone -", nullptr);
+    text(380.0f, 180.0f, "Ctrl + Left Click: Reset to Default", nullptr);
+    text(380.0f, 210.0f, "Right Drag: Set to Minimum", nullptr);
+    text(380.0f, 240.0f, "Ctrl + Right Drag: Set to Maximum", nullptr);
+    text(380.0f, 300.0f, "Have a nice day!", nullptr);
   }
 
   bool onMouse(const MouseEvent &ev) override
