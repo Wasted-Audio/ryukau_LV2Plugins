@@ -21,6 +21,48 @@ Note that some parameter configuration leads to massive DC offset. To stay safe,
 
 Some controls turns red when pointing. They can be the cause of potential blow up. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
 
+## IterativeSinCluster
+<figure>
+<img src="docs/img/lv2_iterativesincluster.png" alt="Image of IterativeSinCluster GUI."/>
+</figure>
+
+IterativeSinCluster is an additive synthesizer. This synth computes 512 sine waves for each note to make tone cluster.
+
+For number display used for `Gain`, `Semi`, etc. <kbd>Mouse Right Click</kbd> can be use to flip min/max.
+
+For overtone control, <kbd>Mouse Right Drag</kbd> to set value to min, and <kbd>Ctrl</kbd> + <kbd>Mouse Right Drag</kbd> to set value to max.
+
+In default, building IterativeSinCluster requires AVX2 instruction. To build without AVX2, remove `-mavx2 -mfma` options from `IterativeSinCluster/Makefile`.
+
+```make
+ifeq ($(DEBUG),true)
+BUILD_CXX_FLAGS += -std=c++17 -g -Wall
+else
+# Change build flag.
+# BUILD_CXX_FLAGS += -std=c++17 -O3 -mavx2 -mfma -Wall -Wno-unused-but-set-parameter
+BUILD_CXX_FLAGS += -std=c++17 -O3 -Wall
+endif
+```
+
+Overview of calculation of pitch for each sine wave. Parameter `ET` stands for equal temperament. `Milli` means 1 milli semitone = 1 / 10 cent.
+
+```
+function toneToPitch(semi, milli):
+  return 2 ^ (1000 * semi + milli) / (ET * 1000)
+
+for each Chord:
+  chordPitch = toneToPitch(Chord.semi, Chord.milli)
+  for each Note:
+    notePitch = toneToPitch(Note.semi, Note.milli)
+    for each Overtone:
+      frequency = midiNoteFrequency
+        * (1 + mod(Multiply * Overtone * notePitch * chordPitch, Modulo))
+```
+
+Various iterative sin algorithm described by Martin Vicanek. IterativeSinCluster uses biquad oscillator.
+
+- [QuadOsc.pdf](https://www.vicanek.de/articles/QuadOsc.pdf)
+
 ## TrapezoidSynth
 <figure>
 <img src="docs/img/lv2_trapezoidsynth.png" alt="Image of TrapezoidSynth GUI."/>
