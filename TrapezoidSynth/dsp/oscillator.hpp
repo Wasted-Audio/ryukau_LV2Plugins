@@ -148,11 +148,11 @@ protected:
     if (slope > maxSlope) {
       slope = maxSlope;
     } else {
-      const float minSlope = float(1) + float(2) * ptrLen;
+      const float minSlope = float(1);
       if (slope < minSlope) slope = minSlope;
     }
 
-    const float maxPw = float(1) - float(2) / slope;
+    const float maxPw = float(1) - float(1) / slope;
     if (pw > maxPw) pw = std::max<float>(float(0), maxPw);
 
     const float y = float(1) - float(2) * slope * ptrLen;
