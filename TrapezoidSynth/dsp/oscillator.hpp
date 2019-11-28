@@ -158,29 +158,27 @@ protected:
     const float y = float(1) - float(2) * slope * ptrLen;
     const float dc = (y * y + pw * slope * y) / (float(2) * y + slope - float(1));
     if (order == 5)
-      return branch<PTRTrapezoidOsc::ptrRamp5>(slope, pw, ptrLen, phase, tick) - dc;
+      return branch<PTRTrapezoidOsc::ptrRamp5>(slope, pw, y, phase, tick) - dc;
     else if (order == 4)
-      return branch<PTRTrapezoidOsc::ptrRamp4>(slope, pw, ptrLen, phase, tick) - dc;
+      return branch<PTRTrapezoidOsc::ptrRamp4>(slope, pw, y, phase, tick) - dc;
     else if (order == 3)
-      return branch<PTRTrapezoidOsc::ptrRamp3>(slope, pw, ptrLen, phase, tick) - dc;
-    return branch<PTRTrapezoidOsc::ptrRamp2>(slope, pw, ptrLen, phase, tick) - dc;
+      return branch<PTRTrapezoidOsc::ptrRamp3>(slope, pw, y, phase, tick) - dc;
+    return branch<PTRTrapezoidOsc::ptrRamp2>(slope, pw, y, phase, tick) - dc;
   }
 
   template<float (*ptrfunc)(float, float)>
-  static float branch(float slope, float pw, float ptrLen, float phase, float tick)
+  static float branch(float slope, float pw, float y, float phase, float tick)
   {
     if (phase <= float(0.25) / slope)
-      return slope * ptrRamp5(phase, tick);
+      return slope * ptrfunc(phase, tick);
     else if (phase <= float(0.5) / slope)
-      return float(1) - float(2) * slope * ptrLen
-        - slope * ptrRamp5(float(0.5) / slope - phase, tick);
+      return y - slope * ptrfunc(float(0.5) / slope - phase, tick);
     else if (phase <= float(0.5) / slope + pw)
-      return float(1) - float(2) * slope * ptrLen;
+      return y;
     else if (phase <= float(0.75) / slope + pw)
-      return float(1) - float(2) * slope * ptrLen
-        - slope * ptrRamp5(phase - float(0.5) / slope - pw, tick);
+      return y - slope * ptrfunc(phase - float(0.5) / slope - pw, tick);
     else if (phase <= float(1) / slope + pw)
-      return slope * ptrRamp5(float(1) / slope + pw + -phase, tick);
+      return slope * ptrfunc(float(1) / slope + pw + -phase, tick);
     return float(0);
   }
 
