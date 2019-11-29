@@ -70,6 +70,10 @@ Various iterative sin algorithm described by Martin Vicanek. IterativeSinCluster
 
 TrapezoidSynth a monophonic synthesizer equipped with trapezoid oscillator which is made from 5th order PTR ramp function. In other words, it's just a fancy version of tri-pulse oscillator. 2 pitch shifters are added to make some chord.
 
+PTR trapezoid oscillator algorithm.
+
+- [PTR 台形オシレータ](https://ryukau.github.io/filter_notes/ptr_trapezoid/ptr_trapezoid.html)
+
 AM pitch shifter algorithm described by Scott Wardle.
 
 - [WAR19 - Audio_Hilbert_WAR19.pdf](https://www.mikrocontroller.net/attachment/33905/Audio_Hilbert_WAR19.pdf)
