@@ -75,6 +75,7 @@ void Note<Sample>::noteOn(
   const Sample semiSign
     = param.value[ID::negativeSemi]->getInt() ? Sample(-1) : Sample(1);
   const Sample eqTemp = param.value[ID::equalTemperament]->getInt();
+  std::cout << std::to_string(eqTemp) << std::endl;
 
   const Sample nyquist = sampleRate / 2;
   const Sample randGainAmt = 3 * param.value[ID::randomGainAmount]->getFloat();
@@ -205,8 +206,8 @@ void Note<Sample>::noteOn(
 
   gainEnvelope.reset(
     param.value[ID::gainA]->getFloat(), param.value[ID::gainD]->getFloat(),
-    param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(),
-    this->frequency, param.value[ID::gainEnvelopeCurve]->getFloat());
+    param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(), frequency,
+    param.value[ID::gainEnvelopeCurve]->getFloat());
   gainEnvCurve = param.value[ID::gainEnvelopeCurve]->getFloat();
 }
 
