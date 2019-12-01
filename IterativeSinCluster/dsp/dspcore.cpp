@@ -30,13 +30,13 @@ inline float midiNoteToFrequency(float pitch, float tuning)
 // Using fmod because if equalTemperament == 1, this returns 2^121 which is too large.
 inline float semiToPitch(float semi, float equalTemperament)
 {
-  return fmodf(powf(2.0f, semi / equalTemperament), 1e7f);
+  return fmodf(powf(2.0f, semi / equalTemperament), 1e5f);
 }
 
 inline float paramMilliToPitch(float semi, float milli, float equalTemperament)
 {
   return fmodf(
-    powf(2.0f, (1000.0f * floorf(semi) + milli) / (equalTemperament * 1000.0f)), 1e7f);
+    powf(2.0f, (1000.0f * floorf(semi) + milli) / (equalTemperament * 1000.0f)), 1e5f);
 }
 
 // https://en.wikipedia.org/wiki/Cent_(music)#Piecewise_linear_approximation
@@ -72,7 +72,6 @@ void Note<Sample>::noteOn(
   const Sample semiSign
     = param.value[ID::negativeSemi]->getInt() ? Sample(-1) : Sample(1);
   const Sample eqTemp = param.value[ID::equalTemperament]->getInt();
-  std::cout << std::to_string(eqTemp) << std::endl;
 
   const Sample nyquist = sampleRate / 2;
   const Sample randGainAmt = 3 * param.value[ID::randomGainAmount]->getFloat();
