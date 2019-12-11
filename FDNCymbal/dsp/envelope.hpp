@@ -21,8 +21,6 @@
 #include "smoother.hpp"
 #include "somemath.hpp"
 
-#include <iostream>
-
 #include <algorithm>
 
 namespace SomeDSP {
@@ -37,15 +35,16 @@ template<typename Sample> class ExpDecay {
 public:
   bool isTerminated = true;
 
-  ExpDecay(
+  void setup(
     Sample sampleRate,
     Sample decayTime = 1.0,
     Sample declickTime = 0.001,
     Sample threshold = 1e-5)
-    : declickLength(declickTime * sampleRate)
-    , sampleRate(sampleRate)
-    , threshold(threshold)
   {
+    declickLength = declickTime * sampleRate;
+    this->sampleRate = sampleRate;
+    this->threshold = threshold;
+
     setDecayTime(decayTime);
   }
 
@@ -87,13 +86,13 @@ protected:
         threshold, Sample(1.0) / (decayTime * sampleRate - declickLength));
   }
 
-  int32_t declickLength;
+  int32_t declickLength = 0;
   int32_t declickCounter = 0;
   Sample declickOffset = 0;
 
-  Sample sampleRate;
+  Sample sampleRate = 44100;
   Sample alpha = Sample(0);
-  Sample threshold;
+  Sample threshold = 1e-5;
   Sample value = Sample(1);
   Sample output = Sample(0);
 };

@@ -31,10 +31,7 @@ inline float sometan(float x) { return ::tanf(x); }
 
 template<typename Sample> class SVF {
 public:
-  SVF(Sample sampleRate, Sample cutoff, Sample resonance)
-    : sampleRate(sampleRate), cutoff(cutoff), resonance(resonance)
-  {
-  }
+  void setup(Sample sampleRate) { this->sampleRate = sampleRate; }
 
   void setCoefficient()
   {
@@ -79,9 +76,9 @@ public:
   }
 
 protected:
-  Sample sampleRate;
-  Sample cutoff;
-  Sample resonance;
+  Sample sampleRate = 44100;
+  Sample cutoff = 0.5;
+  Sample resonance = 0.5;
 
   Sample yLP = 0.0;
   Sample yBP = 0.0;
@@ -99,9 +96,11 @@ protected:
 // http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 template<typename Sample> class BiquadHighPass {
 public:
-  BiquadHighPass(Sample sampleRate, Sample cutoff, Sample q)
-    : fs(sampleRate), f0(cutoff), q(q)
+  // q in (0, 1].
+  void setup(Sample sampleRate, Sample q)
   {
+    fs = sampleRate;
+    this->q = q < Sample(1e-5) ? Sample(1e-5) : q;
   }
 
   void reset()
@@ -115,18 +114,7 @@ public:
   void setCutoff(Sample hz)
   {
     f0 = hz > 0.0 ? hz : 0.0;
-    setCoefficient();
-  }
 
-  // value is (0, 1].
-  void setQ(Sample value)
-  {
-    q = value < Sample(1e-5) ? Sample(1e-5) : value;
-    setCoefficient();
-  }
-
-  void setCoefficient()
-  {
     Sample w0 = Sample(twopi) * f0 / fs;
     Sample cos_w0 = somecos(w0);
     Sample sin_w0 = somesin(w0);
@@ -138,11 +126,17 @@ public:
     a0 = Sample(1.0) + alpha;
     a1 = -Sample(2.0) * cos_w0;
     a2 = Sample(1.0) - alpha;
+
+    b0 /= a0;
+    b1 /= a0;
+    b2 /= a0;
+    a1 /= a0;
+    a2 /= a0;
   }
 
   Sample process(Sample input)
   {
-    Sample output = (b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2) / a0;
+    Sample output = b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
 
     x2 = x1;
     x1 = input;
@@ -154,9 +148,9 @@ public:
   }
 
 protected:
-  Sample fs;
-  Sample f0;
-  Sample q;
+  Sample fs = 44100;
+  Sample f0 = 0.5;
+  Sample q = 0.5;
 
   Sample b0 = 0.0;
   Sample b1 = 0.0;

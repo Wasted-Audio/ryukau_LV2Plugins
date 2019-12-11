@@ -21,8 +21,8 @@ namespace SomeDSP {
 
 template<typename Sample> class Pulsar {
 public:
-  Sample sampleRate;
-  Sample tick;
+  Sample sampleRate = 44100;
+  Sample tick = 0;
   Sample phase = 0;
   Sample buffer = 0;
 
@@ -56,7 +56,7 @@ public:
 // Numerical Recipes In C p.284. Normalized to [0, 1).
 template<typename Sample> class Random {
 public:
-  uint32_t seed;
+  uint32_t seed = 0;
 
   Random(uint32_t seed) : seed(seed) {}
 
@@ -69,9 +69,10 @@ public:
 
 template<typename Sample> class VelvetNoise {
 public:
-  VelvetNoise(Sample sampleRate, Sample density, uint32_t seed)
-    : sampleRate(sampleRate), rng(seed)
+  void setup(Sample sampleRate, Sample density, uint32_t seed)
   {
+    this->sampleRate = sampleRate;
+    rng.seed = seed;
     setDensity(density);
   }
 
@@ -86,11 +87,11 @@ public:
     return Sample(2) * someround<Sample>(rng.process()) - Sample(1);
   }
 
-  Sample sampleRate;
+  Sample sampleRate = 44100;
 
   Sample phase = 0;
   Sample tick = 0;
-  Random<Sample> rng;
+  Random<Sample> rng{0};
 };
 
 // Mostly uniform gain range.
@@ -98,8 +99,9 @@ public:
 // - float  : freq > 8Hz. Huge bump around 1Hz.
 template<typename Sample> class BiquadOsc {
 public:
-  BiquadOsc(Sample sampleRate, Sample frequency) : sampleRate(sampleRate)
+  void setup(Sample sampleRate, Sample frequency)
   {
+    this->sampleRate = sampleRate;
     setFrequency(frequency);
   }
 
@@ -120,10 +122,10 @@ public:
   }
 
 protected:
-  Sample sampleRate;
-  Sample u1;
-  Sample u0;
-  Sample k;
+  Sample sampleRate = 44100;
+  Sample u1 = 0;
+  Sample u0 = 0;
+  Sample k = 0;
 };
 
 } // namespace SomeDSP
