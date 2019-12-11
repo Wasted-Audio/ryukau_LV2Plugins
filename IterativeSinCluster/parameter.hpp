@@ -275,19 +275,19 @@ struct GlobalParameter {
     value[ID::semi0] = std::make_unique<IntValue>(
       0, Scales::oscSemi, "semi0", kParameterIsAutomable | kParameterIsInteger);
     value[ID::semi1] = std::make_unique<IntValue>(
-      5, Scales::oscSemi, "semi1", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::oscSemi, "semi1", kParameterIsAutomable | kParameterIsInteger);
     value[ID::semi2] = std::make_unique<IntValue>(
-      10, Scales::oscSemi, "semi2", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::oscSemi, "semi2", kParameterIsAutomable | kParameterIsInteger);
     value[ID::semi3] = std::make_unique<IntValue>(
-      15, Scales::oscSemi, "semi3", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::oscSemi, "semi3", kParameterIsAutomable | kParameterIsInteger);
     value[ID::semi4] = std::make_unique<IntValue>(
-      20, Scales::oscSemi, "semi4", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::oscSemi, "semi4", kParameterIsAutomable | kParameterIsInteger);
     value[ID::semi5] = std::make_unique<IntValue>(
-      25, Scales::oscSemi, "semi5", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::oscSemi, "semi5", kParameterIsAutomable | kParameterIsInteger);
     value[ID::semi6] = std::make_unique<IntValue>(
-      30, Scales::oscSemi, "semi6", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::oscSemi, "semi6", kParameterIsAutomable | kParameterIsInteger);
     value[ID::semi7] = std::make_unique<IntValue>(
-      35, Scales::oscSemi, "semi7", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::oscSemi, "semi7", kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::milli0] = std::make_unique<IntValue>(
       0, Scales::oscMilli, "milli0", kParameterIsAutomable | kParameterIsInteger);
@@ -432,6 +432,11 @@ struct GlobalParameter {
   }
 #endif
 
+  void resetParameter()
+  {
+    for (auto &val : value) val->setFromNormalized(val->getDefaultNormalized());
+  }
+
   double getParameterValue(uint32_t index) const
   {
     if (index >= value.size()) return 0.0;
@@ -457,4 +462,71 @@ struct GlobalParameter {
     value[index]->setFromNormalized(normalized);
     return value[index]->getFloat();
   }
+
+  enum Preset {
+    presetDefault,
+    presetMilliDetune,
+    preset35th,
+    presetOdd7th,
+    presetRandomPitchStereo,
+    presetET7Cluster,
+    presetChorusKeyFollow,
+    presetRandomBell,
+    presetShelving,
+    presetModuloOrgan,
+    presetDim,
+    presetNarrowModulo,
+    presetET15,
+    presetReverseSemiLowPop,
+    presetET19,
+    preset2479,
+    presetSparseOvertone,
+    preset4thPad,
+    presetAliasing,
+    presetNoisyFeedback,
+    presetTotallyRandom,
+    presetET12ToneCluster,
+    presetSlowRotation,
+    presetAnotherPad,
+    presetSolidHighBlurredLow,
+    presetThisSynthIsNotGoodForBass,
+
+    Preset_ENUM_LENGTH,
+  };
+
+  std::array<const char *, 26> programName{
+    "Default",
+    "MilliDetune",
+    "35th",
+    "Odd7th",
+    "RandomPitchStereo",
+    "ET7Cluster",
+    "ChorusKeyFollow",
+    "RandomBell",
+    "Shelving",
+    "ModuloOrgan",
+    "Dim",
+    "NarrowModulo",
+    "ET15",
+    "ReverseSemiLowPop",
+    "ET19",
+    "2479",
+    "SparseOvertone",
+    "4thPad",
+    "Aliasing",
+    "NoisyFeedback",
+    "TotallyRandom",
+    "ET12ToneCluster",
+    "SlowRotation",
+    "AnotherPad",
+    "SolidHighBlurredLow",
+    "ThisSynthIsNotGoodForBass",
+  };
+
+  void initProgramName(uint32_t index, String &programName)
+  {
+    programName = this->programName[index];
+  }
+
+  void loadProgram(uint32_t index);
 };

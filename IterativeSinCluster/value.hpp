@@ -56,6 +56,7 @@ struct ValueInterface {
 #ifndef TEST_BUILD
   virtual void setParameterRange(Parameter &parameter) = 0;
 #endif
+  virtual const char *getName() const = 0;
   virtual double getFloat() const = 0;
   virtual uint32_t getInt() const = 0;
   virtual double getNormalized() = 0;
@@ -97,6 +98,7 @@ struct IntValue : public ValueInterface {
   }
 #endif
 
+  inline const char *getName() const override { return name; }
   inline uint32_t getInt() const override { return raw; }
   inline double getFloat() const override { return raw; }
   double getNormalized() override { return scale.invmap(raw); }
@@ -147,6 +149,7 @@ template<typename Scale> struct FloatValue : public ValueInterface {
   }
 #endif
 
+  inline const char *getName() const override { return name; }
   inline uint32_t getInt() const override { return uint32_t(raw); }
   inline double getFloat() const override { return raw; }
   double getNormalized() override { return scale.invmap(raw); }

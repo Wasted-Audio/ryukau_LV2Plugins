@@ -30,7 +30,9 @@ START_NAMESPACE_DISTRHO
 class IterativeSinCluster : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
-  IterativeSinCluster() : Plugin(ParameterID::ID_ENUM_LENGTH, 1, 0)
+  IterativeSinCluster()
+    : Plugin(
+      ParameterID::ID_ENUM_LENGTH, GlobalParameter::Preset::Preset_ENUM_LENGTH, 0)
   {
     sampleRateChanged(getSampleRate());
     lastNoteId.reserve(dsp.maxVoice + 1);
@@ -81,24 +83,10 @@ protected:
 
   void initProgramName(uint32_t index, String &programName) override
   {
-    switch (index) {
-      case 0:
-        programName = "Default";
-        break;
-
-        // Add program here.
-    }
+    dsp.param.initProgramName(index, programName);
   }
 
-  void loadProgram(uint32_t index) override
-  {
-    switch (index) {
-      case 0:
-        break;
-
-        // Add program here.
-    }
-  }
+  void loadProgram(uint32_t index) override { dsp.param.loadProgram(index); }
 
   void sampleRateChanged(double newSampleRate) { dsp.setup(newSampleRate); }
   void activate() { dsp.startup(); }

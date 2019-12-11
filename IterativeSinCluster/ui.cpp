@@ -20,6 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with IterativeSinCluster.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -401,16 +402,23 @@ protected:
   {
     setParameterValue(id, param.updateValue(id, normalized));
     repaint();
+    dumpParameter();
   }
 
   void programLoaded(uint32_t index) override
   {
-    switch (index) {
-      case 0:
-        break;
+    param.loadProgram(index);
 
-        // Add program here.
+    for (auto &vWidget : valueWidget)
+      vWidget->setValue(param.value[vWidget->id]->getNormalized());
+
+    for (auto &aWidget : arrayWidget) {
+      for (size_t idx = 0; idx < aWidget->id.size(); ++idx) {
+        aWidget->setValueAt(idx, param.value[aWidget->id[idx]]->getNormalized());
+      }
     }
+
+    repaint();
   }
 
   void onNanoDisplay() override
@@ -436,6 +444,13 @@ private:
   std::vector<std::shared_ptr<Widget>> widget;
   std::vector<std::shared_ptr<ValueWidget>> valueWidget;
   std::vector<std::shared_ptr<ArrayWidget>> arrayWidget;
+
+  void dumpParameter()
+  {
+    for (const auto &value : param.value)
+      std::cout << value->getName() << " " << std::to_string(value->getFloat()) << "\n";
+    std::cout << std::endl;
+  }
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)
   {
