@@ -449,8 +449,8 @@ private:
   {
     std::cout << "{\n";
     for (const auto &value : param.value)
-      std::cout << "\"" << value->getName() << "\": " << std::to_string(value->getFloat())
-                << ",\n";
+      std::cout << "\"" << value->getName()
+                << "\": " << std::to_string(value->getNormalized()) << ",\n";
     std::cout << "}" << std::endl;
   }
 
