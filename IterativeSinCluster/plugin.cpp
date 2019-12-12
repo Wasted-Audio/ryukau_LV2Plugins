@@ -31,8 +31,7 @@ class IterativeSinCluster : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
   IterativeSinCluster()
-    : Plugin(
-      ParameterID::ID_ENUM_LENGTH, GlobalParameter::Preset::Preset_ENUM_LENGTH, 0)
+    : Plugin(ParameterID::ID_ENUM_LENGTH, GlobalParameter::Preset::Preset_ENUM_LENGTH, 0)
   {
     sampleRateChanged(getSampleRate());
     lastNoteId.reserve(dsp.maxVoice + 1);

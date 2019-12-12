@@ -338,6 +338,11 @@ struct GlobalParameter {
   }
 #endif
 
+  void resetParameter()
+  {
+    for (auto &val : value) val->setFromNormalized(val->getDefaultNormalized());
+  }
+
   double getParameterValue(uint32_t index) const
   {
     if (index >= value.size()) return 0.0;
@@ -363,6 +368,61 @@ struct GlobalParameter {
     value[index]->setFromNormalized(normalized);
     return value[index]->getFloat();
   }
+
+  enum Preset {
+    presetDefault,
+    presetBassAndSweep,
+    presetBelow,
+    presetBrokenModulation,
+    presetDetuneWhileSliding,
+    presetDetunedPhaseMod,
+    presetDrift,
+    presetGroan,
+    presetLFOFreqDecay,
+    presetMindlessModulation,
+    presetMinor3rdShift,
+    presetOctaveDecay,
+    presetOsc1PitchLFO,
+    presetOverTheNyquist,
+    presetOvertone19,
+    presetResShortDecay,
+    presetSaturation,
+    presetShifterPseudoResonance,
+    presetSubBassDrum,
+    presetTpzRoar,
+
+    Preset_ENUM_LENGTH,
+  };
+
+  std::array<const char *, 20> programName{
+    "Default",
+    "BassAndSweep",
+    "Below",
+    "BrokenModulation",
+    "DetuneWhileSliding",
+    "DetunedPhaseMod",
+    "Drift",
+    "Groan",
+    "LFOFreqDecay",
+    "MindlessModulation",
+    "Minor3rdShift",
+    "OctaveDecay",
+    "Osc1PitchLFO",
+    "OverTheNyquist",
+    "Overtone19",
+    "ResShortDecay",
+    "Saturation",
+    "ShifterPseudoResonance",
+    "SubBassDrum",
+    "TpzRoar",
+  };
+
+  void initProgramName(uint32_t index, String &programName)
+  {
+    programName = this->programName[index];
+  }
+
+  void loadProgram(uint32_t index);
 
   void validate()
   {

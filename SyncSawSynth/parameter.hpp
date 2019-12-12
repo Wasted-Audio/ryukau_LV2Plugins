@@ -294,6 +294,11 @@ struct GlobalParameter {
   }
 #endif
 
+  void resetParameter()
+  {
+    for (auto &val : value) val->setFromNormalized(val->getDefaultNormalized());
+  }
+
   double getParameterValue(uint32_t index) const
   {
     if (index >= value.size()) return 0.0;
@@ -319,4 +324,67 @@ struct GlobalParameter {
     value[index]->setFromNormalized(normalized);
     return value[index]->getRaw();
   }
+
+  enum Preset {
+    presetDefault,
+    preset_2Octave,
+    presetAlmost,
+    presetBasicFilter,
+    presetBasicSync,
+    presetBreathing,
+    presetBurningUpCPU,
+    presetEdgyResonance,
+    presetFaint,
+    presetHmmm,
+    presetIndistinguishable,
+    presetMessBehindFilter,
+    presetMod_HP,
+    presetMotivation,
+    presetNoisyMod,
+    presetOutOfTuning,
+    presetPitchDecay,
+    presetPitchLFO,
+    presetPulse,
+    presetRunOutOfIdea,
+    presetSingleOscSyncLFO,
+    presetSomehowTonal,
+    presetTeachMeEnglishCoolWords,
+    presetThisIsntAModem,
+
+    Preset_ENUM_LENGTH,
+  };
+
+  std::array<const char *, 24> programName{
+    "Default",
+    "-2Octave",
+    "Almost",
+    "BasicFilter",
+    "BasicSync",
+    "Breathing",
+    "BurningUpCPU",
+    "EdgyResonance",
+    "Faint",
+    "Hmmm",
+    "Indistinguishable",
+    "MessBehindFilter",
+    "Mod+HP",
+    "Motivation",
+    "NoisyMod",
+    "OutOfTuning",
+    "PitchDecay",
+    "PitchLFO",
+    "Pulse",
+    "RunOutOfIdea",
+    "SingleOscSyncLFO",
+    "SomehowTonal",
+    "TeachMeEnglishCoolWords",
+    "ThisIsntAModem",
+  };
+
+  void initProgramName(uint32_t index, String &programName)
+  {
+    programName = this->programName[index];
+  }
+
+  void loadProgram(uint32_t index);
 };

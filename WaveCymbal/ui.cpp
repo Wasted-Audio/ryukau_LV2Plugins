@@ -112,7 +112,6 @@ public:
       leftWave + 2.0f * knobX, topWave, knobWidth, colorBlue, "PulseWidth",
       ID::pulseWidth);
 
-
     // Collision.
     const auto top1 = top0 + knobY + 3.0f * margin;
 
@@ -200,12 +199,10 @@ protected:
 
   void programLoaded(uint32_t index) override
   {
-    switch (index) {
-      case 0:
-        break;
-
-        // Add program here.
-    }
+    param.loadProgram(index);
+    for (auto &vWidget : valueWidget)
+      vWidget->setValue(param.value[vWidget->id]->getNormalized());
+    repaint();
   }
 
   void onNanoDisplay() override

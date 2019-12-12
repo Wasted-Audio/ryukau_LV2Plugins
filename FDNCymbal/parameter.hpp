@@ -184,6 +184,11 @@ struct GlobalParameter {
   }
 #endif
 
+  void resetParameter()
+  {
+    for (auto &val : value) val->setFromNormalized(val->getDefaultNormalized());
+  }
+
   double getParameterValue(uint32_t index) const
   {
     if (index >= value.size()) return 0.0;
@@ -209,4 +214,43 @@ struct GlobalParameter {
     value[index]->setFromNormalized(normalized);
     return value[index]->getFloat();
   }
+
+  enum Preset {
+    presetDefault,
+    preset0,
+    preset11415258,
+    preset5711006,
+    presetFDNTweak,
+    presetGlassy,
+    presetLongExcitation,
+    presetRandomShortTime,
+    presetRetriggerStickOscillator,
+    presetSmooth,
+    presetTooMuchDelayTime,
+    presetTurnRight,
+
+    Preset_ENUM_LENGTH,
+  };
+
+  std::array<const char *, 12> programName{
+    "Default",
+    "0",
+    "11415258",
+    "5711006",
+    "FDNTweak",
+    "Glassy",
+    "LongExcitation",
+    "RandomShortTime",
+    "RetriggerStickOscillator",
+    "Smooth",
+    "TooMuchDelayTime",
+    "TurnRight",
+  };
+
+  void initProgramName(uint32_t index, String &programName)
+  {
+    programName = this->programName[index];
+  }
+
+  void loadProgram(uint32_t index);
 };

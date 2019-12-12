@@ -30,7 +30,8 @@ START_NAMESPACE_DISTRHO
 class TrapezoidSynth : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
-  TrapezoidSynth() : Plugin(ParameterID::ID_ENUM_LENGTH, 1, 0)
+  TrapezoidSynth()
+    : Plugin(ParameterID::ID_ENUM_LENGTH, GlobalParameter::Preset::Preset_ENUM_LENGTH, 0)
   {
     dsp.param.validate();
 
@@ -83,24 +84,10 @@ protected:
 
   void initProgramName(uint32_t index, String &programName) override
   {
-    switch (index) {
-      case 0:
-        programName = "Default";
-        break;
-
-        // Add program here.
-    }
+    dsp.param.initProgramName(index, programName);
   }
 
-  void loadProgram(uint32_t index) override
-  {
-    switch (index) {
-      case 0:
-        break;
-
-        // Add program here.
-    }
-  }
+  void loadProgram(uint32_t index) override { dsp.param.loadProgram(index); }
 
   void sampleRateChanged(double newSampleRate) { dsp.setup(newSampleRate); }
   void activate() { dsp.startup(); }

@@ -402,7 +402,7 @@ protected:
   {
     setParameterValue(id, param.updateValue(id, normalized));
     repaint();
-    dumpParameter();
+    // dumpParameter(); // Used to make preset. There may be better way to do this.
   }
 
   void programLoaded(uint32_t index) override
@@ -447,9 +447,11 @@ private:
 
   void dumpParameter()
   {
+    std::cout << "{\n";
     for (const auto &value : param.value)
-      std::cout << value->getName() << " " << std::to_string(value->getFloat()) << "\n";
-    std::cout << std::endl;
+      std::cout << "\"" << value->getName() << "\": " << std::to_string(value->getFloat())
+                << ",\n";
+    std::cout << "}" << std::endl;
   }
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)
