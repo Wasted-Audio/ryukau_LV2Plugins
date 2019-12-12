@@ -48,6 +48,7 @@ protected:
 
 struct ValueInterface {
   virtual void setParameterRange(Parameter &parameter) = 0;
+  virtual const char *getName() const = 0;
   virtual double getRaw() const = 0;
   virtual double getNormalized() = 0;
   virtual double getDefaultNormalized() = 0;
@@ -59,11 +60,13 @@ template<typename Scale> struct InternalValue : public ValueInterface {
   double defaultNormalized;
   double raw;
   Scale &scale;
+  const char *name;
 
-  InternalValue(double defaultNormalized, Scale &scale)
+  InternalValue(double defaultNormalized, Scale &scale, const char *name)
     : defaultNormalized(defaultNormalized)
     , raw(scale.map(defaultNormalized))
     , scale(scale)
+    , name(name)
   {
   }
 
@@ -72,6 +75,7 @@ template<typename Scale> struct InternalValue : public ValueInterface {
     parameter.ranges = ScaledParameterRanges<Scale>(defaultNormalized, scale);
   }
 
+  inline const char *getName() const override { return name; }
   inline double getRaw() const override { return raw; }
   double getNormalized() override { return scale.invmap(raw); }
   inline double getDefaultNormalized() override { return defaultNormalized; }

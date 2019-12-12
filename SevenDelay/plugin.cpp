@@ -28,7 +28,11 @@ START_NAMESPACE_DISTRHO
 class SevenDelay : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
-  SevenDelay() : Plugin(22, 1, 0) { sampleRateChanged(getSampleRate()); }
+  SevenDelay()
+    : Plugin(ParameterID::ID_ENUM_LENGTH, GlobalParameter::Preset::Preset_ENUM_LENGTH, 0)
+  {
+    sampleRateChanged(getSampleRate());
+  }
 
 protected:
   /* Information */
@@ -192,24 +196,10 @@ protected:
 
   void initProgramName(uint32_t index, String &programName) override
   {
-    switch (index) {
-      case 0:
-        programName = "Default";
-        break;
-
-        // Add program here.
-    }
+    dsp.param.initProgramName(index, programName);
   }
 
-  void loadProgram(uint32_t index) override
-  {
-    switch (index) {
-      case 0:
-        break;
-
-        // Add program here.
-    }
-  }
+  void loadProgram(uint32_t index) override { dsp.param.loadProgram(index); }
 
   void sampleRateChanged(double newSampleRate) { dsp.setup(newSampleRate); }
 

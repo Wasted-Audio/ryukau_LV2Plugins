@@ -80,57 +80,63 @@ struct GlobalParameter {
   {
     value.resize(ParameterID::ID_ENUM_LENGTH);
 
-    value[ParameterID::bypass]
-      = std::make_unique<InternalValue<BoolScale<double>>>(0.0, Scales::boolScale);
+    value[ParameterID::bypass] = std::make_unique<InternalValue<BoolScale<double>>>(
+      0.0, Scales::boolScale, "bypass");
     value[ParameterID::time]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.5, Scales::time);
-    value[ParameterID::feedback]
-      = std::make_unique<InternalValue<LinearScale<double>>>(0.625, Scales::defaultScale);
-    value[ParameterID::offset]
-      = std::make_unique<InternalValue<SPolyScale<double>>>(0.5, Scales::offset);
-    value[ParameterID::wetMix]
-      = std::make_unique<InternalValue<LinearScale<double>>>(0.75, Scales::defaultScale);
-    value[ParameterID::dryMix]
-      = std::make_unique<InternalValue<LinearScale<double>>>(1.0, Scales::defaultScale);
-    value[ParameterID::tempoSync]
-      = std::make_unique<InternalValue<BoolScale<double>>>(0.0, Scales::boolScale);
+      = std::make_unique<InternalValue<LogScale<double>>>(0.5, Scales::time, "time");
+    value[ParameterID::feedback] = std::make_unique<InternalValue<LinearScale<double>>>(
+      0.625, Scales::defaultScale, "feedback");
+    value[ParameterID::offset] = std::make_unique<InternalValue<SPolyScale<double>>>(
+      0.5, Scales::offset, "offset");
+    value[ParameterID::wetMix] = std::make_unique<InternalValue<LinearScale<double>>>(
+      0.75, Scales::defaultScale, "wetMix");
+    value[ParameterID::dryMix] = std::make_unique<InternalValue<LinearScale<double>>>(
+      1.0, Scales::defaultScale, "dryMix");
+    value[ParameterID::tempoSync] = std::make_unique<InternalValue<BoolScale<double>>>(
+      0.0, Scales::boolScale, "tempoSync");
     value[ParameterID::negativeFeedback]
-      = std::make_unique<InternalValue<BoolScale<double>>>(0.0, Scales::boolScale);
-    value[ParameterID::lfoTimeAmount]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.0, Scales::lfoTimeAmount);
-    value[ParameterID::lfoToneAmount]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.0, Scales::lfoToneAmount);
-    value[ParameterID::lfoFrequency]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.5, Scales::lfoFrequency);
-    value[ParameterID::lfoShape]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.5, Scales::lfoShape);
+      = std::make_unique<InternalValue<BoolScale<double>>>(
+        0.0, Scales::boolScale, "negativeFeedback");
+    value[ParameterID::lfoTimeAmount] = std::make_unique<InternalValue<LogScale<double>>>(
+      0.0, Scales::lfoTimeAmount, "lfoTimeAmount");
+    value[ParameterID::lfoToneAmount] = std::make_unique<InternalValue<LogScale<double>>>(
+      0.0, Scales::lfoToneAmount, "lfoToneAmount");
+    value[ParameterID::lfoFrequency] = std::make_unique<InternalValue<LogScale<double>>>(
+      0.5, Scales::lfoFrequency, "lfoFrequency");
+    value[ParameterID::lfoShape] = std::make_unique<InternalValue<LogScale<double>>>(
+      0.5, Scales::lfoShape, "lfoShape");
     value[ParameterID::lfoInitialPhase]
       = std::make_unique<InternalValue<LinearScale<double>>>(
-        0.0, Scales::lfoInitialPhase);
-    value[ParameterID::lfoHold]
-      = std::make_unique<InternalValue<BoolScale<double>>>(0.0, Scales::boolScale);
-    value[ParameterID::smoothness]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.3, Scales::smoothness);
-    value[ParameterID::inSpread]
-      = std::make_unique<InternalValue<LinearScale<double>>>(0.0, Scales::defaultScale);
-    value[ParameterID::inPan]
-      = std::make_unique<InternalValue<LinearScale<double>>>(0.5, Scales::defaultScale);
-    value[ParameterID::outSpread]
-      = std::make_unique<InternalValue<LinearScale<double>>>(0.0, Scales::defaultScale);
-    value[ParameterID::outPan]
-      = std::make_unique<InternalValue<LinearScale<double>>>(0.5, Scales::defaultScale);
-    value[ParameterID::toneCutoff]
-      = std::make_unique<InternalValue<LogScale<double>>>(1.0, Scales::toneCutoff);
+        0.0, Scales::lfoInitialPhase, "lfoInitialPhase");
+    value[ParameterID::lfoHold] = std::make_unique<InternalValue<BoolScale<double>>>(
+      0.0, Scales::boolScale, "lfoHold");
+    value[ParameterID::smoothness] = std::make_unique<InternalValue<LogScale<double>>>(
+      0.3, Scales::smoothness, "smoothness");
+    value[ParameterID::inSpread] = std::make_unique<InternalValue<LinearScale<double>>>(
+      0.0, Scales::defaultScale, "inSpread");
+    value[ParameterID::inPan] = std::make_unique<InternalValue<LinearScale<double>>>(
+      0.5, Scales::defaultScale, "inPan");
+    value[ParameterID::outSpread] = std::make_unique<InternalValue<LinearScale<double>>>(
+      0.0, Scales::defaultScale, "outSpread");
+    value[ParameterID::outPan] = std::make_unique<InternalValue<LinearScale<double>>>(
+      0.5, Scales::defaultScale, "outPan");
+    value[ParameterID::toneCutoff] = std::make_unique<InternalValue<LogScale<double>>>(
+      1.0, Scales::toneCutoff, "toneCutoff");
     value[ParameterID::toneQ]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.9, Scales::toneQ);
+      = std::make_unique<InternalValue<LogScale<double>>>(0.9, Scales::toneQ, "toneQ");
     value[ParameterID::dckill]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.0, Scales::dckill);
+      = std::make_unique<InternalValue<LogScale<double>>>(0.0, Scales::dckill, "dckill");
   }
 
   void initParameter(uint32_t index, Parameter &parameter)
   {
     if (index >= value.size()) return;
     value[index]->setParameterRange(parameter);
+  }
+
+  void resetParameter()
+  {
+    for (auto &val : value) val->setFromNormalized(val->getDefaultNormalized());
   }
 
   double getParameterValue(uint32_t index) const
@@ -158,4 +164,46 @@ struct GlobalParameter {
     value[index]->setFromNormalized(normalized);
     return value[index]->getRaw();
   }
+
+  enum Preset {
+    presetDefault,
+    preset3_16Invert,
+    preset3_16PingPong,
+    presetBend,
+    presetChorus,
+    presetCloseToPhaser,
+    presetFlapping,
+    presetGhostVibrato,
+    presetHigh,
+    presetLean,
+    presetMaxFeedback,
+    presetModeratelyCentered,
+    presetNoise,
+    presetPower,
+    presetResponse,
+    presetSlowLFO,
+    presetSomewhere,
+    presetTail,
+    presetTurnUpTimeKnob,
+    presetWaitForScratch,
+    presetWandering,
+
+    Preset_ENUM_LENGTH,
+  };
+
+  std::array<const char *, 21> programName{
+    "Default",   "3/16Invert",    "3/16PingPong",   "Bend",
+    "Chorus",    "CloseToPhaser", "Flapping",       "GhostVibrato",
+    "High",      "Lean",          "MaxFeedback",    "ModeratelyCentered",
+    "Noise",     "Power",         "Response",       "SlowLFO",
+    "Somewhere", "Tail",          "TurnUpTimeKnob", "WaitForScratch",
+    "Wandering",
+  };
+
+  void initProgramName(uint32_t index, String &programName)
+  {
+    programName = this->programName[index];
+  }
+
+  void loadProgram(uint32_t index);
 };

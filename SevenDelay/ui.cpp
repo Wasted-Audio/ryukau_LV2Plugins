@@ -20,6 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with SevenDelay.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -165,16 +166,16 @@ protected:
     setParameterValue(id, param.updateValue(id, normalized));
     updateWaveView();
     repaint();
+    // dumpParameter(); // Used to make preset. There may be better way to do this.
   }
 
   void programLoaded(uint32_t index) override
   {
-    switch (index) {
-      case 0:
-        break;
-
-        // Add program here.
-    }
+    param.loadProgram(index);
+    for (auto &vWidget : valueWidget)
+      vWidget->setValue(param.value[vWidget->id]->getNormalized());
+    updateWaveView();
+    repaint();
   }
 
   void onNanoDisplay() override
@@ -198,6 +199,22 @@ private:
   std::vector<std::shared_ptr<Widget>> widget;
   std::vector<std::shared_ptr<ValueWidget>> valueWidget;
   std::shared_ptr<WaveView> waveView;
+
+  void dumpParameter()
+  {
+    std::cout << "{\n";
+    for (const auto &value : param.value) {
+      const auto val = dynamic_cast<InternalValue<BoolScale<double>> *>(value.get());
+      if (val == nullptr) {
+        std::cout << "\"" << value->getName()
+                  << "\": " << std::to_string(value->getNormalized()) << ",\n";
+      } else {
+        std::cout << "\"" << value->getName()
+                  << "\": " << std::to_string(uint32_t(value->getRaw())) << ",\n";
+      }
+    }
+    std::cout << "}" << std::endl;
+  }
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)
   {
