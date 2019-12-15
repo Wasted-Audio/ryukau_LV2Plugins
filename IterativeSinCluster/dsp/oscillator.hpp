@@ -23,82 +23,34 @@
 #include "constants.hpp"
 #include "somemath.hpp"
 
-#ifdef __AVX2__
 #include "../../lib/vcl/vectorclass.h"
 #include "../../lib/vcl/vectormath_trig.h"
-#endif
 
 namespace SomeDSP {
+namespace BiquadOsc {
 
-#ifdef __AVX2__
+constexpr size_t biquadOscSize = 8;
 
-template<size_t size> struct BiquadOscAVX2 {
-public:
-  std::array<Vec8f, size> frequency;
-  std::array<Vec8f, size> gain;
-  std::array<Vec8f, size> u1;
-  std::array<Vec8f, size> u0;
-  std::array<Vec8f, size> k;
-
-  void setup(float sampleRate)
-  {
-    for (size_t i = 0; i < size; ++i) {
-      u1[i] = 0;
-      auto omega = float(twopi) * frequency[i] / sampleRate;
-      u0[i] = -sincos(&k[i], omega);
-      k[i] *= 2.0f;
-    }
-  }
-
-  float process()
-  {
-    float sum = 0;
-    for (size_t i = 0; i < size; ++i) {
-      auto out = k[i] * u1[i] - u0[i];
-      u0[i] = u1[i];
-      u1[i] = out;
-      sum += horizontal_add(gain[i] * out);
-    }
-    return sum / (8 * size);
-  }
+struct alignas(64) Data16x8 {
+  std::array<Vec16f, biquadOscSize> frequency;
+  std::array<Vec16f, biquadOscSize> gain;
+  std::array<Vec16f, biquadOscSize> u1;
+  std::array<Vec16f, biquadOscSize> u0;
+  std::array<Vec16f, biquadOscSize> k;
+  void (*setup)(Data16x8 &, float) = nullptr;
+  float (*process)(Data16x8 &) = nullptr;
 };
 
-#else
+extern void setup_AVX512(Data16x8 &data, float sampleRate);
+extern void setup_AVX2(Data16x8 &data, float sampleRate);
+extern void setup_SSE41(Data16x8 &data, float sampleRate);
+extern void setup_SSE2(Data16x8 &data, float sampleRate);
+extern float process_AVX512(Data16x8 &data);
+extern float process_AVX2(Data16x8 &data);
+extern float process_SSE41(Data16x8 &data);
+extern float process_SSE2(Data16x8 &data);
 
-// Mostly uniform gain range.
-// - double : freq > 0.25Hz.
-// - float  : freq > 8Hz. Huge bump around 1Hz.
-template<typename Sample, size_t size> struct BiquadOscN {
-  std::array<Sample, size> frequency{};
-  std::array<Sample, size> gain{};
-  std::array<Sample, size> u1{};
-  std::array<Sample, size> u0{};
-  std::array<Sample, size> k{};
+extern void initMethod(Data16x8 &data);
 
-  void setup(Sample sampleRate)
-  {
-    u1.fill(0);
-    for (size_t i = 0; i < size; ++i) {
-      auto omega = Sample(twopi) * frequency[i] / sampleRate;
-      u0[i] = -sin(omega);
-      k[i] = 2 * cos(omega);
-    }
-  }
-
-  Sample process()
-  {
-    Sample sum = 0;
-    Sample out;
-    for (size_t i = 0; i < size; ++i) {
-      out = k[i] * u1[i] - u0[i];
-      u0[i] = u1[i];
-      u1[i] = out;
-      sum += gain[i] * out;
-    }
-    return sum / size;
-  }
-};
-
-#endif
-
+} // namespace BiquadOsc
 } // namespace SomeDSP
