@@ -57,6 +57,7 @@ IntScale<double> Scales::nVoice(5);
 LogScale<double> Scales::smoothness(0.0, 0.5, 0.1, 0.04);
 
 // Generated from preset dump. This works, but hard coding preset data is seriously bad.
+#ifndef TEST_BUILD
 void GlobalParameter::loadProgram(uint32_t index)
 {
   using ID = ParameterID::ID;
@@ -3462,3 +3463,4 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
   }
 }
+#endif

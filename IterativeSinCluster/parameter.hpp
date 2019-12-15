@@ -541,10 +541,12 @@ struct GlobalParameter {
     "WeirdPan",
   };
 
+#ifndef TEST_BUILD
   void initProgramName(uint32_t index, String &programName)
   {
     programName = this->programName[index];
   }
 
   void loadProgram(uint32_t index);
+#endif
 };
