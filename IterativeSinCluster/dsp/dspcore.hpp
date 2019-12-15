@@ -51,11 +51,7 @@ public:
   Sample gain = 0;
   Sample frequency = 0;
 
-#ifdef __AVX2__
-  std::array<BiquadOscAVX2<nOvertone>, nChord> oscillator;
-#else
-  std::array<BiquadOscN<Sample, biquadOscSize>, nChord> oscillator;
-#endif
+  std::array<BiquadOscAVX2<nPitch>, nChord> oscillator;
   std::array<Sample, nChord> chordPan{};
 
   ExpADSREnvelope<Sample> gainEnvelope;
