@@ -17,58 +17,7 @@
 
 #pragma once
 
-#include "../parameter.hpp"
-#include "constants.hpp"
-#include "delay.hpp"
-#include "envelope.hpp"
-#include "iir.hpp"
-#include "noise.hpp"
-#include "oscillator.hpp"
-#include "smoother.hpp"
-
-#include <array>
-#include <cmath>
-#include <memory>
-
-using namespace SomeDSP;
-
-constexpr size_t nPitch = 8;
-constexpr size_t nChord = 4;
-constexpr size_t nOvertone = 16;
-constexpr size_t biquadOscSize = nPitch * nOvertone;
-
-enum class NoteState { active, release, rest };
-
-template<typename Sample> class Note {
-public:
-  NoteState state = NoteState::rest;
-
-  Sample sampleRate = 44100;
-
-  int32_t id = -1;
-  Sample normalizedKey = 0;
-  Sample velocity = 0;
-  Sample gain = 0;
-  Sample frequency = 0;
-
-  std::array<BiquadOscAVX2<nPitch>, nChord> oscillator;
-  std::array<Sample, nChord> chordPan{};
-
-  ExpADSREnvelope<Sample> gainEnvelope;
-  Sample gainEnvCurve = 0;
-
-  void setup(Sample sampleRate);
-  void noteOn(
-    int32_t noteId,
-    Sample normalizedKey,
-    Sample frequency,
-    Sample velocity,
-    GlobalParameter &param,
-    White<float> &rng);
-  void release();
-  void rest();
-  std::array<Sample, 2> process();
-};
+#include "note.hpp"
 
 class DSPCore {
 public:
@@ -134,7 +83,7 @@ private:
   White<float> rng{0};
 
   size_t nVoice = 32;
-  std::array<Note<float>, maxVoice> notes;
+  std::array<Note, maxVoice> notes;
   float lastNoteFreq = 1.0f;
 
   std::array<Chorus<float>, 3> chorus;

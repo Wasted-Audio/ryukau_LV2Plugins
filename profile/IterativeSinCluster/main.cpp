@@ -1,3 +1,20 @@
+/*
+With AVX2
+IterativeSinCluster
+Total[ms]3140.817090
+Average[ms]3.067204
+
+Without AVX2
+IterativeSinCluster
+Total[ms]7905.182097
+Average[ms]7.719904
+
+With instrset_detection
+IterativeSinCluster
+Total[ms]126483.596998
+Average[ms]123.519138
+*/
+
 #include <sndfile.h>
 #include <string.h>
 
