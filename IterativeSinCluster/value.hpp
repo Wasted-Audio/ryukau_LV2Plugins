@@ -53,6 +53,7 @@ protected:
 #endif
 
 struct ValueInterface {
+  virtual ~ValueInterface(){};
 #ifndef TEST_BUILD
   virtual void setParameterRange(Parameter &parameter) = 0;
 #endif
@@ -102,10 +103,10 @@ struct IntValue : public ValueInterface {
   inline uint32_t getInt() const override { return raw; }
   inline double getFloat() const override { return raw; }
   double getNormalized() override { return scale.invmap(raw); }
-  uint32_t getDefaultInt() { return scale.map(defaultNormalized); }
+  uint32_t getDefaultInt() override { return scale.map(defaultNormalized); }
   inline double getDefaultNormalized() override { return defaultNormalized; }
 
-  void setFromInt(uint32_t value)
+  void setFromInt(uint32_t value) override
   {
     raw = value < scale.getMin() ? scale.getMin()
                                  : value > scale.getMax() ? scale.getMax() : value;
@@ -153,7 +154,7 @@ template<typename Scale> struct FloatValue : public ValueInterface {
   inline uint32_t getInt() const override { return uint32_t(raw); }
   inline double getFloat() const override { return raw; }
   double getNormalized() override { return scale.invmap(raw); }
-  uint32_t getDefaultInt() { return uint32_t(scale.map(defaultNormalized)); }
+  uint32_t getDefaultInt() override { return uint32_t(scale.map(defaultNormalized)); }
   inline double getDefaultNormalized() override { return defaultNormalized; }
 
   void setFromInt(uint32_t value) override

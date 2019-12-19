@@ -1,25 +1,9 @@
-/*
-With AVX2
-IterativeSinCluster
-Total[ms]3140.817090
-Average[ms]3.067204
-
-Without AVX2
-IterativeSinCluster
-Total[ms]7905.182097
-Average[ms]7.719904
-
-With instrset_detection
-IterativeSinCluster
-Total[ms]126483.596998
-Average[ms]123.519138
-*/
-
 #include <sndfile.h>
 #include <string.h>
 
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include "../../IterativeSinCluster/dsp/dspcore.hpp"
@@ -61,25 +45,43 @@ int main()
 
   float sig[2][BUF_LEN];
 
-  DSPCore dsp;
-  dsp.setup(sampleRate);
+  std::unique_ptr<DSPInterface> dsp;
 
-  dsp.param.value[ParameterID::gainR]->setFromNormalized(1.0);
+  auto iset = instrset_detect();
 
-  dsp.setParameters();
+  std::cout << "instrset: " << std::to_string(iset) << std::endl;
 
-  for (size_t n = 0; n < dsp.maxVoice; ++n) dsp.noteOn(n, 48 + n, 0, 0.5);
-  dsp.setParameters();
-  dsp.process(BUF_LEN, sig[0], sig[1]);
+  if (iset >= 10) { // AVX512
+    dsp = std::make_unique<DSPCore_AVX512>();
+  } else if (iset >= 8) { // AVX2
+    dsp = std::make_unique<DSPCore_AVX2>();
+  } else if (iset >= 5) { // SSE4.1
+    dsp = std::make_unique<DSPCore_SSE41>();
+  } else if (iset >= 2) { // SSE2
+    dsp = std::make_unique<DSPCore_SSE2>();
+  } else {
+    std::cerr << "\nError: Instruction set SSE2 not supported on this computer";
+    exit(EXIT_FAILURE);
+  }
+
+  dsp->setup(sampleRate);
+
+  dsp->param.value[ParameterID::gainR]->setFromNormalized(1.0);
+
+  dsp->setParameters();
+
+  for (size_t n = 0; n < dsp->maxVoice; ++n) dsp->noteOn(n, 48 + n, 0, 0.5);
+  dsp->setParameters();
+  dsp->process(BUF_LEN, sig[0], sig[1]);
 
   double sumElapsed = 0.0;
   for (size_t i = 0; i < N_LOOP; ++i) {
     if (i == 20) // 20 * BUF_LEN / sampleRate [seconds].
-      for (size_t n = 0; n < dsp.maxVoice; ++n) dsp.noteOff(n);
+      for (size_t n = 0; n < dsp->maxVoice; ++n) dsp->noteOff(n);
 
     auto start = std::chrono::high_resolution_clock::now();
-    dsp.setParameters();
-    dsp.process(BUF_LEN, sig[0], sig[1]);
+    dsp->setParameters();
+    dsp->process(BUF_LEN, sig[0], sig[1]);
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsed = finish - start;
     sumElapsed += elapsed.count();

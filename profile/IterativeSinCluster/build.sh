@@ -13,16 +13,20 @@ function compile_simd() {
   g++ -DTEST_BUILD -O3 -fPIC -msse2 -std=c++17 -c "$1" -o"$base.sse2.o"
 }
 
-compile_simd ../../IterativeSinCluster/dsp/oscillator.cpp
-compile_simd ../../IterativeSinCluster/dsp/note.cpp
+compile_simd ../../IterativeSinCluster/dsp/dspcore.cpp
 
 echo Compiling main.cpp
-g++ -std=c++17 -O3 -Wall -lsndfile -DTEST_BUILD -o instrset \
+
+# If CPU doesn't support AVX512, changing order of *.o file cause SIGILL (illegal instruction).
+# See: https://stackoverflow.com/questions/15406658/cpu-dispatcher-for-visual-studio-for-avx-and-sse
+g++ -std=c++17 -O3 -Wall -lsndfile -DTEST_BUILD -o instrset2 \
   ../../lib/vcl/instrset_detect.cpp \
-  ./*.o \
-  ../../IterativeSinCluster/dsp/dspcore.cpp \
+  ./dspcore.cpp.sse2.o \
+  ./dspcore.cpp.sse41.o \
+  ./dspcore.cpp.avx2.o \
+  ./dspcore.cpp.avx512.o \
   ../../IterativeSinCluster/parameter.cpp \
   main.cpp
 
 echo Running benchmark
-./instrset
+./instrset2
