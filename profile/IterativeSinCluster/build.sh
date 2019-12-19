@@ -17,7 +17,7 @@ compile_simd ../../IterativeSinCluster/dsp/oscillator.cpp
 compile_simd ../../IterativeSinCluster/dsp/note.cpp
 
 echo Compiling main.cpp
-g++ -std=c++17 -O3 -Wall -lsndfile -DTEST_BUILD -o instrset \
+g++ -std=c++17 -O3 -Wall -lsndfile -DTEST_BUILD -o master \
   ../../lib/vcl/instrset_detect.cpp \
   ./*.o \
   ../../IterativeSinCluster/dsp/dspcore.cpp \
@@ -25,4 +25,4 @@ g++ -std=c++17 -O3 -Wall -lsndfile -DTEST_BUILD -o instrset \
   main.cpp
 
 echo Running benchmark
-./instrset
+./master
