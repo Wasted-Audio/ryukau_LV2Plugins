@@ -1,10 +1,7 @@
 #pragma once
 
-#include <memory>
-#include <numeric>
 #include <vector>
 
-#include "../../lib/juce_FastMathApproximations.h"
 #include "constants.hpp"
 #include "smoother.hpp"
 

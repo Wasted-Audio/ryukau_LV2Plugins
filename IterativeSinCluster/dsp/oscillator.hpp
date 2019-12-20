@@ -18,7 +18,6 @@
 #pragma once
 
 #include <array>
-#include <iostream>
 
 #include "constants.hpp"
 #include "somemath.hpp"
@@ -27,30 +26,36 @@
 #include "../../lib/vcl/vectormath_trig.h"
 
 namespace SomeDSP {
-namespace BiquadOsc {
 
-constexpr size_t biquadOscSize = 8;
+template<size_t size> struct alignas(64) BiquadOsc {
+public:
+  std::array<Vec16f, size> frequency;
+  std::array<Vec16f, size> gain;
+  std::array<Vec16f, size> u1;
+  std::array<Vec16f, size> u0;
+  std::array<Vec16f, size> k;
 
-struct alignas(64) Data16x8 {
-  std::array<Vec16f, biquadOscSize> frequency;
-  std::array<Vec16f, biquadOscSize> gain;
-  std::array<Vec16f, biquadOscSize> u1;
-  std::array<Vec16f, biquadOscSize> u0;
-  std::array<Vec16f, biquadOscSize> k;
-  void (*setup)(Data16x8 &, float) = nullptr;
-  float (*process)(Data16x8 &) = nullptr;
+  void setup(float sampleRate)
+  {
+    for (size_t i = 0; i < size; ++i) {
+      u1[i] = 0;
+      auto omega = float(twopi) * frequency[i] / sampleRate;
+      u0[i] = -sincos(&k[i], omega);
+      k[i] *= 2.0f;
+    }
+  }
+
+  float process()
+  {
+    float sum = 0;
+    for (size_t i = 0; i < size; ++i) {
+      auto out = k[i] * u1[i] - u0[i];
+      u0[i] = u1[i];
+      u1[i] = out;
+      sum += horizontal_add(gain[i] * out);
+    }
+    return sum / (8 * size);
+  }
 };
 
-extern void setup_AVX512(Data16x8 &data, float sampleRate);
-extern void setup_AVX2(Data16x8 &data, float sampleRate);
-extern void setup_SSE41(Data16x8 &data, float sampleRate);
-extern void setup_SSE2(Data16x8 &data, float sampleRate);
-extern float process_AVX512(Data16x8 &data);
-extern float process_AVX2(Data16x8 &data);
-extern float process_SSE41(Data16x8 &data);
-extern float process_SSE2(Data16x8 &data);
-
-extern void initMethod(Data16x8 &data);
-
-} // namespace BiquadOsc
 } // namespace SomeDSP
