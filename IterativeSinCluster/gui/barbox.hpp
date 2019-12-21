@@ -118,6 +118,8 @@ public:
 
   bool onScroll(const ScrollEvent &ev) override
   {
+    if (!contains(ev.pos)) return false;
+
     size_t index = size_t(ev.pos.getX() / sliderWidth);
     if (index >= value.size()) return false;
 
