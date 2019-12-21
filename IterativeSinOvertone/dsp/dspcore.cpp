@@ -89,7 +89,7 @@ void NOTE_NAME<Sample>::noteOn(
 
   const float nyquist = sampleRate / 2;
   const bool aliasing = param.value[ID::aliasing]->getInt();
-  const Sample randGainAmt = 3 * param.value[ID::randomGainAmount]->getFloat();
+  const Sample randGainAmt = param.value[ID::randomGainAmount]->getFloat();
   const Sample randFreqAmt = param.value[ID::randomFrequencyAmount]->getFloat();
   const Sample pitchMultiply = param.value[ID::pitchMultiply]->getFloat();
   const Sample pitchModulo = param.value[ID::pitchModulo]->getFloat();

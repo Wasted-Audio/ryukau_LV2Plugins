@@ -79,7 +79,8 @@ struct Scales {
   static SomeDSP::LinearScale<double> pitchModulo;
 
   static SomeDSP::IntScale<double> seed;
-  static SomeDSP::LogScale<double> randomAmount;
+  static SomeDSP::LinearScale<double> randomGainAmount;
+  static SomeDSP::LogScale<double> randomFrequencyAmount;
 
   static SomeDSP::LogScale<double> gain;
   static SomeDSP::LinearScale<double> gainBoost;
@@ -126,10 +127,10 @@ struct GlobalParameter {
     value[ID::randomRetrigger] = std::make_unique<IntValue>(
       0, Scales::boolScale, "randomRetrigger",
       kParameterIsAutomable | kParameterIsBoolean);
-    value[ID::randomGainAmount] = std::make_unique<LogValue>(
-      0.0, Scales::randomAmount, "randomGainAmount", kParameterIsAutomable);
+    value[ID::randomGainAmount] = std::make_unique<LinearValue>(
+      0.0, Scales::randomGainAmount, "randomGainAmount", kParameterIsAutomable);
     value[ID::randomFrequencyAmount] = std::make_unique<LogValue>(
-      0.0, Scales::randomAmount, "randomFrequencyAmount", kParameterIsAutomable);
+      0.0, Scales::randomFrequencyAmount, "randomFrequencyAmount", kParameterIsAutomable);
 
     value[ID::gain]
       = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);

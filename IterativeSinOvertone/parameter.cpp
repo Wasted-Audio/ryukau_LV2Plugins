@@ -29,7 +29,8 @@ LinearScale<double> Scales::pitchMultiply(0.0, 4.0);
 LinearScale<double> Scales::pitchModulo(0.0, 60.0);
 
 IntScale<double> Scales::seed(16777215); // 2^24 - 1
-LogScale<double> Scales::randomAmount(0.0, 1.0, 0.5, 0.1);
+LinearScale<double> Scales::randomGainAmount(0.0, 4.0);
+LogScale<double> Scales::randomFrequencyAmount(0.0, 1.0, 0.5, 0.1);
 
 LogScale<double> Scales::gain(0.0, 4.0, 0.5, 1.0);
 LinearScale<double> Scales::gainBoost(1.0, 16.0);
