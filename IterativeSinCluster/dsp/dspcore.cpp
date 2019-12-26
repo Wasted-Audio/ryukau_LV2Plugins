@@ -45,16 +45,17 @@ inline float midiNoteToFrequency(float pitch, float tuning)
   return 440.0f * powf(2.0f, ((pitch - 69.0f) * 100.0f + tuning) / 1200.0f);
 }
 
-// Using fmod because if equalTemperament == 1, this returns 2^121 which is too large.
+// Using fmod because if equalTemperament == 1, this returns 2^121 which is too large for
+// BiquadOsc. 4096 is arbitrary choosed. 1e5 was too large.
 inline float semiToPitch(float semi, float equalTemperament)
 {
-  return fmodf(powf(2.0f, semi / equalTemperament), 1e5f);
+  return fmodf(powf(2.0f, semi / equalTemperament), 4096);
 }
 
 inline float paramMilliToPitch(float semi, float milli, float equalTemperament)
 {
   return fmodf(
-    powf(2.0f, (1000.0f * floorf(semi) + milli) / (equalTemperament * 1000.0f)), 1e5f);
+    powf(2.0f, (1000.0f * floorf(semi) + milli) / (equalTemperament * 1000.0f)), 4096);
 }
 
 // https://en.wikipedia.org/wiki/Cent_(music)#Piecewise_linear_approximation
