@@ -19,6 +19,8 @@
 
 #include "Widget.hpp"
 
+#include "../dsp/constants.hpp"
+
 class Label : public NanoWidget {
 public:
   bool drawBorder = false;
@@ -83,4 +85,52 @@ protected:
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
   float borderWidth = 1.0f;
   float textSize = 18.0f;
+};
+
+class VLabel : public Label {
+public:
+  explicit VLabel(NanoWidget *group, const char *labelText, FontId fontId)
+    : Label(group, labelText, fontId)
+  {
+  }
+
+  void onNanoDisplay() override
+  {
+    const auto width = getWidth();
+    const auto height = getHeight();
+
+    resetTransform();
+    translate(getAbsoluteX(), getAbsoluteY() + width);
+    rotate(-SomeDSP::pi / 2.0f);
+
+    // Text.
+    if (labelText == nullptr) return;
+    fontFaceId(fontId);
+    fontSize(textSize);
+    textAlign(align);
+
+    float labelX = (align & ALIGN_LEFT) ? 0 : (align & ALIGN_RIGHT) ? width : width / 2;
+    float labelY = height / 2;
+    if (drawBorder) {
+      beginPath();
+      moveTo(0, height / 2);
+      lineTo(width, height / 2);
+      strokeColor(colorFore);
+      strokeWidth(borderWidth);
+      stroke();
+
+      auto textBackMargin = 10.0f;
+      Rectangle<float> textBack;
+      textBounds(labelX, labelY, labelText, NULL, textBack);
+      beginPath();
+      rect(
+        textBack.getX() - textBackMargin, textBack.getY(),
+        textBack.getWidth() + 2 * textBackMargin, textBack.getHeight());
+      fillColor(colorBack);
+      fill();
+    }
+
+    fillColor(colorFore);
+    text(labelX, labelY, labelText, nullptr);
+  }
 };

@@ -39,6 +39,17 @@ namespace ParameterID {
 enum ID {
   bypass,
 
+  // 64 for each.
+  attack0,
+  decay0 = 65,
+  overtone0 = 129,
+  saturation0 = 193,
+
+  // Do not add parameter here.
+
+  gain = 257,
+  gainBoost,
+
   aliasing,
   masterOctave,
   pitchMultiply,
@@ -46,21 +57,23 @@ enum ID {
 
   seed,
   randomRetrigger,
-  randomGainAmount,
-  randomFrequencyAmount,
+  randomGain,
+  randomFrequency,
+  randomAttack,
+  randomDecay,
+  randomSaturation,
+  randomPhase,
 
-  gain,
-  gainBoost,
+  overtoneExpand,
 
-  // 64 for each.
-  attack0,
-  decay0 = 75,
-  overtone0 = 139,
-  phase0 = 203,
+  attackMultiplier,
+  decayMultiplier,
+  declick,
+  gainPower,
+  saturationMix,
 
-  // Do not add parameter here.
-
-  nVoice = 267,
+  unison,
+  nVoice,
   smoothness,
 
   pitchBend,
@@ -73,22 +86,31 @@ struct Scales {
   static SomeDSP::IntScale<double> boolScale;
   static SomeDSP::LinearScale<double> defaultScale;
 
+  static SomeDSP::LogScale<double> envelopeA;
+  static SomeDSP::LogScale<double> envelopeD;
+  static SomeDSP::DecibelScale<double> gainDecibel;
+  static SomeDSP::LogScale<double> saturation;
+
+  static SomeDSP::LogScale<double> gain;
+  static SomeDSP::LinearScale<double> gainBoost;
+
   static SomeDSP::LinearScale<double> masterOctave;
   static SomeDSP::LinearScale<double> equalTemperament;
   static SomeDSP::LinearScale<double> pitchMultiply;
   static SomeDSP::LinearScale<double> pitchModulo;
 
   static SomeDSP::IntScale<double> seed;
-  static SomeDSP::LinearScale<double> randomGainAmount;
-  static SomeDSP::LogScale<double> randomFrequencyAmount;
+  static SomeDSP::LinearScale<double> randomGain;
+  static SomeDSP::LogScale<double> randomFrequency;
+  static SomeDSP::LinearScale<double> randomAttack;
+  static SomeDSP::LinearScale<double> randomDecay;
+  static SomeDSP::LinearScale<double> randomSaturation;
+  static SomeDSP::LinearScale<double> randomPhase;
 
-  static SomeDSP::LogScale<double> gain;
-  static SomeDSP::LinearScale<double> gainBoost;
+  static SomeDSP::LogScale<double> overtoneExpand;
 
-  static SomeDSP::LogScale<double> envelopeA;
-  static SomeDSP::LogScale<double> envelopeD;
-  static SomeDSP::DecibelScale<double> gainDecibel;
-  static SomeDSP::LinearScale<double> phase;
+  static SomeDSP::LogScale<double> envelopeMultiplier;
+  static SomeDSP::LinearScale<double> gainPower;
 
   static SomeDSP::IntScale<double> nVoice;
   static SomeDSP::LogScale<double> smoothness;
@@ -112,35 +134,10 @@ struct GlobalParameter {
     value[ID::bypass] = std::make_unique<IntValue>(
       0, Scales::boolScale, "bypass", kParameterIsAutomable | kParameterIsBoolean);
 
-    value[ID::aliasing] = std::make_unique<IntValue>(
-      0, Scales::boolScale, "aliasing", kParameterIsAutomable | kParameterIsBoolean);
-    value[ID::masterOctave] = std::make_unique<LinearValue>(
-      0.5, Scales::masterOctave, "masterOctave",
-      kParameterIsAutomable | kParameterIsInteger);
-    value[ID::pitchMultiply] = std::make_unique<LinearValue>(
-      0.25, Scales::pitchMultiply, "pitchMultiply", kParameterIsAutomable);
-    value[ID::pitchModulo] = std::make_unique<LinearValue>(
-      0.0, Scales::pitchModulo, "pitchModulo", kParameterIsAutomable);
-
-    value[ID::seed] = std::make_unique<IntValue>(
-      0, Scales::seed, "seed", kParameterIsAutomable | kParameterIsInteger);
-    value[ID::randomRetrigger] = std::make_unique<IntValue>(
-      0, Scales::boolScale, "randomRetrigger",
-      kParameterIsAutomable | kParameterIsBoolean);
-    value[ID::randomGainAmount] = std::make_unique<LinearValue>(
-      0.0, Scales::randomGainAmount, "randomGainAmount", kParameterIsAutomable);
-    value[ID::randomFrequencyAmount] = std::make_unique<LogValue>(
-      0.0, Scales::randomFrequencyAmount, "randomFrequencyAmount", kParameterIsAutomable);
-
-    value[ID::gain]
-      = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
-    value[ID::gainBoost] = std::make_unique<LinearValue>(
-      0.0, Scales::gainBoost, "gainBoost", kParameterIsAutomable);
-
     std::string attackLabel("attack");
     std::string curveLabel("curve");
     std::string overtoneLabel("overtone");
-    std::string phaseLabel("phase");
+    std::string saturationLabel("saturation");
     for (size_t i = 0; i < nOvertone; ++i) {
       auto indexStr = std::to_string(i);
       value[ID::attack0 + i] = std::make_unique<LogValue>(
@@ -150,10 +147,65 @@ struct GlobalParameter {
       value[ID::overtone0 + i] = std::make_unique<DecibelValue>(
         Scales::gainDecibel.invmap(1.0 / (i + 1)), Scales::gainDecibel,
         (overtoneLabel + indexStr).c_str(), kParameterIsAutomable);
-      value[ID::phase0 + i] = std::make_unique<LinearValue>(
-        0.0, Scales::phase, (phaseLabel + indexStr).c_str(), kParameterIsAutomable);
+      value[ID::saturation0 + i] = std::make_unique<LogValue>(
+        0.0, Scales::saturation, (saturationLabel + indexStr).c_str(),
+        kParameterIsAutomable);
     }
 
+    value[ID::gain]
+      = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
+    value[ID::gainBoost] = std::make_unique<LinearValue>(
+      0.0, Scales::gainBoost, "gainBoost", kParameterIsAutomable);
+
+    value[ID::aliasing] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "aliasing", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::masterOctave] = std::make_unique<LinearValue>(
+      0.5, Scales::masterOctave, "masterOctave",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::pitchMultiply] = std::make_unique<LinearValue>(
+      Scales::pitchMultiply.invmap(1.0), Scales::pitchMultiply, "pitchMultiply",
+      kParameterIsAutomable);
+    value[ID::pitchModulo] = std::make_unique<LinearValue>(
+      0.0, Scales::pitchModulo, "pitchModulo", kParameterIsAutomable);
+
+    value[ID::seed] = std::make_unique<IntValue>(
+      0, Scales::seed, "seed", kParameterIsAutomable | kParameterIsInteger);
+    value[ID::randomRetrigger] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "randomRetrigger",
+      kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::randomGain] = std::make_unique<LinearValue>(
+      0.0, Scales::randomGain, "randomGain", kParameterIsAutomable);
+    value[ID::randomFrequency] = std::make_unique<LogValue>(
+      0.0, Scales::randomFrequency, "randomFrequency", kParameterIsAutomable);
+    value[ID::randomAttack] = std::make_unique<LinearValue>(
+      0.0, Scales::randomAttack, "randomAttack", kParameterIsAutomable);
+    value[ID::randomDecay] = std::make_unique<LinearValue>(
+      0.0, Scales::randomDecay, "randomDecay", kParameterIsAutomable);
+    value[ID::randomSaturation] = std::make_unique<LinearValue>(
+      0.0, Scales::randomSaturation, "randomSaturation", kParameterIsAutomable);
+    value[ID::randomPhase] = std::make_unique<LinearValue>(
+      0.0, Scales::randomPhase, "randomPhase", kParameterIsAutomable);
+
+    value[ID::overtoneExpand] = std::make_unique<LogValue>(
+      Scales::overtoneExpand.invmap(1.0), Scales::overtoneExpand, "overtoneExpand",
+      kParameterIsAutomable);
+
+    value[ID::attackMultiplier] = std::make_unique<LogValue>(
+      Scales::envelopeMultiplier.invmap(1.0), Scales::envelopeMultiplier,
+      "attackMultiplier", kParameterIsAutomable);
+    value[ID::decayMultiplier] = std::make_unique<LogValue>(
+      Scales::envelopeMultiplier.invmap(1.0), Scales::envelopeMultiplier,
+      "decayMultiplier", kParameterIsAutomable);
+    value[ID::declick] = std::make_unique<IntValue>(
+      1, Scales::boolScale, "declick", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::gainPower] = std::make_unique<LinearValue>(
+      Scales::gainPower.invmap(1.0), Scales::gainPower, "gainPower",
+      kParameterIsAutomable);
+    value[ID::saturationMix] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "saturationMix", kParameterIsAutomable);
+
+    value[ID::unison] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "unison", kParameterIsAutomable | kParameterIsBoolean);
     value[ID::nVoice] = std::make_unique<IntValue>(
       5, Scales::nVoice, "nVoice", kParameterIsAutomable | kParameterIsInteger);
     value[ID::smoothness] = std::make_unique<LogValue>(

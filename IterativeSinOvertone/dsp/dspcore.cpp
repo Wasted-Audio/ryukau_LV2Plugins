@@ -17,6 +17,8 @@
 
 #include "dspcore.hpp"
 
+#include "../../lib/vcl/vectormath_exp.h"
+
 #include <iostream>
 
 #if INSTRSET >= 10
@@ -57,6 +59,12 @@ inline float paramMilliToPitch(float semi, float milli, float equalTemperament)
     powf(2.0f, (1000.0f * floorf(semi) + milli) / (equalTemperament * 1000.0f)), 1e5f);
 }
 
+// modf for VCL types.
+template<typename T, typename S> inline T vecModf(T value, S divisor)
+{
+  return value - divisor * floor(value / divisor);
+}
+
 // https://en.wikipedia.org/wiki/Cent_(music)#Piecewise_linear_approximation
 inline float centApprox(float cent) { return 1.0f + 0.0005946f * cent; }
 
@@ -64,7 +72,7 @@ template<typename Sample> void NOTE_NAME<Sample>::setup(Sample sampleRate)
 {
   this->sampleRate = sampleRate;
 
-  oscillator.setup(sampleRate);
+  osc.setup(sampleRate);
 }
 
 template<typename Sample>
@@ -73,8 +81,9 @@ void NOTE_NAME<Sample>::noteOn(
   Sample normalizedKey,
   Sample frequency,
   Sample velocity,
+  Sample pan,
   GlobalParameter &param,
-  White<float> &rng)
+  White16 &rng)
 {
   using ID = ParameterID::ID;
 
@@ -86,52 +95,120 @@ void NOTE_NAME<Sample>::noteOn(
   this->normalizedKey = normalizedKey;
   this->frequency = frequency;
   this->velocity = velocity;
+  this->pan = pan;
+
+  float noteGain = param.value[ParameterID::unison]->getInt() ? 0.5f : 1.0f;
+  noteGain *= velocity;
+
+  gain[0] = noteGain * (1.0f - pan);
+  gain[1] = noteGain * pan;
 
   const float nyquist = sampleRate / 2;
   const bool aliasing = param.value[ID::aliasing]->getInt();
-  const Sample randGainAmt = param.value[ID::randomGainAmount]->getFloat();
-  const Sample randFreqAmt = param.value[ID::randomFrequencyAmount]->getFloat();
-  const Sample pitchMultiply = param.value[ID::pitchMultiply]->getFloat();
-  const Sample pitchModulo = param.value[ID::pitchModulo]->getFloat();
+  const bool declick = param.value[ID::declick]->getInt();
+  const float randGain = param.value[ID::randomGain]->getFloat();
+  const float randFreq = param.value[ID::randomFrequency]->getFloat();
+  const float randAttack = param.value[ID::randomAttack]->getFloat();
+  const float randDecay = param.value[ID::randomDecay]->getFloat();
+  const float randPhase = param.value[ID::randomPhase]->getFloat();
+  const float randSaturation = param.value[ID::randomSaturation]->getFloat();
+  const float pitchMultiply = param.value[ID::pitchMultiply]->getFloat();
+  const float pitchModulo = param.value[ID::pitchModulo]->getFloat();
+  const float gainPow = param.value[ID::gainPower]->getFloat();
+  const float attackMul = param.value[ID::attackMultiplier]->getFloat();
+  const float decayMul = param.value[ID::decayMultiplier]->getFloat();
+
+  const float satMinFreq = 100;
+  const float satMaxFreq = 4000;
+  float satMix = 0.0f;
+  if (frequency <= satMinFreq) {
+    satMix = param.value[ID::saturationMix]->getFloat();
+  } else {
+    satMix = 1.0f - (frequency - satMinFreq) / (satMaxFreq - satMinFreq);
+    satMix *= param.value[ID::saturationMix]->getFloat();
+  }
 
   Vec16f overtonePitch(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
 
-  size_t idxOffset = 0;
-  for (size_t i = 0; i < oscillatorSize; ++i) {
-    Vec16f rndPt = randFreqAmt
-      * Vec16f(rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
-               rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
-               rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
-               rng.process());
-    Vec16f modPt = pitchMultiply * (rndPt + overtonePitch + rndPt * overtonePitch);
-    if (pitchModulo != 0) // Modulo operation. modf isn't available in vcl.
-      modPt = modPt - pitchModulo * floor(modPt / pitchModulo);
-    oscillator.frequency[i] = frequency * modPt;
+  for (size_t idx = 0; idx < 64; ++idx) {
+    paramAttack[idx] = param.value[ID::attack0 + idx]->getFloat();
+    paramDecay[idx] = param.value[ID::decay0 + idx]->getFloat();
+    paramGain[idx] = param.value[ID::overtone0 + idx]->getFloat();
+    paramSaturation[idx] = param.value[ID::saturation0 + idx]->getFloat();
+  }
 
-    overtonePitch += 16.0f;
+  const float expand = param.value[ID::overtoneExpand]->getFloat();
+  for (size_t idx = 0; idx < oscillatorSize; ++idx) {
+    for (size_t jdx = 0; jdx < 16; ++jdx) {
+      float index = expand * (16 * idx + jdx);
+      size_t high = ceilf(index);
 
-    for (size_t j = 0; j < 16; ++j) {
-      oscillator.phase[i].insert(j, param.value[ID::phase0 + idxOffset]->getFloat());
-      oscillator.attack[i].insert(j, param.value[ID::attack0 + idxOffset]->getFloat());
-      oscillator.decay[i].insert(j, param.value[ID::decay0 + idxOffset]->getFloat());
-      oscillator.gain[i].insert(j, param.value[ID::overtone0 + idxOffset]->getFloat());
-      idxOffset += 1;
-    }
+      if (high >= paramGain.size()) {
+        osc.attack[idx].insert(jdx, 0);
+        osc.decay[idx].insert(jdx, 0);
+        osc.saturation[idx].insert(jdx, 0);
+        osc.gain[idx].insert(jdx, 0);
+        continue;
+      }
 
-    Vec16f rndGn(
-      rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
-      rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
-      rng.process(), rng.process(), rng.process(), rng.process(), rng.process(),
-      rng.process());
-    oscillator.gain[i] *= (1.0f + randGainAmt * rndGn);
+      size_t low = index;
+      float frac = index - low;
 
-    if (!aliasing) {
-      oscillator.gain[i]
-        = select(oscillator.frequency[i] >= nyquist, 0, oscillator.gain[i]);
+      osc.attack[idx].insert(
+        jdx, paramAttack[low] + frac * (paramAttack[high] - paramAttack[low]));
+      osc.decay[idx].insert(
+        jdx, paramDecay[low] + frac * (paramDecay[high] - paramDecay[low]));
+      osc.saturation[idx].insert(
+        jdx,
+        paramSaturation[low] + frac * (paramSaturation[high] - paramSaturation[low]));
+      osc.gain[idx].insert(
+        jdx, paramGain[low] + frac * (paramGain[high] - paramGain[low]));
     }
   }
 
-  oscillator.setup(sampleRate);
+  // QuadOsc diverges around nyquist frequency.
+  const auto maxFreq = nyquist * 0.999f;
+  const auto minFreq = nyquist * 0.001f;
+
+  for (size_t idx = 0; idx < oscillatorSize; ++idx) {
+    Vec16f rndPt = randFreq * rng.process();
+    Vec16f modPt = pitchMultiply * (rndPt + overtonePitch + rndPt * overtonePitch);
+    if (pitchModulo != 0) {
+      modPt = vecModf(modPt, pitchModulo);
+    }
+    osc.frequency[idx] = frequency * abs(modPt);
+
+    overtonePitch += 16.0f;
+
+    osc.attack[idx] *= attackMul;
+    osc.attack[idx] *= 1.0f + randAttack * (rng.process() - 1.0f); // Linear interp.
+
+    osc.decay[idx] *= decayMul;
+    Vec16f rndDec = rng.process();
+    osc.decay[idx] *= 1.0f + randDecay * (rndDec * rndDec - 1.0f);
+
+    if (declick) {
+      Vec16f envFreq = abs(osc.frequency[idx]);
+      envFreq = select(envFreq < 1, 1, envFreq); // Avoid negative and division by 0.
+      osc.attack[idx] += 1.0f / envFreq + 0.001f;
+      osc.decay[idx] += 2.0f / envFreq + 0.001f;
+    }
+
+    Vec16f rndGn = rng.process();
+    osc.gain[idx] *= 1.0f + randGain * rndGn;
+    osc.gain[idx] = pow(osc.gain[idx], gainPow);
+    osc.gain[idx]
+      = select(osc.gain[idx] > 1.0f, vecModf(osc.gain[idx], 1.0f), osc.gain[idx]);
+    if (!aliasing) {
+      osc.gain[idx] = select(osc.frequency[idx] >= maxFreq, 0, osc.gain[idx]);
+    }
+
+    osc.saturation[idx] *= 1.0f + randSaturation * (rng.process() - 1.0f);
+    osc.satMix[idx] = satMix;
+    osc.phase[idx] = randPhase * rng.process();
+  }
+
+  osc.setup(sampleRate);
 }
 
 template<typename Sample> void NOTE_NAME<Sample>::release()
@@ -142,16 +219,18 @@ template<typename Sample> void NOTE_NAME<Sample>::release()
 
 template<typename Sample> void NOTE_NAME<Sample>::rest() { state = NoteState::rest; }
 
-template<typename Sample> Sample NOTE_NAME<Sample>::process()
+template<typename Sample> std::array<Sample, 2> NOTE_NAME<Sample>::process()
 {
-  if (state == NoteState::rest) return 0;
+  if (state == NoteState::rest) return {0.0f, 0.0f};
 
-  float sig = oscillator.process();
-  if (oscillator.isTerminated()) rest();
+  float sig = osc.process();
+  if (osc.isTerminated()) rest();
 
-  gain = velocity;
+  std::array<Sample, 2> frame;
+  frame[0] = gain[0] * sig;
+  frame[1] = gain[1] * sig;
 
-  return gain * sig;
+  return frame;
 }
 
 void DSPCORE_NAME::setup(double sampleRate)
@@ -164,7 +243,7 @@ void DSPCORE_NAME::setup(double sampleRate)
   for (auto &note : notes) note.setup(sampleRate);
 
   // 2 msec + 1 sample transition time.
-  transitionBuffer.resize(1 + size_t(sampleRate * 0.005), 0.0f);
+  transitionBuffer.resize(1 + size_t(sampleRate * 0.005), {0.0f, 0.0f});
 
   startup();
 }
@@ -177,7 +256,7 @@ void DSPCORE_NAME::reset()
   startup();
 }
 
-void DSPCORE_NAME::startup() { rng.seed = param.value[ParameterID::seed]->getInt(); }
+void DSPCORE_NAME::startup() { rng.setSeed(param.value[ParameterID::seed]->getInt()); }
 
 void DSPCORE_NAME::setParameters()
 {
@@ -196,73 +275,90 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
 {
   LinearSmoother<float>::setBufferSize(length);
 
-  float sample;
+  std::array<float, 2> frame{};
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
 
-    sample = 0.0f;
+    frame.fill(0.0f);
 
     for (auto &note : notes) {
       if (note.state == NoteState::rest) continue;
-      sample += note.process();
+      auto noteOut = note.process();
+      frame[0] += noteOut[0];
+      frame[1] += noteOut[1];
     }
 
     if (isTransitioning) {
-      sample += transitionBuffer[trIndex];
-      transitionBuffer[trIndex] = 0.0f;
+      frame[0] += transitionBuffer[trIndex][0];
+      frame[1] += transitionBuffer[trIndex][1];
+      transitionBuffer[trIndex].fill(0.0f);
       trIndex = (trIndex + 1) % transitionBuffer.size();
       if (trIndex == trStop) isTransitioning = false;
     }
 
     const auto masterGain = interpMasterGain.process();
-    out0[i] = masterGain * sample;
-    out1[i] = masterGain * sample;
+    out0[i] = masterGain * frame[0];
+    out1[i] = masterGain * frame[1];
   }
 }
 
 void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float velocity)
 {
-  size_t noteIdx = 0;
-  size_t mostSilent = 0;
-  float gain = 16 * oscillatorSize;
-  for (; noteIdx < nVoice; ++noteIdx) {
-    if (notes[noteIdx].id == identifier) break;
-    if (notes[noteIdx].state == NoteState::rest) break;
-    if (notes[noteIdx].oscillator.getDecayGain() < gain) {
-      gain = notes[noteIdx].oscillator.getDecayGain();
-      mostSilent = noteIdx;
-    }
-  }
-  if (noteIdx >= nVoice) {
-    isTransitioning = true;
-
-    noteIdx = mostSilent;
-
-    // Beware the negative overflow. trStop is size_t.
-    trStop = trIndex - 1;
-    if (trStop >= transitionBuffer.size()) trStop += transitionBuffer.size();
-
-    for (size_t bufIdx = 0; bufIdx < transitionBuffer.size(); ++bufIdx) {
-      if (notes[noteIdx].state == NoteState::rest) {
-        trStop = trIndex + bufIdx;
-        if (trStop >= transitionBuffer.size()) trStop -= transitionBuffer.size();
-        break;
-      }
-
-      auto sample = notes[noteIdx].process();
-      auto idx = (trIndex + bufIdx) % transitionBuffer.size();
-      auto interp = 1.0f - float(bufIdx) / transitionBuffer.size();
-
-      transitionBuffer[idx] += sample * interp;
-    }
-  }
-
   if (param.value[ParameterID::randomRetrigger]->getInt())
-    rng.seed = param.value[ParameterID::seed]->getInt();
+    rng.setSeed(param.value[ParameterID::seed]->getInt());
 
-  auto normalizedKey = float(pitch) / 127.0f;
-  lastNoteFreq = midiNoteToFrequency(pitch, tuning);
-  notes[noteIdx].noteOn(identifier, normalizedKey, lastNoteFreq, velocity, param, rng);
+  size_t nUnison = param.value[ParameterID::unison]->getInt() ? 2 : 1;
+
+  for (size_t unison = 0; unison < nUnison; ++unison) {
+    size_t noteIdx = 0;
+    size_t mostSilent = 0;
+    float gain = 16 * oscillatorSize;
+    for (; noteIdx < nVoice; ++noteIdx) {
+      if (notes[noteIdx].id == identifier) break;
+      if (notes[noteIdx].state == NoteState::rest) break;
+      if (notes[noteIdx].osc.getDecayGain() < gain) {
+        gain = notes[noteIdx].osc.getDecayGain();
+        mostSilent = noteIdx;
+      }
+    }
+    if (noteIdx >= nVoice) {
+      noteIdx = mostSilent;
+      fillTransitionBuffer(noteIdx);
+    }
+
+    auto normalizedKey = float(pitch) / 127.0f;
+    lastNoteFreq = midiNoteToFrequency(pitch, tuning);
+    auto pan = nUnison == 1 ? 0.5 : unison / float(nUnison - 1);
+    notes[noteIdx].noteOn(
+      identifier, normalizedKey, lastNoteFreq, velocity, pan, param, rng);
+
+    // Band-aid solution. Hope this won't overlap the id provided by DAW.
+    identifier += 1024;
+  }
+}
+
+void DSPCORE_NAME::fillTransitionBuffer(size_t noteIndex)
+{
+  isTransitioning = true;
+
+  // Beware the negative overflow. trStop is size_t.
+  trStop = trIndex - 1;
+  if (trStop >= transitionBuffer.size()) trStop += transitionBuffer.size();
+
+  for (size_t bufIdx = 0; bufIdx < transitionBuffer.size(); ++bufIdx) {
+    if (notes[noteIndex].state == NoteState::rest) {
+      trStop = trIndex + bufIdx;
+      if (trStop >= transitionBuffer.size()) trStop -= transitionBuffer.size();
+      break;
+    }
+
+    auto frame = notes[noteIndex].process();
+    auto idx = (trIndex + bufIdx) % transitionBuffer.size();
+    auto interp = 1.0f - float(bufIdx) / transitionBuffer.size();
+
+    transitionBuffer[idx][0] += frame[0] * interp;
+    transitionBuffer[idx][1] += frame[1] * interp;
+  }
 }
 
 void DSPCORE_NAME::noteOff(int32_t noteId)

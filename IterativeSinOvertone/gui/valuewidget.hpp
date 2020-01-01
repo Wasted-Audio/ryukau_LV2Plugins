@@ -21,6 +21,7 @@
 #include "Widget.hpp"
 
 #include <iostream>
+#include <random>
 #include <vector>
 
 class ValueWidget : public NanoWidget {
@@ -84,5 +85,14 @@ public:
   {
     if (ui == nullptr || id.size() != value.size()) return;
     for (size_t i = 0; i < id.size(); ++i) ui->updateValue(id[i], value[i]);
+  }
+
+  virtual void randomize()
+  {
+    std::random_device dev;
+    std::mt19937_64 rng(dev());
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    for (auto &val : value) val = dist(rng);
+    updateValue();
   }
 };

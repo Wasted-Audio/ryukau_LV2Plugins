@@ -23,22 +23,31 @@ using namespace SomeDSP;
 IntScale<double> Scales::boolScale(1);
 LinearScale<double> Scales::defaultScale(0.0, 1.0);
 
+LogScale<double> Scales::envelopeA(0.0, 16.0, 0.5, 0.5);
+LogScale<double> Scales::envelopeD(0.0, 4.0, 0.5, 0.5);
+DecibelScale<double> Scales::gainDecibel(-40.0, 0.0, true);
+LogScale<double> Scales::saturation(0.5, 5.0, 0.5, 2.0);
+
+LogScale<double> Scales::gain(0.0, 32.0, 0.5, 8.0);
+LinearScale<double> Scales::gainBoost(1.0, 8.0);
+
 LinearScale<double> Scales::masterOctave(-4.0, 4.0);
 LinearScale<double> Scales::equalTemperament(1.0, 60.0);
-LinearScale<double> Scales::pitchMultiply(0.0, 4.0);
+LinearScale<double> Scales::pitchMultiply(0.001, 4.0);
 LinearScale<double> Scales::pitchModulo(0.0, 60.0);
 
 IntScale<double> Scales::seed(16777215); // 2^24 - 1
-LinearScale<double> Scales::randomGainAmount(0.0, 4.0);
-LogScale<double> Scales::randomFrequencyAmount(0.0, 1.0, 0.5, 0.1);
+LinearScale<double> Scales::randomGain(0.0, 4.0);
+LogScale<double> Scales::randomFrequency(0.0, 1.0, 0.5, 0.1);
+LinearScale<double> Scales::randomAttack(0.0, 1.0);
+LinearScale<double> Scales::randomDecay(0.0, 1.0);
+LinearScale<double> Scales::randomSaturation(0.0, 1.0);
+LinearScale<double> Scales::randomPhase(0.0, 1.0);
 
-LogScale<double> Scales::gain(0.0, 4.0, 0.5, 1.0);
-LinearScale<double> Scales::gainBoost(1.0, 16.0);
+LogScale<double> Scales::overtoneExpand(0.01, 4.0, 0.4, 1.0);
 
-LogScale<double> Scales::envelopeA(0.0, 4.0, 0.5, 0.5);
-LogScale<double> Scales::envelopeD(0.0, 4.0, 0.5, 0.5);
-DecibelScale<double> Scales::gainDecibel(-40.0, 0.0, true);
-LinearScale<double> Scales::phase(0.0, twopi);
+LogScale<double> Scales::envelopeMultiplier(0.001, 4.0, 0.4, 1.0);
+LinearScale<double> Scales::gainPower(0.001, 16.0);
 
 IntScale<double> Scales::nVoice(5);
 LogScale<double> Scales::smoothness(0.0, 0.5, 0.1, 0.04);

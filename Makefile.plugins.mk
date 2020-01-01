@@ -23,7 +23,7 @@ TARGET_DIR = ../bin
 BUILD_DIR = ../build/$(NAME)
 
 BUILD_C_FLAGS   += -I.
-BUILD_CXX_FLAGS += -I. -I$(DPF_PATH)/distrho -I$(DPF_PATH)/dgl
+BUILD_CXX_FLAGS += -I. -I$(DPF_PATH)/distrho -I$(DPF_PATH)/dgl $(INCLUDE_LIB)
 
 ifeq ($(HAVE_CAIRO),true)
 DGL_FLAGS += -DHAVE_CAIRO

@@ -17,9 +17,10 @@
 
 #pragma once
 
-#include <cmath>
-
 #include "valuewidget.hpp"
+
+#include <algorithm>
+#include <cmath>
 
 class BarBox : public ArrayWidget {
 public:
@@ -82,13 +83,113 @@ public:
       }
     }
 
-    // Text.
+    // Index text.
     fillColor(borderColor);
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
     for (size_t i = 0; i < value.size(); ++i)
       text((i + 0.5f) * sliderWidth, height - 4, std::to_string(i + 1).c_str(), nullptr);
+  }
+
+  bool onKeyboard(const KeyboardEvent &ev)
+  {
+    if (!isMouseEntered || !ev.press) return false;
+    handleKey(ev);
+    return true;
+  }
+
+  void handleKey(const KeyboardEvent &ev)
+  {
+    /*
+    IDEA:
+    - n time permutation. n may be small (10~20 ?).
+    - zero/max.
+    - add curve.
+    - saturate/excite with pow().
+    - multiply then modulo. modf(const * value[i], 1.0f);
+    - sparse randomize.
+
+    Make number key to set anchor point.
+     */
+    if (ev.key == 'r') {
+      randomize();
+    } else if (ev.key == 's') { // Sort decending order.
+      std::sort(value.begin(), value.end(), std::greater<>());
+      updateValue();
+    } else if (ev.key == 'a') { // Sort ascending order.
+      std::sort(value.begin(), value.end());
+      updateValue();
+    } else if (ev.key == 'e') { // Mute even.
+      multiplySkip(0, 2);
+    } else if (ev.key == 'o') { // Mute odd.
+      multiplySkip(1, 2);
+    } else if (ev.key == 'n') { // Normalize.
+      normalize();
+    } else if (ev.key == '1') {
+      multiplyLinearDecendCurve();
+    } else if (ev.key == '2') {
+      multiplyLinearAscendCurve();
+    } else if (ev.key == '3') {
+      multiplyHigh();
+    } else if (ev.key == '4') {
+      multiplyLow();
+    } else {
+      return;
+    }
+    repaint();
+  }
+
+  void normalize() noexcept
+  {
+    auto mul = 1.0 / *(std::max_element(value.begin(), value.end()));
+    if (!std::isfinite(mul)) return;
+    for (size_t i = 0; i < value.size(); ++i) setValueAt(i, value[i] * mul);
+    updateValue();
+  }
+
+  void multiplySkip(size_t offset, size_t interval) noexcept
+  {
+    for (size_t i = offset; i < value.size(); i += interval) value[i] *= 0.9;
+    updateValue();
+  }
+
+  void multiplyLinearDecendCurve()
+  {
+    double denom = value.size() - 1;
+    for (size_t i = 0; i < value.size(); ++i) {
+      value[i] *= 0.5 * (1.0 + (denom - i) / denom);
+    }
+    updateValue();
+  }
+
+  void multiplyLinearAscendCurve()
+  {
+    double denom = value.size() - 1;
+    for (size_t i = 0; i < value.size(); ++i) {
+      value[i] *= 0.5 * (1.0 + i / denom);
+    }
+    updateValue();
+  }
+
+  void multiplyHigh()
+  {
+    size_t start = value.size() / 2;
+    double denom = value.size() - start;
+    for (size_t i = start; i < value.size(); ++i) {
+      value[i] *= 0.5 * (1.0 + (denom - i) / denom);
+    }
+    updateValue();
+  }
+
+  void multiplyLow()
+  {
+    size_t end = value.size() / 2;
+    double denom = end;
+    for (size_t i = 0; i < end; ++i) {
+      value[i] *= 0.5 * (1.0 + i / denom);
+    }
+    updateValue();
   }
 
   bool onMouse(const MouseEvent &ev) override
@@ -110,6 +211,7 @@ public:
 
   bool onMotion(const MotionEvent &ev) override
   {
+    isMouseEntered = contains(ev.pos);
     mousePosition = ev.pos;
     if (!isMouseLeftDown && !isMouseRightDown) return false;
     setValueFromPosition(ev.pos, ev.mod);

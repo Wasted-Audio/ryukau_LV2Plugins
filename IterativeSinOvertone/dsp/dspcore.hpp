@@ -45,10 +45,15 @@ enum class NoteState { active, release, rest };
     int32_t id = -1;                                                                     \
     Sample normalizedKey = 0;                                                            \
     Sample velocity = 0;                                                                 \
-    Sample gain = 0;                                                                     \
+    Sample pan = 0.5;                                                                    \
+    std::array<Sample, 2> gain{};                                                        \
     Sample frequency = 0;                                                                \
                                                                                          \
-    QuadOscExpAD<oscillatorSize> oscillator;                                             \
+    QuadOscExpAD<oscillatorSize> osc;                                                    \
+    std::array<float, 64> paramSaturation{};                                             \
+    std::array<float, 64> paramAttack{};                                                 \
+    std::array<float, 64> paramDecay{};                                                  \
+    std::array<float, 64> paramGain{};                                                   \
                                                                                          \
     void setup(Sample sampleRate);                                                       \
     void noteOn(                                                                         \
@@ -56,11 +61,12 @@ enum class NoteState { active, release, rest };
       Sample normalizedKey,                                                              \
       Sample frequency,                                                                  \
       Sample velocity,                                                                   \
+      Sample pan,                                                                        \
       GlobalParameter &param,                                                            \
-      White<float> &rng);                                                                \
+      White16 &rng);                                                                     \
     void release();                                                                      \
     void rest();                                                                         \
-    Sample process();                                                                    \
+    std::array<Sample, 2> process();                                                     \
   };
 
 NOTE_CLASS(AVX512)
@@ -119,6 +125,7 @@ transitionBuffer is used to store a release of a note to reduce pop noise.
     void setParameters() override;                                                       \
     void process(const size_t length, float *out0, float *out1) override;                \
     void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity) override;   \
+    void fillTransitionBuffer(size_t noteIndex);                                         \
     void noteOff(int32_t noteId) override;                                               \
                                                                                          \
     void pushMidiNote(                                                                   \
@@ -158,7 +165,7 @@ transitionBuffer is used to store a release of a note to reduce pop noise.
   private:                                                                               \
     float sampleRate = 44100.0f;                                                         \
                                                                                          \
-    White<float> rng{0};                                                                 \
+    White16 rng{0};                                                                      \
                                                                                          \
     size_t nVoice = 32;                                                                  \
     std::array<Note_##INSTRSET<float>, maxVoice> notes;                                  \
@@ -166,7 +173,7 @@ transitionBuffer is used to store a release of a note to reduce pop noise.
                                                                                          \
     LinearSmoother<float> interpMasterGain;                                              \
                                                                                          \
-    std::vector<float> transitionBuffer{};                                               \
+    std::vector<std::array<float, 2>> transitionBuffer{};                                \
     bool isTransitioning = false;                                                        \
     size_t trIndex = 0;                                                                  \
     size_t trStop = 0;                                                                   \
