@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <iostream>
+
 class BarBox : public ArrayWidget {
 public:
   explicit BarBox(
@@ -200,10 +202,12 @@ public:
       return false;
     }
 
-    if (ev.button == 1)
+    if (ev.button == 1) {
       isMouseLeftDown = true;
-    else if (ev.button == 3)
+    } else if (ev.button == 3) {
       isMouseRightDown = true;
+      anchor = ev.pos;
+    }
 
     setValueFromPosition(ev.pos, ev.mod);
     return true;
@@ -213,9 +217,14 @@ public:
   {
     isMouseEntered = contains(ev.pos);
     mousePosition = ev.pos;
-    if (!isMouseLeftDown && !isMouseRightDown) return false;
-    setValueFromPosition(ev.pos, ev.mod);
-    return true;
+    if (isMouseLeftDown) {
+      setValueFromPosition(ev.pos, ev.mod);
+      return true;
+    } else if (isMouseRightDown) {
+      setValueFromLine(anchor, ev.pos);
+      return true;
+    }
+    return false;
   }
 
   bool onScroll(const ScrollEvent &ev) override
@@ -251,18 +260,56 @@ private:
   {
     size_t index = size_t(position.getX() / sliderWidth);
     if (index >= value.size()) return;
-    if (isMouseLeftDown) {
-      if (modifier & kModifierControl)
-        setValueAt(index, defaultValue[index]);
-      else
-        setValueAt(index, 1.0 - double(position.getY()) / getHeight());
-    } else if (isMouseRightDown) {
-      if (modifier & kModifierControl)
-        setValueAt(index, 1);
-      else
-        setValueAt(index, 0);
-    }
+    if (modifier & kModifierControl)
+      setValueAt(index, defaultValue[index]);
+    else
+      setValueAt(index, 1.0 - double(position.getY()) / getHeight());
     updateValueAt(index);
+    repaint();
+  }
+
+  void setValueFromLine(Point<int> p0, Point<int> p1)
+  {
+    if (p0.getX() > p1.getX()) std::swap(p0, p1);
+
+    size_t left = size_t(p0.getX() / sliderWidth);
+    size_t right = size_t(p1.getX() / sliderWidth);
+    if (left >= value.size() || right >= value.size()) return;
+
+    const float p0y = p0.getY();
+    const float p1y = p1.getY();
+
+    if (left == right) {
+      // p0 and p1 are in a same bar.
+      setValueAt(left, 1.0f - (p0y + p1y) * 0.5f / getHeight());
+      updateValueAt(left);
+      repaint();
+      return;
+    }
+
+    const float xL = sliderWidth * (left + 1);
+    const float xR = sliderWidth * right;
+
+    if (fabs(xR - xL) >= 1e-5) {
+      p0.setX(xL);
+      p1.setX(xR);
+    }
+
+    setValueAt(left, 1.0f - p0y / getHeight());
+    setValueAt(right, 1.0f - p1y / getHeight());
+
+    // In between.
+    const float p0x = p0.getX();
+    const float p1x = p1.getX();
+    const float slope = (p1y - p0y) / (p1x - p0x);
+    const float yInc = slope * sliderWidth;
+    float y = slope * (sliderWidth * (left + 1) - p0x) + p0y;
+    for (size_t idx = left + 1; idx < right; ++idx) {
+      setValueAt(idx, 1.0f - (y + 0.5f * yInc) / getHeight());
+      y += yInc;
+    }
+
+    updateValue();
     repaint();
   }
 
@@ -279,7 +326,7 @@ private:
   float textSize = 9.0f;
   FontId fontId = -1;
 
-  Point<int> anchorPoint{0, 0};
+  Point<int> anchor{0, 0};
   bool isMouseLeftDown = false;
   bool isMouseRightDown = false;
   bool isMouseEntered = false;
