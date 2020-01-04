@@ -54,9 +54,9 @@ constexpr float barboxHeight = 2.0f * knobY;
 constexpr float barboxY = barboxHeight + 2.0f * margin;
 constexpr float checkboxWidth = 60.0f;
 constexpr float splashHeight = 40.0f;
-constexpr uint32_t defaultWidth = uint32_t(barboxWidth + 6.0 * knobX + 40);
+constexpr uint32_t defaultWidth = uint32_t(barboxWidth + 3 * knobX + labelY + 40);
 constexpr uint32_t defaultHeight
-  = uint32_t(40 + 5 * labelY + 1 * knobY + 4 * barboxY + 2 * margin) + uint32_t(knobY);
+  = uint32_t(40 + 2 * labelY + knobY + 4 * barboxY + 2 * margin);
 
 class IterativeSinOvertoneUI : public PluginUI {
 public:
@@ -70,8 +70,8 @@ public:
 
     using ID = ParameterID::ID;
 
-    const float top0 = 20.0f;
-    const float left0 = 20.0f;
+    const auto top0 = 20.0f;
+    const auto left0 = 20.0f;
 
     // Gain.
     const auto gainTop = top0;
@@ -90,48 +90,63 @@ public:
       pitchLeft0, pitchTop0 + labelY - 2.0f * margin, knobX, "Add Aliasing",
       ID::aliasing);
 
+    const auto pitchLabelWidth = knobX - 2.0f * margin;
+    const auto pitchLeft1 = pitchLeft0 + margin;
+    const auto pitchLeft2 = pitchLeft0 + knobX;
+
     const auto pitchTop1 = pitchTop0 + 2.0f * labelY - 3.0f * margin;
-    addLabel(pitchLeft0 + margin, pitchTop1, knobX - 2.0f * margin, "Octave");
+    addLabel(pitchLeft1, pitchTop1, pitchLabelWidth, "Octave");
     addTextKnob(
-      pitchLeft0 + knobX, pitchTop1, knobX, colorBlue, ID::masterOctave,
-      Scales::masterOctave);
+      pitchLeft2, pitchTop1, knobX, colorBlue, ID::masterOctave, Scales::masterOctave);
 
     const auto pitchTop2 = pitchTop1 + labelY;
-    addLabel(pitchLeft0 + margin, pitchTop2, knobX - 2.0f * margin, "Multiply");
+    addLabel(pitchLeft1, pitchTop2, pitchLabelWidth, "Multiply");
     addTextKnob(
-      pitchLeft0 + knobX, pitchTop2, knobX, colorBlue, ID::pitchMultiply,
-      Scales::pitchMultiply, false, 3);
+      pitchLeft2, pitchTop2, knobX, colorBlue, ID::pitchMultiply, Scales::pitchMultiply,
+      false, 3);
 
     const auto pitchTop3 = pitchTop2 + labelY;
-    addLabel(pitchLeft0 + margin, pitchTop3, knobX - 2.0f * margin, "Modulo");
+    addLabel(pitchLeft1, pitchTop3, pitchLabelWidth, "Modulo");
     addTextKnob(
-      pitchLeft0 + knobX, pitchTop3, knobX, colorBlue, ID::pitchModulo,
-      Scales::pitchModulo, false, 3);
+      pitchLeft2, pitchTop3, knobX, colorBlue, ID::pitchModulo, Scales::pitchModulo,
+      false, 3);
+
+    const auto pitchTop4 = pitchTop3 + labelY;
+    addLabel(pitchLeft1, pitchTop4, pitchLabelWidth, "Expand");
+    addTextKnob(
+      pitchLeft2, pitchTop4, knobX, colorBlue, ID::overtoneExpand, Scales::overtoneExpand,
+      false, 3);
+
+    const auto pitchTop5 = pitchTop4 + labelY;
+    addLabel(pitchLeft1, pitchTop5, pitchLabelWidth, "Shift");
+    addTextKnob(
+      pitchLeft2, pitchTop5, knobX, colorBlue, ID::overtoneShift, Scales::overtoneShift,
+      false, 3);
 
     // Random.
-    const float randomTop0 = pitchTop0 + 2.0f * knobY;
-    const float randomLeft0 = left0;
-    const float randomLeft1 = randomLeft0 + knobX;
+    const auto randomTop0 = pitchTop0 + labelHeight + 6.0 * labelY - margin;
+    const auto randomLeft0 = left0;
+    const auto randomLeft1 = randomLeft0 + knobX;
     addGroupLabel(randomLeft0, randomTop0, 2.0f * knobX, "Random");
     addCheckbox(
       randomLeft0, randomTop0 + labelY - 2.0f * margin, knobX, "Retrigger",
       ID::randomRetrigger);
 
-    const float randomTop1 = randomTop0 + 2.0f * labelY - 3.0f * margin;
+    const auto randomTop1 = randomTop0 + 2.0f * labelY - 3.0f * margin;
     addLabel(randomLeft0, randomTop1, knobX - 2.0f * margin, "Seed");
     addTextKnob(
       randomLeft1 - 2.0f * margin, randomTop1, knobX, colorBlue, ID::seed, Scales::seed);
 
-    const float randomTop2 = randomTop1 + labelY;
+    const auto randomTop2 = randomTop1 + labelY;
     addKnob(randomLeft0, randomTop2, knobWidth, colorBlue, "To Gain", ID::randomGain);
     addKnob(
       randomLeft1, randomTop2, knobWidth, colorBlue, "To Pitch", ID::randomFrequency);
 
-    const float randomTop3 = randomTop2 + knobY;
+    const auto randomTop3 = randomTop2 + knobY;
     addKnob(randomLeft0, randomTop3, knobWidth, colorBlue, "To Attack", ID::randomAttack);
     addKnob(randomLeft1, randomTop3, knobWidth, colorBlue, "To Decay", ID::randomDecay);
 
-    const float randomTop4 = randomTop3 + knobY;
+    const auto randomTop4 = randomTop3 + knobY;
     addKnob(
       randomLeft0, randomTop4, knobWidth, colorBlue, "To Sat.", ID::randomSaturation);
     addKnob(randomLeft1, randomTop4, knobWidth, colorBlue, "To Phase", ID::randomPhase);
@@ -139,70 +154,73 @@ public:
     // Misc.
     const auto miscTop = randomTop4 + knobY;
     const auto miscLeft = left0;
-    addKnob(miscLeft, miscTop, knobWidth, colorBlue, "Smooth", ID::smoothness);
+    addGroupLabel(miscLeft, miscTop, 2.0f * knobX, "Misc.");
 
-    const auto miscLeft0 = miscLeft - (checkboxWidth - knobWidth) / 2.0f;
-    const auto miscTop0 = miscTop + knobY;
+    addKnob(miscLeft, miscTop + labelY, knobWidth, colorBlue, "Smooth", ID::smoothness);
+
+    const auto miscLeft0 = miscLeft + knobX - (checkboxWidth - knobWidth) / 2.0f;
+    const auto miscTop0 = miscTop + labelY;
     std::vector<const char *> nVoiceOptions
       = {"Mono", "2 Voices", "4 Voices", "8 Voices", "16 Voices", "32 Voices"};
     addOptionMenu(miscLeft0, miscTop0, checkboxWidth, ID::nVoice, nVoiceOptions);
     addCheckbox(miscLeft0, miscTop0 + labelY, checkboxWidth, "Unison", ID::unison);
 
+    // Modifier.
+    const auto modTop = top0 + 4.0f * (barboxY + margin);
+    const auto modLeft = left0 + 3.0f * knobX + labelY;
+    addGroupLabel(modLeft, modTop, 4.0f * knobX, "Modifier");
+
+    const auto modTop0 = modTop + labelY;
+    addKnob(modLeft, modTop0, knobWidth, colorBlue, "Attack*", ID::attackMultiplier);
+    addKnob(
+      modLeft + knobX, modTop0, knobWidth, colorBlue, "Decay*", ID::decayMultiplier);
+    addCheckbox(
+      modLeft + 0.4f * knobX, modTop0 + knobY, checkboxWidth, "Declick", ID::declick);
+
+    addKnob(
+      modLeft + 2.0f * knobX, modTop0, knobWidth, colorBlue, "Gain^", ID::gainPower);
+    addKnob(
+      modLeft + 3.0f * knobX, modTop0, knobWidth, colorBlue, "Sat. Mix",
+      ID::saturationMix);
+
     // Attack.
-    const float topAttack = top0;
-    const float leftAttack = left0 + 3.0f * knobX;
-    addGroupVerticalLabel(leftAttack, topAttack, barboxHeight, "Attack");
+    const auto attackTop = top0;
+    const auto attackLeft = left0 + 3.0f * knobX;
+    addGroupVerticalLabel(attackLeft, attackTop, barboxHeight, "Attack");
 
-    const float leftAttack0 = leftAttack + labelY;
-    addBarBox(leftAttack0, topAttack, barboxWidth, barboxHeight, ID::attack0);
-
-    const float leftAttack1 = leftAttack0 + barboxWidth + 2.0f * margin;
-    addKnob(
-      leftAttack1, topAttack, knobWidth, colorBlue, "Multiply", ID::attackMultiplier);
-    addCheckbox(leftAttack1 + knobX, topAttack, checkboxWidth, "Declick", ID::declick);
-    addKnob(
-      leftAttack1, topAttack + knobY, knobWidth, colorBlue, "Expand", ID::overtoneExpand);
+    const auto attackLeft0 = attackLeft + labelY;
+    addBarBox(attackLeft0, attackTop, barboxWidth, barboxHeight, ID::attack0);
 
     // Decay.
-    const float topDecay = topAttack + barboxY + margin;
-    const float leftDecay = leftAttack;
-    addGroupVerticalLabel(leftDecay, topDecay, barboxHeight, "Decay");
+    const auto decayTop = attackTop + barboxY + margin;
+    const auto decayLeft = attackLeft;
+    addGroupVerticalLabel(decayLeft, decayTop, barboxHeight, "Decay");
 
-    const float leftDecay0 = leftDecay + labelY;
-    addBarBox(leftDecay0, topDecay, barboxWidth, barboxHeight, ID::decay0);
-
-    const float leftDecay1 = leftDecay0 + barboxWidth + 2.0f * margin;
-    addKnob(leftDecay1, topDecay, knobWidth, colorBlue, "Multiply", ID::decayMultiplier);
+    const auto decayLeft0 = decayLeft + labelY;
+    addBarBox(decayLeft0, decayTop, barboxWidth, barboxHeight, ID::decay0);
 
     // Overtone.
-    const float topOvertone = topDecay + barboxY + margin;
-    const float leftOvertone = leftAttack;
-    addGroupVerticalLabel(leftOvertone, topOvertone, barboxHeight, "Gain");
+    const auto overtoneTop = decayTop + barboxY + margin;
+    const auto overtoneLeft = attackLeft;
+    addGroupVerticalLabel(overtoneLeft, overtoneTop, barboxHeight, "Gain");
 
-    const float leftOvertone0 = leftOvertone + labelY;
-    addBarBox(leftOvertone0, topOvertone, barboxWidth, barboxHeight, ID::overtone0);
-
-    const float leftOvertone1 = leftOvertone0 + barboxWidth + 2.0f * margin;
-    addKnob(leftOvertone1, topOvertone, knobWidth, colorBlue, "Power", ID::gainPower);
+    const auto overtoneLeft0 = overtoneLeft + labelY;
+    addBarBox(overtoneLeft0, overtoneTop, barboxWidth, barboxHeight, ID::overtone0);
 
     // Saturation.
-    const float topSaturation = topOvertone + barboxY + margin;
-    const float leftSaturation = leftAttack;
-    addGroupVerticalLabel(leftSaturation, topSaturation, barboxHeight, "Saturation");
+    const auto saturationTop = overtoneTop + barboxY + margin;
+    const auto saturationLeft = attackLeft;
+    addGroupVerticalLabel(saturationLeft, saturationTop, barboxHeight, "Saturation");
 
-    const float leftSaturation0 = leftSaturation + labelY;
-    addBarBox(leftSaturation0, topSaturation, barboxWidth, barboxHeight, ID::saturation0);
-
-    const float leftSaturation1 = leftSaturation0 + barboxWidth + 2.0f * margin;
-    addKnob(
-      leftSaturation1, topSaturation, knobWidth, colorBlue, "Mix", ID::saturationMix);
+    const auto saturationLeft0 = saturationLeft + labelY;
+    addBarBox(saturationLeft0, saturationTop, barboxWidth, barboxHeight, ID::saturation0);
 
     // Plugin name.
     const auto splashTop = defaultHeight - splashHeight - 20.0f;
     const auto splashLeft = left0;
     addSplashScreen(
-      splashLeft, splashTop, 2.5f * knobX, splashHeight, 20.0f, 20.0f,
-      defaultWidth - splashHeight, defaultHeight - splashHeight, "SomeOvertone");
+      splashLeft, splashTop, 3.2f * knobX, splashHeight, 20.0f, 20.0f,
+      defaultWidth - splashHeight, defaultHeight - splashHeight, "IterativeSinAD");
   }
 
   void addBarBox(float left, float top, float width, float height, uint32_t id0)
