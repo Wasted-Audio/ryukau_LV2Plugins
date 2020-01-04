@@ -45,6 +45,7 @@ LinearScale<double> Scales::randomSaturation(0.0, 1.0);
 LinearScale<double> Scales::randomPhase(0.0, 1.0);
 
 LogScale<double> Scales::overtoneExpand(0.01, 4.0, 0.4, 1.0);
+LinearScale<double> Scales::overtoneShift(0.0, 64.0);
 
 LogScale<double> Scales::envelopeMultiplier(0.001, 4.0, 0.4, 1.0);
 LinearScale<double> Scales::gainPower(0.001, 16.0);

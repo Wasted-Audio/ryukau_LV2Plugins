@@ -129,6 +129,7 @@ void NOTE_NAME<Sample>::noteOn(
   }
 
   Vec16f overtonePitch(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+  overtonePitch += param.value[ID::overtoneShift]->getFloat();
 
   for (size_t idx = 0; idx < 64; ++idx) {
     paramAttack[idx] = param.value[ID::attack0 + idx]->getFloat();

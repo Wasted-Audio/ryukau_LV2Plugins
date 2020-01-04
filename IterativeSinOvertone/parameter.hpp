@@ -65,6 +65,7 @@ enum ID {
   randomPhase,
 
   overtoneExpand,
+  overtoneShift,
 
   attackMultiplier,
   decayMultiplier,
@@ -108,6 +109,7 @@ struct Scales {
   static SomeDSP::LinearScale<double> randomPhase;
 
   static SomeDSP::LogScale<double> overtoneExpand;
+  static SomeDSP::LinearScale<double> overtoneShift;
 
   static SomeDSP::LogScale<double> envelopeMultiplier;
   static SomeDSP::LinearScale<double> gainPower;
@@ -189,6 +191,8 @@ struct GlobalParameter {
     value[ID::overtoneExpand] = std::make_unique<LogValue>(
       Scales::overtoneExpand.invmap(1.0), Scales::overtoneExpand, "overtoneExpand",
       kParameterIsAutomable);
+    value[ID::overtoneShift] = std::make_unique<LinearValue>(
+      0, Scales::overtoneShift, "overtoneShift", kParameterIsAutomable);
 
     value[ID::attackMultiplier] = std::make_unique<LogValue>(
       Scales::envelopeMultiplier.invmap(1.0), Scales::envelopeMultiplier,
