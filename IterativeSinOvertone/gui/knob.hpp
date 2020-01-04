@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinOvertone.
 //
@@ -199,7 +199,7 @@ public:
     auto displayValue = isDecibel ? 20.0 * log10(scale.map(value)) : scale.map(value);
     std::ostringstream os;
     os.precision(precision);
-    os << std::fixed << displayValue;
+    os << std::fixed << displayValue + offset;
     std::string txt(os.str());
     text(width / 2, height / 2, txt.c_str(), nullptr);
   }
@@ -229,6 +229,8 @@ public:
   void setForegroundColor(Color color) { foregroundColor = color; }
   void setPrecision(uint32_t precision) { this->precision = precision; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
+
+  int32_t offset = 0;
 
 protected:
   Color foregroundColor{0, 0, 0};

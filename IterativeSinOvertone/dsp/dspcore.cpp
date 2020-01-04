@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinOvertone.
 //
@@ -42,21 +42,10 @@ inline float clamp(float value, float min, float max)
   return (value < min) ? min : (value > max) ? max : value;
 }
 
-inline float midiNoteToFrequency(float pitch, float tuning)
+inline float midiNoteToFrequency(float pitch, float tuning, float bend)
 {
-  return 440.0f * powf(2.0f, ((pitch - 69.0f) * 100.0f + tuning) / 1200.0f);
-}
-
-// Using fmod because if equalTemperament == 1, this returns 2^121 which is too large.
-inline float semiToPitch(float semi, float equalTemperament)
-{
-  return fmodf(powf(2.0f, semi / equalTemperament), 1e5f);
-}
-
-inline float paramMilliToPitch(float semi, float milli, float equalTemperament)
-{
-  return fmodf(
-    powf(2.0f, (1000.0f * floorf(semi) + milli) / (equalTemperament * 1000.0f)), 1e5f);
+  return 440.0f
+    * powf(2.0f, ((pitch - 69.0f) * 100.0f + tuning + (bend - 0.5f) * 400.0f) / 1200.0f);
 }
 
 // modf for VCL types.
@@ -64,9 +53,6 @@ template<typename T, typename S> inline T vecModf(T value, S divisor)
 {
   return value - divisor * floor(value / divisor);
 }
-
-// https://en.wikipedia.org/wiki/Cent_(music)#Piecewise_linear_approximation
-inline float centApprox(float cent) { return 1.0f + 0.0005946f * cent; }
 
 template<typename Sample> void NOTE_NAME<Sample>::setup(Sample sampleRate)
 {
@@ -241,6 +227,8 @@ void DSPCORE_NAME::setup(double sampleRate)
   LinearSmoother<float>::setSampleRate(sampleRate);
   LinearSmoother<float>::setTime(0.04f);
 
+  interpPhaserPhase.setRange(float(twopi));
+
   for (auto &note : notes) note.setup(sampleRate);
 
   // 2 msec + 1 sample transition time.
@@ -254,10 +242,19 @@ void DSPCORE_NAME::reset()
   for (auto &note : notes) note.rest();
   lastNoteFreq = 1.0f;
 
+  for (auto &ph : phaser) ph.reset();
+
   startup();
 }
 
-void DSPCORE_NAME::startup() { rng.setSeed(param.value[ParameterID::seed]->getInt()); }
+void DSPCORE_NAME::startup()
+{
+  rng.setSeed(param.value[ParameterID::seed]->getInt());
+
+  for (size_t i = 0; i < phaser.size(); ++i) {
+    phaser[i].phase = float(i) / phaser.size();
+  }
+}
 
 void DSPCORE_NAME::setParameters()
 {
@@ -267,6 +264,23 @@ void DSPCORE_NAME::setParameters()
 
   interpMasterGain.push(
     param.value[ID::gain]->getFloat() * param.value[ID::gainBoost]->getFloat());
+
+  interpPhaserMix.push(param.value[ID::phaserMix]->getFloat());
+  interpPhaserFrequency.push(
+    param.value[ID::phaserFrequency]->getFloat() * twopi / sampleRate);
+  interpPhaserFeedback.push(param.value[ID::phaserFeedback]->getFloat());
+
+  const float phaserRange = param.value[ID::phaserRange]->getFloat();
+  interpPhaserRange.push(phaserRange);
+  interpPhaserMin.push(
+    Thiran2Phaser16::getOffset(phaserRange, param.value[ID::phaserMin]->getFloat()));
+
+  interpPhaserPhase.push(param.value[ID::phaserPhase]->getFloat());
+  interpPhaserOffset.push(param.value[ID::phaserOffset]->getFloat());
+
+  auto phaserStage = param.value[ID::phaserStage]->getInt();
+  phaser[0].setStage(phaserStage);
+  phaser[1].setStage(phaserStage);
 
   nVoice = 1 << param.value[ID::nVoice]->getInt();
   if (nVoice > notes.size()) nVoice = notes.size();
@@ -296,6 +310,20 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
       trIndex = (trIndex + 1) % transitionBuffer.size();
       if (trIndex == trStop) isTransitioning = false;
     }
+
+    const auto phaserFreq = interpPhaserFrequency.process();
+    const auto phaserFeedback = interpPhaserFeedback.process();
+    const auto phaserRange = interpPhaserRange.process();
+    const auto phaserMin = interpPhaserMin.process();
+    const auto phaserPhase = interpPhaserPhase.process();
+    const auto phaserOffset = interpPhaserOffset.process();
+    phaser[0].setup(phaserPhase, phaserFreq, phaserFeedback, phaserRange, phaserMin);
+    phaser[1].setup(
+      phaserPhase + phaserOffset, phaserFreq, phaserFeedback, phaserRange, phaserMin);
+
+    const auto phaserMix = interpPhaserMix.process();
+    frame[0] += phaserMix * (phaser[0].process(frame[0]) - frame[0]);
+    frame[1] += phaserMix * (phaser[1].process(frame[1]) - frame[1]);
 
     const auto masterGain = interpMasterGain.process();
     out0[i] = masterGain * frame[0];
@@ -328,7 +356,8 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
     }
 
     auto normalizedKey = float(pitch) / 127.0f;
-    lastNoteFreq = midiNoteToFrequency(pitch, tuning);
+    lastNoteFreq = midiNoteToFrequency(
+      pitch, tuning, param.value[ParameterID::pitchBend]->getFloat());
     auto pan = nUnison == 1 ? 0.5 : unison / float(nUnison - 1);
     notes[noteIdx].noteOn(
       identifier, normalizedKey, lastNoteFreq, velocity, pan, param, rng);

@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinOvertone.
 //
@@ -73,6 +73,15 @@ enum ID {
   gainPower,
   saturationMix,
 
+  phaserMix,
+  phaserFrequency,
+  phaserFeedback,
+  phaserRange,
+  phaserMin,
+  phaserPhase,
+  phaserOffset,
+  phaserStage,
+
   unison,
   nVoice,
   smoothness,
@@ -113,6 +122,12 @@ struct Scales {
 
   static SomeDSP::LogScale<double> envelopeMultiplier;
   static SomeDSP::LinearScale<double> gainPower;
+
+  static SomeDSP::LogScale<double> phaserFrequency;
+  static SomeDSP::LinearScale<double> phaserFeedback;
+  static SomeDSP::LogScale<double> phaserRange;
+  static SomeDSP::LinearScale<double> phaserPhase;
+  static SomeDSP::IntScale<double> phaserStage;
 
   static SomeDSP::IntScale<double> nVoice;
   static SomeDSP::LogScale<double> smoothness;
@@ -207,6 +222,24 @@ struct GlobalParameter {
       kParameterIsAutomable);
     value[ID::saturationMix] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "saturationMix", kParameterIsAutomable);
+
+    value[ID::phaserMix] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "phaserMix", kParameterIsAutomable);
+    value[ID::phaserFrequency] = std::make_unique<LogValue>(
+      0.5, Scales::phaserFrequency, "phaserFrequency", kParameterIsAutomable);
+    value[ID::phaserFeedback] = std::make_unique<LinearValue>(
+      0.5, Scales::phaserFeedback, "phaserFeedback", kParameterIsAutomable);
+    value[ID::phaserRange] = std::make_unique<LogValue>(
+      1.0, Scales::phaserRange, "phaserRange", kParameterIsAutomable);
+    value[ID::phaserMin] = std::make_unique<LogValue>(
+      0.0, Scales::phaserRange, "phaserMin", kParameterIsAutomable);
+    value[ID::phaserPhase] = std::make_unique<LinearValue>(
+      0.0, Scales::phaserPhase, "phaserPhase", kParameterIsAutomable);
+    value[ID::phaserOffset] = std::make_unique<LinearValue>(
+      0.5, Scales::phaserPhase, "phaserOffset", kParameterIsAutomable);
+    value[ID::phaserStage] = std::make_unique<IntValue>(
+      15, Scales::phaserStage, "phaserStage",
+      kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::unison] = std::make_unique<IntValue>(
       0, Scales::boolScale, "unison", kParameterIsAutomable | kParameterIsBoolean);

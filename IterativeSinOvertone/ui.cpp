@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinOvertone.
 //
@@ -174,14 +174,46 @@ public:
     addKnob(modLeft, modTop0, knobWidth, colorBlue, "Attack*", ID::attackMultiplier);
     addKnob(
       modLeft + knobX, modTop0, knobWidth, colorBlue, "Decay*", ID::decayMultiplier);
-    addCheckbox(
-      modLeft + 0.4f * knobX, modTop0 + knobY, checkboxWidth, "Declick", ID::declick);
-
     addKnob(
       modLeft + 2.0f * knobX, modTop0, knobWidth, colorBlue, "Gain^", ID::gainPower);
     addKnob(
       modLeft + 3.0f * knobX, modTop0, knobWidth, colorBlue, "Sat. Mix",
       ID::saturationMix);
+
+    const auto modTop1 = modTop0 + knobY;
+    addCheckbox(modLeft + 0.4f * knobX, modTop1, checkboxWidth, "Declick", ID::declick);
+
+    // Phaser.
+    const auto phaserTop = modTop;
+    const auto phaserLeft = modLeft + 4.0f * knobX + 4.0f * margin;
+    addGroupLabel(phaserLeft, phaserTop, 7.0f * knobX + labelY, "Phaser");
+
+    const auto phaserTop0 = phaserTop + labelY;
+    addKnob(phaserLeft, phaserTop0, knobWidth, colorBlue, "Mix", ID::phaserMix);
+    addKnob(
+      phaserLeft + knobX, phaserTop0, knobWidth, colorBlue, "Freq", ID::phaserFrequency);
+    addKnob(
+      phaserLeft + 2.0f * knobX, phaserTop0, knobWidth, colorRed, "Feedback",
+      ID::phaserFeedback);
+    addKnob(
+      phaserLeft + 3.0f * knobX, phaserTop0, knobWidth, colorBlue, "Range",
+      ID::phaserRange);
+    addKnob(
+      phaserLeft + 4.0f * knobX, phaserTop0, knobWidth, colorBlue, "Min", ID::phaserMin);
+    addKnob(
+      phaserLeft + 5.0f * knobX, phaserTop0, knobWidth, colorBlue, "Offset",
+      ID::phaserOffset);
+    addRotaryKnob(
+      phaserLeft + 6.0f * knobX, phaserTop0, knobWidth + labelY, colorBlue, "Phase",
+      ID::phaserPhase);
+
+    const auto phaserTop1 = phaserTop0 + knobY;
+    std::vector<const char *> phaserStageItems{
+      "Stage 1",  "Stage 2",  "Stage 3",  "Stage 4",  "Stage 5",  "Stage 6",
+      "Stage 7",  "Stage 8",  "Stage 9",  "Stage 10", "Stage 11", "Stage 12",
+      "Stage 13", "Stage 14", "Stage 15", "Stage 16"};
+    addOptionMenu(
+      phaserLeft - margin, phaserTop1, knobX, ID::phaserStage, phaserStageItems);
 
     // Attack.
     const auto attackTop = top0;
@@ -306,6 +338,7 @@ private:
   Color colorBlue{11, 164, 241};
   Color colorGreen{19, 193, 54};
   Color colorOrange{252, 192, 79};
+  Color colorRed{252, 128, 128};
 
   FontId fontId = -1;
 
@@ -505,7 +538,8 @@ private:
     uint32_t id,
     Scale &scale,
     bool isDecibel = false,
-    uint32_t precision = 0)
+    uint32_t precision = 0,
+    int32_t offset = 0)
   {
     auto knob = std::make_shared<TextKnob<Scale>>(this, this, fontId, scale, isDecibel);
     knob->id = id;
@@ -517,6 +551,7 @@ private:
     knob->setDefaultValue(defaultValue);
     knob->setValue(defaultValue);
     knob->setPrecision(precision);
+    knob->offset = offset;
     knob->setTextSize(uiTextSize);
     valueWidget.push_back(knob);
   }

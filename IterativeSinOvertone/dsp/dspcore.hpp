@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinOvertone.
 //
@@ -21,6 +21,7 @@
 #include "constants.hpp"
 #include "noise.hpp"
 #include "oscillator.hpp"
+#include "phaser.hpp"
 #include "smoother.hpp"
 
 #include "../../lib/vcl/vectorclass.h"
@@ -166,12 +167,20 @@ transitionBuffer is used to store a release of a note to reduce pop noise.
     float sampleRate = 44100.0f;                                                         \
                                                                                          \
     White16 rng{0};                                                                      \
+    std::array<Thiran2Phaser16, 2> phaser;                                               \
                                                                                          \
     size_t nVoice = 32;                                                                  \
     std::array<Note_##INSTRSET<float>, maxVoice> notes;                                  \
     float lastNoteFreq = 1.0f;                                                           \
                                                                                          \
     LinearSmoother<float> interpMasterGain;                                              \
+    LinearSmoother<float> interpPhaserMix;                                               \
+    LinearSmoother<float> interpPhaserFrequency;                                         \
+    LinearSmoother<float> interpPhaserFeedback;                                          \
+    LinearSmoother<float> interpPhaserRange;                                             \
+    LinearSmoother<float> interpPhaserMin;                                               \
+    RotarySmoother<float> interpPhaserPhase;                                             \
+    LinearSmoother<float> interpPhaserOffset;                                            \
                                                                                          \
     std::vector<std::array<float, 2>> transitionBuffer{};                                \
     bool isTransitioning = false;                                                        \

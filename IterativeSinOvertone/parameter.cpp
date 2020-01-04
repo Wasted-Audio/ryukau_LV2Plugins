@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinOvertone.
 //
@@ -49,6 +49,12 @@ LinearScale<double> Scales::overtoneShift(0.0, 64.0);
 
 LogScale<double> Scales::envelopeMultiplier(0.001, 4.0, 0.4, 1.0);
 LinearScale<double> Scales::gainPower(0.001, 16.0);
+
+LogScale<double> Scales::phaserFrequency(0.004, 16.0, 0.5, 2.0);
+LinearScale<double> Scales::phaserFeedback(-1.0, 1.0);
+LogScale<double> Scales::phaserRange(0.0, 128.0, 0.5, 32.0);
+LinearScale<double> Scales::phaserPhase(0.0, twopi);
+IntScale<double> Scales::phaserStage(15);
 
 IntScale<double> Scales::nVoice(5);
 LogScale<double> Scales::smoothness(0.0, 0.5, 0.1, 0.04);
