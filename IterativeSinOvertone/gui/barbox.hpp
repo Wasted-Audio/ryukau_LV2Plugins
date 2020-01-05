@@ -139,23 +139,23 @@ public:
     } else if (ev.key == '.') { // Rotate forward.
       std::rotate(value.rbegin(), value.rbegin() + 1, value.rend());
       updateValue();
-    } else if (ev.key == '1') { // Mute odd.
+    } else if (ev.key == '1') { // Decrease odd.
       multiplySkip(0, 2);
-    } else if (ev.key == '2') { // Mute even.
+    } else if (ev.key == '2') { // Decrease even.
       multiplySkip(1, 2);
-    } else if (ev.key == '3') { // Mute 3n.
+    } else if (ev.key == '3') { // Decrease 3n.
       multiplySkip(2, 3);
-    } else if (ev.key == '4') { // Mute 4n.
+    } else if (ev.key == '4') { // Decrease 4n.
       multiplySkip(3, 4);
-    } else if (ev.key == '5') { // Mute 5n.
+    } else if (ev.key == '5') { // Decrease 5n.
       multiplySkip(4, 5);
-    } else if (ev.key == '6') { // Mute 6n.
+    } else if (ev.key == '6') { // Decrease 6n.
       multiplySkip(5, 6);
-    } else if (ev.key == '7') { // Mute 7n.
+    } else if (ev.key == '7') { // Decrease 7n.
       multiplySkip(6, 7);
-    } else if (ev.key == '8') { // Mute 8n.
+    } else if (ev.key == '8') { // Decrease 8n.
       multiplySkip(7, 8);
-    } else if (ev.key == '9') { // Mute 9n.
+    } else if (ev.key == '9') { // Decrease 9n.
       multiplySkip(8, 9);
     } else {
       return;
