@@ -252,7 +252,7 @@ public:
     const auto splashLeft = left0;
     addSplashScreen(
       splashLeft, splashTop, 3.2f * knobX, splashHeight, 20.0f, 20.0f,
-      defaultWidth - splashHeight, defaultHeight - splashHeight, "IterativeSinAD");
+      defaultWidth - splashHeight, defaultHeight - splashHeight, "IterativeSinOvertone");
   }
 
   void addBarBox(float left, float top, float width, float height, uint32_t id0)
