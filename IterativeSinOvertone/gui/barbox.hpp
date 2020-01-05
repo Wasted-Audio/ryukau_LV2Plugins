@@ -103,95 +103,152 @@ public:
 
   void handleKey(const KeyboardEvent &ev)
   {
-    /*
-    IDEA:
-    - n time permutation. n may be small (10~20 ?).
-    - zero/max.
-    - add curve.
-    - saturate/excite with pow().
-    - multiply then modulo. modf(const * value[i], 1.0f);
-    - sparse randomize.
-
-    Make number key to set anchor point.
-     */
-    if (ev.key == 'r') {
-      randomize();
-    } else if (ev.key == 's') { // Sort decending order.
-      std::sort(value.begin(), value.end(), std::greater<>());
-      updateValue();
-    } else if (ev.key == 'a') { // Sort ascending order.
+    if (ev.key == 'a') { // Sort ascending order.
       std::sort(value.begin(), value.end());
       updateValue();
-    } else if (ev.key == 'e') { // Mute even.
+    } else if (ev.key == 'd') { // Sort decending order.
+      std::sort(value.begin(), value.end(), std::greater<>());
+      updateValue();
+    } else if (ev.key == 'f') {
+      averageLowpass();
+    } else if (ev.key == 'F') {
+      highpass();
+    } else if (ev.key == 'h') {
+      emphasizeHigh();
+    } else if (ev.key == 'i') {
+      invert(true);
+    } else if (ev.key == 'I') {
+      invert(false);
+    } else if (ev.key == 'l') {
+      emphasizeLow();
+    } else if (ev.key == 'n') {
+      normalize(true);
+    } else if (ev.key == 'N') {
+      normalize(false);
+    } else if (ev.key == 'p') { // Permute.
+      permute();
+    } else if (ev.key == 'r') {
+      randomize(1.0);
+    } else if (ev.key == 'R') {
+      sparseRandomize();
+    } else if (ev.key == 's') { // Subtle randomize.
+      randomize(0.02);
+    } else if (ev.key == ',') { // Rotate back.
+      std::rotate(value.begin(), value.begin() + 1, value.end());
+      updateValue();
+    } else if (ev.key == '.') { // Rotate forward.
+      std::rotate(value.rbegin(), value.rbegin() + 1, value.rend());
+      updateValue();
+    } else if (ev.key == '1') { // Mute odd.
       multiplySkip(0, 2);
-    } else if (ev.key == 'o') { // Mute odd.
+    } else if (ev.key == '2') { // Mute even.
       multiplySkip(1, 2);
-    } else if (ev.key == 'n') { // Normalize.
-      normalize();
-    } else if (ev.key == '1') {
-      multiplyLinearDecendCurve();
-    } else if (ev.key == '2') {
-      multiplyLinearAscendCurve();
-    } else if (ev.key == '3') {
-      multiplyHigh();
-    } else if (ev.key == '4') {
-      multiplyLow();
+    } else if (ev.key == '3') { // Mute 3n.
+      multiplySkip(2, 3);
+    } else if (ev.key == '4') { // Mute 4n.
+      multiplySkip(3, 4);
+    } else if (ev.key == '5') { // Mute 5n.
+      multiplySkip(4, 5);
+    } else if (ev.key == '6') { // Mute 6n.
+      multiplySkip(5, 6);
+    } else if (ev.key == '7') { // Mute 7n.
+      multiplySkip(6, 7);
+    } else if (ev.key == '8') { // Mute 8n.
+      multiplySkip(7, 8);
+    } else if (ev.key == '9') { // Mute 9n.
+      multiplySkip(8, 9);
     } else {
       return;
     }
+    updateValue();
     repaint();
   }
 
-  void normalize() noexcept
+  void averageLowpass()
   {
-    auto mul = 1.0 / *(std::max_element(value.begin(), value.end()));
+    const int32_t range = 1;
+
+    std::vector<double> result(value);
+    for (size_t i = 0; i < value.size(); ++i) {
+      result[i] = 0.0;
+      for (int32_t j = -range; j <= range; ++j) {
+        size_t index = i + j; // Note that index is unsigned.
+        if (index >= value.size()) continue;
+        result[i] += value[index];
+      }
+      setValueAt(i, result[i] / double(2 * range + 1));
+    }
+  }
+
+  void highpass()
+  {
+    // value[i] = sum((-0.5, 1.0, -0.5) * value[(i - 1, i, i + 1)])
+    // Value of index outside of array is assumed to be same as closest element.
+    std::vector<double> result(value);
+    size_t last = value.size() - 1;
+    for (size_t i = 0; i < value.size(); ++i) {
+      result[i] = 0.0;
+      result[i] -= (i >= 1) ? value[i - 1] : value[i];
+      result[i] -= (i < last) ? value[i + 1] : value[i];
+      result[i] = value[i] + 0.5f * result[i];
+      setValueAt(i, result[i]);
+    }
+  }
+
+  void randomize(double mix)
+  {
+    std::random_device dev;
+    std::mt19937_64 rng(dev());
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    for (auto &val : value) val += mix * (dist(rng) - val);
+  }
+
+  void sparseRandomize()
+  {
+    std::random_device device;
+    std::mt19937_64 rng(device());
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    for (auto &val : value) {
+      if (dist(rng) < 0.1f) val = dist(rng);
+    }
+  }
+
+  void permute()
+  {
+    std::random_device device;
+    std::mt19937 rng(device());
+    std::shuffle(value.begin(), value.end(), rng);
+  }
+
+  void invert(bool preserveMin)
+  {
+    auto min = preserveMin ? *(std::min_element(value.begin(), value.end())) : 0.0;
+    for (size_t i = 0; i < value.size(); ++i) setValueAt(i, 1.0f - value[i] + min);
+  }
+
+  void normalize(bool preserveMin) noexcept
+  {
+    auto min = preserveMin ? 0.0 : *(std::min_element(value.begin(), value.end()));
+    auto mul = 1.0 / (*(std::max_element(value.begin(), value.end())) - min);
     if (!std::isfinite(mul)) return;
-    for (size_t i = 0; i < value.size(); ++i) setValueAt(i, value[i] * mul);
-    updateValue();
+    for (size_t i = 0; i < value.size(); ++i) setValueAt(i, (value[i] - min) * mul);
   }
 
   void multiplySkip(size_t offset, size_t interval) noexcept
   {
     for (size_t i = offset; i < value.size(); i += interval) value[i] *= 0.9;
-    updateValue();
   }
 
-  void multiplyLinearDecendCurve()
+  void emphasizeLow()
   {
-    double denom = value.size() - 1;
-    for (size_t i = 0; i < value.size(); ++i) {
-      value[i] *= 0.5 * (1.0 + (denom - i) / denom);
-    }
-    updateValue();
+    for (size_t i = 0; i < value.size(); ++i)
+      setValueAt(i, value[i] / pow(i + 1, 0.0625));
   }
 
-  void multiplyLinearAscendCurve()
+  void emphasizeHigh()
   {
-    double denom = value.size() - 1;
-    for (size_t i = 0; i < value.size(); ++i) {
-      value[i] *= 0.5 * (1.0 + i / denom);
-    }
-    updateValue();
-  }
-
-  void multiplyHigh()
-  {
-    size_t start = value.size() / 2;
-    double denom = value.size() - start;
-    for (size_t i = start; i < value.size(); ++i) {
-      value[i] *= 0.5 * (1.0 + (denom - i) / denom);
-    }
-    updateValue();
-  }
-
-  void multiplyLow()
-  {
-    size_t end = value.size() / 2;
-    double denom = end;
-    for (size_t i = 0; i < end; ++i) {
-      value[i] *= 0.5 * (1.0 + i / denom);
-    }
-    updateValue();
+    for (size_t i = 0; i < value.size(); ++i)
+      setValueAt(i, value[i] * (0.9 + 0.1 * double(i + 1) / value.size()));
   }
 
   bool onMouse(const MouseEvent &ev) override
