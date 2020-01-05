@@ -106,7 +106,7 @@ public:
     if (ev.key == 'a') { // Sort ascending order.
       std::sort(value.begin(), value.end());
       updateValue();
-    } else if (ev.key == 'd') { // Sort decending order.
+    } else if (ev.key == 'd') { // Sort descending order.
       std::sort(value.begin(), value.end(), std::greater<>());
       updateValue();
     } else if (ev.key == 'f') {
