@@ -5,20 +5,20 @@
 // Modified by:
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of IterativeSinOvertone.
+// This file is part of EnvelopedSine.
 //
-// IterativeSinOvertone is free software: you can redistribute it and/or modify
+// EnvelopedSine is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// IterativeSinOvertone is distributed in the hope that it will be useful,
+// EnvelopedSine is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with IterativeSinOvertone.  If not, see <https://www.gnu.org/licenses/>.
+// along with EnvelopedSine.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
 
@@ -30,10 +30,10 @@
 
 START_NAMESPACE_DISTRHO
 
-class IterativeSinOvertone : public Plugin {
+class EnvelopedSine : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
-  IterativeSinOvertone()
+  EnvelopedSine()
     : Plugin(ParameterID::ID_ENUM_LENGTH, GlobalParameter::Preset::Preset_ENUM_LENGTH, 0)
   {
     auto iset = instrset_detect();
@@ -58,7 +58,7 @@ public:
 
 protected:
   /* Information */
-  const char *getLabel() const override { return "IterativeSinOvertone"; }
+  const char *getLabel() const override { return "EnvelopedSine"; }
   const char *getDescription() const override
   {
     return "A synthesizer to make sine wave tone cluster.";
@@ -179,9 +179,9 @@ private:
   std::vector<std::pair<uint8_t, uint32_t>> lastNoteId;
   std::vector<uint8_t> alreadyRecievedNote;
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(IterativeSinOvertone)
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnvelopedSine)
 };
 
-Plugin *createPlugin() { return new IterativeSinOvertone(); }
+Plugin *createPlugin() { return new EnvelopedSine(); }
 
 END_NAMESPACE_DISTRHO

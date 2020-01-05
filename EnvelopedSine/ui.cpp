@@ -5,20 +5,20 @@
 // Modified by:
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of IterativeSinOvertone.
+// This file is part of EnvelopedSine.
 //
-// IterativeSinOvertone is free software: you can redistribute it and/or modify
+// EnvelopedSine is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// IterativeSinOvertone is distributed in the hope that it will be useful,
+// EnvelopedSine is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with IterativeSinOvertone.  If not, see <https://www.gnu.org/licenses/>.
+// along with EnvelopedSine.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <memory>
@@ -54,13 +54,14 @@ constexpr float barboxHeight = 2.0f * knobY;
 constexpr float barboxY = barboxHeight + 2.0f * margin;
 constexpr float checkboxWidth = 60.0f;
 constexpr float splashHeight = 40.0f;
-constexpr uint32_t defaultWidth = uint32_t(barboxWidth + 3 * knobX + labelY + 40);
+constexpr uint32_t defaultWidth
+  = uint32_t(barboxWidth + 2 * knobX + labelY + 4 * margin + 40);
 constexpr uint32_t defaultHeight
   = uint32_t(40 + 2 * labelY + knobY + 4 * barboxY + 2 * margin);
 
-class IterativeSinOvertoneUI : public PluginUI {
+class EnvelopedSineUI : public PluginUI {
 public:
-  IterativeSinOvertoneUI() : PluginUI(defaultWidth, defaultHeight)
+  EnvelopedSineUI() : PluginUI(defaultWidth, defaultHeight)
   {
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
@@ -167,7 +168,7 @@ public:
 
     // Modifier.
     const auto modTop = top0 + 4.0f * (barboxY + margin);
-    const auto modLeft = left0 + 3.0f * knobX + labelY;
+    const auto modLeft = left0 + 2.0f * knobX + 4.0f * margin + labelY;
     addGroupLabel(modLeft, modTop, 4.0f * knobX, "Modifier");
 
     const auto modTop0 = modTop + labelY;
@@ -217,7 +218,7 @@ public:
 
     // Attack.
     const auto attackTop = top0;
-    const auto attackLeft = left0 + 3.0f * knobX;
+    const auto attackLeft = left0 + 2.0f * knobX + 4.0f * margin;
     addGroupVerticalLabel(attackLeft, attackTop, barboxHeight, "Attack");
 
     const auto attackLeft0 = attackLeft + labelY;
@@ -251,8 +252,8 @@ public:
     const auto splashTop = defaultHeight - splashHeight - 20.0f;
     const auto splashLeft = left0;
     addSplashScreen(
-      splashLeft, splashTop, 3.2f * knobX, splashHeight, 20.0f, 20.0f,
-      defaultWidth - splashHeight, defaultHeight - splashHeight, "IterativeSinOvertone");
+      splashLeft, splashTop, 2.5f * knobX, splashHeight, 20.0f, 20.0f,
+      defaultWidth - splashHeight, defaultHeight - splashHeight, "EnvelopedSine");
   }
 
   void addBarBox(float left, float top, float width, float height, uint32_t id0)
@@ -629,9 +630,9 @@ private:
     widget.push_back(label);
   }
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(IterativeSinOvertoneUI)
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnvelopedSineUI)
 };
 
-UI *createUI() { return new IterativeSinOvertoneUI(); }
+UI *createUI() { return new EnvelopedSineUI(); }
 
 END_NAMESPACE_DISTRHO
