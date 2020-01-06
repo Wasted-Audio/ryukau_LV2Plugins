@@ -1,5 +1,11 @@
-# all: dpf SevenDelay SyncSawSynth WaveCymbal FDNCymbal TrapezoidSynth IterativeSinCluster
-all: dpf EnvelopedSine
+all: dpf \
+	SevenDelay \
+	SyncSawSynth \
+	WaveCymbal \
+	FDNCymbal \
+	TrapezoidSynth \
+	IterativeSinCluster \
+	EnvelopedSine
 
 # DEBUG=true
 # export DEBUG
