@@ -19,7 +19,8 @@
 
 #include "../../lib/vcl/vectormath_exp.h"
 
-#include <iostream>
+#include <algorithm>
+#include <numeric>
 
 #if INSTRSET >= 10
 #define NOTE_NAME Note_AVX512
@@ -338,28 +339,38 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
 
   size_t nUnison = param.value[ParameterID::unison]->getInt() ? 2 : 1;
 
+  std::vector<size_t> noteIndices(0);
+
+  for (size_t index = 0; index < nVoice; ++index) {
+    if (notes[index].id == identifier) noteIndices.push_back(index);
+    if (notes[index].state == NoteState::rest) noteIndices.push_back(index);
+    if (noteIndices.size() >= nUnison) break;
+  }
+
+  if (noteIndices.size() < nUnison) {
+    std::vector<size_t> indices(nVoice);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::sort(indices.begin(), indices.end(), [&](size_t left, size_t right) {
+      return notes[left].osc.getDecayGain() < notes[right].osc.getDecayGain();
+    });
+
+    for (auto &index : indices) {
+      fillTransitionBuffer(index);
+      noteIndices.push_back(index);
+      if (noteIndices.size() >= nUnison) break;
+    }
+  }
+
   for (size_t unison = 0; unison < nUnison; ++unison) {
-    size_t noteIdx = 0;
-    size_t mostSilent = 0;
+    if (noteIndices.size() <= unison) break;
+    const size_t index = noteIndices[unison];
     float gain = 16 * oscillatorSize;
-    for (; noteIdx < nVoice; ++noteIdx) {
-      if (notes[noteIdx].id == identifier) break;
-      if (notes[noteIdx].state == NoteState::rest) break;
-      if (notes[noteIdx].osc.getDecayGain() < gain) {
-        gain = notes[noteIdx].osc.getDecayGain();
-        mostSilent = noteIdx;
-      }
-    }
-    if (noteIdx >= nVoice) {
-      noteIdx = mostSilent;
-      fillTransitionBuffer(noteIdx);
-    }
 
     auto normalizedKey = float(pitch) / 127.0f;
     lastNoteFreq = midiNoteToFrequency(
       pitch, tuning, param.value[ParameterID::pitchBend]->getFloat());
     auto pan = nUnison == 1 ? 0.5 : unison / float(nUnison - 1);
-    notes[noteIdx].noteOn(
+    notes[index].noteOn(
       identifier, normalizedKey, lastNoteFreq, velocity, pan, param, rng);
 
     // Band-aid solution. Hope this won't overlap the id provided by DAW.
