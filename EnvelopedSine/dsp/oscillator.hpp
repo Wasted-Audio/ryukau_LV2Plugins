@@ -51,7 +51,7 @@ template<size_t size> struct alignas(64) QuadOscExpAD {
   const float threshold = 1e-5;
 
   bool isTerminated() { return decayGain <= threshold; }
-  size_t getDecayGain() { return decayGain; }
+  float getDecayGain() { return decayGain; }
 
   void setup(float sampleRate) noexcept
   {
