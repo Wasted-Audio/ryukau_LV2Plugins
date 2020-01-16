@@ -112,7 +112,7 @@ template<typename Sample> struct Thiran2Phaser {
   }
 };
 
-struct ThiranAllpass2x16 {
+struct alignas(64) ThiranAllpass2x16 {
   Vec16f x0 = 0.0f;
   Vec16f x1 = 0.0f;
   Vec16f x2 = 0.0f;

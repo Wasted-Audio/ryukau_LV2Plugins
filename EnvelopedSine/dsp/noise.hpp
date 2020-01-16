@@ -26,7 +26,7 @@
 namespace SomeDSP {
 
 // Numerical Recipes In C p.284.
-struct White16 {
+struct alignas(64) White16 {
   Vec16ui buffer{0};
 
   White16(uint32_t seed) { setSeed(seed); }
