@@ -72,29 +72,29 @@ public:
     text(20.0f, 300.0f, "Shares same controls with knob, and:", nullptr);
     text(20.0f, 330.0f, "Right Click    |  Flip Minimum and Maximum", nullptr);
 
-    text(360.0f, 150.0f, "- Overtone -", nullptr);
+    text(355.0f, 150.0f, "- Overtone -", nullptr);
 
-    text(360.0f, 180.0f, "Ctrl + Left Click    |  Reset to Default", nullptr);
-    text(360.0f, 210.0f, "Right Drag    |  Draw Line", nullptr);
-    text(360.0f, 240.0f, "A    |  Sort Ascending Order", nullptr);
-    text(360.0f, 270.0f, "D    |  Sort Decending Order", nullptr);
-    text(360.0f, 300.0f, "F    |  Low-pass Filter", nullptr);
-    text(360.0f, 330.0f, "Shift + F    |  High-pass Filter", nullptr);
-    text(360.0f, 360.0f, "I    |  Invert Value", nullptr);
-    text(360.0f, 390.0f, "Shift + I    |  Invert Value (Minimum to 0)", nullptr);
-    text(360.0f, 420.0f, "N    |  Normalize", nullptr);
-    text(360.0f, 450.0f, "Shift + N    |  Normalize (Minimum to 0)", nullptr);
+    text(355.0f, 180.0f, "Ctrl + Left Click    |  Reset to Default", nullptr);
+    text(355.0f, 210.0f, "Right Drag    |  Draw Line", nullptr);
+    text(355.0f, 240.0f, "A    |  Sort Ascending Order", nullptr);
+    text(355.0f, 270.0f, "D    |  Sort Decending Order", nullptr);
+    text(355.0f, 300.0f, "F    |  Low-pass Filter", nullptr);
+    text(355.0f, 330.0f, "Shift + F    |  High-pass Filter", nullptr);
+    text(355.0f, 360.0f, "I    |  Invert Value", nullptr);
+    text(355.0f, 390.0f, "Shift + I    |  Invert Value (Minimum to 0)", nullptr);
+    text(355.0f, 420.0f, "N    |  Normalize", nullptr);
+    text(355.0f, 450.0f, "Shift + N    |  Normalize (Minimum to 0)", nullptr);
 
-    text(680.0f, 180.0f, "H    |  Emphasize High", nullptr);
-    text(680.0f, 210.0f, "L    |  Emphasize Low", nullptr);
-    text(680.0f, 240.0f, "P    |  Permute", nullptr);
-    text(680.0f, 270.0f, "R    |  Randomize", nullptr);
-    text(680.0f, 300.0f, "Shift + R    |  Sparse Randomize", nullptr);
-    text(680.0f, 330.0f, "S    |  Subtle Randomize", nullptr);
-    text(680.0f, 360.0f, ", (Comma)    |  Rotate Back", nullptr);
-    text(680.0f, 390.0f, ". (Period)    |  Rotate Forward", nullptr);
-    text(680.0f, 420.0f, "1    |  Decrease Odd", nullptr);
-    text(680.0f, 450.0f, "2-9    |  Decrease 2n-9n", nullptr);
+    text(660.0f, 180.0f, "H    |  Emphasize High", nullptr);
+    text(660.0f, 210.0f, "L    |  Emphasize Low", nullptr);
+    text(660.0f, 240.0f, "P    |  Permute", nullptr);
+    text(660.0f, 270.0f, "R    |  Randomize", nullptr);
+    text(660.0f, 300.0f, "Shift + R    |  Sparse Randomize", nullptr);
+    text(660.0f, 330.0f, "S    |  Subtle Randomize", nullptr);
+    text(660.0f, 360.0f, ", (Comma)    |  Rotate Back", nullptr);
+    text(660.0f, 390.0f, ". (Period)    |  Rotate Forward", nullptr);
+    text(660.0f, 420.0f, "1    |  Decrease Odd", nullptr);
+    text(660.0f, 450.0f, "2-9    |  Decrease 2n-9n", nullptr);
 
     text(740.0f, 510.0f, "Have a nice day!", nullptr);
   }
