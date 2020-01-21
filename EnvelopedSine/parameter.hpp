@@ -141,8 +141,6 @@ struct GlobalParameter {
     value.resize(ParameterID::ID_ENUM_LENGTH);
 
     using ID = ParameterID::ID;
-
-    using ID = ParameterID::ID;
     using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
     using LogValue = FloatValue<SomeDSP::LogScale<double>>;
     // using SPolyValue = FloatValue<SomeDSP::SPolyScale<double>>;
