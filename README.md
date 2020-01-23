@@ -21,6 +21,18 @@ Note that some parameter configuration leads to massive DC offset. To stay safe,
 
 Some controls turns red when pointing. They can be the cause of potential blow up. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
 
+## EsPhaser
+<figure>
+<img src="docs/img/lv2_esphaser.png" alt="Image of EsPhaser GUI."/>
+</figure>
+
+EsPhaser is a phaser with up to 4096 stages of order 2 Thiran all-pass filters. This is the same phaser used in EnvelopedSine.
+
+Caution:
+- When `stage` is set to 4096, it will be CPU intensive.
+- Output varies in different sample rate.
+- Output may be loud when changing `Cas. Offset`. Use <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd> to slowly change the value, or insert limiter to prevent hard clipping.
+
 ## EnvelopedSine
 <figure>
 <img src="docs/img/lv2_envelopedsine.png" alt="Image of EnvelopedSine GUI."/>
