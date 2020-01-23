@@ -5,7 +5,8 @@ all: dpf \
 	FDNCymbal \
 	TrapezoidSynth \
 	IterativeSinCluster \
-	EnvelopedSine
+	EnvelopedSine \
+	EsPhaser
 
 # DEBUG=true
 # export DEBUG
@@ -13,6 +14,10 @@ all: dpf \
 .PHONY: dpf
 dpf:
 	$(MAKE) -C lib/DPF
+
+.PHONY: EsPhaser
+EsPhaser: dpf
+	$(MAKE) -C EsPhaser
 
 .PHONY: EnvelopedSine
 EnvelopedSine: dpf
