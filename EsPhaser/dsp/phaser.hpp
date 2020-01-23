@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "constants.hpp"
 #include "smoother.hpp"
 
 #include "../../lib/juce_FastMathApproximations.h"
@@ -103,7 +104,7 @@ struct alignas(64) Thiran2Phaser {
   {
     this->sampleRate = sampleRate;
     interpStage.setSampleRate(sampleRate);
-    interpStage.setTime(0.02f);
+    interpStage.setTime(0.04f);
     interpStage.reset(1.0f);
   }
 

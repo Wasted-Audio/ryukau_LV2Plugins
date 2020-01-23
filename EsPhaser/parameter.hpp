@@ -91,7 +91,7 @@ struct GlobalParameter {
     value[ID::frequency] = std::make_unique<LogValue>(
       0.5, Scales::frequency, "frequency", kParameterIsAutomable);
     value[ID::freqSpread] = std::make_unique<LinearValue>(
-      0.5, Scales::defaultScale, "freqSpread", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "freqSpread", kParameterIsAutomable);
     value[ID::feedback] = std::make_unique<LinearValue>(
       0.5, Scales::feedback, "feedback", kParameterIsAutomable);
     value[ID::range]
@@ -109,7 +109,8 @@ struct GlobalParameter {
       15, Scales::stage, "stage", kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::smoothness] = std::make_unique<LogValue>(
-      0.0, Scales::smoothness, "smoothness", kParameterIsAutomable);
+      Scales::smoothness.invmap(0.35), Scales::smoothness, "smoothness",
+      kParameterIsAutomable);
   }
 
 #ifndef TEST_BUILD
