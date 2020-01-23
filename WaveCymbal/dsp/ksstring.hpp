@@ -101,6 +101,7 @@ public:
     feedback = 0;
     decay = Sample(1.0);
     lowpass.reset();
+    highpass.reset();
     delay.reset();
   }
 
@@ -416,6 +417,11 @@ public:
   {
     for (auto &cmb : comb)
       cmb.setup(sampleRate, Sample(0.002), -Sample(1.0), Sample(1.0));
+  }
+
+  void reset()
+  {
+    for (auto &cmb : comb) cmb.reset();
   }
 
   void trigger(Random<Sample> &rnd)
