@@ -154,12 +154,22 @@ struct GlobalParameter {
 
   enum Preset {
     presetDefault,
+    presetSharp,
+    presetStage1,
+    presetStage1770,
+    presetStage2261,
+    presetStage2982,
+    presetStage3515,
+    presetStage4096,
+    presetStage476,
+    presetStage828,
 
     Preset_ENUM_LENGTH,
   };
 
-  std::array<const char *, 1> programName{
-    "Default",
+  std::array<const char *, 10> programName{
+    "Default",   "Sharp",     "Stage1",    "Stage1770", "Stage2261",
+    "Stage2982", "Stage3515", "Stage4096", "Stage476",  "Stage828",
   };
 
 #ifndef TEST_BUILD
