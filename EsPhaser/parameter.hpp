@@ -154,22 +154,28 @@ struct GlobalParameter {
 
   enum Preset {
     presetDefault,
+    presetAutomateCasOffset,
+    presetAutomateMin,
+    presetFeedback,
+    presetHallucinogen95,
+    presetResonator,
     presetSharp,
-    presetStage1,
-    presetStage1770,
-    presetStage2261,
-    presetStage2982,
-    presetStage3515,
+    presetSlowBend,
     presetStage4096,
-    presetStage476,
-    presetStage828,
+    presetSubtle,
+    presetThick,
+    presetThisPhaserIsTooResourceHungry,
 
     Preset_ENUM_LENGTH,
   };
 
-  std::array<const char *, 10> programName{
-    "Default",   "Sharp",     "Stage1",    "Stage1770", "Stage2261",
-    "Stage2982", "Stage3515", "Stage4096", "Stage476",  "Stage828",
+  std::array<const char *, 12> programName{
+    "Default",        "AutomateCasOffset",
+    "AutomateMin",    "Feedback",
+    "Hallucinogen95", "Resonator",
+    "Sharp",          "SlowBend",
+    "Stage4096",      "Subtle",
+    "Thick",          "ThisPhaserIsTooResourceHungry",
   };
 
 #ifndef TEST_BUILD

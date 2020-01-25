@@ -34,7 +34,6 @@ LogScale<double> Scales::smoothness(0.04, 1.0, 0.5, 0.4);
 
 // Generated from preset dump. This works, but hard coding preset data is seriously bad.
 #ifndef TEST_BUILD
-
 void GlobalParameter::loadProgram(uint32_t index)
 {
   using ID = ParameterID::ID;
@@ -56,7 +55,82 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::stereoOffset]->setFromNormalized(0.5);
       value[ID::cascadeOffset]->setFromNormalized(0.0625);
       value[ID::stage]->setFromInt(15);
-      value[ID::smoothness]->setFromNormalized(0.44985925258897935);
+      value[ID::smoothness]->setFromNormalized(0.0);
+    } break;
+
+    case presetAutomateCasOffset: {
+      value[ID::bypass]->setFromInt(0);
+      value[ID::mix]->setFromNormalized(0.492);
+      value[ID::frequency]->setFromNormalized(0.148);
+      value[ID::freqSpread]->setFromNormalized(0.208);
+      value[ID::feedback]->setFromNormalized(0.964);
+      value[ID::range]->setFromNormalized(1.0);
+      value[ID::min]->setFromNormalized(1.0);
+      value[ID::phase]->setFromNormalized(0.0);
+      value[ID::stereoOffset]->setFromNormalized(0.5);
+      value[ID::cascadeOffset]->setFromNormalized(0.0);
+      value[ID::stage]->setFromInt(1.0);
+      value[ID::smoothness]->setFromNormalized(0.0);
+    } break;
+
+    case presetAutomateMin: {
+      value[ID::bypass]->setFromInt(0);
+      value[ID::mix]->setFromNormalized(0.584);
+      value[ID::frequency]->setFromNormalized(0.76);
+      value[ID::freqSpread]->setFromNormalized(0.0);
+      value[ID::feedback]->setFromNormalized(0.958696);
+      value[ID::range]->setFromNormalized(0.048);
+      value[ID::min]->setFromNormalized(0.0);
+      value[ID::phase]->setFromNormalized(0.0);
+      value[ID::stereoOffset]->setFromNormalized(0.34);
+      value[ID::cascadeOffset]->setFromNormalized(0.0);
+      value[ID::stage]->setFromInt(1.0);
+      value[ID::smoothness]->setFromNormalized(0.0);
+    } break;
+
+    case presetFeedback: {
+      value[ID::bypass]->setFromInt(0);
+      value[ID::mix]->setFromNormalized(0.9320003390312195);
+      value[ID::frequency]->setFromNormalized(1.0);
+      value[ID::freqSpread]->setFromNormalized(0.0);
+      value[ID::feedback]->setFromNormalized(0.0);
+      value[ID::range]->setFromNormalized(0.8960002064704895);
+      value[ID::min]->setFromNormalized(0.9479999542236328);
+      value[ID::phase]->setFromNormalized(0.0);
+      value[ID::stereoOffset]->setFromNormalized(0.5600001215934753);
+      value[ID::cascadeOffset]->setFromNormalized(0.0);
+      value[ID::stage]->setFromInt(2260);
+      value[ID::smoothness]->setFromNormalized(0.0);
+    } break;
+
+    case presetHallucinogen95: {
+      value[ID::bypass]->setFromInt(0);
+      value[ID::mix]->setFromNormalized(0.584);
+      value[ID::frequency]->setFromNormalized(0.412);
+      value[ID::freqSpread]->setFromNormalized(0.552);
+      value[ID::feedback]->setFromNormalized(0.906696);
+      value[ID::range]->setFromNormalized(0.364);
+      value[ID::min]->setFromNormalized(0.0);
+      value[ID::phase]->setFromNormalized(0.0);
+      value[ID::stereoOffset]->setFromNormalized(0.34);
+      value[ID::cascadeOffset]->setFromNormalized(0.264);
+      value[ID::stage]->setFromInt(0.027839);
+      value[ID::smoothness]->setFromNormalized(0.0);
+    } break;
+
+    case presetResonator: {
+      value[ID::bypass]->setFromInt(0);
+      value[ID::mix]->setFromNormalized(0.32);
+      value[ID::frequency]->setFromNormalized(0.14);
+      value[ID::freqSpread]->setFromNormalized(0.0);
+      value[ID::feedback]->setFromNormalized(0.008);
+      value[ID::range]->setFromNormalized(0.048);
+      value[ID::min]->setFromNormalized(0.368);
+      value[ID::phase]->setFromNormalized(0.0);
+      value[ID::stereoOffset]->setFromNormalized(0.34);
+      value[ID::cascadeOffset]->setFromNormalized(0.0);
+      value[ID::stage]->setFromInt(0.013919);
+      value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
     case presetSharp: {
@@ -71,70 +145,10 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::stereoOffset]->setFromNormalized(0.5);
       value[ID::cascadeOffset]->setFromNormalized(0.4679999947547912);
       value[ID::stage]->setFromInt(24);
-      value[ID::smoothness]->setFromNormalized(0.44985925258897935);
-    } break;
-
-    case presetStage1: {
-      value[ID::bypass]->setFromInt(0);
-      value[ID::mix]->setFromNormalized(0.3200003504753113);
-      value[ID::frequency]->setFromNormalized(0.14800019562244415);
-      value[ID::freqSpread]->setFromNormalized(0.7120001316070557);
-      value[ID::feedback]->setFromNormalized(0.872000515460968);
-      value[ID::range]->setFromNormalized(0.8599997162818909);
-      value[ID::min]->setFromNormalized(0.1359998732805252);
-      value[ID::phase]->setFromNormalized(0.3520001471042633);
-      value[ID::stereoOffset]->setFromNormalized(0.0);
-      value[ID::cascadeOffset]->setFromNormalized(1.0);
-      value[ID::stage]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
-    case presetStage1770: {
-      value[ID::bypass]->setFromInt(0);
-      value[ID::mix]->setFromNormalized(0.2560003995895386);
-      value[ID::frequency]->setFromNormalized(0.7640001773834229);
-      value[ID::freqSpread]->setFromNormalized(0.160000279545784);
-      value[ID::feedback]->setFromNormalized(0.47199997305870056);
-      value[ID::range]->setFromNormalized(0.7320000529289246);
-      value[ID::min]->setFromNormalized(0.13600000739097595);
-      value[ID::phase]->setFromNormalized(0.3520001471042633);
-      value[ID::stereoOffset]->setFromNormalized(0.5600001215934753);
-      value[ID::cascadeOffset]->setFromNormalized(0.41199982166290283);
-      value[ID::stage]->setFromInt(1769);
-      value[ID::smoothness]->setFromNormalized(0.0);
-    } break;
-
-    case presetStage2261: {
-      value[ID::bypass]->setFromInt(0);
-      value[ID::mix]->setFromNormalized(0.9320003390312195);
-      value[ID::frequency]->setFromNormalized(1.0);
-      value[ID::freqSpread]->setFromNormalized(0.0);
-      value[ID::feedback]->setFromNormalized(0.0);
-      value[ID::range]->setFromNormalized(0.8960002064704895);
-      value[ID::min]->setFromNormalized(0.9479999542236328);
-      value[ID::phase]->setFromNormalized(0.3520001471042633);
-      value[ID::stereoOffset]->setFromNormalized(0.5600001215934753);
-      value[ID::cascadeOffset]->setFromNormalized(0.0);
-      value[ID::stage]->setFromInt(2260);
-      value[ID::smoothness]->setFromNormalized(0.0);
-    } break;
-
-    case presetStage2982: {
-      value[ID::bypass]->setFromInt(0);
-      value[ID::mix]->setFromNormalized(0.23600055277347565);
-      value[ID::frequency]->setFromNormalized(0.7320000529289246);
-      value[ID::freqSpread]->setFromNormalized(0.5519999861717224);
-      value[ID::feedback]->setFromNormalized(0.5);
-      value[ID::range]->setFromNormalized(0.8960002064704895);
-      value[ID::min]->setFromNormalized(0.3520001471042633);
-      value[ID::phase]->setFromNormalized(0.3520001471042633);
-      value[ID::stereoOffset]->setFromNormalized(0.5600001215934753);
-      value[ID::cascadeOffset]->setFromNormalized(0.5999999642372131);
-      value[ID::stage]->setFromInt(2981);
-      value[ID::smoothness]->setFromNormalized(0.0);
-    } break;
-
-    case presetStage3515: {
+    case presetSlowBend: {
       value[ID::bypass]->setFromInt(0);
       value[ID::mix]->setFromNormalized(0.3880005478858948);
       value[ID::frequency]->setFromNormalized(0.14400027692317963);
@@ -152,34 +166,34 @@ void GlobalParameter::loadProgram(uint32_t index)
     case presetStage4096: {
       value[ID::bypass]->setFromInt(0);
       value[ID::mix]->setFromNormalized(0.5);
-      value[ID::frequency]->setFromNormalized(0.0320000946521759);
-      value[ID::freqSpread]->setFromNormalized(0.8480003476142883);
-      value[ID::feedback]->setFromNormalized(0.9520004987716675);
-      value[ID::range]->setFromNormalized(0.0720001757144928);
-      value[ID::min]->setFromNormalized(0.8640000820159912);
+      value[ID::frequency]->setFromNormalized(0.043994);
+      value[ID::freqSpread]->setFromNormalized(0.0);
+      value[ID::feedback]->setFromNormalized(0.952);
+      value[ID::range]->setFromNormalized(0.368);
+      value[ID::min]->setFromNormalized(0.932);
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.5);
-      value[ID::cascadeOffset]->setFromNormalized(0.6745002865791321);
-      value[ID::stage]->setFromInt(4095);
-      value[ID::smoothness]->setFromNormalized(0.4498592615127564);
-    } break;
-
-    case presetStage476: {
-      value[ID::bypass]->setFromInt(0);
-      value[ID::mix]->setFromNormalized(0.7680003643035889);
-      value[ID::frequency]->setFromNormalized(0.504000186920166);
-      value[ID::freqSpread]->setFromNormalized(0.9680002331733704);
-      value[ID::feedback]->setFromNormalized(0.9160006046295166);
-      value[ID::range]->setFromNormalized(0.9719998240470886);
-      value[ID::min]->setFromNormalized(0.6999999284744263);
-      value[ID::phase]->setFromNormalized(0.3520001471042633);
-      value[ID::stereoOffset]->setFromNormalized(0.0);
-      value[ID::cascadeOffset]->setFromNormalized(0.2639998495578766);
-      value[ID::stage]->setFromInt(475);
+      value[ID::cascadeOffset]->setFromNormalized(0.628);
+      value[ID::stage]->setFromInt(1.0);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
-    case presetStage828: {
+    case presetSubtle: {
+      value[ID::bypass]->setFromInt(0);
+      value[ID::mix]->setFromNormalized(0.3);
+      value[ID::frequency]->setFromNormalized(0.412);
+      value[ID::freqSpread]->setFromNormalized(0.968);
+      value[ID::feedback]->setFromNormalized(0.402695);
+      value[ID::range]->setFromNormalized(0.972);
+      value[ID::min]->setFromNormalized(0.7);
+      value[ID::phase]->setFromNormalized(0.0);
+      value[ID::stereoOffset]->setFromNormalized(0.0);
+      value[ID::cascadeOffset]->setFromNormalized(0.264);
+      value[ID::stage]->setFromInt(0.183883);
+      value[ID::smoothness]->setFromNormalized(0.0);
+    } break;
+
+    case presetThick: {
       value[ID::bypass]->setFromInt(0);
       value[ID::mix]->setFromNormalized(0.836000382900238);
       value[ID::frequency]->setFromNormalized(0.7920001149177551);
@@ -187,10 +201,25 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::feedback]->setFromNormalized(0.47199997305870056);
       value[ID::range]->setFromNormalized(0.7519999146461487);
       value[ID::min]->setFromNormalized(0.31999996304512024);
-      value[ID::phase]->setFromNormalized(0.3520001471042633);
+      value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.0);
       value[ID::cascadeOffset]->setFromNormalized(0.8719998598098754);
       value[ID::stage]->setFromInt(827);
+      value[ID::smoothness]->setFromNormalized(0.0);
+    } break;
+
+    case presetThisPhaserIsTooResourceHungry: {
+      value[ID::bypass]->setFromInt(0);
+      value[ID::mix]->setFromNormalized(0.5);
+      value[ID::frequency]->setFromNormalized(0.42);
+      value[ID::freqSpread]->setFromNormalized(0.444);
+      value[ID::feedback]->setFromNormalized(0.972);
+      value[ID::range]->setFromNormalized(0.476);
+      value[ID::min]->setFromNormalized(0.0);
+      value[ID::phase]->setFromNormalized(0.0);
+      value[ID::stereoOffset]->setFromNormalized(0.5);
+      value[ID::cascadeOffset]->setFromNormalized(0.0);
+      value[ID::stage]->setFromInt(1.0);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
   }
