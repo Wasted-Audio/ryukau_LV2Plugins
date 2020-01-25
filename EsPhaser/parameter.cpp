@@ -69,7 +69,7 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.5);
       value[ID::cascadeOffset]->setFromNormalized(0.0);
-      value[ID::stage]->setFromInt(1.0);
+      value[ID::stage]->setFromInt(4095);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
@@ -84,7 +84,7 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.34);
       value[ID::cascadeOffset]->setFromNormalized(0.0);
-      value[ID::stage]->setFromInt(1.0);
+      value[ID::stage]->setFromInt(4095);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
@@ -114,7 +114,7 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.34);
       value[ID::cascadeOffset]->setFromNormalized(0.264);
-      value[ID::stage]->setFromInt(0.027839);
+      value[ID::stage]->setFromInt(114);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
@@ -129,7 +129,7 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.34);
       value[ID::cascadeOffset]->setFromNormalized(0.0);
-      value[ID::stage]->setFromInt(0.013919);
+      value[ID::stage]->setFromInt(57);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
@@ -174,7 +174,7 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.5);
       value[ID::cascadeOffset]->setFromNormalized(0.628);
-      value[ID::stage]->setFromInt(1.0);
+      value[ID::stage]->setFromInt(4095);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
@@ -189,7 +189,7 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.0);
       value[ID::cascadeOffset]->setFromNormalized(0.264);
-      value[ID::stage]->setFromInt(0.183883);
+      value[ID::stage]->setFromInt(753);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
 
@@ -219,7 +219,7 @@ void GlobalParameter::loadProgram(uint32_t index)
       value[ID::phase]->setFromNormalized(0.0);
       value[ID::stereoOffset]->setFromNormalized(0.5);
       value[ID::cascadeOffset]->setFromNormalized(0.0);
-      value[ID::stage]->setFromInt(1.0);
+      value[ID::stage]->setFromInt(4095);
       value[ID::smoothness]->setFromNormalized(0.0);
     } break;
   }
