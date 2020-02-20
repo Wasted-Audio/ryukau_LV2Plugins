@@ -1,12 +1,15 @@
-all: dpf \
-	SevenDelay \
-	SyncSawSynth \
-	WaveCymbal \
-	FDNCymbal \
-	TrapezoidSynth \
-	IterativeSinCluster \
-	EnvelopedSine \
-	EsPhaser
+# all: dpf \
+# 	SevenDelay \
+# 	SyncSawSynth \
+# 	WaveCymbal \
+# 	FDNCymbal \
+# 	TrapezoidSynth \
+# 	IterativeSinCluster \
+# 	EnvelopedSine \
+# 	EsPhaser \
+# 	BasicWaveTable
+
+all: dpf CubicPadSynth
 
 # DEBUG=true
 # export DEBUG
@@ -14,6 +17,10 @@ all: dpf \
 .PHONY: dpf
 dpf:
 	$(MAKE) -C lib/DPF
+
+.PHONY: CubicPadSynth
+CubicPadSynth: dpf
+	$(MAKE) -C CubicPadSynth
 
 .PHONY: EsPhaser
 EsPhaser: dpf
