@@ -108,7 +108,7 @@ Various recursive sin algorithm described by Martin Vicanek. IterativeSinCluster
 <img src="docs/img/lv2_trapezoidsynth.png" alt="Image of TrapezoidSynth GUI."/>
 </figure>
 
-TrapezoidSynth a monophonic synthesizer equipped with trapezoid oscillator which is made from 5th order PTR ramp function. In other words, it's just a fancy version of tri-pulse oscillator. 2 pitch shifters are added to make some chord.
+TrapezoidSynth is a monophonic synthesizer equipped with trapezoid oscillator which is made from 5th order PTR ramp function. In other words, it's just a fancy version of tri-pulse oscillator. 2 pitch shifters are added to make some chord.
 
 PTR trapezoid oscillator algorithm.
 
