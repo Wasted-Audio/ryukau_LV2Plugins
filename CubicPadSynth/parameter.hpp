@@ -130,7 +130,7 @@ struct Scales {
   static SomeDSP::LogScale<double> overtonePitch;
   static SomeDSP::LinearScale<double> overtonePhase;
 
-  static SomeDSP::LinearScale<double> tableBaseFrequency;
+  static SomeDSP::LogScale<double> tableBaseFrequency;
   static SomeDSP::LogScale<double> overtoneGainPower;
   static SomeDSP::LogScale<double> overtoneWidthMultiply;
   static SomeDSP::LinearScale<double> overtonePitchMultiply;
@@ -215,7 +215,7 @@ struct GlobalParameter {
         kParameterIsAutomable);
     }
 
-    value[ID::tableBaseFrequency] = std::make_unique<LinearValue>(
+    value[ID::tableBaseFrequency] = std::make_unique<LogValue>(
       0.0, Scales::tableBaseFrequency, "tableBaseFrequency", kParameterIsAutomable);
     value[ID::padSynthSeed] = std::make_unique<IntValue>(
       0, Scales::seed, "padSynthSeed", kParameterIsAutomable | kParameterIsInteger);
@@ -245,7 +245,7 @@ struct GlobalParameter {
       kParameterIsAutomable | kParameterIsBoolean);
 
     value[ID::gain]
-      = std::make_unique<LogValue>(0.25, Scales::gain, "gain", kParameterIsAutomable);
+      = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
     value[ID::gainBoost] = std::make_unique<LinearValue>(
       0.0, Scales::gainBoost, "gainBoost", kParameterIsAutomable);
     value[ID::gainA] = std::make_unique<LogValue>(
