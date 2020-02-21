@@ -132,18 +132,18 @@ public:
     } else if (ev.key == 'D') { // Alternative default. (toggle min/max)
       std::fill(value.begin() + index, value.end(), value[index] != 0 ? 0 : 1);
       updateValue();
+    } else if (ev.key == 'e') {
+      emphasizeLow(index);
+    } else if (ev.key == 'E') {
+      emphasizeHigh(index);
     } else if (ev.key == 'f') {
       averageLowpass(index);
     } else if (ev.key == 'F') {
       highpass(index);
-    } else if (ev.key == 'h') {
-      emphasizeHigh(index);
     } else if (ev.key == 'i') {
       invert(index, true);
     } else if (ev.key == 'I') {
       invert(index, false);
-    } else if (ev.key == 'l') {
-      emphasizeLow(index);
     } else if (ev.key == 'n') {
       normalize(index, true);
     } else if (ev.key == 'N') {

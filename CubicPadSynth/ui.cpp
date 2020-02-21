@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <tuple>
 #include <vector>
 
@@ -35,8 +36,8 @@
 #include "gui/label.hpp"
 #include "gui/optionmenu.hpp"
 #include "gui/rotaryknob.hpp"
-#include "gui/splash.hpp"
 #include "gui/tabview.hpp"
+#include "gui/textview.hpp"
 #include "gui/vslider.hpp"
 
 START_NAMESPACE_DISTRHO
@@ -431,34 +432,6 @@ private:
     return menu;
   }
 
-  auto addSplashScreen(
-    float buttonLeft,
-    float buttonTop,
-    float buttonWidth,
-    float buttonHeight,
-    float splashLeft,
-    float splashTop,
-    float splashWidth,
-    float splashHeight,
-    const char *name)
-  {
-    auto button = std::make_shared<SplashButton>(this, name, fontId);
-    button->setSize(buttonWidth, buttonHeight);
-    button->setAbsolutePos(buttonLeft, buttonTop);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(pluginNameTextSize);
-    widget.push_back(button);
-
-    auto credit = std::make_shared<CreditSplash>(this, name, fontId);
-    credit->setSize(splashWidth, splashHeight);
-    credit->setAbsolutePos(splashLeft, splashTop);
-    button->setSplashWidget(credit);
-    widget.push_back(credit);
-
-    return std::make_tuple(button, credit);
-  }
-
   auto addVSlider(float left, float top, Color valueColor, const char *name, uint32_t id)
   {
     // width, height = 100, 270.
@@ -488,6 +461,23 @@ private:
     widget.push_back(label);
 
     return std::make_tuple(slider, label);
+  }
+
+  auto addTextView(float left, float top, float width, float height, std::string text)
+  {
+    auto view = std::make_shared<TextView>(this, text, fontId);
+    view->setSize(width, height);
+    view->setAbsolutePos(left, top);
+    return view;
+  }
+
+  auto addTextTableView(
+    float left, float top, float width, float height, std::string text, float cellWidth)
+  {
+    auto view = std::make_shared<TextTableView>(this, text, cellWidth, fontId);
+    view->setSize(width, height);
+    view->setAbsolutePos(left, top);
+    return view;
   }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CubicPadSynthUI)
@@ -923,7 +913,7 @@ public:
     const auto refreshTop = tabTop0 + tabHeight - 2.0f * labelY;
     const auto refreshLeft = tabInsideLeft0;
     tabview->widgets[tabPadSynth].push_back(addStateButton(
-      refreshLeft, refreshTop, 2.0f * knobX, "Refresh Wavetable", "padsynth", "N/A"));
+      refreshLeft, refreshTop, 2.0f * knobX, "Refresh Table", "padsynth", "N/A"));
 
     // Overtone Gain.
     const auto otGainTop = tabInsideTop0;
@@ -967,6 +957,77 @@ public:
     tabview->widgets[tabPadSynth].push_back(addBarBox(
       otPhaseLeft0, otPhaseTop, barboxWidth, barboxHeight, ID::overtonePhase0,
       nOvertone));
+
+    auto textKnobControl = R"(- Knob -
+Shift + Left Drag|Fine Adjustment
+Ctrl + Left Click|Reset to Default)";
+    tabview->addWidget(
+      tabInfo,
+      addTextTableView(
+        tabInsideLeft0, tabInsideTop0, 400.0f, 400.0f, textKnobControl, 150.0f));
+
+    auto textNumberControl = R"(- Number -
+Shares same controls with knob, and:
+Right Click|Flip Minimum and Maximum)";
+    tabview->addWidget(
+      tabInfo,
+      addTextTableView(
+        tabInsideLeft0, tabInsideTop0 + 80.0f, 400.0f, 400.0f, textNumberControl,
+        150.0f));
+
+    auto textOvertoneControl = R"(- Overtone -
+Ctrl + Left Click|Reset to Default
+Right Drag|Draw Line
+D|Reset to Default
+Shift + D|Toggle Min/Max
+E|Emphasize Low
+Shift + E|Emphasize High
+F|Low-pass Filter
+Shift + F|High-pass Filter
+I|Invert Value
+Shift + I|Invert Value (Minimum to 0)
+N|Normalize
+Shift + N|Normalize (Minimum to 0)
+P|Permute
+R|Randomize
+Shift + R|Sparse Randomize
+S|Sort Decending Order
+Shift + S|Sort Ascending Order
+T|Subtle Randomize
+, (Comma)|Rotate Back
+. (Period)|Rotate Forward
+1|Decrease Odd
+2-9|Decrease 2n-9n)";
+    tabview->addWidget(
+      tabInfo,
+      addTextTableView(
+        tabInsideLeft0, tabInsideTop0 + 160.0f, 400.0f, 400.0f, textOvertoneControl,
+        150.0f));
+
+    const auto tabInfoLeft1 = tabInsideLeft0 + tabWidth / 2.0f;
+
+    auto textRefreshNotice = R"(Wavetables won't refresh automatically.
+Press following button to apply changes.
+- `Refresh LFO` at center-left in Main tab.
+- `Refresh Table` at bottom-left in WaveTable tab.)";
+    tabview->addWidget(
+      tabInfo,
+      addTextView(tabInfoLeft1, tabInsideTop0, 400.0f, 400.0f, textRefreshNotice));
+
+    const auto tabInfoBottom = tabInsideTop0 + tabHeight - labelY;
+    std::stringstream ssPluginName;
+    ssPluginName << "CubicPadSynth " << std::to_string(MAJOR_VERSION) << "."
+                 << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
+    auto pluginNameTextView = addTextView(
+      tabInfoLeft1, tabInfoBottom - 140.0f, 400.0f, 400.0f, ssPluginName.str());
+    pluginNameTextView->textSize = 36.0f;
+    tabview->addWidget(tabInfo, pluginNameTextView);
+
+    tabview->addWidget(
+      tabInfo,
+      addTextView(
+        tabInfoLeft1, tabInfoBottom - 100.0f, 400.0f, 400.0f,
+        "© 2020 Takamitsu Endo (ryukau@gmail.com)\n\nHave a nice day!"));
 
     tabview->refreshTab();
   }
