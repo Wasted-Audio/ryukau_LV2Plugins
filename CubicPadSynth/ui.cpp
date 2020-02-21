@@ -879,15 +879,27 @@ public:
     auto knobSpectrumShift = addTextKnob(
       tableSpectrumLeft1, tableSpectrumTop + 2.0f * labelY, knobX, colorBlue,
       ID::spectrumShift, Scales::spectrumShift, false, 0, -spectrumSize);
-    knobSpectrumShift->sensitivity = 0.001f;
-    knobSpectrumShift->lowSensitivity = 0.25f / spectrumSize;
+    knobSpectrumShift->sensitivity = 0.25f / spectrumSize;
+    knobSpectrumShift->lowSensitivity = knobSpectrumShift->sensitivity / 4.0f;
     tabview->widgets[tabPadSynth].push_back(knobSpectrumShift);
 
+    tabview->widgets[tabPadSynth].push_back(
+      addLabel(tableSpectrumLeft0, tableSpectrumTop + 3.0 * labelY, knobX, "Comb"));
+    tabview->widgets[tabPadSynth].push_back(addTextKnob(
+      tableSpectrumLeft1, tableSpectrumTop + 3.0 * labelY, knobX, colorBlue,
+      ID::profileComb, Scales::profileComb));
+
+    tabview->widgets[tabPadSynth].push_back(
+      addLabel(tableSpectrumLeft0, tableSpectrumTop + 4.0 * labelY, knobX, "Shape"));
+    tabview->widgets[tabPadSynth].push_back(addTextKnob(
+      tableSpectrumLeft1, tableSpectrumTop + 4.0 * labelY, knobX, colorBlue,
+      ID::profileShape, Scales::profileShape, false, 4, 0));
+
     tabview->widgets[tabPadSynth].push_back(addCheckbox(
-      tableSpectrumLeft0, tableSpectrumTop + 3.0f * labelY, checkboxWidth, "Invert",
+      tableSpectrumLeft0, tableSpectrumTop + 5.0f * labelY, checkboxWidth, "Invert",
       ID::spectrumInvert));
 
-    const auto tablePhaseTop = tableSpectrumTop + 4.0f * labelY;
+    const auto tablePhaseTop = tableSpectrumTop + 6.0f * labelY;
     const auto tablePhaseLeft0 = tablePitchLeft0;
     tabview->widgets[tabPadSynth].push_back(
       addGroupLabel(tablePhaseLeft0, tablePhaseTop, 2.0f * knobX, "Phase"));

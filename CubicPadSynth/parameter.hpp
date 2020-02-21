@@ -63,6 +63,8 @@ enum ID {
   spectrumInvert,
   spectrumExpand,
   spectrumShift,
+  profileComb,
+  profileShape,
   uniformPhaseProfile,
 
   gain,
@@ -138,6 +140,8 @@ struct Scales {
   static SomeDSP::LinearScale<double> overtonePitchModulo;
   static SomeDSP::LogScale<double> spectrumExpand;
   static SomeDSP::IntScale<double> spectrumShift;
+  static SomeDSP::IntScale<double> profileComb;
+  static SomeDSP::LogScale<double> profileShape;
   static SomeDSP::IntScale<double> seed;
 
   static SomeDSP::LogScale<double> gain;
@@ -218,7 +222,8 @@ struct GlobalParameter {
     }
 
     value[ID::tableBaseFrequency] = std::make_unique<LogValue>(
-      0.0, Scales::tableBaseFrequency, "tableBaseFrequency", kParameterIsAutomable);
+      Scales::tableBaseFrequency.invmap(10.0), Scales::tableBaseFrequency,
+      "tableBaseFrequency", kParameterIsAutomable);
     value[ID::padSynthSeed] = std::make_unique<IntValue>(
       0, Scales::seed, "padSynthSeed", kParameterIsAutomable | kParameterIsInteger);
     value[ID::overtoneGainPower] = std::make_unique<LogValue>(
@@ -241,6 +246,11 @@ struct GlobalParameter {
       kParameterIsAutomable);
     value[ID::spectrumShift] = std::make_unique<IntValue>(
       spectrumSize, Scales::spectrumShift, "spectrumShift",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::profileComb] = std::make_unique<IntValue>(
+      0, Scales::profileComb, "profileComb", kParameterIsAutomable | kParameterIsInteger);
+    value[ID::profileShape] = std::make_unique<LogValue>(
+      Scales::profileShape.invmap(1.0), Scales::profileShape, "profileShape",
       kParameterIsAutomable | kParameterIsInteger);
     value[ID::uniformPhaseProfile] = std::make_unique<IntValue>(
       0, Scales::boolScale, "uniformPhaseProfile",
@@ -279,9 +289,9 @@ struct GlobalParameter {
     value[ID::pitchD] = std::make_unique<LogValue>(
       0.5, Scales::envelopeD, "pitchD", kParameterIsAutomable);
     value[ID::pitchS] = std::make_unique<LogValue>(
-      0.5, Scales::envelopeS, "pitchS", kParameterIsAutomable);
+      0.0, Scales::envelopeS, "pitchS", kParameterIsAutomable);
     value[ID::pitchR] = std::make_unique<LogValue>(
-      0.0, Scales::envelopeR, "pitchR", kParameterIsAutomable);
+      0.35, Scales::envelopeR, "pitchR", kParameterIsAutomable);
 
     value[ID::lfoWavetableType] = std::make_unique<IntValue>(
       0, Scales::lfoWavetableType, "lfoWavetableType",
@@ -316,7 +326,7 @@ struct GlobalParameter {
     value[ID::tableLowpassS] = std::make_unique<LogValue>(
       0.5, Scales::envelopeS, "tableLowpassS", kParameterIsAutomable);
     value[ID::tableLowpassR] = std::make_unique<LogValue>(
-      0.0, Scales::envelopeR, "tableLowpassR", kParameterIsAutomable);
+      0.5, Scales::envelopeR, "tableLowpassR", kParameterIsAutomable);
 
     value[ID::oscInitialPhase] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "oscInitialPhase", kParameterIsAutomable);

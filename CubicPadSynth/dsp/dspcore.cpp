@@ -278,6 +278,7 @@ PROCESSING_UNIT_NAME::process(float sampleRate, NoteProcessInfo &info)
   Vec16f pitch = lfoSig + notePitch + info.masterPitch.getValue()
     + info.pitchEnvelopeAmount.getValue() * pitchEnvelope.process();
   osc.setFrequency(
+    sampleRate,
     notePitchToFrequency(
       pitch, info.equalTemperament.getValue(), info.pitchA4Hz.getValue()),
     waveTable.tableBaseFreq);
@@ -556,6 +557,7 @@ void DSPCORE_NAME::refreshTable()
     sampleRate, tableBaseFreq, otFrequency, otGain, otPhase, otBandWidth,
     param.value[ID::padSynthSeed]->getInt(), param.value[ID::spectrumExpand]->getFloat(),
     int32_t(param.value[ID::spectrumShift]->getInt()) - spectrumSize,
+    param.value[ID::profileComb]->getInt() + 1, param.value[ID::profileShape]->getFloat(),
     param.value[ID::overtonePitchRandom]->getInt(),
     param.value[ID::spectrumInvert]->getInt(),
     param.value[ID::uniformPhaseProfile]->getInt());

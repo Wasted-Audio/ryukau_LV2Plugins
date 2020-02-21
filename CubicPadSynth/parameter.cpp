@@ -37,6 +37,8 @@ LinearScale<double> Scales::overtonePitchMultiply(0.0001, 16.0);
 LinearScale<double> Scales::overtonePitchModulo(0.0, 136.0);
 LogScale<double> Scales::spectrumExpand(0.03125, 32.0, 0.5, 1.0);
 IntScale<double> Scales::spectrumShift(2 * spectrumSize);
+IntScale<double> Scales::profileComb(255);
+LogScale<double> Scales::profileShape(0.0, 4.0, 0.5, 1.0);
 IntScale<double> Scales::seed(16777215); // 2^24 - 1
 
 LogScale<double> Scales::gain(0.0, 2.0, 0.5, 0.5);

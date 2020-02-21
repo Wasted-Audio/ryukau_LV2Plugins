@@ -122,11 +122,11 @@ template<size_t tableSize, size_t nPeak> struct WaveTable {
     fftwf_free(spectrum);
   }
 
-  inline float profile(float fi, float bwi)
+  inline float profile(float fi, float bwi, float shape)
   {
     if (bwi < 1e-5) bwi = 1e-5;
     auto x = fi / bwi;
-    return expf(-x * x) / bwi;
+    return powf(expf(-x * x) / bwi, shape);
   }
 
   void refreshTable(float sampleRate)
@@ -182,6 +182,8 @@ template<size_t tableSize, size_t nPeak> struct WaveTable {
     uint32_t seed,
     float expand,
     int32_t shift,
+    uint32_t profileSkip,
+    uint32_t profileShape,
     bool randomPitch,
     bool invertSpectrum,
     bool uniformPhaseProfile)
@@ -211,8 +213,9 @@ template<size_t tableSize, size_t nPeak> struct WaveTable {
 
       std::uniform_real_distribution<float> distPhase(0.0f, phase[peak]);
       auto phase = distPhase(rng);
-      for (int32_t bin = start; bin < end; ++bin) {
-        auto radius = gain[peak] * profile(bin / float(spectrumSize) - freqIdx, bandIdx);
+      for (int32_t bin = start; bin < end; bin += profileSkip) {
+        auto radius = gain[peak]
+          * profile(bin / float(spectrumSize) - freqIdx, bandIdx, profileShape);
         if (!uniformPhaseProfile) phase = distPhase(rng);
         spectrum[bin][0] += radius * cosf(phase);
         spectrum[bin][1] += radius * sinf(phase);
@@ -354,13 +357,13 @@ template<size_t tableSize> struct alignas(64) TableOsc16 {
     this->phase.insert(index, 1.0f + (phase - floorf(phase)) * tableSize);
   }
 
-  void setFrequency(Vec16f frequency, float tableBaseFreq)
+  void setFrequency(float sampleRate, Vec16f frequency, float tableBaseFreq)
   {
     tick = frequency / tableBaseFreq;
     tick = select(tick >= tableSize, 0, tick);
   }
 
-  void setFrequency(int index, float frequency, float tableBaseFreq)
+  void setFrequency(int index, float sampleRate, float frequency, float tableBaseFreq)
   {
     float tck = frequency / tableBaseFreq;
     tick.insert(index, tck >= tableSize ? 0 : tck);
