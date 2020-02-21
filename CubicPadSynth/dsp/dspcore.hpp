@@ -42,6 +42,8 @@ struct NoteProcessInfo {
   std::minstd_rand rng{0};
 
   LinearSmoother<float> masterPitch;
+  LinearSmoother<float> equalTemperament;
+  LinearSmoother<float> pitchA4Hz;
   LinearSmoother<float> tableLowpass;
   LinearSmoother<float> tableLowpassKeyFollow;
   LinearSmoother<float> tableLowpassEnvelopeAmount;
@@ -53,6 +55,8 @@ struct NoteProcessInfo {
   void reset()
   {
     masterPitch.reset(1.0f);
+    equalTemperament.reset(12.0f);
+    pitchA4Hz.reset(440.0f);
     tableLowpass.reset(0);
     tableLowpassKeyFollow.reset(1.0);
     tableLowpassEnvelopeAmount.reset(0);

@@ -40,7 +40,6 @@ IntScale<double> Scales::spectrumShift(2 * spectrumSize);
 IntScale<double> Scales::seed(16777215); // 2^24 - 1
 
 LogScale<double> Scales::gain(0.0, 2.0, 0.5, 0.5);
-LinearScale<double> Scales::gainBoost(1.0, 8.0);
 LogScale<double> Scales::envelopeA(0.0001, 16.0, 0.5, 2.0);
 LogScale<double> Scales::envelopeD(0.0001, 16.0, 0.5, 4.0);
 LogScale<double> Scales::envelopeS(0.0001, 0.9995, 0.5, 0.3);
@@ -49,6 +48,8 @@ LogScale<double> Scales::envelopeR(0.001, 16.0, 0.5, 2.0);
 IntScale<double> Scales::oscOctave(16);
 IntScale<double> Scales::oscSemi(168);
 IntScale<double> Scales::oscMilli(2000);
+IntScale<double> Scales::equalTemperament(119);
+IntScale<double> Scales::pitchA4Hz(900);
 
 LogScale<double> Scales::pitchAmount(0.0, pitchRange, 0.5, 24.0);
 

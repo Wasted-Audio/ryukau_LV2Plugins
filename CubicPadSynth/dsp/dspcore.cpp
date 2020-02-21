@@ -51,31 +51,21 @@ inline float clamp(float value, float min, float max)
   return (value < min) ? min : (value > max) ? max : value;
 }
 
-inline float midiNoteToFrequency(float pitch, float tuning, float bend)
-{
-  return 440.0f
-    * powf(2.0f, ((pitch - 69.0f) * 100.0f + tuning + (bend - 0.5f) * 400.0f) / 1200.0f);
-}
-
 inline float calcMasterPitch(int32_t octave, int32_t semi, int32_t milli, float bend)
 {
   return 12 * octave + semi + milli / 1000.0f + (bend - 0.5f) * 4.0f;
 }
 
-// modf for VCL types.
-template<typename T, typename S> inline T vecModf(T value, S divisor)
+inline Vec16f
+notePitchToFrequency(Vec16f notePitch, float equalTemperament, float a4Hz = 440.0f)
 {
-  return value - divisor * floor(value / divisor);
+  return a4Hz * pow(Vec16f(2.0f), (notePitch - 69.0f) / equalTemperament);
 }
 
-inline Vec16f notePitchToFrequency(Vec16f notePitch)
+inline float
+notePitchToFrequency(float notePitch, float equalTemperament, float a4Hz = 440.0f)
 {
-  return 440.0f * pow(Vec16f(2.0f), (notePitch - 69.0f) / 12.0f);
-}
-
-inline float notePitchToFrequency(float notePitch)
-{
-  return 440.0f * powf(2.0f, (notePitch - 69.0f) / 12.0f);
+  return a4Hz * powf(2.0f, (notePitch - 69.0f) / equalTemperament);
 }
 
 WaveTable<tableSize, nOvertone> PROCESSING_UNIT_NAME::waveTable;
@@ -110,7 +100,6 @@ void NOTE_NAME::noteOn(
 
   std::uniform_real_distribution<float> dist(0.0, 1.0);
   unit.notePitch.insert(vecIndex, notePitch);
-  float frequency = notePitchToFrequency(notePitch);
   if (param.value[ID::oscPhaseReset]->getInt()) {
     const auto phaseRnd
       = param.value[ID::oscPhaseRandom]->getInt() ? dist(info.rng) : 1.0f;
@@ -122,7 +111,9 @@ void NOTE_NAME::noteOn(
 
   unit.gainEnvelope.reset(
     vecIndex, param.value[ID::gainA]->getFloat(), param.value[ID::gainD]->getFloat(),
-    param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(), frequency);
+    param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(),
+    notePitchToFrequency(
+      notePitch, info.equalTemperament.getValue(), info.pitchA4Hz.getValue()));
   unit.lowpassEnvelope.reset(
     vecIndex, param.value[ID::tableLowpassA]->getFloat(),
     param.value[ID::tableLowpassD]->getFloat(),
@@ -227,7 +218,9 @@ void PROCESSING_UNIT_NAME::setParameters(
   gainEnvelope.set(
     param.value[ID::gainA]->getFloat(), param.value[ID::gainD]->getFloat(),
     param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(),
-    notePitchToFrequency(notePitch + info.masterPitch.getValue()));
+    notePitchToFrequency(
+      notePitch + info.masterPitch.getValue(), info.equalTemperament.getValue(),
+      info.pitchA4Hz.getValue()));
   lowpassEnvelope.set(
     param.value[ID::tableLowpassA]->getFloat(),
     param.value[ID::tableLowpassD]->getFloat(),
@@ -244,13 +237,14 @@ void DSPCORE_NAME::setParameters(float tempo)
 
   SmootherCommon<float>::setTime(param.value[ID::smoothness]->getFloat());
 
-  interpMasterGain.push(
-    param.value[ID::gain]->getFloat() * param.value[ID::gainBoost]->getFloat());
+  interpMasterGain.push(param.value[ID::gain]->getFloat());
 
   info.masterPitch.push(calcMasterPitch(
     int32_t(param.value[ID::oscOctave]->getInt()) - 12,
     param.value[ID::oscSemi]->getInt() - 120, param.value[ID::oscMilli]->getInt() - 1000,
     param.value[ID::pitchBend]->getFloat()));
+  info.equalTemperament.push(param.value[ID::equalTemperament]->getFloat() + 1);
+  info.pitchA4Hz.push(param.value[ID::pitchA4Hz]->getFloat() + 100);
   info.tableLowpass.push(
     Scales::tableLowpass.getMax() - param.value[ID::tableLowpass]->getFloat());
   info.tableLowpassKeyFollow.push(param.value[ID::tableLowpassKeyFollow]->getFloat());
@@ -283,7 +277,10 @@ PROCESSING_UNIT_NAME::process(float sampleRate, NoteProcessInfo &info)
 
   Vec16f pitch = lfoSig + notePitch + info.masterPitch.getValue()
     + info.pitchEnvelopeAmount.getValue() * pitchEnvelope.process();
-  osc.setFrequency(notePitchToFrequency(pitch), waveTable.tableBaseFreq);
+  osc.setFrequency(
+    notePitchToFrequency(
+      pitch, info.equalTemperament.getValue(), info.pitchA4Hz.getValue()),
+    waveTable.tableBaseFreq);
 
   float lpKey = info.tableLowpassKeyFollow.getValue();
   float lpCutoff = info.tableLowpass.getValue();
@@ -324,6 +321,8 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
     processMidiNote(i);
 
     info.masterPitch.process();
+    info.equalTemperament.process();
+    info.pitchA4Hz.process();
     info.tableLowpass.process();
     info.tableLowpassKeyFollow.process();
     info.tableLowpassEnvelopeAmount.process();
@@ -546,7 +545,8 @@ void DSPCORE_NAME::refreshTable()
     otFrequency[idx] = (pitchMultiplier * idx + 1.0f) * tableBaseFreq
       * param.value[ID::overtonePitch0 + idx]->getFloat();
     if (pitchModulo != 0)
-      otFrequency[idx] = fmodf(otFrequency[idx], notePitchToFrequency(pitchModulo));
+      otFrequency[idx]
+        = fmodf(otFrequency[idx], notePitchToFrequency(pitchModulo, 12.0f, 440.0f));
     otGain[idx] = powf(param.value[ID::overtoneGain0 + idx]->getFloat(), gainPow);
     otBandWidth[idx] = widthMul * param.value[ID::overtoneWidth0 + idx]->getFloat();
     otPhase[idx] = param.value[ID::overtonePhase0 + idx]->getFloat();

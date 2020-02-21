@@ -66,7 +66,6 @@ enum ID {
   uniformPhaseProfile,
 
   gain,
-  gainBoost,
   gainA,
   gainD,
   gainS,
@@ -75,6 +74,8 @@ enum ID {
   oscOctave,
   oscSemi,
   oscMilli,
+  equalTemperament,
+  pitchA4Hz,
 
   pitchEnvelopeAmount,
   pitchEnvelopeAmountNegative,
@@ -140,7 +141,6 @@ struct Scales {
   static SomeDSP::IntScale<double> seed;
 
   static SomeDSP::LogScale<double> gain;
-  static SomeDSP::LinearScale<double> gainBoost;
   static SomeDSP::LogScale<double> envelopeA;
   static SomeDSP::LogScale<double> envelopeD;
   static SomeDSP::LogScale<double> envelopeS;
@@ -149,6 +149,8 @@ struct Scales {
   static SomeDSP::IntScale<double> oscOctave;
   static SomeDSP::IntScale<double> oscSemi;
   static SomeDSP::IntScale<double> oscMilli;
+  static SomeDSP::IntScale<double> equalTemperament;
+  static SomeDSP::IntScale<double> pitchA4Hz;
 
   static SomeDSP::LogScale<double> pitchAmount;
 
@@ -246,8 +248,6 @@ struct GlobalParameter {
 
     value[ID::gain]
       = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
-    value[ID::gainBoost] = std::make_unique<LinearValue>(
-      0.0, Scales::gainBoost, "gainBoost", kParameterIsAutomable);
     value[ID::gainA] = std::make_unique<LogValue>(
       0.0, Scales::envelopeA, "gainA", kParameterIsAutomable);
     value[ID::gainD] = std::make_unique<LogValue>(
@@ -263,6 +263,11 @@ struct GlobalParameter {
       120, Scales::oscSemi, "oscSemi", kParameterIsAutomable);
     value[ID::oscMilli] = std::make_unique<IntValue>(
       1000, Scales::oscMilli, "oscMilli", kParameterIsAutomable);
+    value[ID::equalTemperament] = std::make_unique<IntValue>(
+      11, Scales::equalTemperament, "equalTemperament",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::pitchA4Hz] = std::make_unique<IntValue>(
+      340, Scales::pitchA4Hz, "pitchA4Hz", kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::pitchEnvelopeAmount] = std::make_unique<LogValue>(
       0.0, Scales::pitchAmount, "pitchEnvelopeAmount", kParameterIsAutomable);

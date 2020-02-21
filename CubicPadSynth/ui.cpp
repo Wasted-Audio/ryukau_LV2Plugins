@@ -510,43 +510,91 @@ public:
 
     const auto tabInsideTop0 = tabTop0 + labelY + 4.0f * margin;
     const auto tabInsideLeft0 = tabLeft0 + 4.0f * margin;
+    const auto tabCenterX = tabInsideLeft0 + labelY + 7.0f * knobX + 4.0f * margin;
+
+    // Tuning.
+    const auto tuningTop = tabInsideTop0;
+    const auto tuningLeft = tabInsideLeft0 + labelY;
+    tabview->widgets[tabMain].push_back(
+      addGroupLabel(tuningLeft, tuningTop, 2.0f * knobX - 4.0 * margin, "Tuning"));
+
+    const auto tuningLabelWidth = knobX - 2.0f * margin;
+    const auto tuningLeft1 = tuningLeft;
+    const auto tuningLeft2 = tuningLeft1 + tuningLabelWidth;
+
+    const auto tuningTop1 = tuningTop + labelY;
+    tabview->widgets[tabMain].push_back(
+      addLabel(tuningLeft1, tuningTop1, tuningLabelWidth, "Octave"));
+    tabview->widgets[tabMain].push_back(addTextKnob(
+      tuningLeft2, tuningTop1, knobWidth, colorBlue, ID::oscOctave, Scales::oscOctave,
+      false, 0, -12));
+
+    const auto tuningTop2 = tuningTop1 + labelY;
+    tabview->widgets[tabMain].push_back(
+      addLabel(tuningLeft1, tuningTop2, tuningLabelWidth, "Semi"));
+    tabview->widgets[tabMain].push_back(addTextKnob(
+      tuningLeft2, tuningTop2, knobWidth, colorBlue, ID::oscSemi, Scales::oscSemi, false,
+      0, -120));
+
+    const auto tuningTop3 = tuningTop2 + labelY;
+    tabview->widgets[tabMain].push_back(
+      addLabel(tuningLeft1, tuningTop3, tuningLabelWidth, "Milli"));
+    auto knobOscMilli = addTextKnob(
+      tuningLeft2, tuningTop3, knobWidth, colorBlue, ID::oscMilli, Scales::oscMilli,
+      false, 0, -1000);
+    knobOscMilli->sensitivity = 0.001f;
+    knobOscMilli->lowSensitivity = 0.00025f;
+    tabview->widgets[tabMain].push_back(knobOscMilli);
+
+    const auto tuningTop4 = tuningTop3 + 1.5f * labelY;
+    tabview->addWidget(
+      tabMain, addLabel(tuningLeft1, tuningTop4, tuningLabelWidth, "ET"));
+    tabview->addWidget(
+      tabMain,
+      addTextKnob(
+        tuningLeft2, tuningTop4, knobWidth, colorBlue, ID::equalTemperament,
+        Scales::equalTemperament, false, 0, 1));
+
+    const auto tuningTop5 = tuningTop4 + labelY;
+    tabview->addWidget(
+      tabMain, addLabel(tuningLeft1, tuningTop5, tuningLabelWidth, "A4 [Hz]"));
+    tabview->addWidget(
+      tabMain,
+      addTextKnob(
+        tuningLeft2, tuningTop5, knobWidth, colorBlue, ID::pitchA4Hz, Scales::pitchA4Hz,
+        false, 0, 100));
+
+    const auto tuningOffsetX = 2.0f * knobX;
 
     // Gain.
     const auto gainTop = tabInsideTop0;
-    const auto gainLeft = tabInsideLeft0 + labelY;
+    const auto gainLeft = tabInsideLeft0 + labelY + tuningOffsetX;
     tabview->widgets[tabMain].push_back(
-      addGroupLabel(gainLeft, gainTop, 7.0f * knobX, "Gain"));
+      addGroupLabel(gainLeft, gainTop, 5.0f * knobX, "Gain"));
     const auto gainKnobTop = gainTop + labelY;
 
     tabview->addWidget(
-      tabMain,
-      addKnob(
-        gainLeft + 0.0f * knobX, gainKnobTop, knobWidth, colorBlue, "Boost",
-        ID::gainBoost));
+      tabMain, addKnob(gainLeft, gainKnobTop, knobWidth, colorBlue, "A", ID::gainA));
     tabview->addWidget(
       tabMain,
       addKnob(
-        gainLeft + 1.0f * knobX, gainKnobTop, knobWidth, colorBlue, "Gain", ID::gain));
+        gainLeft + 1.0f * knobX, gainKnobTop, knobWidth, colorBlue, "D", ID::gainD));
     tabview->addWidget(
       tabMain,
       addKnob(
-        gainLeft + 2.0f * knobX, gainKnobTop, knobWidth, colorBlue, "A", ID::gainA));
+        gainLeft + 2.0f * knobX, gainKnobTop, knobWidth, colorBlue, "S", ID::gainS));
     tabview->addWidget(
       tabMain,
       addKnob(
-        gainLeft + 3.0f * knobX, gainKnobTop, knobWidth, colorBlue, "D", ID::gainD));
+        gainLeft + 3.0f * knobX, gainKnobTop, knobWidth, colorBlue, "R", ID::gainR));
     tabview->addWidget(
       tabMain,
       addKnob(
-        gainLeft + 4.0f * knobX, gainKnobTop, knobWidth, colorBlue, "S", ID::gainS));
-    tabview->addWidget(
-      tabMain,
-      addKnob(
-        gainLeft + 5.0f * knobX, gainKnobTop, knobWidth, colorBlue, "R", ID::gainR));
+        gainLeft + 4.0f * knobX, gainKnobTop, knobWidth, colorBlue, "Gain", ID::gain));
 
     // Lowpass.
     const auto filterTop = tabInsideTop0;
-    const auto filterLeft = gainLeft + 7.0f * knobX + 4.0f * margin;
+    const auto filterLeft = tabCenterX;
     tabview->widgets[tabMain].push_back(
       addGroupLabel(filterLeft, filterTop, 7.0f * knobX, "Lowpass"));
     const auto filterKnobTop = filterTop + labelY;
@@ -587,69 +635,39 @@ public:
 
     // Pitch.
     const auto pitchTop = filterTop + labelY + knobY;
-    const auto pitchLeft = tabInsideLeft0 + labelY;
+    const auto pitchLeft = tabInsideLeft0 + labelY + tuningOffsetX;
     tabview->widgets[tabMain].push_back(
-      addGroupLabel(pitchLeft, pitchTop, 7.0f * knobX, "Pitch"));
-
-    const auto pitchLabelWidth = knobWidth;
-    const auto pitchLeft1 = pitchLeft + margin;
-    const auto pitchLeft2 = pitchLeft + knobX;
-
-    const auto pitchTop1 = pitchTop + labelY;
-    tabview->widgets[tabMain].push_back(
-      addLabel(pitchLeft1, pitchTop1, pitchLabelWidth, "Octave"));
-    tabview->widgets[tabMain].push_back(addTextKnob(
-      pitchLeft2, pitchTop1, knobWidth, colorBlue, ID::oscOctave, Scales::oscOctave,
-      false, 0, -12));
-
-    const auto pitchTop2 = pitchTop1 + labelY;
-    tabview->widgets[tabMain].push_back(
-      addLabel(pitchLeft1, pitchTop2, pitchLabelWidth, "Semi"));
-    tabview->widgets[tabMain].push_back(addTextKnob(
-      pitchLeft2, pitchTop2, knobWidth, colorBlue, ID::oscSemi, Scales::oscSemi, false, 0,
-      -120));
-
-    const auto pitchTop3 = pitchTop2 + labelY;
-    tabview->widgets[tabMain].push_back(
-      addLabel(pitchLeft1, pitchTop3, pitchLabelWidth, "Milli"));
-    auto knobOscMilli = addTextKnob(
-      pitchLeft2, pitchTop3, knobWidth, colorBlue, ID::oscMilli, Scales::oscMilli, false,
-      0, -1000);
-    knobOscMilli->sensitivity = 0.001f;
-    knobOscMilli->lowSensitivity = 0.00025f;
-    tabview->widgets[tabMain].push_back(knobOscMilli);
+      addGroupLabel(pitchLeft, pitchTop, 5.0f * knobX, "Pitch"));
 
     const auto pitchKnobTop = pitchTop + labelY;
     tabview->addWidget(
-      tabMain,
-      addKnob(
-        pitchLeft + 2.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "A", ID::pitchA));
+      tabMain, addKnob(pitchLeft, pitchKnobTop, knobWidth, colorBlue, "A", ID::pitchA));
     tabview->addWidget(
       tabMain,
       addKnob(
-        pitchLeft + 3.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "D", ID::pitchD));
+        pitchLeft + 1.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "D", ID::pitchD));
     tabview->addWidget(
       tabMain,
       addKnob(
-        pitchLeft + 4.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "S", ID::pitchS));
+        pitchLeft + 2.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "S", ID::pitchS));
     tabview->addWidget(
       tabMain,
       addKnob(
-        pitchLeft + 5.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "R", ID::pitchR));
+        pitchLeft + 3.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "R", ID::pitchR));
     tabview->addWidget(
       tabMain,
       addKnob(
-        pitchLeft + 6.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "Amount",
+        pitchLeft + 4.0f * knobX, pitchKnobTop, knobWidth, colorBlue, "Amount",
         ID::pitchEnvelopeAmount));
     tabview->addWidget(
       tabMain,
       addCheckbox(
-        pitchLeft + 6.0f * knobX - 1.5f * margin, pitchKnobTop + knobY, knobWidth,
+        pitchLeft + 4.0f * knobX - 1.5f * margin, pitchKnobTop + knobY, knobWidth,
         "Negative", ID::pitchEnvelopeAmountNegative));
 
     // Unison.
     const auto unisonTop = pitchTop;
-    const auto unisonLeft = pitchLeft + 7.0f * knobX + 4.0f * margin;
+    const auto unisonLeft = tabCenterX;
     tabview->widgets[tabMain].push_back(
       addGroupLabel(unisonLeft, unisonTop, 7.0f * knobX, "Unison"));
     const auto unisonKnobTop = unisonTop + labelY;
