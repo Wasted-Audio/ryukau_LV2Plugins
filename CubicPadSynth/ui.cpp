@@ -1005,7 +1005,7 @@ Right Click|Flip Minimum and Maximum)";
         tabInsideLeft0, tabInsideTop0 + 80.0f, 400.0f, 400.0f, textNumberControl,
         150.0f));
 
-    auto textOvertoneControl = R"(- Overtone -
+    auto textOvertoneControl = R"(- Overtone & LFO Wave -
 Ctrl + Left Click|Reset to Default
 Right Drag|Draw Line
 D|Reset to Default
