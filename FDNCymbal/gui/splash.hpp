@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of FDNCymbal.
 //
@@ -62,7 +62,7 @@ public:
     text(20.0f, 50.0f, stream.str().c_str(), nullptr);
 
     fontSize(textSize);
-    text(20.0f, 90.0f, "© 2019 Takamitsu Endo (ryukau@gmail.com)", nullptr);
+    text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
     text(20.0f, 150.0f, "Shift + Drag: Fine Adjustment", nullptr);
     text(20.0f, 180.0f, "Ctrl + Click: Reset to Default", nullptr);
     text(20.0f, 240.0f, "Have a nice day!", nullptr);

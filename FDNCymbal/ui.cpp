@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of FDNCymbal.
 //
@@ -72,6 +72,7 @@ public:
     // Gain.
     const auto left0 = 20.0f;
     const auto top0 = 20.0f;
+    const auto smallKnobWidth = 50.0f;
 
     addVSlider(left0, top0, colorBlue, "Gain", ID::gain);
 
@@ -80,9 +81,18 @@ public:
     addButton(leftStick, top0, 2.0f * knobX, "Stick", ID::stick);
 
     const auto topStick = top0 + labelHeight + margin;
-    addKnob(leftStick, topStick, knobWidth, colorBlue, "Decay", ID::stickDecay);
     addKnob(
-      leftStick + knobX, topStick, knobWidth, colorBlue, "ToneMix", ID::stickToneMix);
+      leftStick, topStick, smallKnobWidth, colorBlue, " Pulse", ID::stickPulseMix,
+      LabelPosition::right);
+    addKnob(
+      leftStick, topStick + smallKnobWidth, smallKnobWidth, colorBlue, " Velvet",
+      ID::stickVelvetMix, LabelPosition::right);
+    addKnob(
+      leftStick + knobX + margin, topStick, smallKnobWidth, colorBlue, " Tone",
+      ID::stickToneMix, LabelPosition::right);
+    addKnob(
+      leftStick + knobX + margin, topStick + smallKnobWidth, smallKnobWidth, colorBlue,
+      " Decay", ID::stickDecay, LabelPosition::right);
 
     // Random.
     const auto leftRandom = leftStick + 2.0f * knobX + 2.0f * margin;

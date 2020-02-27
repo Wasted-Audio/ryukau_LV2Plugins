@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of FDNCymbal.
 //
@@ -59,6 +59,8 @@ enum ID {
   stick,
   stickDecay,
   stickToneMix,
+  stickPulseMix,
+  stickVelvetMix,
 
   smoothness,
 
@@ -166,6 +168,10 @@ struct GlobalParameter {
       0.5, Scales::stickDecay, "stickDecay", kParameterIsAutomable);
     value[ID::stickToneMix] = std::make_unique<LogValue>(
       0.5, Scales::stickToneMix, "stickToneMix", kParameterIsAutomable);
+    value[ID::stickPulseMix] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "stickPulseMix", kParameterIsAutomable);
+    value[ID::stickVelvetMix] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "stickVelvetMix", kParameterIsAutomable);
 
     value[ID::smoothness] = std::make_unique<LogValue>(
       0.1, Scales::smoothness, "smoothness", kParameterIsAutomable);

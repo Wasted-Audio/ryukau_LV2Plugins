@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of FDNCymbal.
 //
@@ -99,32 +99,42 @@ void DSPCore::startup()
 
 void DSPCore::setParameters()
 {
-  LinearSmoother<float>::setTime(param.value[ParameterID::smoothness]->getFloat());
+  using ID = ParameterID::ID;
 
-  if (!noteStack.empty()) velocity = noteStack.back().velocity;
-  interpMasterGain.push(velocity * param.value[ParameterID::gain]->getFloat());
+  LinearSmoother<float>::setTime(param.value[ID::smoothness]->getFloat());
 
-  interpFDNFeedback.push(param.value[ParameterID::fdnFeedback]->getFloat());
-  interpFDNCascadeMix.push(param.value[ParameterID::fdnCascadeMix]->getFloat());
+  if (!noteStack.empty()) {
+    velocity = noteStack.back().velocity;
+    const auto freq
+      = noteStack.back().frequency * paramToPitch(param.value[ID::pitchBend]->getFloat());
+    interpPitch.push(freq);
+  } else {
+    interpPitch.push(0.0f);
+  }
+  interpMasterGain.push(velocity * param.value[ID::gain]->getFloat());
 
-  interpAllpassMix.push(param.value[ParameterID::allpassMix]->getFloat());
-  interpAllpass1Feedback.push(param.value[ParameterID::allpass1Feedback]->getFloat());
-  interpAllpass2Feedback.push(param.value[ParameterID::allpass2Feedback]->getFloat());
+  interpStickToneMix.push(param.value[ID::stickToneMix]->getFloat());
+  interpStickPulseMix.push(param.value[ID::stickPulseMix]->getFloat());
+  interpStickVelvetMix.push(param.value[ID::stickVelvetMix]->getFloat());
 
-  interpTremoloMix.push(param.value[ParameterID::tremoloMix]->getFloat());
-  interpTremoloDepth.push(
-    randomTremoloDepth * param.value[ParameterID::tremoloDepth]->getFloat());
+  interpFDNFeedback.push(param.value[ID::fdnFeedback]->getFloat());
+  interpFDNCascadeMix.push(param.value[ID::fdnCascadeMix]->getFloat());
+
+  interpAllpassMix.push(param.value[ID::allpassMix]->getFloat());
+  interpAllpass1Feedback.push(param.value[ID::allpass1Feedback]->getFloat());
+  interpAllpass2Feedback.push(param.value[ID::allpass2Feedback]->getFloat());
+
+  interpTremoloMix.push(param.value[ID::tremoloMix]->getFloat());
+  interpTremoloDepth.push(randomTremoloDepth * param.value[ID::tremoloDepth]->getFloat());
   interpTremoloFrequency.push(
-    randomTremoloFrequency * param.value[ParameterID::tremoloFrequency]->getFloat());
+    randomTremoloFrequency * param.value[ID::tremoloFrequency]->getFloat());
   interpTremoloDelayTime.push(
-    randomTremoloDelayTime * param.value[ParameterID::tremoloDelayTime]->getFloat());
-
-  interpStickToneMix.push(param.value[ParameterID::stickToneMix]->getFloat());
+    randomTremoloDelayTime * param.value[ID::tremoloDelayTime]->getFloat());
 
   serialAP1Highpass.setCutoffQ(
-    param.value[ParameterID::allpass1HighpassCutoff]->getFloat(), highpassQ);
+    param.value[ID::allpass1HighpassCutoff]->getFloat(), highpassQ);
   serialAP2Highpass.setCutoffQ(
-    param.value[ParameterID::allpass2HighpassCutoff]->getFloat(), highpassQ);
+    param.value[ID::allpass2HighpassCutoff]->getFloat(), highpassQ);
 }
 
 void DSPCore::process(
@@ -143,15 +153,21 @@ void DSPCore::process(
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
 
-    float sample = pulsar.process();
+    float sample = 0.0f;
     if (in0 != nullptr) sample += in0[i];
     if (in1 != nullptr) sample += in1[i];
 
+    const float pitch = interpPitch.process();
     if (!stickEnvelope.isTerminated) {
+      const float toneMix = interpStickToneMix.process();
+      const float pulseMix = interpStickPulseMix.process();
+      const float velvetMix = interpStickVelvetMix.process();
+      const float stickEnv = stickEnvelope.process();
       float stickTone = 0.0f;
       for (auto &osc : stickOscillator) stickTone += osc.process();
-      sample += (interpStickToneMix.process() * stickTone + velvet.process())
-        * stickEnvelope.process();
+      velvet.setDensity(pitch);
+      sample += pulseMix * pulsar.process()
+        + stickEnv * (toneMix * stickTone + velvetMix * velvet.process());
     }
 
     // FDN.
@@ -220,10 +236,14 @@ void DSPCore::noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity
     pulsar.phase = 1.0f;
 
     stickEnvelope.reset(param.value[ParameterID::stickDecay]->getFloat());
+    const auto upperBound = 0.95f * sampleRate / 2.0f;
     auto oscFreq = info.frequency;
+    while (oscFreq >= upperBound) oscFreq *= 0.5f;
     for (auto &osc : stickOscillator) {
+      if (oscFreq < 20.0f) oscFreq += 20.0f;
       osc.setFrequency(oscFreq);
       oscFreq *= 1.0f + rngStick.process();
+      if (oscFreq > upperBound) oscFreq = info.frequency * (1.0f + rngStick.process());
     }
 
     velvet.setDensity(sampleRate * 0.004f * (pitch + 1) / 32.0f);
