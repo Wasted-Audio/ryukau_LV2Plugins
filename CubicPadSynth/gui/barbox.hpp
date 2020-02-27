@@ -53,8 +53,8 @@ public:
       auto sliderHeight = value[i] * height;
       beginPath();
       rect(
-        roundf(i * sliderWidth), roundf(height - sliderHeight), roundf(sliderWidth),
-        roundf(sliderHeight));
+        i * sliderWidth, height - sliderHeight, sliderWidth - defaultBorderWidth,
+        sliderHeight);
       fill();
     }
 
@@ -129,8 +129,10 @@ public:
     if (ev.key == 'd') { // reset to Default.
       value = defaultValue;
       updateValue();
-    } else if (ev.key == 'D') { // Alternative default. (toggle min/max)
-      std::fill(value.begin() + index, value.end(), value[index] != 0 ? 0 : 1);
+    } else if (ev.key == 'D') { // Alternative default. (toggle min/mid/max)
+      std::fill(
+        value.begin() + index, value.end(),
+        value[index] == 0 ? 0.5 : value[index] == 0.5 ? 1.0 : 0.0);
       updateValue();
     } else if (ev.key == 'e') {
       emphasizeLow(index);
@@ -169,7 +171,7 @@ public:
       std::rotate(value.rbegin() + index, value.rbegin() + 1, value.rend());
       updateValue();
     } else if (ev.key == '1') { // Decrease odd.
-      multiplySkip(index, 2);
+      multiplySkip(index, 1);
     } else if (ev.key == '2') { // Decrease even.
       multiplySkip(index, 2);
     } else if (ev.key == '3') { // Decrease 3n.
@@ -338,6 +340,7 @@ public:
   void onResize(const ResizeEvent &ev)
   {
     sliderWidth = float(ev.size.getWidth()) / value.size();
+    defaultBorderWidth = sliderWidth < 4.0f ? 1.0f : 2.0f;
   }
 
   void setHighlightColor(Color color) { highlightColor = color; }

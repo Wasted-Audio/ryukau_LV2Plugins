@@ -1026,7 +1026,7 @@ Shift + S|Sort Ascending Order
 T|Subtle Randomize
 , (Comma)|Rotate Back
 . (Period)|Rotate Forward
-1|Decrease Odd
+1|Decrease
 2-9|Decrease 2n-9n)";
     tabview->addWidget(
       tabInfo,
