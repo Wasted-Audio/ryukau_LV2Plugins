@@ -34,7 +34,7 @@ static const uint32_t kParameterIsInteger = 0x04;
 static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
-constexpr int32_t nOvertone = 256;
+constexpr int32_t nOvertone = 360;
 constexpr int32_t nLFOWavetable = 64;
 constexpr int32_t tableSize = 262144;
 constexpr int32_t lfoTableSize = 1023;
@@ -45,15 +45,15 @@ enum ID {
   bypass,
 
   overtoneGain0,
-  overtoneWidth0 = 257,
-  overtonePitch0 = 513,
-  overtonePhase0 = 769,
+  overtoneWidth0 = 361,
+  overtonePitch0 = 721,
+  overtonePhase0 = 1081,
 
-  lfoWavetable0 = 1025,
+  lfoWavetable0 = 1441,
 
   // Do not add parameter here.
 
-  tableBaseFrequency = 1089,
+  tableBaseFrequency = 1505,
   padSynthSeed,
   overtoneGainPower,
   overtoneWidthMultiply,
