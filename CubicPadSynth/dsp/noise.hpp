@@ -1,4 +1,4 @@
-// (c) 2019-2020 Takamitsu Endo
+// (c) 2020 Takamitsu Endo
 //
 // This file is part of CubicPadSynth.
 //
@@ -47,7 +47,7 @@ struct alignas(64) White16 {
 
   void setSeed(uint32_t seed)
   {
-    for (size_t idx = 0; idx < 16; ++idx) {
+    for (int idx = 0; idx < 16; ++idx) {
       seed = 1664525L * seed + 1013904223L;
       buffer.insert(idx, seed);
     }
