@@ -165,10 +165,12 @@ public:
     } else if (ev.key == 't') { // subTle randomize.
       randomize(index, 0.02);
     } else if (ev.key == ',') { // Rotate back.
-      std::rotate(value.begin() + index, value.begin() + 1, value.end());
+      if (index == value.size() - 1) index = 0;
+      std::rotate(value.begin() + index, value.begin() + index + 1, value.end());
       updateValue();
     } else if (ev.key == '.') { // Rotate forward.
-      std::rotate(value.rbegin() + index, value.rbegin() + 1, value.rend());
+      size_t rIndex = index == 0 ? 0 : value.size() - 1 - index;
+      std::rotate(value.rbegin() + rIndex, value.rbegin() + rIndex + 1, value.rend());
       updateValue();
     } else if (ev.key == '1') { // Decrease odd.
       multiplySkip(index, 1);
