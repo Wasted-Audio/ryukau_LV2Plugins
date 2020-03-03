@@ -18,6 +18,7 @@
 #pragma once
 
 #include "../../lib/fftw3/fftw3.h"
+
 #include "../../lib/vcl/vectorclass.h"
 
 #include "constants.hpp"
@@ -25,10 +26,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cstring>
 #include <deque>
 #include <random>
-
-#include <iostream>
 
 namespace SomeDSP {
 
@@ -61,15 +61,15 @@ inline Vec16f cubicInterp(Vec16f y0, Vec16f y1, Vec16f y2, Vec16f y3, Vec16f t)
 /*
 table is 2d array which has extra padding for interpolation.
 
-    @              @
-@   3  0  1  2  3  0
-    3  0  1  2  3  0
-   13 10 11 12 13 10
-   23 20 21 22 23 20
-   33 30 31 32 33 30
-@   0  0  0  0  0  0
-@   0  0  0  0  0  0
-@   0  0  0  0  0  0
+    @              @  @
+@   3  0  1  2  3  0  1
+    3  0  1  2  3  0  1
+   13 10 11 12 13 10 11
+   23 20 21 22 23 20 21
+   33 30 31 32 33 30 31
+@   0  0  0  0  0  0  0
+@   0  0  0  0  0  0  0
+@   0  0  0  0  0  0  0
 
 '@' in figure above represents padded array. Index is table[column][row].
 - Padded first column has last element of original table.
@@ -77,9 +77,9 @@ table is 2d array which has extra padding for interpolation.
 - Padded first row is copy of first row of original table.
 - Padded last 3 row is silence.
 */
-template<size_t tableSize, size_t nPeak> struct WaveTable {
+template<size_t tableSize, size_t nPeak> struct Wavetable {
   static constexpr size_t spectrumSize = tableSize / 2 + 1;
-  static constexpr size_t paddedSize = tableSize + 2;
+  static constexpr size_t paddedSize = tableSize + 3;
   fftwf_complex *spectrum;
   fftwf_complex *bandLimited;
   fftwf_complex *tmpSpec;
@@ -89,7 +89,7 @@ template<size_t tableSize, size_t nPeak> struct WaveTable {
   bool isRefreshing = true;
   float tableBaseFreq = 20.0f;
 
-  WaveTable()
+  Wavetable()
   {
     spectrum = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * spectrumSize);
     bandLimited = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * spectrumSize);
@@ -113,7 +113,7 @@ template<size_t tableSize, size_t nPeak> struct WaveTable {
     }
   }
 
-  ~WaveTable()
+  ~Wavetable()
   {
     for (auto &pln : plan) fftwf_destroy_plan(pln);
     for (auto &tbl : table) fftwf_free(tbl);
@@ -154,17 +154,23 @@ template<size_t tableSize, size_t nPeak> struct WaveTable {
       fftwf_execute(plan[idx]);
     }
 
+    // Fill padded elements.
+    for (size_t idx = 0; idx < nTablePadded - 1; ++idx) {
+      table[idx][0] = table[idx][tableSize];
+      table[idx][paddedSize - 2] = table[idx][1];
+      table[idx][paddedSize - 1] = table[idx][2];
+    }
+
     // Normalize.
     float max = 0.0f;
     for (size_t i = 0; i < tableSize; ++i) {
       auto value = fabsf(table[0][i]);
       if (max < value) max = value;
     }
-    if (max == 0.0f) return;
-    for (size_t idx = 0; idx < nTablePadded - 1; ++idx) {
-      table[idx][0] = table[idx][tableSize];
-      table[idx][paddedSize - 1] = table[idx][1];
-      for (size_t i = 0; i < paddedSize; ++i) table[idx][i] /= max;
+    if (max != 0.0f) {
+      for (size_t idx = 0; idx < nTablePadded - 1; ++idx) {
+        for (size_t i = 0; i < paddedSize; ++i) table[idx][i] /= max;
+      }
     }
 
     isRefreshing = false;
@@ -466,7 +472,7 @@ template<size_t tableSize> struct alignas(64) TableOsc16 {
   }
 };
 
-template<size_t tableSize> struct alignas(64) LfoWaveTable {
+template<size_t tableSize> struct alignas(64) LfoWavetable {
   std::array<float, tableSize + 1> table;
 
   enum InterpType : int32_t { interpStep, interpLinear, interpCubic };
