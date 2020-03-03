@@ -406,12 +406,42 @@ struct GlobalParameter {
 
   enum Preset {
     presetDefault,
+    presetArtifact,
+    presetBasicLowpass,
+    presetBasicUnison,
+    presetBell,
+    presetComfortable,
+    presetCreepingIn,
+    presetCurtain,
+    presetDawn,
+    presetDownSawLFO,
+    presetEven,
+    presetFlap,
+    presetFresh,
+    presetGoodThings,
+    presetHonesty,
+    presetKnock,
+    presetLFO,
+    presetPigeon,
+    presetRandomTable,
+    presetSafety,
+    presetSoftWobble,
+    presetSqueeze,
+    presetTrafficFlow,
+    presetUnderwater,
+    presetUniformPhase,
+    presetUnrealistic,
 
     Preset_ENUM_LENGTH,
   };
 
-  std::array<const char *, 1> programName{
-    "Default",
+  std::array<const char *, 26> programName{
+    "Default",     "Artifact",   "BasicLowpass", "BasicUnison", "Bell",
+    "Comfortable", "CreepingIn", "Curtain",      "Dawn",        "DownSawLFO",
+    "Even",        "Flap",       "Fresh",        "GoodThings",  "Honesty",
+    "Knock",       "LFO",        "Pigeon",       "RandomTable", "Safety",
+    "SoftWobble",  "Squeeze",    "TrafficFlow",  "Underwater",  "UniformPhase",
+    "Unrealistic",
   };
 
 #ifndef TEST_BUILD

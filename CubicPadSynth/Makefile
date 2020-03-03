@@ -29,11 +29,13 @@ OBJS_DSP += $(OBJ_SIMD)
 FILES_DSP = \
 	../lib/vcl/instrset_detect.cpp \
 	plugin.cpp \
-	parameter.cpp
+	parameter.cpp \
+	parameter_preset.cpp \
 
 FILES_UI  = \
 	ui.cpp \
 	parameter.cpp \
+	parameter_preset.cpp \
 	gui/TinosBoldItalic.cpp \
 
 # Do some magic

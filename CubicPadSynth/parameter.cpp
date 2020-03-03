@@ -71,19 +71,3 @@ IntScale<double> Scales::unisonPanType(9);
 
 IntScale<double> Scales::nVoice(7);
 LogScale<double> Scales::smoothness(0.0, 0.5, 0.1, 0.04);
-
-// Generated from preset dump. This works, but hard coding preset data is seriously bad.
-#ifndef TEST_BUILD
-
-void GlobalParameter::loadProgram(uint32_t index)
-{
-  using ID = ParameterID::ID;
-
-  switch (index) {
-    default:
-    case presetDefault:
-      resetParameter();
-      break;
-  }
-}
-#endif
