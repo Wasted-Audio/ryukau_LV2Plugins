@@ -1,4 +1,4 @@
-// (c) 2019-2020 Takamitsu Endo
+// (c) 2020 Takamitsu Endo
 //
 // This file is part of CubicPadSynth.
 //
@@ -38,7 +38,7 @@
 #define PROCESSING_UNIT_NAME ProcessingUnit_SSE41
 #define NOTE_NAME Note_SSE41
 #define DSPCORE_NAME DSPCore_SSE41
-#elif INSTRSET == 2
+#elif INSTRSET >= 2
 #define PROCESSING_UNIT_NAME ProcessingUnit_SSE2
 #define NOTE_NAME Note_SSE2
 #define DSPCORE_NAME DSPCore_SSE2
@@ -68,9 +68,6 @@ notePitchToFrequency(float notePitch, float equalTemperament, float a4Hz = 440.0
   return a4Hz * powf(2.0f, (notePitch - 69.0f) / equalTemperament);
 }
 
-WaveTable<tableSize, nOvertone> PROCESSING_UNIT_NAME::waveTable;
-LfoWaveTable<lfoTableSize> PROCESSING_UNIT_NAME::lfoWaveTable;
-
 void NOTE_NAME::setup(float sampleRate) { this->sampleRate = sampleRate; }
 
 void NOTE_NAME::noteOn(
@@ -87,7 +84,6 @@ void NOTE_NAME::noteOn(
 
   state = NoteState::active;
   id = noteId;
-  this->pan = pan;
 
   auto &unit = units[arrayIndex];
   unit.isActive = true;
@@ -109,11 +105,7 @@ void NOTE_NAME::noteOn(
 
   unit.notePan.insert(vecIndex, pan);
 
-  unit.gainEnvelope.reset(
-    vecIndex, param.value[ID::gainA]->getFloat(), param.value[ID::gainD]->getFloat(),
-    param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(),
-    notePitchToFrequency(
-      notePitch, info.equalTemperament.getValue(), info.pitchA4Hz.getValue()));
+  unit.gainEnvelope.reset(vecIndex);
   unit.lowpassEnvelope.reset(
     vecIndex, param.value[ID::tableLowpassA]->getFloat(),
     param.value[ID::tableLowpassD]->getFloat(),
@@ -176,6 +168,9 @@ void DSPCORE_NAME::setup(double sampleRate)
   }
 
   for (auto &note : notes) note.setup(sampleRate);
+
+  // 2 msec + 1 sample transition time.
+  transitionBuffer.resize(1 + size_t(sampleRate * 0.01), {0.0f, 0.0f});
 
   startup();
   refreshTable();
@@ -267,35 +262,38 @@ void DSPCORE_NAME::setParameters(float tempo)
   if (nVoice > notes.size()) nVoice = notes.size();
 }
 
-std::array<float, 2>
-PROCESSING_UNIT_NAME::process(float sampleRate, NoteProcessInfo &info)
+std::array<float, 2> PROCESSING_UNIT_NAME::process(
+  float sampleRate,
+  Wavetable<tableSize, nOvertone> &wavetable,
+  LfoWavetable<lfoTableSize> &lfoWavetable,
+  NoteProcessInfo &info)
 {
   lfo.setFrequency(sampleRate, info.lfoFrequency.getValue());
-  Vec16f lfoSig = info.lfoPitchAmount.getValue() * lfo.process(lfoWaveTable.table);
+  Vec16f lfoSig = info.lfoPitchAmount.getValue() * lfo.process(lfoWavetable.table);
   lfoSmoother.setP(info.lfoLowpass.getValue());
   lfoSig = lfoSmoother.process(lfoSig);
 
-  Vec16f pitch = lfoSig + notePitch + info.masterPitch.getValue()
+  pitch = lfoSig + notePitch + info.masterPitch.getValue()
     + info.pitchEnvelopeAmount.getValue() * pitchEnvelope.process();
   osc.setFrequency(
     sampleRate,
     notePitchToFrequency(
       pitch, info.equalTemperament.getValue(), info.pitchA4Hz.getValue()),
-    waveTable.tableBaseFreq);
+    wavetable.tableBaseFreq);
 
   float lpKey = info.tableLowpassKeyFollow.getValue();
   float lpCutoff = info.tableLowpass.getValue();
   float lpPt = lpCutoff * 128.0f; // 128 comes from midi note number range + 1.
-  Vec16f lowpassPitch = (lpPt + lpKey * (lpCutoff * (float(nTable) - pitch) - lpPt))
+  lowpassPitch = (lpPt + lpKey * (lpCutoff * (float(nTable) - pitch) - lpPt))
     - lowpassEnvelope.process() * info.tableLowpassEnvelopeAmount.getValue();
   lowpassPitch = select(lowpassPitch < 0.0f, 0.0f, lowpassPitch);
-  Vec16f sig = osc.processCubic(lowpassPitch + pitch, waveTable.table);
+  Vec16f sig = osc.processCubic(lowpassPitch + pitch, wavetable.table);
 
   gain = velocity * gainEnvelope.process();
   isActive = horizontal_add(gain) != 0;
 
-  Vec16f gain1 = gain * notePan;
-  Vec16f gain0 = gain - gain1;
+  gain1 = gain * notePan;
+  gain0 = gain - gain1;
 
   std::array<float, 2> frame;
   frame[0] = horizontal_add(gain0 * sig);
@@ -305,7 +303,7 @@ PROCESSING_UNIT_NAME::process(float sampleRate, NoteProcessInfo &info)
 
 void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
 {
-  if (PROCESSING_UNIT_NAME::waveTable.isRefreshing) {
+  if (wavetable.isRefreshing) {
     for (int i = 0; i < length; ++i) {
       processMidiNote(i);
       out0[i] = 0;
@@ -317,8 +315,7 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
   SmootherCommon<float>::setBufferSize(length);
 
   std::array<float, 2> frame{};
-  float sig = 0;
-  for (size_t i = 0; i < length; ++i) {
+  for (uint32_t i = 0; i < length; ++i) {
     processMidiNote(i);
 
     info.masterPitch.process();
@@ -336,9 +333,17 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
 
     for (auto &unit : units) {
       if (!unit.isActive) continue;
-      auto sig = unit.process(sampleRate, info);
+      auto sig = unit.process(sampleRate, wavetable, lfoWavetable, info);
       frame[0] += sig[0];
       frame[1] += sig[1];
+    }
+
+    if (isTransitioning) {
+      frame[0] += transitionBuffer[trIndex][0];
+      frame[1] += transitionBuffer[trIndex][1];
+      transitionBuffer[trIndex].fill(0.0f);
+      trIndex = (trIndex + 1) % transitionBuffer.size();
+      if (trIndex == trStop) isTransitioning = false;
     }
 
     const auto masterGain = interpMasterGain.process();
@@ -376,7 +381,7 @@ void DSPCORE_NAME::terminateNotes(size_t nNote)
     sortVoiceIndicesByGain();
     if (nNote > voiceIndices.size()) nNote = voiceIndices.size();
     for (size_t idx = 0; idx < nNote; ++idx) {
-      notes[voiceIndices[idx]].release(units, 0.04f);
+      notes[voiceIndices[idx]].release(units, 0.02f);
     }
   }
 }
@@ -400,6 +405,7 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
   if (noteIndices.size() < nUnison) {
     sortVoiceIndicesByGain();
     for (auto &index : voiceIndices) {
+      fillTransitionBuffer(index);
       noteIndices.push_back(index);
       if (noteIndices.size() >= nUnison) break;
     }
@@ -453,17 +459,6 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
     HIGH_ON_MID:
       size_t panIdx = unisonPan.size() / 2;
       size_t sign = 1;
-      for (size_t idx = 0; idx < unisonPan.size(); ++idx) {
-        panIdx += sign * idx;
-        unisonPan[idx] = panRange * panIdx + panOffset;
-        sign *= -1;
-      }
-    } break;
-
-    case unisonPanHighOnSide: {
-    HIGH_ON_SIDE:
-      size_t panIdx = unisonPan.size() / 2;
-      size_t sign = 1;
       size_t inc = 0;
       size_t dec = unisonPan.size() - 1;
       while (inc < unisonPan.size()) {
@@ -471,6 +466,17 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
         unisonPan[dec] = panRange * panIdx + panOffset;
         sign *= -1;
         ++inc, --dec;
+      }
+    } break;
+
+    case unisonPanHighOnSide: {
+    HIGH_ON_SIDE:
+      size_t panIdx = unisonPan.size() / 2;
+      size_t sign = 1;
+      for (size_t idx = 0; idx < unisonPan.size(); ++idx) {
+        panIdx += sign * idx;
+        unisonPan[idx] = panRange * panIdx + panOffset;
+        sign *= -1;
       }
     } break;
 
@@ -524,6 +530,39 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
   terminateNotes(nUnison);
 }
 
+void DSPCORE_NAME::fillTransitionBuffer(size_t noteIndex)
+{
+  isTransitioning = true;
+
+  // Beware the negative overflow. trStop is size_t.
+  trStop = trIndex - 1;
+  if (trStop >= transitionBuffer.size()) trStop += transitionBuffer.size();
+
+  auto &unit = units[notes[noteIndex].arrayIndex];
+  auto vecIndex = notes[noteIndex].vecIndex;
+
+  float gain0 = unit.gain0[vecIndex];
+  float gain1 = unit.gain1[vecIndex];
+  float pitch = unit.lowpassPitch[vecIndex] + unit.pitch[vecIndex];
+  trOsc.phase = unit.osc.phase.extract(vecIndex);
+  trOsc.tick = unit.osc.tick.extract(vecIndex);
+
+  for (size_t bufIdx = 0; bufIdx < transitionBuffer.size(); ++bufIdx) {
+    if (notes[noteIndex].state == NoteState::rest) {
+      trStop = trIndex + bufIdx;
+      if (trStop >= transitionBuffer.size()) trStop -= transitionBuffer.size();
+      break;
+    }
+
+    float oscOut = trOsc.process(pitch, wavetable.table);
+    auto idx = (trIndex + bufIdx) % transitionBuffer.size();
+    auto interp = 1.0f - float(bufIdx) / transitionBuffer.size();
+
+    transitionBuffer[idx][0] += oscOut * interp * gain0;
+    transitionBuffer[idx][1] += oscOut * interp * gain1;
+  }
+}
+
 void DSPCORE_NAME::noteOff(int32_t noteId)
 {
   for (size_t i = 0; i < notes.size(); ++i)
@@ -534,7 +573,7 @@ void DSPCORE_NAME::refreshTable()
 {
   using ID = ParameterID::ID;
 
-  for (auto &note : notes) note.rest();
+  reset();
 
   const float tableBaseFreq = param.value[ID::tableBaseFrequency]->getFloat();
   const float pitchMultiplier = param.value[ID::overtonePitchMultiply]->getFloat();
@@ -553,7 +592,7 @@ void DSPCORE_NAME::refreshTable()
     otPhase[idx] = param.value[ID::overtonePhase0 + idx]->getFloat();
   }
 
-  PROCESSING_UNIT_NAME::waveTable.padsynth(
+  wavetable.padsynth(
     sampleRate, tableBaseFreq, otFrequency, otGain, otPhase, otBandWidth,
     param.value[ID::padSynthSeed]->getInt(), param.value[ID::spectrumExpand]->getFloat(),
     int32_t(param.value[ID::spectrumShift]->getInt()) - spectrumSize,
@@ -567,10 +606,11 @@ void DSPCORE_NAME::refreshLfo()
 {
   using ID = ParameterID::ID;
 
+  reset();
+
   std::vector<float> table(nLFOWavetable);
   for (size_t idx = 0; idx < nLFOWavetable; ++idx)
     table[idx] = param.value[ID::lfoWavetable0 + idx]->getFloat();
 
-  PROCESSING_UNIT_NAME::lfoWaveTable.refreshTable(
-    table, param.value[ID::lfoWavetableType]->getInt());
+  lfoWavetable.refreshTable(table, param.value[ID::lfoWavetableType]->getInt());
 }

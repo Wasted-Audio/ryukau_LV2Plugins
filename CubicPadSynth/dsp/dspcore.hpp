@@ -1,4 +1,4 @@
-// (c) 2019-2020 Takamitsu Endo
+// (c) 2020 Takamitsu Endo
 //
 // This file is part of EnvelopedSine.
 //
@@ -69,9 +69,6 @@ struct NoteProcessInfo {
 
 #define PROCESSING_UNIT_CLASS(INSTRSET)                                                  \
   struct ProcessingUnit_##INSTRSET {                                                     \
-    static WaveTable<tableSize, nOvertone> waveTable;                                    \
-    static LfoWaveTable<lfoTableSize> lfoWaveTable;                                      \
-                                                                                         \
     TableOsc16<tableSize> osc;                                                           \
     LfoTableOsc16<lfoTableSize> lfo;                                                     \
     PController16 lfoSmoother;                                                           \
@@ -80,15 +77,23 @@ struct NoteProcessInfo {
     LinearADSREnvelope16 lowpassEnvelope;                                                \
                                                                                          \
     Vec16f notePitch = 0;                                                                \
+    Vec16f pitch = 0;                                                                    \
+    Vec16f lowpassPitch = 0;                                                             \
     Vec16f notePan = 0.5f;                                                               \
     Vec16f frequency = 1;                                                                \
     Vec16f gain = 0;                                                                     \
+    Vec16f gain0 = 0;                                                                    \
+    Vec16f gain1 = 0;                                                                    \
     Vec16f velocity = 0;                                                                 \
                                                                                          \
     bool isActive = false;                                                               \
                                                                                          \
     void setParameters(float sampleRate, NoteProcessInfo &info, GlobalParameter &param); \
-    std::array<float, 2> process(float sampleRate, NoteProcessInfo &info);               \
+    std::array<float, 2> process(                                                        \
+      float sampleRate,                                                                  \
+      Wavetable<tableSize, nOvertone> &wavetable,                                        \
+      LfoWavetable<lfoTableSize> &lfoWavetable,                                          \
+      NoteProcessInfo &info);                                                            \
     void reset();                                                                        \
   };
 
@@ -107,7 +112,6 @@ PROCESSING_UNIT_CLASS(SSE2)
     int vecIndex = 0;                                                                    \
     int arrayIndex = 0;                                                                  \
     int32_t id = -1;                                                                     \
-    float pan = 0.5;                                                                     \
                                                                                          \
     void setup(float sampleRate);                                                        \
     void noteOn(                                                                         \
@@ -231,6 +235,8 @@ public:
     std::array<float, nOvertone> otPhase{};                                              \
     std::array<float, nOvertone> otBandWidth{};                                          \
                                                                                          \
+    Wavetable<tableSize, nOvertone> wavetable;                                           \
+    LfoWavetable<lfoTableSize> lfoWavetable;                                             \
     std::array<ProcessingUnit_##INSTRSET, nUnit> units;                                  \
                                                                                          \
     size_t nVoice = 32;                                                                  \
@@ -242,6 +248,12 @@ public:
                                                                                          \
     NoteProcessInfo info;                                                                \
     LinearSmoother<float> interpMasterGain;                                              \
+                                                                                         \
+    std::vector<std::array<float, 2>> transitionBuffer{};                                \
+    bool isTransitioning = false;                                                        \
+    size_t trIndex = 0;                                                                  \
+    size_t trStop = 0;                                                                   \
+    TableOsc<tableSize> trOsc;                                                           \
   };
 
 DSPCORE_CLASS(AVX512)
