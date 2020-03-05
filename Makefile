@@ -1,15 +1,13 @@
-# all: dpf \
-# 	SevenDelay \
-# 	SyncSawSynth \
-# 	WaveCymbal \
-# 	FDNCymbal \
-# 	TrapezoidSynth \
-# 	IterativeSinCluster \
-# 	EnvelopedSine \
-# 	EsPhaser \
-# 	BasicWaveTable
-
-all: dpf CubicPadSynth
+all: dpf \
+	SevenDelay \
+	SyncSawSynth \
+	WaveCymbal \
+	FDNCymbal \
+	TrapezoidSynth \
+	IterativeSinCluster \
+	EnvelopedSine \
+	EsPhaser \
+	CubicPadSynth
 
 # DEBUG=true
 # export DEBUG
