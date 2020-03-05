@@ -10,16 +10,66 @@ On Ubuntu 18.04, open terminal and run following command.
 sudo apt install git pkg-config libjack-jackd2-dev libgl-dev liblo-dev
 git clone --recursive <this repository url>
 cd LV2Plugins
+
+# Temporary patch to DPF. See: https://github.com/DISTRHO/DPF/issues/216
+cp patch/NanoVG.cpp lib/DPF/dgl/src/NanoVG.cpp
+
 make -j
 make install # Copy *.lv2 to ~/.lv2
 ```
 
 Binaries are built into `LV2Plugins/bin`.
 
+To rebuild, use `make clean` or `make cleanall`.
+
+```bash
+cd LV2Plugins
+make clean    # Removes LV2Plugins/bin directory.
+make cleanall # Removes LV2Plugins/bin and files built for DPF.
+```
+
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 
 Some controls turns red when pointing. They can be the cause of potential blow up. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
+
+## CubicPadSynth
+<figure>
+<img src="docs/img/lv2_cubicpadsynth.png" alt="Image of CubicPadSynth GUI."/>
+</figure>
+
+CubicPadSynth is a wavetable synthesizer which uses PADsynth algorithm to generate oscillator tables. Cubic interpolation is used to get smooth sound even at inaudible low frequency range. LFO waveform can be directly drawn.
+
+- [PADsynth algorithm](https://zynaddsubfx.sourceforge.io/doc/PADsynth/PADsynth.htm)
+
+Some parameters have wide range of value. <kbd>Shift</kbd> + <kbd>Left Drag</kbd> can be used to fine adjustment.
+
+Barbox controls used for `LFO Wave` in Main tab and `Gain`, `Width`, `Pitch`, `Phase` in Wavetable tab have keyboard shortcuts. Shortcuts are only enabled when cursor is on overtone control. Cheat sheet is available on Information tab.
+
+| Input                                   | Control                                 |
+| --------------------------------------- | --------------------------------------- |
+| <kbd>Ctrl</kbd> + <kbd>Left Click</kbd> | Reset to Default                        |
+| <kbd>Right Drag</kbd>                   | Draw Line                               |
+| <kbd>d</kbd>                            | Reset Everything to Default             |
+| <kbd>D</kbd>                            | Toggle Min/Mid/Max                      |
+| <kbd>e</kbd>                            | Emphasize Low                           |
+| <kbd>E</kbd>                            | Emphasize High                          |
+| <kbd>f</kbd>                            | Low-pass Filter                         |
+| <kbd>F</kbd>                            | High-pass Filter                        |
+| <kbd>i</kbd>                            | Invert Value (Preserve current minimum) |
+| <kbd>I</kbd>                            | Invert Value (Minimum to 0)             |
+| <kbd>n</kbd>                            | Normalize (Preserve current minimum)    |
+| <kbd>N</kbd>                            | Normalize (Minimum to 0)                |
+| <kbd>p</kbd>                            | Permute                                 |
+| <kbd>r</kbd>                            | Randomize                               |
+| <kbd>R</kbd>                            | Sparse Randomize                        |
+| <kbd>s</kbd>                            | Sort Descending Order                   |
+| <kbd>S</kbd>                            | Sort Ascending Order                    |
+| <kbd>t</kbd>                            | Subtle Randomize                        |
+| <kbd>,</kbd> (Comma)                    | Rotate Back                             |
+| <kbd>.</kbd> (Period)                   | Rotate Forward                          |
+| <kbd>1</kbd>                            | Decrease                                |
+| <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
 
 ## EsPhaser
 <figure>
@@ -40,7 +90,7 @@ Caution:
 
 EnvelopedSine is another additive synthesizer which computes 64 sine waves per note. There are individual controls of attack, decay and saturation for each sine oscillator.
 
-Overtone controls (`Attack`, `Decay`, `Gain`, `Saturation`) have some keyboard shortcuts. Shortcuts are only enabled when cursor is on overtone control. Cheat sheet can be popped up by clicking plugin title on bottom left.
+Overtone controls (`Attack`, `Decay`, `Gain`, `Saturation`) have keyboard shortcuts. Shortcuts are only enabled when cursor is on overtone control. Cheat sheet can be popped up by clicking plugin title on bottom left.
 
 | Input                                   | Control                                 |
 | --------------------------------------- | --------------------------------------- |

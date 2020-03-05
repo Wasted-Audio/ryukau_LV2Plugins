@@ -1,4 +1,6 @@
 # Code Walkthrough
+This is mostly a note to remember what I was doing.
+
 ## Adding a Parameter
 Parameter management is structured to avoid changing 5 different switch statement in `ui.cpp` and `plugin.cpp` for each parameter addition.
 
