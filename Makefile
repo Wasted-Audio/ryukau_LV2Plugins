@@ -12,45 +12,49 @@ all: dpf \
 # DEBUG=true
 # export DEBUG
 
+LV2 ?= true
+VST2 ?= true
+JACK ?= true
+
 .PHONY: dpf
 dpf:
 	$(MAKE) -C lib/DPF
 
 .PHONY: CubicPadSynth
 CubicPadSynth: dpf
-	$(MAKE) -C CubicPadSynth
+	$(MAKE) -C CubicPadSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: EsPhaser
 EsPhaser: dpf
-	$(MAKE) -C EsPhaser
+	$(MAKE) -C EsPhaser LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: EnvelopedSine
 EnvelopedSine: dpf
-	$(MAKE) -C EnvelopedSine
+	$(MAKE) -C EnvelopedSine LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: IterativeSinCluster
 IterativeSinCluster: dpf
-	$(MAKE) -C IterativeSinCluster
+	$(MAKE) -C IterativeSinCluster LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: TrapezoidSynth
 TrapezoidSynth: dpf
-	$(MAKE) -C TrapezoidSynth
+	$(MAKE) -C TrapezoidSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: FDNCymbal
 FDNCymbal: dpf
-	$(MAKE) -C FDNCymbal
+	$(MAKE) -C FDNCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: WaveCymbal
 WaveCymbal: dpf
-	$(MAKE) -C WaveCymbal
+	$(MAKE) -C WaveCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: SyncSawSynth
 SyncSawSynth: dpf
-	$(MAKE) -C SyncSawSynth
+	$(MAKE) -C SyncSawSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: SevenDelay
 SevenDelay: dpf
-	$(MAKE) -C SevenDelay
+	$(MAKE) -C SevenDelay LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: generate_ttl
 generate_ttl:

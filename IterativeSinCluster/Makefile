@@ -44,28 +44,25 @@ BUILD_CXX_FLAGS += -std=c++17 -O3 -Wall -Wno-unused-but-set-parameter
 endif
 
 # Enable all possible plugin types
-ifeq ($(HAVE_JACK),true)
-ifeq ($(HAVE_OPENGL),true)
+LV2 ?= true
+VST2 ?= true
+JACK ?= true
+
+ifeq ($(JACK)$(HAVE_JACK)$(HAVE_OPENGL),truetruetrue)
 TARGETS += jack
 endif
-endif
 
-# ifeq ($(LINUX),true)
-# ifeq ($(HAVE_LIBLO),true)
-# ifeq ($(HAVE_OPENGL),true)
-# TARGETS += ladspa
-# TARGETS += dssi
-# endif
-# endif
-# endif
-
+ifeq ($(LV2),true)
 ifeq ($(HAVE_OPENGL),true)
 TARGETS += lv2_sep
 else
 TARGETS += lv2_dsp
 endif
+endif
 
+ifeq ($(VST2),true)
 TARGETS += vst
+endif
 
 # Rule entry point.
 all: simd $(TARGETS)
