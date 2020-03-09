@@ -14,7 +14,7 @@ cd LV2Plugins
 # Temporary patch to DPF. See: https://github.com/DISTRHO/DPF/issues/216
 cp patch/NanoVG.cpp lib/DPF/dgl/src/NanoVG.cpp
 
-make -j      # If you have problem, try removing the -j option.
+make -j      # If building process goes out of memory, try removing the -j option.
 make install # Copy *.lv2 to ~/.lv2
 ```
 
