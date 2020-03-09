@@ -14,7 +14,7 @@ cd LV2Plugins
 # Temporary patch to DPF. See: https://github.com/DISTRHO/DPF/issues/216
 cp patch/NanoVG.cpp lib/DPF/dgl/src/NanoVG.cpp
 
-make -j
+make -j      # If you have problem, try removing the -j option.
 make install # Copy *.lv2 to ~/.lv2
 ```
 
@@ -24,8 +24,16 @@ To rebuild, use `make clean` or `make cleanall`.
 
 ```bash
 cd LV2Plugins
-make clean    # Removes LV2Plugins/bin directory.
-make cleanall # Removes LV2Plugins/bin and files built for DPF.
+make clean    # Remove LV2Plugins/bin directory.
+make cleanall # Remove LV2Plugins/bin and files built for DPF.
+```
+
+To disable particular plugin type, set the variables `LV2`, `JACK`, `VST2` to `false`.
+
+```bash
+cd LV2Plugins
+make -j LV2=false             # Disable LV2 build.
+make -j JACK=false VST2=false # Disable jack and vst2 build.
 ```
 
 # Plugins
