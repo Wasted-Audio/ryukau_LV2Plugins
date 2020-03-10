@@ -60,7 +60,7 @@ protected:
   const char *getLabel() const override { return "IterativeSinCluster"; }
   const char *getDescription() const override
   {
-    return "A synthesizer to make sine wave tone cluster.";
+    return "An additive synthesizer to make tone cluster. 512 sine waves per note.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override

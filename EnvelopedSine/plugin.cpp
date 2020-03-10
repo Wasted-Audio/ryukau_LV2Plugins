@@ -61,7 +61,8 @@ protected:
   const char *getLabel() const override { return "EnvelopedSine"; }
   const char *getDescription() const override
   {
-    return "A synthesizer to make sine wave tone cluster.";
+    return "An additive synthesizer which has individual envelopes for each 64 sine "
+           "waves.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
@@ -73,7 +74,7 @@ protected:
   {
     return d_version(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
   }
-  int64_t getUniqueId() const override { return d_cconst('u', 'i', 's', 'c'); }
+  int64_t getUniqueId() const override { return d_cconst('u', 'e', 'n', 's'); }
 
   void initParameter(uint32_t index, Parameter &parameter) override
   {

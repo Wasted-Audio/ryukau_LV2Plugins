@@ -61,7 +61,7 @@ protected:
   const char *getLabel() const override { return "CubicPadSynth"; }
   const char *getDescription() const override
   {
-    return "A synthesizer to make sine wave tone cluster.";
+    return "A wavetable synthesizer using PADsynth algoritihm and cubic interpolation.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
@@ -73,7 +73,7 @@ protected:
   {
     return d_version(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
   }
-  int64_t getUniqueId() const override { return d_cconst('u', 'b', 'w', 't'); }
+  int64_t getUniqueId() const override { return d_cconst('u', 'c', 'p', 's'); }
 
   void initParameter(uint32_t index, Parameter &parameter) override
   {
