@@ -1,4 +1,6 @@
-all: dpf \
+all: build generate_ttl
+
+build: dpf \
 	SevenDelay \
 	SyncSawSynth \
 	WaveCymbal \
@@ -9,6 +11,10 @@ all: dpf \
 	EsPhaser \
 	CubicPadSynth
 
+.PHONY: generate_ttl
+generate_ttl: build
+	./generate-ttl.sh
+
 # DEBUG=true
 # export DEBUG
 
@@ -18,7 +24,7 @@ JACK ?= true
 
 .PHONY: dpf
 dpf:
-	$(MAKE) -C lib/DPF
+	$(MAKE) -C lib/DPF dgl utils/lv2_ttl_generator
 
 .PHONY: CubicPadSynth
 CubicPadSynth: dpf
@@ -56,12 +62,8 @@ SyncSawSynth: dpf
 SevenDelay: dpf
 	$(MAKE) -C SevenDelay LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
-.PHONY: generate_ttl
-generate_ttl:
-	./generate-ttl.sh
-
 .PHONY: install
-install: generate_ttl
+install:
 	cp -r bin/*.lv2 ~/.lv2/
 
 .PHONY: clean
@@ -71,8 +73,7 @@ clean:
 
 .PHONY: cleanDPF
 cleanDPF:
-	rm -r lib/DPF/bin
-	rm -r lib/DPF/build
+	$(MAKE) -C lib/DPF clean
 
 .PHONY: cleanall
 cleanall: cleanDPF clean
