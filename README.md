@@ -267,6 +267,7 @@ GPLv3. See License directory for the complete license.
 - [DPF - DISTRHO Plugin Framework](https://github.com/DISTRHO/DPF)
 - [juce_FastMathApproximations.h](https://github.com/WeAreROLI/JUCE/blob/master/modules/juce_dsp/maths/juce_FastMathApproximations.h) from [JUCE](https://juce.com/)
 - [VCL - Vector class library version2](https://github.com/vectorclass/version2)
+- [FFTW](http://fftw.org/)
 
 ## Font
 - [Tinos](https://fonts.google.com/specimen/Tinos)
