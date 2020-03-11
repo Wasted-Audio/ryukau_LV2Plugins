@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SevenDelay.
 //
@@ -25,26 +25,75 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ui.hpp"
+#include "../common/ui.hpp"
+#include "parameter.hpp"
 
-#include "gui/button.hpp"
-#include "gui/checkbox.hpp"
-#include "gui/knob.hpp"
-#include "gui/label.hpp"
-#include "gui/splash.hpp"
-#include "gui/vslider.hpp"
+#include "../common/gui/TinosBoldItalic.hpp"
+#include "../common/gui/button.hpp"
+#include "../common/gui/checkbox.hpp"
+#include "../common/gui/knob.hpp"
+#include "../common/gui/label.hpp"
+#include "../common/gui/splash.hpp"
+#include "../common/gui/vslider.hpp"
 #include "gui/waveview.hpp"
+
+void CreditSplash::onNanoDisplay()
+{
+  if (!isVisible()) return;
+
+  resetTransform();
+  translate(getAbsoluteX(), getAbsoluteY());
+
+  const auto width = getWidth();
+  const auto height = getHeight();
+
+  // Border.
+  beginPath();
+  rect(0, 0, width, height);
+  fillColor(backgroundColor);
+  fill();
+  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeWidth(borderWidth);
+  stroke();
+
+  // Text.
+  fillColor(foregroundColor);
+  fontFaceId(fontId);
+  textAlign(align);
+
+  fontSize(textSize * 1.5f);
+  std::stringstream stream;
+  stream << "SevenDelay " << std::to_string(MAJOR_VERSION) << "."
+         << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
+  text(20.0f, 50.0f, stream.str().c_str(), nullptr);
+
+  fontSize(textSize);
+  text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
+  text(20.0f, 150.0f, "Shift + Drag: Fine Adjustment", nullptr);
+  text(20.0f, 180.0f, "Ctrl + Click: Reset to Default", nullptr);
+  text(20.0f, 240.0f, "Have a nice day!", nullptr);
+}
 
 START_NAMESPACE_DISTRHO
 
 constexpr uint32_t defaultWidth = 960;
 constexpr uint32_t defaultHeight = 330;
+constexpr float pluginNameTextSize = 28.0f;
+constexpr float labelHeight = 30.0f;
+constexpr float midTextSize = 20.0f;
+constexpr float uiTextSize = 16.0f;
+constexpr float checkboxWidth = 100.0f;
+constexpr float margin = 0.0f;
 
 class SevenDelayUI : public PluginUI {
 public:
   SevenDelayUI() : PluginUI(defaultWidth, defaultHeight)
   {
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
+
+    fontId = createFontFromMemory(
+      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
+      TinosBoldItalic::TinosBoldItalicDataSize, false);
 
     const auto normalWidth = 80.0f;
     const auto normalHeight = normalWidth + 40.0f;
@@ -73,8 +122,11 @@ public:
     const auto delayTop2 = delayTop1 + normalHeight;
     const auto delayTop3 = delayTop2 + smallHeight;
     const auto delayTop4 = delayTop3 + smallHeight;
-    addCheckbox(delayLeft + 10.0f, delayTop2, "Sync", ParameterID::tempoSync);
-    addCheckbox(delayLeft + 10.0f, delayTop3, "Negative", ParameterID::negativeFeedback);
+    addCheckbox(
+      delayLeft + 10.0f, delayTop2, checkboxWidth, "Sync", ParameterID::tempoSync);
+    addCheckbox(
+      delayLeft + 10.0f, delayTop3, checkboxWidth, "Negative",
+      ParameterID::negativeFeedback);
 
     addKnob(
       1.0f * interval + delayLeft, delayTop2, smallWidth, colorBlue, "In Spread",
@@ -135,7 +187,7 @@ public:
     const auto nameWidth = 180.0f;
     addSplashScreen(
       nameLeft, nameTop, nameWidth, 40.0f, 200.0f, 20.0f, defaultWidth - 400.0f,
-      defaultHeight - 40.0f);
+      defaultHeight - 40.0f, "SevenDelay");
   }
 
 protected:
@@ -157,8 +209,8 @@ protected:
 
   void updateWaveView()
   {
-    waveView->shape = param.value[ParameterID::lfoShape]->getRaw();
-    waveView->phase = param.value[ParameterID::lfoInitialPhase]->getRaw();
+    waveView->shape = param.value[ParameterID::lfoShape]->getInt();
+    waveView->phase = param.value[ParameterID::lfoInitialPhase]->getInt();
   }
 
   void updateValue(uint32_t id, float normalized) override
@@ -168,6 +220,8 @@ protected:
     repaint();
     // dumpParameter(); // Used to make preset. There may be better way to do this.
   }
+
+  void updateState(std::string /* key */, std::string /* value */) {}
 
   void programLoaded(uint32_t index) override
   {
@@ -196,6 +250,8 @@ private:
   Color colorGreen{19, 193, 54};
   Color colorOrange{252, 192, 79};
 
+  FontId fontId = -1;
+
   std::vector<std::shared_ptr<Widget>> widget;
   std::vector<std::shared_ptr<ValueWidget>> valueWidget;
   std::shared_ptr<WaveView> waveView;
@@ -204,13 +260,13 @@ private:
   {
     std::cout << "{\n";
     for (const auto &value : param.value) {
-      const auto val = dynamic_cast<InternalValue<BoolScale<double>> *>(value.get());
+      const auto val = dynamic_cast<IntValue *>(value.get());
       if (val == nullptr) {
         std::cout << "\"" << value->getName()
                   << "\": " << std::to_string(value->getNormalized()) << ",\n";
       } else {
         std::cout << "\"" << value->getName()
-                  << "\": " << std::to_string(uint32_t(value->getRaw())) << ",\n";
+                  << "\": " << std::to_string(uint32_t(value->getInt())) << ",\n";
       }
     }
     std::cout << "}" << std::endl;
@@ -218,44 +274,39 @@ private:
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)
   {
-    auto button = std::make_shared<ToggleButton>(this, this, title);
+    auto button = std::make_shared<ToggleButton>(this, this, title, fontId);
     button->id = id;
-    button->setSize(width, 30.0f);
+    button->setSize(width, labelHeight);
     button->setAbsolutePos(left, top);
     button->setForegroundColor(colorFore);
     button->setHighlightColor(colorOrange);
-    button->setTextSize(20.0f);
+    button->setTextSize(midTextSize);
     valueWidget.push_back(button);
   }
 
-  void addCheckbox(float left, float top, const char *title, uint32_t id)
+  void addCheckbox(float left, float top, float width, const char *title, uint32_t id)
   {
-    auto width = 100.0f;
-    auto height = 30.0f;
-
-    auto checkbox = std::make_shared<CheckBox>(this, this, title);
+    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
     checkbox->id = id;
-    checkbox->setSize(width, height);
+    checkbox->setSize(width, labelHeight);
     checkbox->setAbsolutePos(left, top);
     checkbox->setForegroundColor(colorFore);
     checkbox->setHighlightColor(colorBlue);
-    checkbox->setTextSize(16.0f);
+    checkbox->setTextSize(uiTextSize);
     valueWidget.push_back(checkbox);
   }
 
   void addGroupLabel(int left, int top, float width, const char *name)
   {
-    auto height = 30.0f;
-
-    auto label = std::make_shared<Label>(this, name);
-    label->setSize(width, height);
+    auto label = std::make_shared<Label>(this, name, fontId);
+    label->setSize(width, labelHeight);
     label->setAbsolutePos(left, top);
     label->setForegroundColor(colorFore);
-    label->drawUnderline = true;
+    label->drawBorder = true;
     label->setBorderWidth(2.0f);
-    label->setTextSize(20.0f);
+    label->setTextSize(midTextSize);
     widget.push_back(label);
-  };
+  }
 
   enum class LabelPosition {
     top,
@@ -273,35 +324,50 @@ private:
     uint32_t id,
     LabelPosition labelPosition = LabelPosition::bottom)
   {
+    auto height = width - 2.0f * margin;
+
     auto knob = std::make_shared<Knob>(this, this);
     knob->id = id;
-    knob->setSize(width, width);
-    knob->setAbsolutePos(left, top);
+    knob->setSize(width - 2.0f * margin, height);
+    knob->setAbsolutePos(left + margin, top + margin);
     knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
+    if (id < param.value.size()) {
+      auto defaultValue = param.value[id]->getDefaultNormalized();
+      knob->setDefaultValue(defaultValue);
+      knob->setValue(defaultValue);
+    }
     valueWidget.push_back(knob);
 
-    float height = width;
+    if (name != nullptr) addKnobLabel(left, top, width, height, name, labelPosition);
+  }
+
+  void addKnobLabel(
+    float left,
+    float top,
+    float width,
+    float height,
+    const char *name,
+    LabelPosition labelPosition)
+  {
     switch (labelPosition) {
       default:
       case LabelPosition::bottom:
-        top = top + width;
+        top = top + height;
         height = 30.0f;
         break;
 
       case LabelPosition::right:
+        height = width;
         left = left + width + 10.0;
         width *= 2.0f;
         break;
     }
 
-    auto label = std::make_shared<Label>(this, name);
+    auto label = std::make_shared<Label>(this, name, fontId);
     label->setSize(width, height);
     label->setAbsolutePos(left, top);
     label->setForegroundColor(colorFore);
-    label->setTextSize(16.0f);
+    label->setTextSize(uiTextSize);
     if (labelPosition == LabelPosition::right)
       label->setTextAlign(ALIGN_LEFT | ALIGN_MIDDLE);
     widget.push_back(label);
@@ -315,17 +381,18 @@ private:
     float splashLeft,
     float splashTop,
     float splashWidth,
-    float splashHeight)
+    float splashHeight,
+    const char *name)
   {
-    auto button = std::make_shared<SplashButton>(this, "SevenDelay");
+    auto button = std::make_shared<SplashButton>(this, name, fontId);
     button->setSize(buttonWidth, buttonHeight);
     button->setAbsolutePos(buttonLeft, buttonTop);
     button->setForegroundColor(colorFore);
     button->setHighlightColor(colorOrange);
-    button->setTextSize(28.0f);
+    button->setTextSize(pluginNameTextSize);
     widget.push_back(button);
 
-    auto credit = std::make_shared<CreditSplash>(this);
+    auto credit = std::make_shared<CreditSplash>(this, name, fontId);
     credit->setSize(splashWidth, splashHeight);
     credit->setAbsolutePos(splashLeft, splashTop);
     button->setSplashWidget(credit);
@@ -352,13 +419,12 @@ private:
     valueWidget.push_back(slider);
 
     top += sliderHeight + 10.0;
-    const auto labelHeight = 30.0f;
 
-    auto label = std::make_shared<Label>(this, name);
+    auto label = std::make_shared<Label>(this, name, fontId);
     label->setSize(width, labelHeight);
     label->setAbsolutePos(left, top);
     label->setForegroundColor(colorFore);
-    label->setTextSize(16.0f);
+    label->setTextSize(uiTextSize);
     widget.push_back(label);
   }
 

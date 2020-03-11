@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SevenDelay.
 //
@@ -20,8 +20,8 @@
 #include <memory>
 #include <vector>
 
-#include "dsp/scale.hpp"
-#include "value.hpp"
+#include "../common/dsp/scale.hpp"
+#include "../common/value.hpp"
 
 constexpr double maxDelayTime = 8.0;
 constexpr double maxToneFrequency = 20000.0;
@@ -56,21 +56,21 @@ enum ID {
 } // namespace ParameterID
 
 struct Scales {
-  static BoolScale<double> boolScale;
-  static LinearScale<double> defaultScale;
-  static LogScale<double> time;
-  static SPolyScale<double> offset;
-  static LogScale<double> lfoTimeAmount;
-  static LogScale<double> lfoToneAmount;
-  static LogScale<double> lfoFrequency;
-  static LogScale<double> lfoShape;
-  static LinearScale<double> lfoInitialPhase;
-  static LogScale<double> smoothness;
-  static LogScale<double> toneCutoff;
-  static LogScale<double> toneQ;
-  static LogScale<double> toneMix; // internal
-  static LogScale<double> dckill;
-  static LogScale<double> dckillMix; // internal
+  static SomeDSP::IntScale<double> boolScale;
+  static SomeDSP::LinearScale<double> defaultScale;
+  static SomeDSP::LogScale<double> time;
+  static SomeDSP::SPolyScale<double> offset;
+  static SomeDSP::LogScale<double> lfoTimeAmount;
+  static SomeDSP::LogScale<double> lfoToneAmount;
+  static SomeDSP::LogScale<double> lfoFrequency;
+  static SomeDSP::LogScale<double> lfoShape;
+  static SomeDSP::LinearScale<double> lfoInitialPhase;
+  static SomeDSP::LogScale<double> smoothness;
+  static SomeDSP::LogScale<double> toneCutoff;
+  static SomeDSP::LogScale<double> toneQ;
+  static SomeDSP::LogScale<double> toneMix; // internal
+  static SomeDSP::LogScale<double> dckill;
+  static SomeDSP::LogScale<double> dckillMix; // internal
 };
 
 struct GlobalParameter {
@@ -80,52 +80,57 @@ struct GlobalParameter {
   {
     value.resize(ParameterID::ID_ENUM_LENGTH);
 
-    value[ParameterID::bypass] = std::make_unique<InternalValue<BoolScale<double>>>(
-      0.0, Scales::boolScale, "bypass");
-    value[ParameterID::time]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.5, Scales::time, "time");
-    value[ParameterID::feedback] = std::make_unique<InternalValue<LinearScale<double>>>(
-      0.625, Scales::defaultScale, "feedback");
-    value[ParameterID::offset] = std::make_unique<InternalValue<SPolyScale<double>>>(
-      0.5, Scales::offset, "offset");
-    value[ParameterID::wetMix] = std::make_unique<InternalValue<LinearScale<double>>>(
-      0.75, Scales::defaultScale, "wetMix");
-    value[ParameterID::dryMix] = std::make_unique<InternalValue<LinearScale<double>>>(
-      1.0, Scales::defaultScale, "dryMix");
-    value[ParameterID::tempoSync] = std::make_unique<InternalValue<BoolScale<double>>>(
-      0.0, Scales::boolScale, "tempoSync");
-    value[ParameterID::negativeFeedback]
-      = std::make_unique<InternalValue<BoolScale<double>>>(
-        0.0, Scales::boolScale, "negativeFeedback");
-    value[ParameterID::lfoTimeAmount] = std::make_unique<InternalValue<LogScale<double>>>(
-      0.0, Scales::lfoTimeAmount, "lfoTimeAmount");
-    value[ParameterID::lfoToneAmount] = std::make_unique<InternalValue<LogScale<double>>>(
-      0.0, Scales::lfoToneAmount, "lfoToneAmount");
-    value[ParameterID::lfoFrequency] = std::make_unique<InternalValue<LogScale<double>>>(
-      0.5, Scales::lfoFrequency, "lfoFrequency");
-    value[ParameterID::lfoShape] = std::make_unique<InternalValue<LogScale<double>>>(
-      0.5, Scales::lfoShape, "lfoShape");
-    value[ParameterID::lfoInitialPhase]
-      = std::make_unique<InternalValue<LinearScale<double>>>(
-        0.0, Scales::lfoInitialPhase, "lfoInitialPhase");
-    value[ParameterID::lfoHold] = std::make_unique<InternalValue<BoolScale<double>>>(
-      0.0, Scales::boolScale, "lfoHold");
-    value[ParameterID::smoothness] = std::make_unique<InternalValue<LogScale<double>>>(
-      0.3, Scales::smoothness, "smoothness");
-    value[ParameterID::inSpread] = std::make_unique<InternalValue<LinearScale<double>>>(
-      0.0, Scales::defaultScale, "inSpread");
-    value[ParameterID::inPan] = std::make_unique<InternalValue<LinearScale<double>>>(
-      0.5, Scales::defaultScale, "inPan");
-    value[ParameterID::outSpread] = std::make_unique<InternalValue<LinearScale<double>>>(
-      0.0, Scales::defaultScale, "outSpread");
-    value[ParameterID::outPan] = std::make_unique<InternalValue<LinearScale<double>>>(
-      0.5, Scales::defaultScale, "outPan");
-    value[ParameterID::toneCutoff] = std::make_unique<InternalValue<LogScale<double>>>(
-      1.0, Scales::toneCutoff, "toneCutoff");
-    value[ParameterID::toneQ]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.9, Scales::toneQ, "toneQ");
-    value[ParameterID::dckill]
-      = std::make_unique<InternalValue<LogScale<double>>>(0.0, Scales::dckill, "dckill");
+    using ID = ParameterID::ID;
+    using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
+    using LogValue = FloatValue<SomeDSP::LogScale<double>>;
+    using SPolyValue = FloatValue<SomeDSP::SPolyScale<double>>;
+    // using DecibelValue = FloatValue<SomeDSP::DecibelScale<double>>;
+
+    value[ID::bypass] = std::make_unique<IntValue>(
+      0.0, Scales::boolScale, "bypass", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::time]
+      = std::make_unique<LogValue>(0.5, Scales::time, "time", kParameterIsAutomable);
+    value[ID::feedback] = std::make_unique<LinearValue>(
+      0.625, Scales::defaultScale, "feedback", kParameterIsAutomable);
+    value[ID::offset] = std::make_unique<SPolyValue>(
+      0.5, Scales::offset, "offset", kParameterIsAutomable);
+    value[ID::wetMix] = std::make_unique<LinearValue>(
+      0.75, Scales::defaultScale, "wetMix", kParameterIsAutomable);
+    value[ID::dryMix] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "dryMix", kParameterIsAutomable);
+    value[ID::tempoSync] = std::make_unique<IntValue>(
+      0.0, Scales::boolScale, "tempoSync", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::negativeFeedback] = std::make_unique<IntValue>(
+      0.0, Scales::boolScale, "negativeFeedback",
+      kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::lfoTimeAmount] = std::make_unique<LogValue>(
+      0.0, Scales::lfoTimeAmount, "lfoTimeAmount", kParameterIsAutomable);
+    value[ID::lfoToneAmount] = std::make_unique<LogValue>(
+      0.0, Scales::lfoToneAmount, "lfoToneAmount", kParameterIsAutomable);
+    value[ID::lfoFrequency] = std::make_unique<LogValue>(
+      0.5, Scales::lfoFrequency, "lfoFrequency", kParameterIsAutomable);
+    value[ID::lfoShape] = std::make_unique<LogValue>(
+      0.5, Scales::lfoShape, "lfoShape", kParameterIsAutomable);
+    value[ID::lfoInitialPhase] = std::make_unique<LinearValue>(
+      0.0, Scales::lfoInitialPhase, "lfoInitialPhase", kParameterIsAutomable);
+    value[ID::lfoHold] = std::make_unique<IntValue>(
+      0.0, Scales::boolScale, "lfoHold", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::smoothness] = std::make_unique<LogValue>(
+      0.3, Scales::smoothness, "smoothness", kParameterIsAutomable);
+    value[ID::inSpread] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "inSpread", kParameterIsAutomable);
+    value[ID::inPan] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "inPan", kParameterIsAutomable);
+    value[ID::outSpread] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "outSpread", kParameterIsAutomable);
+    value[ID::outPan] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "outPan", kParameterIsAutomable);
+    value[ID::toneCutoff] = std::make_unique<LogValue>(
+      1.0, Scales::toneCutoff, "toneCutoff", kParameterIsAutomable);
+    value[ID::toneQ]
+      = std::make_unique<LogValue>(0.9, Scales::toneQ, "toneQ", kParameterIsAutomable);
+    value[ID::dckill]
+      = std::make_unique<LogValue>(0.0, Scales::dckill, "dckill", kParameterIsAutomable);
   }
 
   void initParameter(uint32_t index, Parameter &parameter)
@@ -142,19 +147,19 @@ struct GlobalParameter {
   double getParameterValue(uint32_t index) const
   {
     if (index >= value.size()) return 0.0;
-    return value[index]->getRaw();
+    return value[index]->getFloat();
   }
 
   void setParameterValue(uint32_t index, float raw)
   {
     if (index >= value.size()) return;
-    value[index]->setFromRaw(raw);
+    value[index]->setFromFloat(raw);
   }
 
   double parameterChanged(uint32_t index, float raw)
   {
     if (index >= value.size()) return 0.0;
-    value[index]->setFromRaw(raw);
+    value[index]->setFromFloat(raw);
     return value[index]->getNormalized();
   }
 
@@ -162,7 +167,7 @@ struct GlobalParameter {
   {
     if (index >= value.size()) return 0.0;
     value[index]->setFromNormalized(normalized);
-    return value[index]->getRaw();
+    return value[index]->getFloat();
   }
 
   enum Preset {

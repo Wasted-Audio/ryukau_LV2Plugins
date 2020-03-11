@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SevenDelay.
 //
@@ -17,10 +17,9 @@
 
 #include <cmath>
 
-namespace SomeDSP {
+#include "../common/dsp/constants.hpp"
 
-constexpr double pi = 3.14159265358979323846;
-constexpr double twopi = 6.28318530717958647692;
+namespace SomeDSP {
 
 inline double somesin(double x) { return ::sin(x); }
 inline float somesin(float x) { return ::sinf(x); }

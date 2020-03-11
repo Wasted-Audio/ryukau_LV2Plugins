@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SevenDelay.
 //
@@ -20,15 +20,17 @@
 #include <array>
 #include <memory>
 
+#include "../common/dsp/smoother.hpp"
 #include "../parameter.hpp"
 #include "delay.hpp"
 #include "iir.hpp"
-#include "smoother.hpp"
 
 // Lagrange delay is very slow at debug build. If that's the case set Order to 1.
 using DelayTypeName = DelayLagrange<float, 7>;
 using FilterTypeName = SomeDSP::SVF<float>;
 using DCKillerTypeName = SomeDSP::BiquadHighPass<float>;
+
+using namespace SomeDSP;
 
 class DSPCore {
 public:

@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SevenDelay.
 //
@@ -16,9 +16,11 @@
 // along with SevenDelay.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "parameter.hpp"
-#include "dsp/constants.hpp"
+#include "../common/dsp/constants.hpp"
 
-BoolScale<double> Scales::boolScale{};
+using namespace SomeDSP;
+
+IntScale<double> Scales::boolScale(1);
 LinearScale<double> Scales::defaultScale(0.0, 1.0);
 LogScale<double> Scales::time(0.0001, maxDelayTime, 0.5, 1.0);
 SPolyScale<double> Scales::offset(-1.0, 1.0, 0.8);
@@ -45,20 +47,20 @@ void GlobalParameter::loadProgram(uint32_t index)
       break;
 
     case presetDefault: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.5);
       value[ID::feedback]->setFromNormalized(0.625);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.5);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -70,20 +72,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case preset3_16Invert: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.726374);
       value[ID::feedback]->setFromNormalized(0.625);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(1);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(1);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.5);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -95,20 +97,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case preset3_16PingPong: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.726374);
       value[ID::feedback]->setFromNormalized(0.625);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(1);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(1);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.5);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(1.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -120,20 +122,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetBend: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.144);
       value[ID::feedback]->setFromNormalized(0.625);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.547826);
       value[ID::lfoToneAmount]->setFromNormalized(1.0);
       value[ID::lfoFrequency]->setFromNormalized(0.595652);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -145,20 +147,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetChorus: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.124);
       value[ID::feedback]->setFromNormalized(0.524);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.862);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.182609);
       value[ID::lfoToneAmount]->setFromNormalized(0.717391);
       value[ID::lfoFrequency]->setFromNormalized(0.5);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(1.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -170,20 +172,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetCloseToPhaser: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.032);
       value[ID::feedback]->setFromNormalized(0.929);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(1.0);
       value[ID::lfoFrequency]->setFromNormalized(0.413043);
       value[ID::lfoShape]->setFromNormalized(0.696);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -195,20 +197,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetFlapping: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.044);
       value[ID::feedback]->setFromNormalized(0.969);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(1.0);
       value[ID::lfoFrequency]->setFromNormalized(0.586957);
       value[ID::lfoShape]->setFromNormalized(0.228);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -220,20 +222,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetGhostVibrato: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.08);
       value[ID::feedback]->setFromNormalized(0.925);
       value[ID::offset]->setFromNormalized(0.524233);
       value[ID::wetMix]->setFromNormalized(0.258);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(1);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(1);
       value[ID::lfoTimeAmount]->setFromNormalized(0.130435);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.643478);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.5);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -245,20 +247,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetHigh: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.028);
       value[ID::feedback]->setFromNormalized(0.965);
       value[ID::offset]->setFromNormalized(0.248);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(1);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(1);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.995652);
       value[ID::lfoFrequency]->setFromNormalized(0.83913);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -270,20 +272,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetLean: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.324);
       value[ID::feedback]->setFromNormalized(1.0);
       value[ID::offset]->setFromNormalized(0.956);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.508696);
       value[ID::lfoFrequency]->setFromNormalized(0.730435);
       value[ID::lfoShape]->setFromNormalized(0.768);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -295,20 +297,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetMaxFeedback: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.08);
       value[ID::feedback]->setFromNormalized(1.0);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.143478);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.5);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.928);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -320,20 +322,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetModeratelyCentered: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.62);
       value[ID::feedback]->setFromNormalized(0.592);
       value[ID::offset]->setFromNormalized(0.408);
       value[ID::wetMix]->setFromNormalized(1.0);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(1);
-      value[ID::negativeFeedback]->setFromRaw(1);
+      value[ID::tempoSync]->setFromInt(1);
+      value[ID::negativeFeedback]->setFromInt(1);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(1.0);
       value[ID::lfoFrequency]->setFromNormalized(0.673913);
       value[ID::lfoShape]->setFromNormalized(0.384);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.824);
       value[ID::inPan]->setFromNormalized(0.66);
@@ -345,20 +347,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetNoise: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.176);
       value[ID::feedback]->setFromNormalized(1.0);
       value[ID::offset]->setFromNormalized(1.0);
       value[ID::wetMix]->setFromNormalized(0.098);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(1);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(1);
       value[ID::lfoTimeAmount]->setFromNormalized(1.0);
       value[ID::lfoToneAmount]->setFromNormalized(1.0);
       value[ID::lfoFrequency]->setFromNormalized(1.0);
       value[ID::lfoShape]->setFromNormalized(0.268);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(1.0);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -370,20 +372,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetPower: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.236);
       value[ID::feedback]->setFromNormalized(0.625);
       value[ID::offset]->setFromNormalized(0.502402);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.504348);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.430435);
       value[ID::lfoShape]->setFromNormalized(1.0);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.668);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -395,20 +397,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetResponse: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.24);
       value[ID::feedback]->setFromNormalized(0.217);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.966);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.5);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.784);
       value[ID::inPan]->setFromNormalized(0.264);
@@ -420,20 +422,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetSlowLFO: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.404);
       value[ID::feedback]->setFromNormalized(0.625);
       value[ID::offset]->setFromNormalized(0.328);
       value[ID::wetMix]->setFromNormalized(0.542);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.547826);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.265217);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.564);
@@ -445,20 +447,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetSomewhere: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.168);
       value[ID::feedback]->setFromNormalized(0.049);
       value[ID::offset]->setFromNormalized(0.384);
       value[ID::wetMix]->setFromNormalized(0.424);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.430435);
       value[ID::lfoFrequency]->setFromNormalized(0.969565);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(1.0);
       value[ID::inPan]->setFromNormalized(0.308);
@@ -470,20 +472,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetTail: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.636);
       value[ID::feedback]->setFromNormalized(0.837);
       value[ID::offset]->setFromNormalized(0.176);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(1);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(1);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.5);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.772);
@@ -495,20 +497,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetTurnUpTimeKnob: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.156);
       value[ID::feedback]->setFromNormalized(0.829);
       value[ID::offset]->setFromNormalized(0.436);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(0.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.695652);
       value[ID::lfoFrequency]->setFromNormalized(0.169565);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(1.0);
       value[ID::inSpread]->setFromNormalized(1.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -520,20 +522,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetWaitForScratch: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.852);
       value[ID::feedback]->setFromNormalized(1.0);
       value[ID::offset]->setFromNormalized(0.436);
       value[ID::wetMix]->setFromNormalized(1.0);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(0);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(0);
       value[ID::lfoTimeAmount]->setFromNormalized(1.0);
       value[ID::lfoToneAmount]->setFromNormalized(0.0);
       value[ID::lfoFrequency]->setFromNormalized(0.1);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);
@@ -545,20 +547,20 @@ void GlobalParameter::loadProgram(uint32_t index)
     } break;
 
     case presetWandering: {
-      value[ID::bypass]->setFromRaw(0);
+      value[ID::bypass]->setFromInt(0);
       value[ID::time]->setFromNormalized(0.34);
       value[ID::feedback]->setFromNormalized(0.625);
       value[ID::offset]->setFromNormalized(0.5);
       value[ID::wetMix]->setFromNormalized(0.75);
       value[ID::dryMix]->setFromNormalized(1.0);
-      value[ID::tempoSync]->setFromRaw(0);
-      value[ID::negativeFeedback]->setFromRaw(1);
+      value[ID::tempoSync]->setFromInt(0);
+      value[ID::negativeFeedback]->setFromInt(1);
       value[ID::lfoTimeAmount]->setFromNormalized(0.221739);
       value[ID::lfoToneAmount]->setFromNormalized(1.0);
       value[ID::lfoFrequency]->setFromNormalized(0.595652);
       value[ID::lfoShape]->setFromNormalized(0.5);
       value[ID::lfoInitialPhase]->setFromNormalized(0.0);
-      value[ID::lfoHold]->setFromRaw(0);
+      value[ID::lfoHold]->setFromInt(0);
       value[ID::smoothness]->setFromNormalized(0.3);
       value[ID::inSpread]->setFromNormalized(0.0);
       value[ID::inPan]->setFromNormalized(0.5);

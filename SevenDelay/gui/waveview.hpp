@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SevenDelay.
 //
@@ -19,7 +19,7 @@
 
 #include <cmath>
 
-#include "../dsp/constants.hpp"
+#include "../../common/dsp/constants.hpp"
 #include "Widget.hpp"
 
 class WaveView : public NanoWidget {
@@ -63,6 +63,7 @@ public:
 protected:
   float lfo(float phase)
   {
+    using namespace SomeDSP;
     phase = this->phase + phase * 2.0f * float(pi);
     if (phase > 2.0f * float(pi)) phase -= 2.0f * float(pi);
     auto sign = (float(pi) < phase) - (phase < float(pi));
