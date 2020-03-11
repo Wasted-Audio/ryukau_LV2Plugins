@@ -81,9 +81,8 @@ void CreditSplash::onNanoDisplay()
 
   text(380.0f, 150.0f, "- Overtone -", nullptr);
   text(380.0f, 180.0f, "Ctrl + Left Click: Reset to Default", nullptr);
-  text(380.0f, 210.0f, "Right Drag: Set to Minimum", nullptr);
-  text(380.0f, 240.0f, "Ctrl + Right Drag: Set to Maximum", nullptr);
-  text(380.0f, 300.0f, "Have a nice day!", nullptr);
+  text(380.0f, 210.0f, "Right Drag: Draw Line", nullptr);
+  text(380.0f, 270.0f, "Have a nice day!", nullptr);
 }
 
 START_NAMESPACE_DISTRHO
