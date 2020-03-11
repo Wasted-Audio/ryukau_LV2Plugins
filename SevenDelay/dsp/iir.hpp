@@ -15,9 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with SevenDelay.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <cmath>
+#pragma once
 
-#include "../common/dsp/constants.hpp"
+#include "../../common/dsp/constants.hpp"
+
+#include <cmath>
 
 namespace SomeDSP {
 

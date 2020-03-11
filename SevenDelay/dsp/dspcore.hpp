@@ -20,7 +20,7 @@
 #include <array>
 #include <memory>
 
-#include "../common/dsp/smoother.hpp"
+#include "../../common/dsp/smoother.hpp"
 #include "../parameter.hpp"
 #include "delay.hpp"
 #include "iir.hpp"

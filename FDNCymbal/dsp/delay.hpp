@@ -21,7 +21,7 @@
 #include <numeric>
 #include <vector>
 
-#include "../common/dsp/smoother.hpp"
+#include "../../common/dsp/smoother.hpp"
 
 namespace SomeDSP {
 

@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "../common/dsp/constants.hpp"
-#include "../common/dsp/smoother.hpp"
+#include "../../common/dsp/constants.hpp"
+#include "../../common/dsp/smoother.hpp"
 
 #include "../../lib/juce_FastMathApproximations.h"
 #include "../../lib/vcl/vectorclass.h"

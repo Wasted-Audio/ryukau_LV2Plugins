@@ -19,8 +19,8 @@
 
 #include <vector>
 
-#include "../common/dsp/constants.hpp"
-#include "../common/dsp/smoother.hpp"
+#include "../../common/dsp/constants.hpp"
+#include "../../common/dsp/smoother.hpp"
 
 namespace SomeDSP {
 

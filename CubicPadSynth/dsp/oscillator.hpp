@@ -21,8 +21,8 @@
 
 #include "../../lib/vcl/vectorclass.h"
 
-#include "../common/dsp/constants.hpp"
-#include "../common/dsp/somemath.hpp"
+#include "../../common/dsp/constants.hpp"
+#include "../../common/dsp/somemath.hpp"
 
 #include <algorithm>
 #include <array>

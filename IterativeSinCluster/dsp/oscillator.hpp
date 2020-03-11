@@ -19,7 +19,7 @@
 
 #include <array>
 
-#include "../common/dsp/constants.hpp"
+#include "../../common/dsp/constants.hpp"
 
 #include "../../lib/vcl/vectorclass.h"
 #include "../../lib/vcl/vectormath_trig.h"
