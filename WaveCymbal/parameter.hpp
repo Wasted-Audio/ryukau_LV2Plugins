@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of WaveCymbal.
 //
@@ -20,7 +20,7 @@
 #include <memory>
 #include <vector>
 
-#include "value.hpp"
+#include "../common/value.hpp"
 
 #ifdef TEST_BUILD
 static const uint32_t kParameterIsAutomable = 0x01;

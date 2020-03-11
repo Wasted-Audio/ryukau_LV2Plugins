@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of WaveCymbal.
 //
@@ -20,9 +20,9 @@
 #include <array>
 #include <memory>
 
+#include "../../common/dsp/smoother.hpp"
+#include "../../common/dsp/somemath.hpp"
 #include "delay.hpp"
-#include "smoother.hpp"
-#include "somemath.hpp"
 #include "wave.hpp"
 
 namespace SomeDSP {

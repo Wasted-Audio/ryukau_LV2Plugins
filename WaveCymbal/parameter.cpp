@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of WaveCymbal.
 //
@@ -16,7 +16,7 @@
 // along with WaveCymbal.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "parameter.hpp"
-#include "dsp/constants.hpp"
+#include "../common/dsp/constants.hpp"
 
 using namespace SomeDSP;
 

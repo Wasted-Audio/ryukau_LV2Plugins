@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of WaveCymbal.
 //
@@ -55,8 +55,8 @@ void DSPCore::setup(double sampleRate)
 {
   this->sampleRate = sampleRate;
 
-  LinearSmoother<float>::setSampleRate(sampleRate);
-  LinearSmoother<float>::setTime(param.value[ParameterID::smoothness]->getFloat());
+  SmootherCommon<float>::setSampleRate(sampleRate);
+  SmootherCommon<float>::setTime(param.value[ParameterID::smoothness]->getFloat());
 
   noteStack.reserve(128);
   noteStack.resize(0);
@@ -83,7 +83,7 @@ void DSPCore::startup() { rnd.seed = param.value[ParameterID::seed]->getInt(); }
 
 void DSPCore::setParameters()
 {
-  LinearSmoother<float>::setTime(param.value[ParameterID::smoothness]->getFloat());
+  SmootherCommon<float>::setTime(param.value[ParameterID::smoothness]->getFloat());
 
   if (!noteStack.empty()) velocity = noteStack.back().velocity;
   interpMasterGain.push(velocity * param.value[ParameterID::gain]->getFloat());
@@ -115,7 +115,7 @@ void DSPCore::setParameters()
 void DSPCore::process(
   const size_t length, const float *in0, const float *in1, float *out0, float *out1)
 {
-  LinearSmoother<float>::setBufferSize(length);
+  SmootherCommon<float>::setBufferSize(length);
 
   const bool excitation = param.value[ParameterID::excitation]->getInt();
   const bool collision = param.value[ParameterID::collision]->getInt();

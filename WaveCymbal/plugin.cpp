@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of WaveCymbal.
 //
