@@ -21,6 +21,8 @@
 
 class CheckBox : public ValueWidget {
 public:
+  bool drawBackground = false;
+
   explicit CheckBox(NanoWidget *group, PluginUI *ui, const char *labelText, FontId fontId)
     : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId)
   {
@@ -31,8 +33,17 @@ public:
     resetTransform();
     translate(getAbsoluteX(), getAbsoluteY());
 
+    const auto width = getWidth();
     const auto height = getHeight();
     const auto centerY = height / 2;
+
+    // Background.
+    if (drawBackground) {
+      beginPath();
+      rect(0, 0, width, height);
+      fillColor(backgroundColor);
+      fill();
+    }
 
     // Box.
     beginPath();
@@ -97,6 +108,7 @@ public:
 protected:
   Color highlightColor{0x33, 0xaa, 0xff};
   Color foregroundColor{0, 0, 0};
+  Color backgroundColor{0xff, 0xff, 0xff};
 
   const char *labelText = nullptr;
   int align = ALIGN_LEFT | ALIGN_MIDDLE;

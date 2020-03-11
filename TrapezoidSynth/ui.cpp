@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of TrapezoidSynth.
 //
@@ -24,17 +24,54 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ui.hpp"
+#include "../common/ui.hpp"
+#include "parameter.hpp"
 
-#include "gui/TinosBoldItalic.hpp"
-#include "gui/button.hpp"
-#include "gui/checkbox.hpp"
-#include "gui/knob.hpp"
+#include "../common/gui/TinosBoldItalic.hpp"
+#include "../common/gui/button.hpp"
+#include "../common/gui/checkbox.hpp"
+#include "../common/gui/knob.hpp"
+#include "../common/gui/optionmenu.hpp"
+#include "../common/gui/splash.hpp"
+#include "../common/gui/vslider.hpp"
 #include "gui/label.hpp"
-#include "gui/numberknob.hpp"
-#include "gui/optionmenu.hpp"
-#include "gui/splash.hpp"
-#include "gui/vslider.hpp"
+
+void CreditSplash::onNanoDisplay()
+{
+  if (!isVisible()) return;
+
+  resetTransform();
+  translate(getAbsoluteX(), getAbsoluteY());
+
+  const auto width = getWidth();
+  const auto height = getHeight();
+
+  // Border.
+  beginPath();
+  rect(0, 0, width, height);
+  fillColor(backgroundColor);
+  fill();
+  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeWidth(borderWidth);
+  stroke();
+
+  // Text.
+  fillColor(foregroundColor);
+  fontFaceId(fontId);
+  textAlign(align);
+
+  fontSize(textSize * 1.5f);
+  std::stringstream stream;
+  stream << name << " " << std::to_string(MAJOR_VERSION) << "."
+         << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
+  text(20.0f, 50.0f, stream.str().c_str(), nullptr);
+
+  fontSize(textSize);
+  text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
+  text(20.0f, 150.0f, "Shift + Drag: Fine Adjustment", nullptr);
+  text(20.0f, 180.0f, "Ctrl + Click: Reset to Default", nullptr);
+  text(20.0f, 240.0f, "Have a nice day!", nullptr);
+}
 
 START_NAMESPACE_DISTRHO
 
@@ -119,7 +156,7 @@ public:
     const auto top3 = top2knob + knobY;
     addGroupLabel(left0, top3, 6.0f * knobWidth, "Filter");
     const auto top3knob = top3 + labelHeight;
-    std::vector<const char *> filterOrderItems{
+    std::vector<std::string> filterOrderItems{
       "Order 1", "Order 2", "Order 3", "Order 4",
       "Order 5", "Order 6", "Order 7", "Order 8",
     };
@@ -217,7 +254,7 @@ public:
       left1 + 5.0f * knobX, top2knob, knobWidth, colorBlue, "Gain", ID::shifter2Gain);
 
     addGroupLabel(left1, top3, 6.0f * knobWidth, "LFO");
-    std::vector<const char *> lfoTypeItems{"Sin", "Saw", "Pulse", "Noise"};
+    std::vector<std::string> lfoTypeItems{"Sin", "Saw", "Pulse", "Noise"};
     addOptionMenu(left1 + 0.8f * knobX, top3, knobWidth, ID::lfoType, lfoTypeItems);
     addCheckbox(left1 + 2.2f * knobX, top3, 55.0f, "Tempo", ID::lfoTempoSync);
     addKnob(
@@ -233,7 +270,7 @@ public:
       left1 + 5.0f * knobX, top3knob, knobWidth, colorBlue, ">Cut", ID::lfoToCutoff);
 
     addGroupLabel(left1, top4, 6.0f * knobWidth, "Slide");
-    std::vector<const char *> pitchSlideType{"Always", "Sustain", "Reset to 0"};
+    std::vector<std::string> pitchSlideType{"Always", "Sustain", "Reset to 0"};
     addOptionMenu(left1 + 0.75f * knobX, top4, 70.0f, ID::pitchSlideType, pitchSlideType);
     addKnob(left1 + 0.0f * knobX, top4knob, knobWidth, colorBlue, "Time", ID::pitchSlide);
     addKnob(
@@ -269,6 +306,8 @@ protected:
     setParameterValue(id, param.updateValue(id, normalized));
     repaint();
   }
+
+  void updateState(std::string /* key */, std::string /* value */) {}
 
   void programLoaded(uint32_t index) override
   {
@@ -323,6 +362,7 @@ private:
     checkbox->setForegroundColor(colorFore);
     checkbox->setHighlightColor(colorBlue);
     checkbox->setTextSize(uiTextSize);
+    checkbox->drawBackground = true;
     valueWidget.push_back(checkbox);
   }
 
@@ -445,7 +485,7 @@ private:
     float top,
     float width,
     uint32_t id,
-    const std::vector<const char *> &items)
+    const std::vector<std::string> &items)
   {
     auto menu = std::make_shared<OptionMenu>(this, this, items, fontId);
     menu->id = id;
@@ -456,6 +496,7 @@ private:
     menu->setForegroundColor(colorFore);
     menu->setHighlightColor(colorBlue);
     menu->setTextSize(uiTextSize);
+    menu->drawBackground = true;
     valueWidget.push_back(menu);
   }
 

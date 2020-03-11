@@ -23,6 +23,8 @@
 
 class OptionMenu : public ValueWidget {
 public:
+  bool drawBackground = false;
+
   explicit OptionMenu(
     NanoWidget *group, PluginUI *ui, std::vector<std::string> item, FontId fontId)
     : ValueWidget(group, ui, 0.0f), item(item), fontId(fontId)
@@ -43,6 +45,10 @@ public:
     strokeColor(isMouseEntered ? highlightColor : foregroundColor);
     strokeWidth(borderWidth);
     stroke();
+    if (drawBackground) {
+      fillColor(backgroundColor);
+      fill();
+    }
 
     // Text.
     if (item.size() == 0 || item.size() <= index) return;
@@ -141,6 +147,7 @@ protected:
 
   Color highlightColor{0x33, 0xaa, 0xff};
   Color foregroundColor{0, 0, 0};
+  Color backgroundColor{0xff, 0xff, 0xff};
 
   float borderWidth = 1.0f;
   float textSize = 18.0f;

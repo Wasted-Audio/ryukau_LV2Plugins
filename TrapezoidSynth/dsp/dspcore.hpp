@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of TrapezoidSynth.
 //
@@ -17,12 +17,12 @@
 
 #pragma once
 
+#include "../../common/dsp/constants.hpp"
+#include "../../common/dsp/smoother.hpp"
 #include "../parameter.hpp"
-#include "constants.hpp"
 #include "envelope.hpp"
 #include "iir.hpp"
 #include "oscillator.hpp"
-#include "smoother.hpp"
 
 #include <array>
 #include <cmath>

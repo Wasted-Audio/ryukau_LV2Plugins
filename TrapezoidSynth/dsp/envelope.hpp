@@ -1,12 +1,48 @@
+// (c) 2019-2020 Takamitsu Endo
+//
+// This file is part of TrapezoidSynth.
+//
+// TrapezoidSynth is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// TrapezoidSynth is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with TrapezoidSynth.  If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 
-#include "constants.hpp"
-#include "smoother.hpp"
-#include "somemath.hpp"
+#include "../../common/dsp/constants.hpp"
+#include "../../common/dsp/somemath.hpp"
 
 #include <algorithm>
 
 namespace SomeDSP {
+
+// PID controller without I and D.
+template<typename Sample> class PControllerTpz {
+public:
+  Sample sampleRate = 44100;
+
+  PControllerTpz(Sample kp) : kp(kp) {}
+
+  void reset() { value = 0; }
+
+  Sample process(Sample input)
+  {
+    value += kp * (input - value) / sampleRate;
+    return value;
+  }
+
+private:
+  Sample kp;
+  Sample value = 0;
+};
 
 // t in [0, 1].
 template<typename Sample> inline Sample cosinterp(Sample t)
@@ -31,7 +67,7 @@ public:
 
     this->power = power;
 
-    if constexpr (type == EnvelopeCurveType::attack)
+    if (type == EnvelopeCurveType::attack)
       counter = 0;
     else
       counter = length;
@@ -39,7 +75,7 @@ public:
 
   bool isTerminated()
   {
-    if constexpr (type == EnvelopeCurveType::attack)
+    if (type == EnvelopeCurveType::attack)
       return counter >= length;
     else
       return counter <= 0;
@@ -47,7 +83,7 @@ public:
 
   Sample process()
   {
-    if constexpr (type == EnvelopeCurveType::attack) {
+    if (type == EnvelopeCurveType::attack) {
       if (counter >= length) return 1.0;
       return somepow<Sample>((Sample)(++counter) / length, power);
     } else {
@@ -79,7 +115,7 @@ public:
   {
     set(sampleRate, seconds, curve);
 
-    if constexpr (type == EnvelopeCurveType::attack)
+    if (type == EnvelopeCurveType::attack)
       phase = 0;
     else
       phase = tableSize - 1;
@@ -96,7 +132,7 @@ public:
 
   bool isTerminated()
   {
-    if constexpr (type == EnvelopeCurveType::attack)
+    if (type == EnvelopeCurveType::attack)
       return phase >= tableSize - 1;
     else
       return phase <= 0;
@@ -113,7 +149,7 @@ public:
 
   Sample process()
   {
-    if constexpr (type == EnvelopeCurveType::attack) {
+    if (type == EnvelopeCurveType::attack) {
       if (phase >= tableSize - 1) return 1;
       auto output = at(phase);
       phase += tick;
@@ -257,7 +293,7 @@ protected:
   Decay dec{44100, 1, 1};
   Release rel{44100, 1, 1};
 
-  PController<Sample> smoother{2048};
+  PControllerTpz<Sample> smoother{2048};
 
   State state = State::terminated;
   Sample value = 0;
