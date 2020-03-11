@@ -1,19 +1,19 @@
 // (c) 2020 Takamitsu Endo
 //
-// This file is part of CubicPadSynth.
+// This file is part of Uhhyou Plugins.
 //
-// CubicPadSynth is free software: you can redistribute it and/or modify
+// Uhhyou Plugins is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CubicPadSynth is distributed in the hope that it will be useful,
+// Uhhyou Plugins is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CubicPadSynth.  If not, see <https://www.gnu.org/licenses/>.
+// along with Uhhyou Plugins.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
@@ -58,6 +58,7 @@ public:
 
   virtual inline Sample getValue() { return value; }
   virtual void reset(Sample value) { this->value = value; }
+  virtual void refresh() { push(target); }
 
   virtual Sample process()
   {
@@ -70,6 +71,56 @@ public:
   }
 
 protected:
+  Sample value = 1.0;
+  Sample target = 1.0;
+  Sample ramp = 0.0;
+};
+
+template<typename Sample> class LinearSmootherLocal {
+public:
+  void setSampleRate(Sample _sampleRate, Sample time = 0.04)
+  {
+    sampleRate = _sampleRate;
+    setTime(time);
+  }
+
+  void setTime(Sample seconds) { timeInSamples = seconds * sampleRate; }
+  void setBufferSize(Sample bufferSize) { this->bufferSize = bufferSize; }
+
+  void reset(Sample value)
+  {
+    this->value = target = value;
+    ramp = 0;
+  }
+
+  void refresh() { push(target); }
+
+  void push(Sample newTarget)
+  {
+    target = newTarget;
+    if (timeInSamples < bufferSize)
+      value = target;
+    else
+      ramp = (target - value) / timeInSamples;
+  }
+
+  inline Sample getValue() { return value; }
+
+  Sample process()
+  {
+    if (value == target) return value;
+    value += ramp;
+
+    auto diff = value - target;
+    if (diff < 0) diff = -diff;
+    if (diff < 1e-5) value = target;
+    return value;
+  }
+
+protected:
+  Sample sampleRate = 44100;
+  Sample timeInSamples = -1;
+  Sample bufferSize = 0;
   Sample value = 1.0;
   Sample target = 1.0;
   Sample ramp = 0.0;
@@ -137,7 +188,7 @@ public:
   void push(Sample newTarget) override
   {
     this->target = newTarget;
-    if (this->timeInSamples < this->bufferSize) {
+    if (SmootherCommon<Sample>::timeInSamples < SmootherCommon<Sample>::bufferSize) {
       this->value = this->target;
       return;
     }
@@ -147,17 +198,17 @@ public:
     if (dist1 < 0) {
       auto dist2 = this->target + max - this->value;
       if (somefabs<Sample>(dist1) > dist2) {
-        this->ramp = dist2 / this->timeInSamples;
+        this->ramp = dist2 / SmootherCommon<Sample>::timeInSamples;
         return;
       }
     } else {
       auto dist2 = this->target - max - this->value;
       if (dist1 > somefabs<Sample>(dist2)) {
-        this->ramp = dist2 / this->timeInSamples;
+        this->ramp = dist2 / SmootherCommon<Sample>::timeInSamples;
         return;
       }
     }
-    this->ramp = dist1 / this->timeInSamples;
+    this->ramp = dist1 / SmootherCommon<Sample>::timeInSamples;
   }
 
   Sample process() override

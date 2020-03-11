@@ -1,19 +1,19 @@
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of EnvelopedSine.
+// This file is part of Uhhyou Plugins.
 //
-// EnvelopedSine is free software: you can redistribute it and/or modify
+// Uhhyou Plugins is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// EnvelopedSine is distributed in the hope that it will be useful,
+// Uhhyou Plugins is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with EnvelopedSine.  If not, see <https://www.gnu.org/licenses/>.
+// along with Uhhyou Plugins.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
@@ -31,73 +31,7 @@ public:
     hide();
   }
 
-  void onNanoDisplay() override
-  {
-    if (!isVisible()) return;
-
-    resetTransform();
-    translate(getAbsoluteX(), getAbsoluteY());
-
-    const auto width = getWidth();
-    const auto height = getHeight();
-
-    // Border.
-    beginPath();
-    rect(0, 0, width, height);
-    fillColor(backgroundColor);
-    fill();
-    strokeColor(isMouseEntered ? highlightColor : foregroundColor);
-    strokeWidth(borderWidth);
-    stroke();
-
-    // Text.
-    fillColor(foregroundColor);
-    fontFaceId(fontId);
-    textAlign(align);
-
-    fontSize(textSize * 1.5f);
-    std::stringstream stream;
-    stream << name << " " << std::to_string(MAJOR_VERSION) << "."
-           << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
-    text(20.0f, 50.0f, stream.str().c_str(), nullptr);
-
-    fontSize(textSize);
-    text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
-
-    text(20.0f, 150.0f, "- Knob -", nullptr);
-    text(20.0f, 180.0f, "Shift + Left Drag    |  Fine Adjustment", nullptr);
-    text(20.0f, 210.0f, "Ctrl + Left Click    |  Reset to Default", nullptr);
-
-    text(20.0f, 270.0f, "- Number -", nullptr);
-    text(20.0f, 300.0f, "Shares same controls with knob, and:", nullptr);
-    text(20.0f, 330.0f, "Right Click    |  Flip Minimum and Maximum", nullptr);
-
-    text(355.0f, 150.0f, "- Overtone -", nullptr);
-
-    text(355.0f, 180.0f, "Ctrl + Left Click    |  Reset to Default", nullptr);
-    text(355.0f, 210.0f, "Right Drag    |  Draw Line", nullptr);
-    text(355.0f, 240.0f, "A    |  Sort Ascending Order", nullptr);
-    text(355.0f, 270.0f, "D    |  Sort Decending Order", nullptr);
-    text(355.0f, 300.0f, "F    |  Low-pass Filter", nullptr);
-    text(355.0f, 330.0f, "Shift + F    |  High-pass Filter", nullptr);
-    text(355.0f, 360.0f, "I    |  Invert Value", nullptr);
-    text(355.0f, 390.0f, "Shift + I    |  Invert Value (Minimum to 0)", nullptr);
-    text(355.0f, 420.0f, "N    |  Normalize", nullptr);
-    text(355.0f, 450.0f, "Shift + N    |  Normalize (Minimum to 0)", nullptr);
-
-    text(660.0f, 180.0f, "H    |  Emphasize High", nullptr);
-    text(660.0f, 210.0f, "L    |  Emphasize Low", nullptr);
-    text(660.0f, 240.0f, "P    |  Permute", nullptr);
-    text(660.0f, 270.0f, "R    |  Randomize", nullptr);
-    text(660.0f, 300.0f, "Shift + R    |  Sparse Randomize", nullptr);
-    text(660.0f, 330.0f, "S    |  Subtle Randomize", nullptr);
-    text(660.0f, 360.0f, ", (Comma)    |  Rotate Back", nullptr);
-    text(660.0f, 390.0f, ". (Period)    |  Rotate Forward", nullptr);
-    text(660.0f, 420.0f, "1    |  Decrease Odd", nullptr);
-    text(660.0f, 450.0f, "2-9    |  Decrease 2n-9n", nullptr);
-
-    text(740.0f, 510.0f, "Have a nice day!", nullptr);
-  }
+  void onNanoDisplay() override;
 
   bool onMouse(const MouseEvent &ev) override
   {

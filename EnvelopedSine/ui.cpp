@@ -24,18 +24,89 @@
 #include <memory>
 #include <vector>
 
-#include "ui.hpp"
+#include "../common/ui.hpp"
+#include "parameter.hpp"
 
-#include "gui/TinosBoldItalic.hpp"
-#include "gui/barbox.hpp"
-#include "gui/button.hpp"
-#include "gui/checkbox.hpp"
-#include "gui/knob.hpp"
-#include "gui/label.hpp"
-#include "gui/optionmenu.hpp"
-#include "gui/rotaryknob.hpp"
-#include "gui/splash.hpp"
-#include "gui/vslider.hpp"
+#include "../common/gui/TinosBoldItalic.hpp"
+#include "../common/gui/barbox.hpp"
+#include "../common/gui/button.hpp"
+#include "../common/gui/checkbox.hpp"
+#include "../common/gui/knob.hpp"
+#include "../common/gui/label.hpp"
+#include "../common/gui/optionmenu.hpp"
+#include "../common/gui/rotaryknob.hpp"
+#include "../common/gui/splash.hpp"
+#include "../common/gui/vslider.hpp"
+
+void CreditSplash::onNanoDisplay()
+{
+  if (!isVisible()) return;
+
+  resetTransform();
+  translate(getAbsoluteX(), getAbsoluteY());
+
+  const auto width = getWidth();
+  const auto height = getHeight();
+
+  // Border.
+  beginPath();
+  rect(0, 0, width, height);
+  fillColor(backgroundColor);
+  fill();
+  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeWidth(borderWidth);
+  stroke();
+
+  // Text.
+  fillColor(foregroundColor);
+  fontFaceId(fontId);
+  textAlign(align);
+
+  fontSize(textSize * 1.5f);
+  std::stringstream stream;
+  stream << name << " " << std::to_string(MAJOR_VERSION) << "."
+         << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
+  text(20.0f, 50.0f, stream.str().c_str(), nullptr);
+
+  fontSize(textSize);
+  text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
+
+  text(20.0f, 150.0f, "- Knob -", nullptr);
+  text(20.0f, 180.0f, "Shift + Left Drag    |  Fine Adjustment", nullptr);
+  text(20.0f, 210.0f, "Ctrl + Left Click    |  Reset to Default", nullptr);
+
+  text(20.0f, 270.0f, "- Number -", nullptr);
+  text(20.0f, 300.0f, "Shares same controls with knob, and:", nullptr);
+  text(20.0f, 330.0f, "Right Click    |  Flip Min/Max", nullptr);
+
+  text(320.0f, 150.0f, "- Overtone -", nullptr);
+
+  text(320.0f, 180.0f, "Ctrl + Left Click    |  Reset to Default", nullptr);
+  text(320.0f, 210.0f, "Right Drag    |  Draw Line", nullptr);
+  text(320.0f, 240.0f, "D    |  Reset to Default", nullptr);
+  text(320.0f, 270.0f, "Shift + D    |  Toggle Min/Mid/Max", nullptr);
+  text(320.0f, 300.0f, "E    |  Emphasize Low", nullptr);
+  text(320.0f, 330.0f, "Shift + E    |  Emphasize High", nullptr);
+  text(320.0f, 360.0f, "F    |  Low-pass Filter", nullptr);
+  text(320.0f, 390.0f, "Shift + F    |  High-pass Filter", nullptr);
+  text(320.0f, 420.0f, "I    |  Invert Value", nullptr);
+  text(320.0f, 450.0f, "Shift + I    |  Invert Value (Minimum to 0)", nullptr);
+  text(320.0f, 480.0f, "N    |  Normalize", nullptr);
+  text(320.0f, 510.0f, "Shift + N    |  Normalize (Minimum to 0)", nullptr);
+
+  text(630.0f, 180.0f, "P    |  Permute", nullptr);
+  text(630.0f, 210.0f, "R    |  Randomize", nullptr);
+  text(630.0f, 240.0f, "Shift + R    |  Sparse Randomize", nullptr);
+  text(630.0f, 270.0f, "S    |  Sort Decending Order", nullptr);
+  text(630.0f, 300.0f, "Shift + S    |  Sort Ascending Order", nullptr);
+  text(630.0f, 330.0f, "T    |  Subtle Randomize", nullptr);
+  text(630.0f, 360.0f, ", (Comma)    |  Rotate Back", nullptr);
+  text(630.0f, 390.0f, ". (Period)    |  Rotate Forward", nullptr);
+  text(630.0f, 420.0f, "1    |  Decrease", nullptr);
+  text(630.0f, 450.0f, "2-9    |  Decrease 2n-9n", nullptr);
+
+  text(740.0f, 510.0f, "Have a nice day!", nullptr);
+}
 
 START_NAMESPACE_DISTRHO
 
@@ -161,7 +232,7 @@ public:
 
     const auto miscLeft0 = miscLeft + knobX - (checkboxWidth - knobWidth) / 2.0f;
     const auto miscTop0 = miscTop + labelY;
-    std::vector<const char *> nVoiceOptions
+    std::vector<std::string> nVoiceOptions
       = {"Mono", "2 Voices", "4 Voices", "8 Voices", "16 Voices", "32 Voices"};
     addOptionMenu(miscLeft0, miscTop0, checkboxWidth, ID::nVoice, nVoiceOptions);
     addCheckbox(miscLeft0, miscTop0 + labelY, checkboxWidth, "Unison", ID::unison);
@@ -209,7 +280,7 @@ public:
       ID::phaserPhase);
 
     const auto phaserTop1 = phaserTop0 + knobY;
-    std::vector<const char *> phaserStageItems{
+    std::vector<std::string> phaserStageItems{
       "Stage 1",  "Stage 2",  "Stage 3",  "Stage 4",  "Stage 5",  "Stage 6",
       "Stage 7",  "Stage 8",  "Stage 9",  "Stage 10", "Stage 11", "Stage 12",
       "Stage 13", "Stage 14", "Stage 15", "Stage 16"};
@@ -305,6 +376,8 @@ protected:
     repaint();
     // dumpParameter(); // Used to make preset. There may be better way to do this.
   }
+
+  void updateState(std::string /* key */, std::string /* value */) {}
 
   void programLoaded(uint32_t index) override
   {
@@ -562,7 +635,7 @@ private:
     float top,
     float width,
     uint32_t id,
-    const std::vector<const char *> &items)
+    const std::vector<std::string> &items)
   {
     auto menu = std::make_shared<OptionMenu>(this, this, items, fontId);
     menu->id = id;

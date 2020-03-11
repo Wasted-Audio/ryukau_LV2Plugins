@@ -69,6 +69,17 @@ public:
       stroke();
     }
 
+    // Index text.
+    if (sliderWidth >= 4.0f) {
+      fillColor(borderColor);
+      fontFaceId(fontId);
+      fontSize(textSize);
+      textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
+      for (size_t i = 0; i < value.size(); ++i)
+        text(
+          (i + 0.5f) * sliderWidth, height - 4, std::to_string(i + 1).c_str(), nullptr);
+    }
+
     // Border.
     beginPath();
     rect(0, 0, width, height);
@@ -104,15 +115,6 @@ public:
       moveTo(0, height / 2.0f);
       lineTo(width, height / 2.0f);
       stroke();
-
-      // Index text.
-      fillColor(borderColor);
-      fontFaceId(fontId);
-      fontSize(textSize);
-      textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
-      for (size_t i = 0; i < value.size(); ++i)
-        text(
-          (i + 0.5f) * sliderWidth, height - 4, std::to_string(i + 1).c_str(), nullptr);
     }
   }
 
@@ -332,7 +334,7 @@ public:
     if (ev.mod & kModifierShift)
       setValueAt(index, value[index] + 0.003 * ev.delta.getY());
     else
-      setValueAt(index, value[index] + 0.02 * ev.delta.getY());
+      setValueAt(index, value[index] + 0.01 * ev.delta.getY());
 
     updateValueAt(index);
     repaint();
