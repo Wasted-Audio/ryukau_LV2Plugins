@@ -31,7 +31,7 @@ FILES_DSP = \
 FILES_UI  = \
 	ui.cpp \
 	parameter.cpp \
-	gui/TinosBoldItalic.cpp \
+	../common/gui/TinosBoldItalic.cpp \
 
 # Do some magic
 include ../Makefile.plugins.mk
