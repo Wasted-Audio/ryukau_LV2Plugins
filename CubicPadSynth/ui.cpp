@@ -26,19 +26,20 @@
 #include <tuple>
 #include <vector>
 
-#include "ui.hpp"
+#include "../common/ui.hpp"
+#include "parameter.hpp"
 
-#include "gui/TinosBoldItalic.hpp"
-#include "gui/barbox.hpp"
-#include "gui/button.hpp"
-#include "gui/checkbox.hpp"
-#include "gui/knob.hpp"
-#include "gui/label.hpp"
-#include "gui/optionmenu.hpp"
-#include "gui/rotaryknob.hpp"
-#include "gui/tabview.hpp"
-#include "gui/textview.hpp"
-#include "gui/vslider.hpp"
+#include "../common/gui/TinosBoldItalic.hpp"
+#include "../common/gui/barbox.hpp"
+#include "../common/gui/button.hpp"
+#include "../common/gui/checkbox.hpp"
+#include "../common/gui/knob.hpp"
+#include "../common/gui/label.hpp"
+#include "../common/gui/optionmenu.hpp"
+#include "../common/gui/rotaryknob.hpp"
+#include "../common/gui/tabview.hpp"
+#include "../common/gui/textview.hpp"
+#include "../common/gui/vslider.hpp"
 
 START_NAMESPACE_DISTRHO
 

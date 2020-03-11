@@ -36,7 +36,7 @@ FILES_UI  = \
 	ui.cpp \
 	parameter.cpp \
 	parameter_preset.cpp \
-	gui/TinosBoldItalic.cpp \
+	../common/gui/TinosBoldItalic.cpp \
 
 # Do some magic
 include ../Makefile.plugins.mk

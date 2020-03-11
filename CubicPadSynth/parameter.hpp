@@ -23,9 +23,9 @@
 
 #include <iostream>
 
-#include "dsp/constants.hpp"
-#include "dsp/scale.hpp"
-#include "value.hpp"
+#include "../common/dsp/constants.hpp"
+#include "../common/dsp/scale.hpp"
+#include "../common/value.hpp"
 
 #ifdef TEST_BUILD
 static const uint32_t kParameterIsAutomable = 0x01;

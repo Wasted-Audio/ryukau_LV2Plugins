@@ -1,28 +1,28 @@
 // (c) 2020 Takamitsu Endo
 //
-// This file is part of EnvelopedSine.
+// This file is part of CubicPadSynth.
 //
-// EnvelopedSine is free software: you can redistribute it and/or modify
+// CubicPadSynth is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// EnvelopedSine is distributed in the hope that it will be useful,
+// CubicPadSynth is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with EnvelopedSine.  If not, see <https://www.gnu.org/licenses/>.
+// along with CubicPadSynth.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include "../common/dsp/constants.hpp"
+#include "../common/dsp/smoother.hpp"
 #include "../parameter.hpp"
-#include "constants.hpp"
 #include "envelope.hpp"
 #include "noise.hpp"
 #include "oscillator.hpp"
-#include "smoother.hpp"
 
 #include "../../lib/vcl/vectorclass.h"
 #include "../../lib/vcl/vectormath_exp.h"

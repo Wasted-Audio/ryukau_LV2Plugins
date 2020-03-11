@@ -16,7 +16,7 @@
 // along with CubicPadSynth.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "parameter.hpp"
-#include "dsp/constants.hpp"
+#include "../common/dsp/constants.hpp"
 
 constexpr double pitchRange = 128.0;
 
