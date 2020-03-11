@@ -287,7 +287,7 @@ public:
     fontSize(textSize);
     textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
     text(
-      centerX, centerY, std::to_string(int32_t(floor(scale.map(value))) + offset).c_str(),
+      centerX, centerY, std::to_string(int64_t(floor(scale.map(value))) + offset).c_str(),
       nullptr);
 
     // Tip.

@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SyncSawSynth.
 //
@@ -24,17 +24,54 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ui.hpp"
+#include "../common/ui.hpp"
+#include "parameter.hpp"
 
-#include "gui/TinosBoldItalic.hpp"
-#include "gui/button.hpp"
-#include "gui/checkbox.hpp"
-#include "gui/knob.hpp"
-#include "gui/label.hpp"
-#include "gui/numberknob.hpp"
-#include "gui/optionmenu.hpp"
-#include "gui/splash.hpp"
-#include "gui/vslider.hpp"
+#include "../common/gui/TinosBoldItalic.hpp"
+#include "../common/gui/button.hpp"
+#include "../common/gui/checkbox.hpp"
+#include "../common/gui/knob.hpp"
+#include "../common/gui/label.hpp"
+#include "../common/gui/optionmenu.hpp"
+#include "../common/gui/splash.hpp"
+#include "../common/gui/vslider.hpp"
+
+void CreditSplash::onNanoDisplay()
+{
+  if (!isVisible()) return;
+
+  resetTransform();
+  translate(getAbsoluteX(), getAbsoluteY());
+
+  const auto width = getWidth();
+  const auto height = getHeight();
+
+  // Border.
+  beginPath();
+  rect(0, 0, width, height);
+  fillColor(backgroundColor);
+  fill();
+  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeWidth(borderWidth);
+  stroke();
+
+  // Text.
+  fillColor(foregroundColor);
+  fontFaceId(fontId);
+  textAlign(align);
+
+  fontSize(textSize * 1.5f);
+  std::stringstream stream;
+  stream << name << " " << std::to_string(MAJOR_VERSION) << "."
+         << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
+  text(20.0f, 50.0f, stream.str().c_str(), nullptr);
+
+  fontSize(textSize);
+  text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
+  text(20.0f, 150.0f, "Shift + Drag: Fine Adjustment", nullptr);
+  text(20.0f, 180.0f, "Ctrl + Click: Reset to Default", nullptr);
+  text(20.0f, 240.0f, "Have a nice day!", nullptr);
+}
 
 START_NAMESPACE_DISTRHO
 
@@ -77,7 +114,7 @@ public:
       ParameterID::osc2Cent, ParameterID::osc2Sync, ParameterID::osc2SyncType,
       ParameterID::osc2PTROrder, ParameterID::osc2Phase, ParameterID::osc2PhaseLock);
 
-    std::vector<const char *> nVoiceOptions
+    std::vector<std::string> nVoiceOptions
       = {"Mono", "2 Voices", "4 Voices", "8 Voices", "16 Voices", "32 Voices"};
     addOptionMenu(
       oscLeft2 - knobX / 2.0, oscTop + labelY, checkboxWidth, ParameterID::nVoice,
@@ -191,11 +228,11 @@ public:
       ParameterID::filterSaturation);
 
     const auto filterMenuWidth = 100.0;
-    std::vector<const char *> filterTypeOptions = {"LP", "HP", "BP", "Notch", "Bypass"};
+    std::vector<std::string> filterTypeOptions = {"LP", "HP", "BP", "Notch", "Bypass"};
     addOptionMenu(
       filterLeft + 4.0 * knobX, filterTop1, filterMenuWidth, ParameterID::filterType,
       filterTypeOptions);
-    std::vector<const char *> filterShaperOptions
+    std::vector<std::string> filterShaperOptions
       = {"HardClip", "Tanh", "ShaperA", "ShaperB"};
     addOptionMenu(
       filterLeft + 4.0 * knobX, filterTop1 + labelY, filterMenuWidth,
@@ -256,6 +293,8 @@ protected:
     setParameterValue(id, param.updateValue(id, normalized));
     repaint();
   }
+
+  void updateState(std::string /* key */, std::string /* value */) {}
 
   void programLoaded(uint32_t index) override
   {
@@ -321,12 +360,12 @@ private:
       "Sync", idSync);
 
     auto oscTop4 = oscTop3 + syncKnobSize + labelY - 10.0;
-    std::vector<const char *> syncOptions
+    std::vector<std::string> syncOptions
       = {"Off", "Ratio", "Fixed-Master", "Fixed-Slave"};
     addOptionMenu(left, oscTop4, oscMenuWidth, idSyncType, syncOptions);
 
     auto oscTop5 = oscTop4 + labelY - margin;
-    std::vector<const char *> ptrOrderOptions
+    std::vector<std::string> ptrOrderOptions
       = {"Order 0",        "Order 1",        "Order 2",        "Order 3",
          "Order 4",        "Order 5",        "Order 6",        "Order 7",
          "Order 8",        "Order 9",        "Order 10",       "Sin",
@@ -471,14 +510,13 @@ private:
     float top,
     float width,
     uint32_t id,
-    const std::vector<const char *> &items)
+    const std::vector<std::string> &items)
   {
     auto menu = std::make_shared<OptionMenu>(this, this, items, fontId);
     menu->id = id;
     menu->setSize(width, labelHeight);
     menu->setAbsolutePos(left, top);
-    auto defaultValue = param.value[id]->getDefaultRaw();
-    menu->setDefaultValue(defaultValue);
+    menu->setDefaultValue(param.value[id]->getDefaultNormalized());
     menu->setForegroundColor(colorFore);
     menu->setHighlightColor(colorBlue);
     menu->setTextSize(uiTextSize);

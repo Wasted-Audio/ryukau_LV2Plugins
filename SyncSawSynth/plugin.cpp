@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of SyncSawSynth.
 //
@@ -124,7 +124,7 @@ protected:
 
       // Pitch bend. Center is 8192 (0x2000).
       case 0xe0:
-        dsp.param.value[ParameterID::pitchBend]->setFromRaw(
+        dsp.param.value[ParameterID::pitchBend]->setFromFloat(
           ((uint16_t(ev.data[2]) << 7) + ev.data[1]) / 16384.0f);
         break;
 
@@ -141,7 +141,7 @@ protected:
     uint32_t midiEventCount) override
   {
     if (outputs == nullptr) return;
-    if (dsp.param.value[ParameterID::bypass]->getRaw()) return;
+    if (dsp.param.value[ParameterID::bypass]->getInt()) return;
 
     const auto timePos = getTimePosition();
     if (!wasPlaying && timePos.playing) dsp.startup();
