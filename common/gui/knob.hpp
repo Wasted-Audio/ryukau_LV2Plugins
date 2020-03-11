@@ -245,8 +245,9 @@ protected:
 
 template<typename Scale> class NumberKnob : public Knob {
 public:
-  explicit NumberKnob(NanoWidget *group, PluginUI *ui, FontId fontId, Scale &scale)
-    : Knob(group, ui), fontId(fontId), scale(scale)
+  explicit NumberKnob(
+    NanoWidget *group, PluginUI *ui, FontId fontId, Scale &scale, uint32_t offset = 0)
+    : Knob(group, ui), fontId(fontId), scale(scale), offset(offset)
   {
   }
 
@@ -286,7 +287,7 @@ public:
     fontSize(textSize);
     textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
     text(
-      centerX, centerY, std::to_string(int32_t(floor(scale.map(value)))).c_str(),
+      centerX, centerY, std::to_string(int32_t(floor(scale.map(value))) + offset).c_str(),
       nullptr);
 
     // Tip.
@@ -303,4 +304,5 @@ protected:
   float textSize = 14.0f;
   FontId fontId = -1;
   Scale &scale;
+  uint32_t offset;
 };

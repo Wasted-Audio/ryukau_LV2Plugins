@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of FDNCymbal.
 //
@@ -19,8 +19,8 @@
 
 #include <cmath>
 
-#include "constants.hpp"
-#include "somemath.hpp"
+#include "../common/dsp/constants.hpp"
+#include "../common/dsp/somemath.hpp"
 
 namespace SomeDSP {
 

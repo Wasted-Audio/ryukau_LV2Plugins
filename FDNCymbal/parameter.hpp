@@ -20,7 +20,7 @@
 #include <memory>
 #include <vector>
 
-#include "value.hpp"
+#include "../common/value.hpp"
 
 #ifdef TEST_BUILD
 static const uint32_t kParameterIsAutomable = 0x01;
