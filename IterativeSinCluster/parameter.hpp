@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinCluster.
 //
@@ -20,8 +20,8 @@
 #include <memory>
 #include <vector>
 
-#include "dsp/scale.hpp"
-#include "value.hpp"
+#include "../common/dsp/scale.hpp"
+#include "../common/value.hpp"
 
 #ifdef TEST_BUILD
 static const uint32_t kParameterIsAutomable = 0x01;

@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinCluster.
 //
@@ -17,14 +17,14 @@
 
 #pragma once
 
+#include "../common/dsp/constants.hpp"
+#include "../common/dsp/smoother.hpp"
 #include "../parameter.hpp"
-#include "constants.hpp"
 #include "delay.hpp"
 #include "envelope.hpp"
 #include "iir.hpp"
 #include "noise.hpp"
 #include "oscillator.hpp"
-#include "smoother.hpp"
 
 #include "../../lib/vcl/vectorclass.h"
 

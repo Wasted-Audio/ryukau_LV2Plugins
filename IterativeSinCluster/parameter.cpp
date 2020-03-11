@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinCluster.
 //
@@ -16,7 +16,7 @@
 // along with IterativeSinCluster.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "parameter.hpp"
-#include "dsp/constants.hpp"
+#include "../common/dsp/constants.hpp"
 
 using namespace SomeDSP;
 

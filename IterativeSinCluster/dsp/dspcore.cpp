@@ -1,4 +1,4 @@
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinCluster.
 //
@@ -16,8 +16,6 @@
 // along with IterativeSinCluster.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "dspcore.hpp"
-
-#include <iostream>
 
 #if INSTRSET >= 10
 #define NOTE_NAME Note_AVX512
@@ -215,8 +213,8 @@ void DSPCORE_NAME::setup(double sampleRate)
 {
   this->sampleRate = sampleRate;
 
-  LinearSmoother<float>::setSampleRate(sampleRate);
-  LinearSmoother<float>::setTime(0.04f);
+  SmootherCommon<float>::setSampleRate(sampleRate);
+  SmootherCommon<float>::setTime(0.04f);
 
   for (auto &note : notes) note.setup(sampleRate);
 
@@ -247,7 +245,7 @@ void DSPCORE_NAME::setParameters()
 {
   using ID = ParameterID::ID;
 
-  LinearSmoother<float>::setTime(param.value[ID::smoothness]->getFloat());
+  SmootherCommon<float>::setTime(param.value[ID::smoothness]->getFloat());
 
   interpTremoloMix.push(param.value[ID::chorusMix]->getFloat());
   interpMasterGain.push(
@@ -280,7 +278,7 @@ void DSPCORE_NAME::setParameters()
 
 void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
 {
-  LinearSmoother<float>::setBufferSize(length);
+  SmootherCommon<float>::setBufferSize(length);
 
   std::array<float, 2> frame{};
   std::array<float, 2> chorusOut{};

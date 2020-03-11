@@ -3,7 +3,7 @@
 // Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
 //
 // Modified by:
-// (c) 2019 Takamitsu Endo
+// (c) 2019-2020 Takamitsu Endo
 //
 // This file is part of IterativeSinCluster.
 //
@@ -24,18 +24,67 @@
 #include <memory>
 #include <vector>
 
-#include "ui.hpp"
+#include "../common/ui.hpp"
+#include "parameter.hpp"
 
-#include "gui/TinosBoldItalic.hpp"
-#include "gui/barbox.hpp"
-#include "gui/button.hpp"
-#include "gui/checkbox.hpp"
-#include "gui/knob.hpp"
-#include "gui/label.hpp"
-#include "gui/optionmenu.hpp"
-#include "gui/rotaryknob.hpp"
-#include "gui/splash.hpp"
-#include "gui/vslider.hpp"
+#include "../common/gui/TinosBoldItalic.hpp"
+#include "../common/gui/barbox.hpp"
+#include "../common/gui/button.hpp"
+#include "../common/gui/checkbox.hpp"
+#include "../common/gui/knob.hpp"
+#include "../common/gui/label.hpp"
+#include "../common/gui/optionmenu.hpp"
+#include "../common/gui/rotaryknob.hpp"
+#include "../common/gui/splash.hpp"
+#include "../common/gui/vslider.hpp"
+
+void CreditSplash::onNanoDisplay()
+{
+  if (!isVisible()) return;
+
+  resetTransform();
+  translate(getAbsoluteX(), getAbsoluteY());
+
+  const auto width = getWidth();
+  const auto height = getHeight();
+
+  // Border.
+  beginPath();
+  rect(0, 0, width, height);
+  fillColor(backgroundColor);
+  fill();
+  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeWidth(borderWidth);
+  stroke();
+
+  // Text.
+  fillColor(foregroundColor);
+  fontFaceId(fontId);
+  textAlign(align);
+
+  fontSize(textSize * 1.5f);
+  std::stringstream stream;
+  stream << name << " " << std::to_string(MAJOR_VERSION) << "."
+         << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
+  text(20.0f, 50.0f, stream.str().c_str(), nullptr);
+
+  fontSize(textSize);
+  text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
+
+  text(20.0f, 150.0f, "- Knob -", nullptr);
+  text(20.0f, 180.0f, "Shift + Left Drag: Fine Adjustment", nullptr);
+  text(20.0f, 210.0f, "Ctrl + Left Click: Reset to Default", nullptr);
+
+  text(20.0f, 270.0f, "- Number -", nullptr);
+  text(20.0f, 300.0f, "Shares same controls with knob, and:", nullptr);
+  text(20.0f, 330.0f, "Right Click: Flip Minimum and Maximum", nullptr);
+
+  text(380.0f, 150.0f, "- Overtone -", nullptr);
+  text(380.0f, 180.0f, "Ctrl + Left Click: Reset to Default", nullptr);
+  text(380.0f, 210.0f, "Right Drag: Set to Minimum", nullptr);
+  text(380.0f, 240.0f, "Ctrl + Right Drag: Set to Maximum", nullptr);
+  text(380.0f, 300.0f, "Have a nice day!", nullptr);
+}
 
 START_NAMESPACE_DISTRHO
 
@@ -171,7 +220,7 @@ public:
     // Misc.
     const auto miscLeft = pitchLeft0 + 4.5f * knobX + 2.0f * margin;
     addKnob(miscLeft, pitchTop0, knobWidth, colorBlue, "Smooth", ID::smoothness);
-    std::vector<const char *> nVoiceOptions
+    std::vector<std::string> nVoiceOptions
       = {"Mono", "2 Voices", "4 Voices", "8 Voices", "16 Voices", "32 Voices"};
     addOptionMenu(
       miscLeft - (checkboxWidth - knobWidth) / 2.0f, pitchTop0 + knobY, checkboxWidth,
@@ -404,6 +453,8 @@ protected:
     repaint();
     // dumpParameter(); // Used to make preset. There may be better way to do this.
   }
+
+  void updateState(std::string /* key */, std::string /* value */) {}
 
   void programLoaded(uint32_t index) override
   {
@@ -646,7 +697,7 @@ private:
     float top,
     float width,
     uint32_t id,
-    const std::vector<const char *> &items)
+    const std::vector<std::string> &items)
   {
     auto menu = std::make_shared<OptionMenu>(this, this, items, fontId);
     menu->id = id;
