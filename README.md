@@ -3,6 +3,11 @@ Audio plugins for Linux.
 
 VST3 version is available at https://github.com/ryukau/VSTPlugins .
 
+# Package
+For Arch user, package is available on AUR. Thanks to mxmilkb for packaging.
+
+- [AUR (en) - uhhyou.lv2-git](https://aur.archlinux.org/packages/uhhyou.lv2-git)
+
 # Building
 On Ubuntu 18.04, open terminal and run following command.
 
