@@ -133,6 +133,8 @@ void DSPCore::process(
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
+    SmootherCommon<float>::setBufferIndex(i);
+
     auto sign = (pi < lfoPhase) - (lfoPhase < pi);
     const float lfo = sign * powf(fabsf(sin(lfoPhase)), interpLfoShape.process());
     const float lfoTime = interpLfoTimeAmount.process() * (1.0f + lfo);
