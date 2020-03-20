@@ -8,6 +8,11 @@ For Arch user, package is available on AUR. Thanks to mxmilkb for packaging.
 
 - [AUR (en) - uhhyou.lv2-git](https://aur.archlinux.org/packages/uhhyou.lv2-git)
 
+For openSUSE user, package is available on openSUSE Build Service. Thanks to Konstantin Voinov for packageing.
+
+- [Show home:kill_it / Uhhyou-Plugins - openSUSE Build Service](https://build.opensuse.org/package/show/home:kill_it/Uhhyou-Plugins)
+- [Show home:kill_it / vst3-Uhhyou-Plugins - openSUSE Build Service](https://build.opensuse.org/package/show/home:kill_it/vst3-Uhhyou-Plugins)
+
 # Building
 On Ubuntu 18.04, open terminal and run following command.
 
@@ -44,20 +49,25 @@ make -j JACK=false VST2=false # Disable jack and vst2 build.
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 
-Some controls turns red when pointing. They can be the cause of potential blow up. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
+## Controls
+Knobs, sliders etc. has common functionalities listed on below.
 
-## CubicPadSynth
+- <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>: Fine adjustment.
+- <kbd>Ctrl</kbd> + <kbd>Left Click</kbd>: Reset to default.
+
+Some controls turns red when pointing. They can be the cause of potential blow up or stopping all sounds for a while. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
+
+TextKnob which is shown in the image below has an additional control <kbd>Mouse Right Click</kbd> to flip min/max.
+
 <figure>
-<img src="docs/img/lv2_cubicpadsynth.png" alt="Image of CubicPadSynth GUI."/>
+<img src="docs/img/textknob.png" alt="Image of TextKnob." style="padding-bottom: 12px;"/>
 </figure>
 
-CubicPadSynth is a wavetable synthesizer which uses PADsynth algorithm to generate oscillator tables. Cubic interpolation is used to get smooth sound even at inaudible low frequency range. LFO waveform can be directly drawn.
+BarBox controls which is shown in the image below have keyboard shortcuts. Shortcuts are only enabled when cursor is on overtone control. Cheat sheet may be available on plugin information pop-up or information tab.
 
-- [PADsynth algorithm](https://zynaddsubfx.sourceforge.io/doc/PADsynth/PADsynth.htm)
-
-Some parameters have wide range of value. <kbd>Shift</kbd> + <kbd>Left Drag</kbd> can be used to fine adjustment.
-
-Barbox controls used for `LFO Wave` in Main tab and `Gain`, `Width`, `Pitch`, `Phase` in Wavetable tab have keyboard shortcuts. Shortcuts are only enabled when cursor is on overtone control. Cheat sheet is available on Information tab.
+<figure>
+<img src="docs/img/barbox.png" alt="Image of BarBox." style="padding-bottom: 12px;"/>
+</figure>
 
 | Input                                   | Control                                 |
 | --------------------------------------- | --------------------------------------- |
@@ -84,6 +94,18 @@ Barbox controls used for `LFO Wave` in Main tab and `Gain`, `Width`, `Pitch`, `P
 | <kbd>1</kbd>                            | Decrease                                |
 | <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
 
+## CubicPadSynth
+<figure>
+<img src="docs/img/lv2_cubicpadsynth.png" alt="Image of CubicPadSynth GUI."/>
+</figure>
+
+CubicPadSynth is a wavetable synthesizer which uses PADsynth algorithm to generate oscillator tables. Cubic interpolation is used to get smooth sound even at inaudible low frequency range. LFO waveform can be directly drawn.
+
+- [PADsynth algorithm](https://zynaddsubfx.sourceforge.io/doc/PADsynth/PADsynth.htm)
+
+Some parameters have wide range of value. <kbd>Shift</kbd> + <kbd>Left Drag</kbd> can be used to fine adjustment.
+
+
 ## EsPhaser
 <figure>
 <img src="docs/img/lv2_esphaser.png" alt="Image of EsPhaser GUI."/>
@@ -103,31 +125,6 @@ Caution:
 
 EnvelopedSine is another additive synthesizer which computes 64 sine waves per note. There are individual controls of attack, decay and saturation for each sine oscillator.
 
-Overtone controls (`Attack`, `Decay`, `Gain`, `Saturation`) have keyboard shortcuts. Shortcuts are only enabled when cursor is on overtone control. Cheat sheet can be popped up by clicking plugin title on bottom left.
-
-| Input                                   | Control                                 |
-| --------------------------------------- | --------------------------------------- |
-| <kbd>Ctrl</kbd> + <kbd>Left Click</kbd> | Reset to Default                        |
-| <kbd>Right Drag</kbd>                   | Draw Line                               |
-| <kbd>a</kbd>                            | Sort Ascending Order                    |
-| <kbd>d</kbd>                            | Sort Descending Order                   |
-| <kbd>f</kbd>                            | Low-pass Filter                         |
-| <kbd>F</kbd>                            | High-pass Filter                        |
-| <kbd>i</kbd>                            | Invert Value (Preserve current minimum) |
-| <kbd>I</kbd>                            | Invert Value (Minimum to 0)             |
-| <kbd>n</kbd>                            | Normalize (Preserve current minimum)    |
-| <kbd>N</kbd>                            | Normalize (Minimum to 0)                |
-| <kbd>h</kbd>                            | Emphasize High                          |
-| <kbd>l</kbd>                            | Emphasize Low                           |
-| <kbd>p</kbd>                            | Permute                                 |
-| <kbd>r</kbd>                            | Randomize                               |
-| <kbd>R</kbd>                            | Sparse Randomize                        |
-| <kbd>s</kbd>                            | Subtle Randomize                        |
-| <kbd>,</kbd> (Comma)                    | Rotate Back                             |
-| <kbd>.</kbd> (Period)                   | Rotate Forward                          |
-| <kbd>1</kbd>                            | Decrease Odd                            |
-| <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
-
 EnvelopedSine uses stable quadrature oscillator (QuadOsc) algorithm described by Martin Vicanek. QuadOsc is used because I have no idea how to set initial phase for faster algorithm.
 
 - [QuadOsc.pdf](https://www.vicanek.de/articles/QuadOsc.pdf)
@@ -142,10 +139,6 @@ Order 2 Thiran all-pass filters are used for phaser.
 </figure>
 
 IterativeSinCluster is an additive synthesizer. This synth computes 512 sine waves for each note to make tone cluster. I somehow thought "iterative sin" was a thing, but the correct term is "recursive sine".
-
-For number display used for `Gain`, `Semi`, etc. <kbd>Mouse Right Click</kbd> can be use to flip min/max.
-
-For overtone control, <kbd>Mouse Right Drag</kbd> to set value to min, and <kbd>Ctrl</kbd> + <kbd>Mouse Right Drag</kbd> to set value to max.
 
 Overview of calculation of pitch for each sine wave. Parameter `ET` stands for equal temperament. `Milli` means 1 milli semitone = 1 / 10 cent.
 
