@@ -11,9 +11,12 @@ build: dpf \
 	EsPhaser \
 	CubicPadSynth
 
+# build: dpf lv2cvport
+
 .PHONY: generate_ttl
 generate_ttl: build
 	./generate-ttl.sh
+	./cvport-ttl.sh
 
 # DEBUG=true
 # export DEBUG
@@ -25,6 +28,10 @@ JACK ?= true
 .PHONY: dpf
 dpf:
 	$(MAKE) -C lib/DPF dgl utils/lv2_ttl_generator
+
+.PHONY: lv2cvport
+lv2cvport: dpf
+	$(MAKE) -C lv2cvport
 
 .PHONY: CubicPadSynth
 CubicPadSynth: dpf

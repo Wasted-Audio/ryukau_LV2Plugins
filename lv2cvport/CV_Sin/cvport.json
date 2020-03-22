@@ -1,0 +1,18 @@
+{
+  "index0": {
+    "symbol": "Gain",
+    "name": "Gain"
+  },
+  "index1": {
+    "symbol": "Pitch",
+    "name": "Pitch"
+  },
+  "index2": {
+    "symbol": "Phase",
+    "name": "Phase"
+  },
+  "index3": {
+    "symbol": "Output",
+    "name": "Output"
+  }
+}
