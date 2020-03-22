@@ -1,19 +1,19 @@
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of CV_Sin.
+// This file is part of CV_PTRTrapezoid.
 //
-// CV_Sin is free software: you can redistribute it and/or modify
+// CV_PTRTrapezoid is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_Sin is distributed in the hope that it will be useful,
+// CV_PTRTrapezoid is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_Sin.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_PTRTrapezoid.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
@@ -33,6 +33,9 @@ namespace ParameterID {
 enum ID {
   gain,
   boost,
+  pulseWidth,
+  slope,
+  slopeMultiply,
   oscSemi,
   oscMilli,
   pitchBend,
@@ -45,6 +48,8 @@ struct Scales {
   static SomeDSP::IntScale<double> boolScale;
   static SomeDSP::LinearScale<double> defaultScale;
   static SomeDSP::LogScale<double> gain;
+  static SomeDSP::LogScale<double> oscSlope;
+  static SomeDSP::LogScale<double> slopeMultiply;
   static SomeDSP::IntScale<double> oscSemi;
   static SomeDSP::IntScale<double> oscMilli;
 };
@@ -64,6 +69,12 @@ struct GlobalParameter {
       = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
     value[ID::boost] = std::make_unique<LinearValue>(
       0.0, Scales::defaultScale, "boost", kParameterIsAutomable);
+    value[ID::pulseWidth] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "pulseWidth", kParameterIsAutomable);
+    value[ID::slope]
+      = std::make_unique<LogValue>(0.5, Scales::oscSlope, "slope", kParameterIsAutomable);
+    value[ID::slopeMultiply] = std::make_unique<LinearValue>(
+      0.25, Scales::defaultScale, "slopeMultiply", kParameterIsAutomable);
     value[ID::oscSemi] = std::make_unique<IntValue>(
       60, Scales::oscSemi, "oscSemi", kParameterIsAutomable | kParameterIsInteger);
     value[ID::oscMilli] = std::make_unique<IntValue>(

@@ -1,6 +1,7 @@
 all: build generate_ttl
 
 build: dpf \
+	lv2cvport \
 	SevenDelay \
 	SyncSawSynth \
 	WaveCymbal \
@@ -9,9 +10,7 @@ build: dpf \
 	IterativeSinCluster \
 	EnvelopedSine \
 	EsPhaser \
-	CubicPadSynth
-
-# build: dpf lv2cvport
+	CubicPadSynth \
 
 .PHONY: generate_ttl
 generate_ttl: build

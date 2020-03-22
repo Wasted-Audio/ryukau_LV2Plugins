@@ -17,7 +17,14 @@ For openSUSE user, package is available on openSUSE Build Service. Thanks to Kon
 On Ubuntu 18.04, open terminal and run following command.
 
 ```bash
-sudo apt install git pkg-config libjack-jackd2-dev libgl-dev liblo-dev
+sudo apt install \
+  git \
+  pkg-config \
+  libjack-jackd2-dev \
+  libgl-dev \
+  liblo-dev \
+  python-rdflib
+
 git clone --recursive <this repository url>
 cd LV2Plugins
 

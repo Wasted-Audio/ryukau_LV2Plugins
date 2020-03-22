@@ -1,19 +1,19 @@
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of CV_Sin.
+// This file is part of CV_PTRTrapezoid.
 //
-// CV_Sin is free software: you can redistribute it and/or modify
+// CV_PTRTrapezoid is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_Sin is distributed in the hope that it will be useful,
+// CV_PTRTrapezoid is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_Sin.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_PTRTrapezoid.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "parameter.hpp"
 #include "../../common/dsp/constants.hpp"
@@ -23,6 +23,8 @@ using namespace SomeDSP;
 IntScale<double> Scales::boolScale(1);
 LinearScale<double> Scales::defaultScale(0.0, 1.0);
 LogScale<double> Scales::gain(0.0, 4.0, 0.5, 1.0);
+LogScale<double> Scales::oscSlope(1.0, 32.0, 0.5, 8.0);
+LogScale<double> Scales::slopeMultiply(0.0, 16.0, 0.25, 1.0);
 
 IntScale<double> Scales::oscSemi(120);
 IntScale<double> Scales::oscMilli(1000);

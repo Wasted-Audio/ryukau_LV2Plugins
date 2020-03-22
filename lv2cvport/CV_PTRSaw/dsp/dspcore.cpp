@@ -1,19 +1,19 @@
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of CV_Sin.
+// This file is part of CV_PTRSaw.
 //
-// CV_Sin is free software: you can redistribute it and/or modify
+// CV_PTRSaw is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_Sin is distributed in the hope that it will be useful,
+// CV_PTRSaw is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_Sin.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_PTRSaw.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "dspcore.hpp"
 
@@ -34,6 +34,8 @@ void DSPCore::setup(double sampleRate)
   SmootherCommon<float>::setSampleRate(sampleRate);
   SmootherCommon<float>::setTime(0.01f);
 
+  oscillator.setup(sampleRate);
+
   noteStack.reserve(128);
   noteStack.resize(0);
 
@@ -51,7 +53,7 @@ void DSPCore::reset()
   startup();
 }
 
-void DSPCore::startup() { phase = 0; }
+void DSPCore::startup() { oscillator.reset(); }
 
 void DSPCore::setParameters()
 {
@@ -72,8 +74,10 @@ void DSPCore::setParameters()
 void DSPCore::process(
   const size_t length,
   const float *inGain,
-  const float *inPitch,
-  const float *inPhase,
+  const float *inOscPitch,
+  const float *inOscMod,
+  const float *inSyncPitch,
+  const float *inSyncMod,
   float *out0)
 {
   SmootherCommon<float>::setBufferSize(length);
@@ -82,11 +86,12 @@ void DSPCore::process(
     processMidiNote(i);
     SmootherCommon<float>::setBufferIndex(i);
 
-    const float freq = interpFrequency.process() * powf(2.0f, inPitch[i] * 32.0f / 12.0f);
-    const float gain = interpGain.process() + inGain[i];
-
-    phase = fmodf(phase + float(twopi) * freq / sampleRate + inPhase[i], float(twopi));
-    out0[i] = gain * sinf(phase);
+    const float oscFreq
+      = interpFrequency.process() * powf(2.0f, inOscPitch[i] * 32.0f / 12.0f);
+    oscillator.setOscFreq(oscFreq);
+    oscillator.setSyncFreq(oscFreq * inSyncPitch[i]);
+    out0[i] = (interpGain.process() + inGain[i])
+      * oscillator.process(inOscMod[i], inSyncMod[i]);
   }
 }
 

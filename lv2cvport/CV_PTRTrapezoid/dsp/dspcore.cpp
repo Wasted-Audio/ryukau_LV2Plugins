@@ -1,19 +1,19 @@
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of CV_Sin.
+// This file is part of CV_PTRTrapezoid.
 //
-// CV_Sin is free software: you can redistribute it and/or modify
+// CV_PTRTrapezoid is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_Sin is distributed in the hope that it will be useful,
+// CV_PTRTrapezoid is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_Sin.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_PTRTrapezoid.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "dspcore.hpp"
 
@@ -34,6 +34,8 @@ void DSPCore::setup(double sampleRate)
   SmootherCommon<float>::setSampleRate(sampleRate);
   SmootherCommon<float>::setTime(0.01f);
 
+  oscillator.setup(sampleRate);
+
   noteStack.reserve(128);
   noteStack.resize(0);
 
@@ -44,22 +46,23 @@ void DSPCore::setup(double sampleRate)
 void DSPCore::reset()
 {
   noteStack.resize(0);
+  interpFrequency.reset(0);
   interpGain.reset(
     param.value[ParameterID::gain]->getFloat()
     * param.value[ParameterID::boost]->getFloat());
-  interpFrequency.reset(0);
+  interpPulseWidth.reset(param.value[ParameterID::pulseWidth]->getFloat());
+  interpSlope.reset(param.value[ParameterID::slope]->getFloat());
+  interpSlopeMul.reset(0);
   startup();
 }
 
-void DSPCore::startup() { phase = 0; }
+void DSPCore::startup() { oscillator.reset(); }
 
 void DSPCore::setParameters()
 {
   using ID = ParameterID::ID;
 
-  if (!noteStack.empty()) {
-    lastFreq = noteStack.back().frequency;
-  }
+  if (!noteStack.empty()) lastFreq = noteStack.back().frequency;
   interpFrequency.push(
     lastFreq
     * paramToPitch(
@@ -67,13 +70,18 @@ void DSPCore::setParameters()
       param.value[ParameterID::oscMilli]->getFloat(),
       param.value[ParameterID::pitchBend]->getFloat()));
   interpGain.push(param.value[ID::gain]->getFloat() * param.value[ID::boost]->getFloat());
+  interpPulseWidth.push(param.value[ParameterID::pulseWidth]->getFloat());
+  interpSlope.push(param.value[ParameterID::slope]->getFloat());
+  interpSlopeMul.push(param.value[ID::slopeMultiply]->getFloat());
 }
 
 void DSPCore::process(
   const size_t length,
   const float *inGain,
-  const float *inPitch,
-  const float *inPhase,
+  const float *inOscPitch,
+  const float *inPhaseMod,
+  const float *inPulseWidth,
+  const float *inOscSlope,
   float *out0)
 {
   SmootherCommon<float>::setBufferSize(length);
@@ -82,11 +90,12 @@ void DSPCore::process(
     processMidiNote(i);
     SmootherCommon<float>::setBufferIndex(i);
 
-    const float freq = interpFrequency.process() * powf(2.0f, inPitch[i] * 32.0f / 12.0f);
-    const float gain = interpGain.process() + inGain[i];
-
-    phase = fmodf(phase + float(twopi) * freq / sampleRate + inPhase[i], float(twopi));
-    out0[i] = gain * sinf(phase);
+    oscillator.setFreq(
+      interpFrequency.process() * powf(2.0f, inOscPitch[i] * 32.0f / 12.0f));
+    oscillator.addPhase(inPhaseMod[i]);
+    oscillator.setPulseWidth(interpPulseWidth.process() + inPulseWidth[i]);
+    oscillator.setSlope(interpSlope.process() + interpSlopeMul.process() * inOscSlope[i]);
+    out0[i] = (interpGain.process() + inGain[i]) * oscillator.process();
   }
 }
 
