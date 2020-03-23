@@ -47,25 +47,25 @@ For more detailed information, take a look at ArchWiki.
 Convert audio port signal to CV port signal.
 
 - 1 audio input
-- 1 CV output.
+- 1 CV output
 
 ## CV_CvToAudio
 Convert CV port signal to audio port signal.
 
 - 1 CV input
-- 1 audio output.
+- 1 audio output
 
 ## ExpADSREnvelope
 Exponential ADSR Envelope.
 
 - 1 event input
-- 1 CV output.
+- 1 CV output
 
 ## ExpPolyADEnvelope
 Exponential polynomial envelope. Note that this envelope resets to 0 for each note-on.
 
 - 1 event input
-- 1 CV output.
+- 1 CV output
 
 Beware that increasing `curve` parameter may lead to very loud output.
 
@@ -79,14 +79,41 @@ Multiply CV signal. 2 CV inputs and 1 CV output.
 Parabolic envelope. Note that this envelope resets to 0 for each note-on.
 
 - 1 event input
-- 1 CV output.
+- 1 CV output
+
+## CV_PController (Alpha)
+Slew limiter based on PID controller without I and D. This is basically an 1-pole lowpass filter.
+
+- 1 CV input
+- 1 CV output
+
+C++ implementation:
+
+```cpp
+template<typename Sample> struct PController {
+  Sample kp = 1; // Range in [0, 1].
+  Sample value = 0;
+
+  void setup(Sample p) { kp = std::clamp<Sample>(p, Sample(0), Sample(1)); }
+  void reset() { value = 0; }
+  Sample process(Sample input) { return value += kp * (input - value); }
+};
+```
+
+Transfer function.
+
+```
+H(z) = kp / (1 + (kp - 1) * z^-1)
+```
+
+- [Single-pole IIR low-pass filter - which is the correct formula for the decay coefficient? - Signal Processing Stack Exchange](https://dsp.stackexchange.com/questions/54086/single-pole-iir-low-pass-filter-which-is-the-correct-formula-for-the-decay-coe)
 
 ## CV_PTRSaw
 Monophonic order 10 PTR sawtooth oscillator. Double precision is used internally.
 
 - 1 event input
 - 5 CV inputs
-- 1 CV output.
+- 1 CV output
 
 ### CV Mapping
 Equation to calculate gain value:
@@ -114,7 +141,7 @@ Monophonic PTR trapezoid oscillator. Double precision is used internally. PTRTra
 
 - 1 event input
 - 5 CV input
-- 1 CV output.
+- 1 CV output
 
 ### CV Mapping
 Equation to calculate gain value:
@@ -140,12 +167,22 @@ Input to PulseWidth should be in range of `[-1, 1]`. Excessed range will be hard
 
 OscSlope will be multiplied by the value of `slope` parameter.
 
+## CV_RateLimiter
+Slew rate limiter.
+
+- 1 CV input
+- 1 CV output
+
+This is an implementation of the link below.
+
+- [Limit rate of change of signal - Simulink](https://www.mathworks.com/help/simulink/slref/ratelimiter.html)
+
 ## CV_Sin
 Monophonic sine oscillator.
 
 - 1 event input
 - 3 CV input
-- 1 CV output.
+- 1 CV output
 
 ### CV Mapping
 Equation to calculate gain value:
