@@ -19,6 +19,7 @@
 
 #include "../../lib/vcl/vectorclass.h"
 
+#include "constants.hpp"
 #include "somemath.hpp"
 
 #include <algorithm>
