@@ -234,13 +234,19 @@ private:
 // PID controller without I and D.
 template<typename Sample> class PController {
 public:
-  void setup(Sample sampleRate) { this->sampleRate = sampleRate; };
+  // Lower bound of cutoffHz is around 3 to 4 Hz for single presision (float).
+  static Sample cutoffToP(Sample sampleRate, Sample cutoffHz)
+  {
+    auto omega_c = Sample(twopi) * cutoffHz / sampleRate;
+    auto y = Sample(1) - somecos<Sample>(omega_c);
+    return -y + somesqrt<Sample>((y + Sample(2)) * y);
+  }
+
   void setP(Sample p) { kp = std::clamp<Sample>(p, Sample(0), Sample(1)); };
   void reset() { value = 0; }
   Sample process(Sample input) { return value += kp * (input - value); }
 
 private:
-  Sample sampleRate = 44100;
   Sample kp; // In [0, 1].
   Sample value = 0;
 };

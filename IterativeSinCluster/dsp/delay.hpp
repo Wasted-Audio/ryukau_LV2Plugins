@@ -112,7 +112,6 @@ public:
   void setup(double sampleRate, Sample time, Sample maxTime)
   {
     delay.setup(sampleRate, time, maxTime);
-    delayTimeLowpass.setup(sampleRate);
     delayTimeLowpass.setP(0.1); // Fixed.
     interpPhase.setRange(twopi);
   }
