@@ -59,10 +59,10 @@ struct GlobalParameter {
 
     value[ID::gain] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "gain", kParameterIsAutomable);
-    value[ID::attack]
-      = std::make_unique<LogValue>(0.0, Scales::attack, "attack", kParameterIsAutomable);
-    value[ID::curve]
-      = std::make_unique<LogValue>(0.5, Scales::curve, "curve", kParameterIsAutomable);
+    value[ID::attack] = std::make_unique<LogValue>(
+      0.0, Scales::attack, "attack", kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::curve] = std::make_unique<LogValue>(
+      0.5, Scales::curve, "curve", kParameterIsAutomable | kParameterIsLogarithmic);
   }
 
 #ifndef TEST_BUILD

@@ -64,14 +64,14 @@ struct GlobalParameter {
 
     value[ID::gain] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "gain", kParameterIsAutomable);
-    value[ID::attack]
-      = std::make_unique<LogValue>(0.0, Scales::attack, "attack", kParameterIsAutomable);
-    value[ID::decay]
-      = std::make_unique<LogValue>(0.5, Scales::decay, "decay", kParameterIsAutomable);
+    value[ID::attack] = std::make_unique<LogValue>(
+      0.0, Scales::attack, "attack", kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::decay] = std::make_unique<LogValue>(
+      0.5, Scales::decay, "decay", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::sustain] = std::make_unique<LogValue>(
       0.5, Scales::sustain, "sustain", kParameterIsAutomable);
     value[ID::release] = std::make_unique<LogValue>(
-      0.0, Scales::release, "release", kParameterIsAutomable);
+      0.0, Scales::release, "release", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::curve] = std::make_unique<LinearValue>(
       0.0, Scales::defaultScale, "curve", kParameterIsAutomable);
   }

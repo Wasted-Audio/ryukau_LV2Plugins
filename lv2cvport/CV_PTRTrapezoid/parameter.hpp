@@ -65,14 +65,14 @@ struct GlobalParameter {
     using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
     using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
-    value[ID::gain]
-      = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
+    value[ID::gain] = std::make_unique<LogValue>(
+      0.5, Scales::gain, "gain", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::boost] = std::make_unique<LinearValue>(
       0.0, Scales::defaultScale, "boost", kParameterIsAutomable);
     value[ID::pulseWidth] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "pulseWidth", kParameterIsAutomable);
-    value[ID::slope]
-      = std::make_unique<LogValue>(0.5, Scales::oscSlope, "slope", kParameterIsAutomable);
+    value[ID::slope] = std::make_unique<LogValue>(
+      0.5, Scales::oscSlope, "slope", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::slopeMultiply] = std::make_unique<LinearValue>(
       0.25, Scales::defaultScale, "slopeMultiply", kParameterIsAutomable);
     value[ID::oscSemi] = std::make_unique<IntValue>(

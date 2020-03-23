@@ -6,6 +6,11 @@ FILES_DSP = plugin.cpp \
 	parameter.cpp \
 	dsp/dspcore.cpp \
 
+FILES_UI  = \
+	ui.cpp \
+	parameter.cpp \
+	$(realpath ../../common/gui/TinosBoldItalic.cpp) \
+
 # Do some magic
 DPF_PATH ::= ../../lib/DPF
 TARGET_DIR ::= ../../bin

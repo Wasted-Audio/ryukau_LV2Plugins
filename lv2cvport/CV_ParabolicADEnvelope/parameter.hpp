@@ -62,13 +62,15 @@ struct GlobalParameter {
     value[ID::gain] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "gain", kParameterIsAutomable);
     value[ID::attackTime] = std::make_unique<LogValue>(
-      0.5, Scales::envelopeTime, "attackTime", kParameterIsAutomable);
+      0.5, Scales::envelopeTime, "attackTime",
+      kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::attackCurve] = std::make_unique<LinearValue>(
-      0.5, Scales::curve, "attackCurve", kParameterIsAutomable);
+      0.5, Scales::curve, "attackCurve", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::decayTime] = std::make_unique<LogValue>(
-      0.5, Scales::envelopeTime, "decayTime", kParameterIsAutomable);
+      0.5, Scales::envelopeTime, "decayTime",
+      kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::decayCurve] = std::make_unique<LinearValue>(
-      0.5, Scales::curve, "decayCurve", kParameterIsAutomable);
+      0.5, Scales::curve, "decayCurve", kParameterIsAutomable | kParameterIsLogarithmic);
   }
 
 #ifndef TEST_BUILD

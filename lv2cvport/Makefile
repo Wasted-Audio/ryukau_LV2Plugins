@@ -1,16 +1,16 @@
-# build: \
-# 	CV_AudioToCv \
-# 	CV_CvToAudio \
-# 	CV_ExpADSREnvelope \
-# 	CV_ExpPolyADEnvelope \
-# 	CV_LinearADSREnvelope \
-# 	CV_Multiply \
-# 	CV_ParabolicADEnvelope \
-# 	CV_PTRSaw \
-# 	CV_PTRTrapezoid \
-# 	CV_Sin \
-
-build: CV_PTRTrapezoid
+build: \
+	CV_AudioToCv \
+	CV_CvToAudio \
+	CV_ExpADSREnvelope \
+	CV_ExpPolyADEnvelope \
+	CV_LinearADSREnvelope \
+	CV_Multiply \
+	CV_ParabolicADEnvelope \
+	CV_PController \
+	CV_PTRSaw \
+	CV_PTRTrapezoid \
+	CV_RateLimiter \
+	CV_Sin \
 
 .PHONY: CV_AudioToCv
 CV_AudioToCv:
@@ -40,6 +40,10 @@ CV_Multiply:
 CV_ParabolicADEnvelope:
 	$(MAKE) -C CV_ParabolicADEnvelope
 
+.PHONY: CV_PController
+CV_PController:
+	$(MAKE) -C CV_PController
+
 .PHONY: CV_PTRSaw
 CV_PTRSaw:
 	$(MAKE) -C CV_PTRSaw
@@ -47,6 +51,10 @@ CV_PTRSaw:
 .PHONY: CV_PTRTrapezoid
 CV_PTRTrapezoid:
 	$(MAKE) -C CV_PTRTrapezoid
+
+.PHONY: CV_RateLimiter
+CV_RateLimiter:
+	$(MAKE) -C CV_RateLimiter
 
 .PHONY: CV_Sin
 CV_Sin:

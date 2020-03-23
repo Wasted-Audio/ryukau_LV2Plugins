@@ -60,8 +60,8 @@ struct GlobalParameter {
     using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
     using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
-    value[ID::gain]
-      = std::make_unique<LogValue>(0.5, Scales::gain, "gain", kParameterIsAutomable);
+    value[ID::gain] = std::make_unique<LogValue>(
+      0.5, Scales::gain, "gain", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::boost] = std::make_unique<LinearValue>(
       0.0, Scales::defaultScale, "boost", kParameterIsAutomable);
     value[ID::oscSemi] = std::make_unique<IntValue>(
