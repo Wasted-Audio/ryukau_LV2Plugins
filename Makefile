@@ -15,7 +15,6 @@ build: common \
 .PHONY: generate_ttl
 generate_ttl: build
 	./generate-ttl.sh
-	./cvport-ttl.sh
 
 # DEBUG=true
 # export DEBUG

@@ -45,6 +45,25 @@ protected:
   }
   int64_t getUniqueId() const override { return d_cconst('u', '0', '0', '0'); }
 
+  void initAudioPort(bool input, uint32_t index, AudioPort &port)
+  {
+    if (input && index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Input1");
+      port.symbol = String("cv_in_1");
+    } else if (input && index == 1) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Input2");
+      port.symbol = String("cv_in_2");
+    } else if (!input && index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Output");
+      port.symbol = String("cv_out");
+    } else {
+      Plugin::initAudioPort(input, index, port);
+    }
+  }
+
   void initParameter(uint32_t /* index */, Parameter & /*parameter*/) override {}
   float getParameterValue(uint32_t /* index */) const override { return 0; }
   void setParameterValue(uint32_t /* index */, float /* value */) override {}

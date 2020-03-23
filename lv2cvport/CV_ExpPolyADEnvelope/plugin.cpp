@@ -54,7 +54,18 @@ protected:
   {
     return d_version(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
   }
-  int64_t getUniqueId() const override { return d_cconst('u', 'f', 'c', 'y'); }
+  int64_t getUniqueId() const override { return d_cconst('u', '0', '0', '0'); }
+
+  void initAudioPort(bool input, uint32_t index, AudioPort &port)
+  {
+    if (!input && index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Output");
+      port.symbol = String("cv_out");
+    } else {
+      Plugin::initAudioPort(input, index, port);
+    }
+  }
 
   void initParameter(uint32_t index, Parameter &parameter) override
   {

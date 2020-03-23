@@ -48,6 +48,20 @@ protected:
   }
   int64_t getUniqueId() const override { return d_cconst('u', '0', '0', '0'); }
 
+  void initAudioPort(bool input, uint32_t index, AudioPort &port)
+  {
+    if (input && index == 0) {
+      port.name = String("Audio Input");
+      port.symbol = String("audio_in");
+    } else if (!input && index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("CV Output");
+      port.symbol = String("cv_out");
+    } else {
+      Plugin::initAudioPort(input, index, port);
+    }
+  }
+
   void initParameter(uint32_t /* index */, Parameter & /*parameter*/) override {}
   float getParameterValue(uint32_t /* index */) const override { return 0; }
   void setParameterValue(uint32_t /* index */, float /* value */) override {}

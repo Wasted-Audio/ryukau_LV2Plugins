@@ -55,7 +55,46 @@ protected:
   {
     return d_version(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
   }
-  int64_t getUniqueId() const override { return d_cconst('u', 'f', 'c', 'y'); }
+  int64_t getUniqueId() const override { return d_cconst('u', '0', '0', '0'); }
+
+  void initAudioPort(bool input, uint32_t index, AudioPort &port)
+  {
+    if (input) {
+      switch (index) {
+        case 0:
+          port.hints = kAudioPortIsCV;
+          port.name = String("Gain");
+          port.symbol = String("cv_gain");
+          return;
+        case 1:
+          port.hints = kAudioPortIsCV;
+          port.name = String("OscPitch");
+          port.symbol = String("cv_osc_pitch");
+          return;
+        case 2:
+          port.hints = kAudioPortIsCV;
+          port.name = String("PhaseMod");
+          port.symbol = String("cv_phase_mod");
+          return;
+        case 3:
+          port.hints = kAudioPortIsCV;
+          port.name = String("PulseWidth");
+          port.symbol = String("cv_pulse_width");
+          return;
+        case 4:
+          port.hints = kAudioPortIsCV;
+          port.name = String("OscSlope");
+          port.symbol = String("cv_osc_slope");
+          return;
+      }
+    } else if (index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Output");
+      port.symbol = String("cv_out");
+      return;
+    }
+    Plugin::initAudioPort(input, index, port);
+  }
 
   void initParameter(uint32_t index, Parameter &parameter) override
   {

@@ -51,6 +51,21 @@ protected:
   }
   int64_t getUniqueId() const override { return d_cconst('u', '0', '0', '0'); }
 
+  void initAudioPort(bool input, uint32_t index, AudioPort &port)
+  {
+    if (input && index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Input");
+      port.symbol = String("cv_in");
+    } else if (!input && index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Output");
+      port.symbol = String("cv_out");
+    } else {
+      Plugin::initAudioPort(input, index, port);
+    }
+  }
+
   void initParameter(uint32_t index, Parameter &parameter) override
   {
     dsp.param.initParameter(index, parameter);
