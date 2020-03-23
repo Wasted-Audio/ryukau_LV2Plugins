@@ -24,8 +24,6 @@ void DSPCore::setup(double sampleRate)
   SmootherCommon<float>::setSampleRate(sampleRate);
   SmootherCommon<float>::setTime(0.01f);
 
-  pController.setup(sampleRate);
-
   reset();
 }
 
@@ -33,7 +31,14 @@ void DSPCore::reset() { pController.reset(); }
 
 void DSPCore::startup() {}
 
-void DSPCore::setParameters() { interpP.push(param.value[ParameterID::kp]->getFloat()); }
+void DSPCore::setParameters()
+{
+  interpP.push(
+    param.value[ParameterID::bypass]->getInt()
+      ? 1.0f
+      : PController<double>::cutoffToP(
+        sampleRate, param.value[ParameterID::cutoff]->getFloat()));
+}
 
 void DSPCore::process(const size_t length, const float *in0, float *out0)
 {

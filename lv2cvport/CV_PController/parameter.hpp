@@ -31,14 +31,16 @@ static const uint32_t kParameterIsLogarithmic = 0x08;
 
 namespace ParameterID {
 enum ID {
-  kp,
+  bypass,
+  cutoff,
 
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
 
 struct Scales {
-  static SomeDSP::LogScale<double> kp;
+  static SomeDSP::IntScale<double> boolScale;
+  static SomeDSP::LogScale<double> cutoff;
 };
 
 struct GlobalParameter {
@@ -52,8 +54,10 @@ struct GlobalParameter {
     // using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
     using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
-    value[ID::kp] = std::make_unique<LogValue>(
-      0.1, Scales::kp, "kp", kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::bypass] = std::make_unique<IntValue>(
+      0.1, Scales::boolScale, "bypass", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::cutoff] = std::make_unique<LogValue>(
+      0.1, Scales::cutoff, "cutoff", kParameterIsAutomable | kParameterIsLogarithmic);
   }
 
 #ifndef TEST_BUILD

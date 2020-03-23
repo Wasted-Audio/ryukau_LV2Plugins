@@ -54,7 +54,7 @@ constexpr float knobHeight = 40.0f;
 constexpr float knobX = 80.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
 constexpr uint32_t defaultWidth = uint32_t(2 * knobX + 40);
-constexpr uint32_t defaultHeight = uint32_t(labelHeight + 1 * labelY + 30);
+constexpr uint32_t defaultHeight = uint32_t(labelHeight + 2 * labelY + 30);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
@@ -157,6 +157,20 @@ private:
     std::cout << "}" << std::endl;
   }
 
+  std::shared_ptr<CheckBox>
+  addCheckbox(float left, float top, float width, const char *title, uint32_t id)
+  {
+    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
+    checkbox->id = id;
+    checkbox->setSize(width, labelHeight);
+    checkbox->setAbsolutePos(left, top);
+    checkbox->setForegroundColor(colorFore);
+    checkbox->setHighlightColor(colorBlue);
+    checkbox->setTextSize(uiTextSize);
+    valueWidget.push_back(checkbox);
+    return checkbox;
+  }
+
   std::shared_ptr<Label> addLabel(
     int left,
     int top,
@@ -237,8 +251,11 @@ public:
 
     const int labelAlign = ALIGN_LEFT | ALIGN_MIDDLE;
 
-    addLabel(left0, top0 + labelY, knobX, "P value", labelAlign);
-    addTextKnob(left1, top0 + labelY, knobX, colorBlue, ID::kp, Scales::kp, false, 7);
+    addLabel(left0, top0 + labelY, knobX, "Cutoff [Hz]", labelAlign);
+    addTextKnob(
+      left1, top0 + labelY, knobX, colorBlue, ID::cutoff, Scales::cutoff, false, 3);
+
+    addCheckbox(left0, top0 + 2 * labelY, knobX, "Bypass", ID::bypass);
   }
 };
 

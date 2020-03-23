@@ -20,4 +20,6 @@
 
 using namespace SomeDSP;
 
-LogScale<double> Scales::kp(0.0, 1.0, 0.5, 0.04);
+IntScale<double> Scales::boolScale(1);
+LogScale<double> Scales::cutoff(0.0, 22000.0, 0.5, 100.0);
+// LogScale<double> Scales::kp(0.0, 1.0, 0.5, 0.04);

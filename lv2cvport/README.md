@@ -81,30 +81,27 @@ Parabolic envelope. Note that this envelope resets to 0 for each note-on.
 - 1 event input
 - 1 CV output
 
-## CV_PController (Alpha)
+## CV_PController
 Slew limiter based on PID controller without I and D. This is basically an 1-pole lowpass filter.
 
 - 1 CV input
 - 1 CV output
-
-C++ implementation:
-
-```cpp
-template<typename Sample> struct PController {
-  Sample kp = 1; // Range in [0, 1].
-  Sample value = 0;
-
-  void setup(Sample p) { kp = std::clamp<Sample>(p, Sample(0), Sample(1)); }
-  void reset() { value = 0; }
-  Sample process(Sample input) { return value += kp * (input - value); }
-};
-```
 
 Transfer function.
 
 ```
 H(z) = kp / (1 + (kp - 1) * z^-1)
 ```
+
+Using exact formula to compute cutoff frequency.
+
+```
+ω_c = 2 * pi * cutoffHz / sampleRate
+y   = 1 - cos(ω_c)
+kp  = -y + sqrt((y + 2) * y)
+```
+
+This formula is described in the link below.
 
 - [Single-pole IIR low-pass filter - which is the correct formula for the decay coefficient? - Signal Processing Stack Exchange](https://dsp.stackexchange.com/questions/54086/single-pole-iir-low-pass-filter-which-is-the-correct-formula-for-the-decay-coe)
 
