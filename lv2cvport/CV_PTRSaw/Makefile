@@ -9,7 +9,8 @@ FILES_DSP = plugin.cpp \
 FILES_UI  = \
 	ui.cpp \
 	parameter.cpp \
-	$(realpath ../../common/gui/TinosBoldItalic.cpp) \
+
+OBJS_UI = ../../build/common/gui/TinosBoldItalic.cpp.o
 
 # Do some magic
 DPF_PATH ::= ../../lib/DPF

@@ -1,6 +1,6 @@
 all: build generate_ttl
 
-build: dpf \
+build: common \
 	lv2cvport \
 	SevenDelay \
 	SyncSawSynth \
@@ -28,44 +28,48 @@ JACK ?= true
 dpf:
 	$(MAKE) -C lib/DPF dgl utils/lv2_ttl_generator
 
+.PHONY: common
+common: dpf
+	$(MAKE) -C common
+
 .PHONY: lv2cvport
-lv2cvport: dpf
+lv2cvport: common
 	$(MAKE) -C lv2cvport
 
 .PHONY: CubicPadSynth
-CubicPadSynth: dpf
+CubicPadSynth: common
 	$(MAKE) -C CubicPadSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: EsPhaser
-EsPhaser: dpf
+EsPhaser: common
 	$(MAKE) -C EsPhaser LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: EnvelopedSine
-EnvelopedSine: dpf
+EnvelopedSine: common
 	$(MAKE) -C EnvelopedSine LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: IterativeSinCluster
-IterativeSinCluster: dpf
+IterativeSinCluster: common
 	$(MAKE) -C IterativeSinCluster LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: TrapezoidSynth
-TrapezoidSynth: dpf
+TrapezoidSynth: common
 	$(MAKE) -C TrapezoidSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: FDNCymbal
-FDNCymbal: dpf
+FDNCymbal: common
 	$(MAKE) -C FDNCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: WaveCymbal
-WaveCymbal: dpf
+WaveCymbal: common
 	$(MAKE) -C WaveCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: SyncSawSynth
-SyncSawSynth: dpf
+SyncSawSynth: common
 	$(MAKE) -C SyncSawSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: SevenDelay
-SevenDelay: dpf
+SevenDelay: common
 	$(MAKE) -C SevenDelay LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: install

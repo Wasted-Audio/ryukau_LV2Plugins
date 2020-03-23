@@ -10,7 +10,8 @@ FILES_DSP = \
 FILES_UI  = \
 	ui.cpp \
 	parameter.cpp \
-	../common/gui/TinosBoldItalic.cpp \
+
+OBJS_UI = ../build/common/gui/TinosBoldItalic.cpp.o
 
 # Do some magic
 include ../Makefile.plugins.mk
