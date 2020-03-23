@@ -21,6 +21,7 @@
 
 #include "somemath.hpp"
 
+#include <algorithm>
 #include <array>
 
 namespace SomeDSP {
@@ -233,43 +234,26 @@ private:
 // PID controller without I and D.
 template<typename Sample> class PController {
 public:
-  // p in [0, 1].
-  void setup(Sample sampleRate, Sample p)
-  {
-    this->sampleRate = sampleRate;
-    kp = p;
-  };
-
+  void setup(Sample sampleRate) { this->sampleRate = sampleRate; };
+  void setP(Sample p) { kp = std::clamp<Sample>(p, Sample(0), Sample(1)); };
   void reset() { value = 0; }
-
-  Sample process(Sample input)
-  {
-    value += kp * (input - value);
-    return value;
-  }
+  Sample process(Sample input) { return value += kp * (input - value); }
 
 private:
   Sample sampleRate = 44100;
-  Sample kp;
+  Sample kp; // In [0, 1].
   Sample value = 0;
 };
 
 class PController16 {
 public:
-  // p in [0, 1].
-  void setP(float p) { kp = p; };
+  void setP(float p) { kp = std::clamp<float>(p, float(0), float(1)); };
   void setP(int index, float p) { kp.insert(index, p); };
-
   void reset() { value = 0; }
-
-  Vec16f process(Vec16f input)
-  {
-    value += kp * (input - value);
-    return value;
-  }
+  Vec16f process(Vec16f input) { return value += kp * (input - value); }
 
 private:
-  Vec16f kp = 1;
+  Vec16f kp = 1; // In [0, 1].
   Vec16f value = 0;
 };
 
