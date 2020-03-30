@@ -101,7 +101,7 @@ public:
 private:
   float sampleRate = 44100.0f;
 
-  float lastFreq = 0;
+  float lastFreq = 1;
   PTRSyncSaw oscillator;
   std::vector<NoteInfo> noteStack; // Top of this stack is current note.
 
