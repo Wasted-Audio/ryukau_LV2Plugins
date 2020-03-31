@@ -1,4 +1,5 @@
 build: \
+	CV_3PoleLP \
 	CV_AudioToCv \
 	CV_CvToAudio \
 	CV_ExpADSREnvelope \
@@ -11,6 +12,10 @@ build: \
 	CV_PTRTrapezoid \
 	CV_RateLimiter \
 	CV_Sin \
+
+.PHONY: CV_3PoleLP
+CV_3PoleLP:
+	$(MAKE) -C CV_3PoleLP
 
 .PHONY: CV_AudioToCv
 CV_AudioToCv:

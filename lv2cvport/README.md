@@ -5,6 +5,22 @@ Example patch.
 <img src="img/lv2_cvport_example1.png" alt="Image of LV2 CVPort example patch on Carla patchbay." style="padding-bottom: 12px;"/>
 </figure>
 
+## CV_3PoleLP
+3-pole low-pass filter.
+
+- 4 CV input
+- 1 CV output
+
+`DC Block` and `Highpass` shares same parameter with different tuning. Both parameters are multiplied into one value.
+
+```
+internalCutoffCoefficient = dcBlock * mapHzToCutoff(highpass)
+```
+
+When `UniformPeak` is checked, output gain will be almost uniform with varying `Resonance` value. "Almost" means that tuning curve is not exact but approximated.
+
+When `UniformGain` is checked, output gain will be almost uniform with varying `Cutoff` value.
+
 ## CV_AudioToCv
 Convert audio port signal to CV port signal.
 
@@ -168,15 +184,15 @@ First, install `qjackctl`, `jack-keyboard`, `a2jmidid` and `Carla`.
 
 If your environment has multiple sound device, it may requires to configure `qjackctl`. In this case, click `Setup` buttion. Then open `Settings` -> `Advanced` tab. `Output Device` and `Input Device` may not be set to primary device, so fix it.
 
-When configuration is done, click `Start` button on main windows of `qjackctl` to start `jackd`.
+When configuration is done, click `Start` button on main window of `qjackctl` to start `jackd`.
 
-If you have MIDI keyboard, use `a2jmidid` to receive notes. To start `a2jmidid`, type following command after started `jackd` via `qjackctl`.
+To enable MIDI keyboard, `a2jmidid` can be used to receive notes. To start `a2jmidid`, type following command after started `jackd` via `qjackctl`.
 
 ```
 a2jmidid -e
 ```
 
-If you don't have MIDI keyboard, use `jack-keyboard`.
+If you don't have MIDI keyboard, `jack-keyboard` can be used.
 
 `Carla` also requires some configuration to use LV2 CV port. Click `Configure Carla`, then go to `Engine` tab. Change `Audio driver` to JACK and `Process mode` to Patchbay. After configuration, quit Carla, start `jackd` via `qjackctl`, then restart `Carla`. `Carla` now loads LV2 CV port plugins.
 
