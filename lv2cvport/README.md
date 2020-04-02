@@ -33,6 +33,26 @@ Convert CV port signal to audio port signal.
 - 1 CV input
 - 1 audio output
 
+## CV_DoubleFilter
+Strange 4-pole filter inspired from double-spring.
+
+CV_DoubleFilter may outputs loud signal. Recommend to use with limiter.
+
+
+- 3 CV input
+- 1 CV output
+
+When `Uniform Gain` is unchecked, output may be loud where `cutoff` is greater than 3800 Hz.
+
+When `Highpass` is checked, `Uniform Gain` only makes subtle difference.
+
+A CV signal will be added to the corresponding parameter.
+
+### Tips
+There is a resonance boundary around `cutoff` frequency 3700-3800 Hz depending on sample rate.
+
+Resonance also appears when the value of `resonance` is close to 0. Try 0.01 or lower.
+
 ## ExpADSREnvelope
 Exponential ADSR Envelope.
 
