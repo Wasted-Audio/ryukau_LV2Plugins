@@ -1,5 +1,5 @@
 # Code Walkthrough
-This is mostly a note to remember what I was doing.
+A note to remember what I was doing.
 
 ## Adding a Parameter
 Parameter management is structured to avoid changing 5 different switch statement in `ui.cpp` and `plugin.cpp` for each parameter addition.
@@ -57,11 +57,11 @@ struct GlobalParameter {
 };
 ```
 
-`value` is a std::vector. Index is corresponded to `ParameterID::ID`.
+`value` is a std::vector. Index corresponds to `ParameterID::ID`.
 
-There's 2 types of value. `IntValue` and `FloatValue`. They are defined in `value.hpp`. `FloatValue` takes a value scaling for template argument. See `dsp/scales.hpp` for available scales.
+There's 2 types of value. `IntValue` and `FloatValue`. They are defined in `common/value.hpp`. `FloatValue` takes a value scaling for template argument. See `dsp/scales.hpp` for available scales.
 
-Arguments for `make_unique` are `(normalizedValue, scale, parameterName, parameterHint)`. It's calling constructor of `FloatValue` in `value.hpp`. Range of `normalizedValue` is `[0.0, 1.0]`. In DPF, `parameterName` string must only consists of `a-zA-z0-9` and `_` (underscore). Space and other character may crash plugin with segmentation fault.
+Arguments for `make_unique` are `(normalizedValue, scale, parameterName, parameterHint)`. It's calling constructor of `FloatValue` in `common/value.hpp`. Range of `normalizedValue` is `[0.0, 1.0]`. In DPF, `parameterName` string must only consists of `a-zA-z0-9` and `_` (underscore). Space and other characters may crash plugin with segmentation fault.
 
 ### UI
 UI code is in `ui.cpp`. `ui.hpp` only provides interface for DPF, so it can be ignored. There are also widget codes in `gui` directory.
@@ -140,7 +140,7 @@ void DSPCore::process(const size_t length, float *out0, float *out1)
 }
 ```
 
-Keep in mind that changing parameter value for every sample is expensive for CPU. Sometimes  it's better to set parameters at outside of processing loop. Usual places are `DSPCore::setParameters()` and `DSPCore::noteOn()`. When parameter is only changed at outside, `LinearSmoother` is unnecessary.
+Keep in mind that changing parameter value for every sample is expensive for CPU. Sometimes  it's better to set parameters at outside of processing loop. Usual places are `DSPCore::setParameters()` and `DSPCore::noteOn()`. When parameter is only changed at outside of processing loop, `LinearSmoother` is unnecessary.
 
 ## Note Handling
 In DPF, programmer have to deal with raw MIDI events to get note information. MIDI handling is done in `Plugin::handleMidi()` method in `plugin.cpp`.
@@ -186,21 +186,21 @@ Reference:
 ### Note-On Timing
 DPF provides offset of MIDI events. Offset is number of samples from start of processing call.
 
-Plugins in this repository only handles note-on/off offsets.
+Plugins in this repository only handle note-on/off offsets.
 
-Offset is passed to `Plugin::run()` to `DSPCore::pushMidiNote()`. Received notes are stored in `DSPCore::midiNotes`, then picked up in `DSPCore::processMidiNote()`, which is called in`DSPCore::process()`.
+Offset is passed to `Plugin::run()` to `DSPCore::pushMidiNote()`. Received notes are stored in `DSPCore::midiNotes`, then picked up in `DSPCore::processMidiNote()` which is called in`DSPCore::process()`.
 
 ## CPU Dispatching
 In this repository, [vector class library](https://github.com/vectorclass/version2) (VCL) is used to write SIMD instructions.
 
-Basics of CPU dispatching is explained in [VCL manual](https://github.com/vectorclass/manual) - 9.9 Instruction sets and CPU dispatching. VCL is also providing [example code](https://github.com/vectorclass/version2/blob/master/dispatch_example.cpp) for CPU dispatching.
+Basics of CPU dispatching is explained in [VCL manual](https://github.com/vectorclass/manual) - 9.9 Instruction sets and CPU dispatching. VCL also provides [example code](https://github.com/vectorclass/version2/blob/master/dispatch_example.cpp) for CPU dispatching.
 
-VCL example uses function pointer for CPU dispatching. In this repository macro, class and `std::unique_ptr` is used.
+VCL example uses function pointer for CPU dispatching. In this repository, macro, class and `std::unique_ptr` is used to implement CPU dispatching.
 
 ### Building
 Before going to read here, it's better to take a look at [CPU dispatching example code](https://github.com/vectorclass/version2/blob/master/dispatch_example.cpp) provided by VCL.
 
-To enable different set of SIMD instructions, we must compile source code with different options. For example, it could be something like code below. Details of `dspcore.cpp` is described later.
+To enable different set of SIMD instructions, we must compile source code with different options. For example, it could be something like the code below. Details of `dspcore.cpp` is described later.
 
 ```bash
 # -fPIC is required for shared object.
@@ -226,14 +226,14 @@ g++ -std=c++17 -O3 -Wall
 
 In general case, source code for each instruction set may be different. With VCL, a single source code can be compiled into different instruction set.
 
-Above bash script was translated to GNU make. For example, take a look at `IterativeSinCluster/Makefile`.
+Above bash script was translated to GNU make in this repository. For example, take a look at `IterativeSinCluster/Makefile`.
 
-### Prepareing Class
-In order to dispatching for appropriate function/method/class, there must be different identifier for each instruction set. And interface of each function/method/class must be identical.
+### Preparing Class
+In order to dispatching for appropriate function/method/class, different identifier for different instruction set must be present. Interface of those function/method/class must be identical.
 
-In `dsp/dspcore.hpp`, `DSPInterface` is defined. And `DSPCore_SSE2`, `DSPCore_SSE41`, `DSPCore_AVX2`, `DSPCore_AVX512` are derived from `DSPInterface`.
+In `dsp/dspcore.hpp`, `DSPInterface` is defined. Currently, `DSPCore_SSE2`, `DSPCore_SSE41`, `DSPCore_AVX2`, `DSPCore_AVX512` are derived from `DSPInterface`.
 
-Implementation of `DSPCore_*` is identical to each other (thanks to VCL), so macro is used to reduce duplication.
+Implementation of `DSPCore_*` is identical to each other (thanks to VCL), so macro can be used to reduce duplication.
 
 ```cpp
 class DSPInterface {
@@ -318,9 +318,9 @@ private:
 };
 ```
 
-Lifetime of `dsp` must be same with entire lifetime of `Plugin` class. This is because I'm not sure about how DAW access `Plugin`. It's possible that different threads access different method of `Plugin` at same time. If that happens, changing instance pointed by `dsp` causes segmentation fault.
+Lifetime of `dsp` must be same with entire lifetime of `Plugin` class. This is because I'm not sure about how DAW access `Plugin`. It's possible that different threads access different method of `Plugin` at same time. If that happens, changing instance pointed by `dsp` may causes segmentation fault.
 
-For example, think about this implementation:
+For example, consider this implementation:
 
 ```cpp
 void SomePlugin::sampleRateChanged(double newSampleRate) {
@@ -334,4 +334,4 @@ void SomePlugin::run(/* ... */) {
 }
 ```
 
-Then, thread A is calling `Plugin::run()`, and thread B calls `Plugin::sampleRateChanged()`. It's possible that `dsp` in thread A will points destructed address.
+Suppose that thread A is calling `Plugin::run()`, and thread B calls `Plugin::sampleRateChanged()`. It's possible that `dsp` in thread A will points destructed address.
