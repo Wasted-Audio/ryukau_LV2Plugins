@@ -5,12 +5,14 @@ build: \
 	CV_DoubleFilter \
 	CV_ExpADSREnvelope \
 	CV_ExpPolyADEnvelope \
+	CV_HoldFilter \
 	CV_LinearADSREnvelope \
 	CV_Multiply \
 	CV_ParabolicADEnvelope \
 	CV_PController \
 	CV_PTRSaw \
 	CV_PTRTrapezoid \
+	CV_RampFilter \
 	CV_RateLimiter \
 	CV_Sin \
 
@@ -38,6 +40,10 @@ CV_ExpADSREnvelope:
 CV_ExpPolyADEnvelope:
 	$(MAKE) -C CV_ExpPolyADEnvelope
 
+.PHONY: CV_HoldFilter
+CV_HoldFilter:
+	$(MAKE) -C CV_HoldFilter
+
 .PHONY: CV_LinearADSREnvelope
 CV_LinearADSREnvelope:
 	$(MAKE) -C CV_LinearADSREnvelope
@@ -61,6 +67,10 @@ CV_PTRSaw:
 .PHONY: CV_PTRTrapezoid
 CV_PTRTrapezoid:
 	$(MAKE) -C CV_PTRTrapezoid
+
+.PHONY: CV_RampFilter
+CV_RampFilter:
+	$(MAKE) -C CV_RampFilter
 
 .PHONY: CV_RateLimiter
 CV_RateLimiter:

@@ -1,17 +1,12 @@
 # LV2 CVPort Plugins
-Example patch.
+These plugins are made to test some algorithms. Parameter are tuned to be wide as possible, which may not be suitable for music.
 
-<figure>
-<img src="img/lv2_cvport_example1.png" alt="Image of LV2 CVPort example patch on Carla patchbay." style="padding-bottom: 12px;"/>
-</figure>
+If you have suggestion for parameter tuning or other things, feel free to open issue.
 
 ## CV_3PoleLP
 3-pole low-pass filter.
 
-- 4 CV input
-- 1 CV output
-
-`DC Block` and `Highpass` shares same parameter with different tuning. Both parameters are multiplied into one value.
+`DC Block` and `Highpass` shares same parameter with different tuning. DC stands for direct current. Both parameters are multiplied into one value.
 
 ```
 internalCutoffCoefficient = dcBlock * mapHzToCutoff(highpass)
@@ -24,23 +19,13 @@ When `UniformGain` is checked, output gain will be almost uniform with varying `
 ## CV_AudioToCv
 Convert audio port signal to CV port signal.
 
-- 1 audio input
-- 1 CV output
-
 ## CV_CvToAudio
 Convert CV port signal to audio port signal.
-
-- 1 CV input
-- 1 audio output
 
 ## CV_DoubleFilter
 Strange 4-pole filter inspired from double-spring.
 
 CV_DoubleFilter may outputs loud signal. Recommend to use with limiter.
-
-
-- 3 CV input
-- 1 CV output
 
 When `Uniform Gain` is unchecked, output may be loud where `cutoff` is greater than 3800 Hz.
 
@@ -56,16 +41,21 @@ Resonance also appears when the value of `resonance` is close to 0. Try 0.01 or 
 ## ExpADSREnvelope
 Exponential ADSR Envelope.
 
-- 1 event input
-- 1 CV output
-
 ## ExpPolyADEnvelope
 Exponential polynomial envelope. Note that this envelope resets to 0 for each note-on.
 
-- 1 event input
-- 1 CV output
-
 Beware that increasing `curve` parameter may lead to very loud output.
+
+## CV_HoldFilter
+Step decimator combined with resonance filter. Using PolyBLEP residual to reduce aliasing noise.
+
+`Cutoff [Hz]` is not really a cutoff frequency, but a frequency to sample and hold (S&H) input signal.
+
+`PulseWidth` does not change duty ratio. CV_HoldFilter internally holds 2 S&H intervals and `PulseWidth` changes the ratio of those intervals.
+
+`Edge` adds impulse like edge at rise and fall of output signal. When `Edge` is set to 1.0, it will not add any edge. When `Edge` is not set to 1.0, PolyBLEP aliasing suppression will gradually stop working.
+
+`FilterType` changes order of PolyBLEP aliasing suppression. `Naive` does no aliasing suppression. `PolyBLEP N` suppress aliasing noise where larger `N` for better suppression.
 
 ## CV_LinearADSREnvelope
 Linear ADSR envelope. 1 event input and 1 CV output.
@@ -76,14 +66,8 @@ Multiply CV signal. 2 CV inputs and 1 CV output.
 ## CV_ParabolicADEnvelope
 Parabolic envelope. Note that this envelope resets to 0 for each note-on.
 
-- 1 event input
-- 1 CV output
-
 ## CV_PController
 Slew limiter based on PID controller without I and D. This is basically an 1-pole lowpass filter.
-
-- 1 CV input
-- 1 CV output
 
 Transfer function.
 
@@ -105,10 +89,6 @@ This formula is described in the link below.
 
 ## CV_PTRSaw
 Monophonic order 10 PTR sawtooth oscillator. Double precision is used internally.
-
-- 1 event input
-- 5 CV inputs
-- 1 CV output
 
 ### CV Mapping
 Equation to calculate gain value:
@@ -134,10 +114,6 @@ phase -= floor(phase)
 ## CV_PTRTrapezoid
 Monophonic PTR trapezoid oscillator. Double precision is used internally. PTRTrapezoid changes PTR order according to current frequency.
 
-- 1 event input
-- 5 CV input
-- 1 CV output
-
 ### CV Mapping
 Equation to calculate gain value:
 
@@ -162,22 +138,26 @@ Input to PulseWidth should be in range of `[-1, 1]`. Excessed range will be hard
 
 OscSlope will be multiplied by the value of `slope` parameter.
 
+## CV_RampFilter
+Ramp decimator combined with resonance filter.
+
+`Cutoff [Hz]` is not really a cutoff frequency, but a frequency to S&H input signal.
+
+`RampLimit` sets maximum slope to prevent blow up. Because of `RampLimit`, CV_RampFilter will never diverge, but oscillates in worst case. Unit is amplitude/sample.
+
+`Bias` sets character of resonance by changing the ratio between rising rate and falling rate. `Bias` is discontinuous at ±0.75.
+
+`BiasTuning` extends bias to get more resonance.
+
 ## CV_RateLimiter
 Slew rate limiter.
 
-- 1 CV input
-- 1 CV output
-
-This is an implementation of the link below.
+CV_RateLimiter is an implementation of Rate Limiter described in the link below.
 
 - [Limit rate of change of signal - Simulink](https://www.mathworks.com/help/simulink/slref/ratelimiter.html)
 
 ## CV_Sin
 Monophonic sine oscillator.
-
-- 1 event input
-- 3 CV input
-- 1 CV output
 
 ### CV Mapping
 Equation to calculate gain value:
@@ -236,3 +216,9 @@ For more detailed information, take a look at ArchWiki.
 
 - [JACK Audio Connection Kit - ArchWiki](https://wiki.archlinux.org/index.php/JACK_Audio_Connection_Kit)
 - [Professional audio - ArchWiki](https://wiki.archlinux.org/index.php/Professional_audio)
+
+Example patch in Carla.
+
+<figure>
+<img src="img/lv2_cvport_example1.png" alt="Image of LV2 CVPort example patch on Carla patchbay." style="padding-bottom: 12px;"/>
+</figure>
