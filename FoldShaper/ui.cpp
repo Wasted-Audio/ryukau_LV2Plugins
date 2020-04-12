@@ -75,7 +75,7 @@ void CreditSplash::onNanoDisplay()
   fontSize(14.0f);
   text(20.0f, 40.0f, "© 2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
 
-  text(20.0f, 65.0f, "Caution! Unchecking hardclip may cause very loud output.", nullptr);
+  text(20.0f, 65.0f, "Caution! Tuning More* knobs may outputs loud signal.", nullptr);
 }
 
 START_NAMESPACE_DISTRHO
@@ -558,7 +558,7 @@ public:
 
     addKnob(left0 + 0 * knobX, top0, knobX, colorBlue, "Input", ID::inputGain);
     addKnob(left0 + 1 * knobX, top0, knobX, colorBlue, "Mul", ID::mul);
-    addKnob(left0 + 2 * knobX, top0, knobX, colorBlue, "More Mul", ID::moreMul);
+    addKnob(left0 + 2 * knobX, top0, knobX, colorRed, "More Mul", ID::moreMul);
     addKnob(left0 + 3 * knobX, top0, knobX, colorBlue, "Output", ID::outputGain);
 
     const auto checkboxTop = top0;

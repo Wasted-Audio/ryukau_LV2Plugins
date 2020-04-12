@@ -78,8 +78,7 @@ void CreditSplash::onNanoDisplay()
   text(20.0f, 70.0f, "- Shift + Left Drag: Fine Adjustment", nullptr);
   text(20.0f, 90.0f, "- Ctrl + Left Click: Reset to Default", nullptr);
 
-  text(
-    20.0f, 115.0f, "Caution! Unchecking hardclip may cause very loud output.", nullptr);
+  text(20.0f, 115.0f, "Caution! Tuning More* knobs may outputs loud signal.", nullptr);
 
   text(20.0f, 140.0f, "Have a nice day!", nullptr);
 }
