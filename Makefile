@@ -13,6 +13,7 @@ build: common \
 	CubicPadSynth \
 	ModuloShaper \
 	FoldShaper \
+	OddPowShaper \
 
 .PHONY: generate_ttl
 generate_ttl: build
@@ -36,6 +37,10 @@ common: dpf
 .PHONY: lv2cvport
 lv2cvport: common
 	$(MAKE) -C lv2cvport
+
+.PHONY: OddPowShaper
+OddPowShaper: common
+	$(MAKE) -C OddPowShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: FoldShaper
 FoldShaper: common
