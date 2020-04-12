@@ -210,6 +210,12 @@ template<typename Sample> struct ModuloShaper {
   Sample x1 = 0;
   DecimationLowpass<Sample> lowpass;
 
+  void reset()
+  {
+    x1 = 0;
+    lowpass.reset();
+  }
+
   Sample process(Sample x0)
   {
     Sample sign = somecopysign<Sample>(Sample(1), x0);
@@ -253,6 +259,13 @@ public:
   Sample gain = 1;
   Sample add = 1;
   Sample mul = 1;
+
+  void reset()
+  {
+    x0 = x1 = x2 = x3 = x4 = x5 = x6 = x7 = 0;
+    f0 = f1 = f2 = f3 = 0;
+    lastInt = 0;
+  }
 
   Sample process4(Sample input)
   {

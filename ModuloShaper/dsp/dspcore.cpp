@@ -52,7 +52,13 @@ void DSPCORE_NAME::setup(double sampleRate)
   startup();
 }
 
-void DSPCORE_NAME::reset() { startup(); }
+void DSPCORE_NAME::reset()
+{
+  for (auto &shaper : shaperNaive) shaper.reset();
+  for (auto &shaper : shaperBlep) shaper.reset();
+  for (auto &lp : lowpass) lp.reset();
+  startup();
+}
 
 void DSPCORE_NAME::startup() {}
 
