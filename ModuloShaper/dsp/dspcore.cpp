@@ -80,13 +80,16 @@ void DSPCORE_NAME::setParameters(float tempo)
   interpInputGain.push(param.value[ID::inputGain]->getFloat());
   interpClipGain.push(param.value[ID::clipGain]->getFloat());
   interpOutputGain.push(param.value[ID::outputGain]->getFloat());
-  interpAdd.push(param.value[ID::add]->getFloat());
-  interpMul.push(param.value[ID::mul]->getFloat());
+  interpAdd.push(param.value[ID::add]->getFloat() * param.value[ID::moreAdd]->getFloat());
+  interpMul.push(param.value[ID::mul]->getFloat() * param.value[ID::moreMul]->getFloat());
   interpCutoff.push(param.value[ID::lowpassCutoff]->getFloat());
 
   shaperType = param.value[ID::type]->getInt();
-  hardclip = param.value[ID::hardclip]->getInt();
   activateLowpass = param.value[ID::lowpass]->getInt();
+
+  bool hardclip = param.value[ID::hardclip]->getInt();
+  for (auto &shaper : shaperNaive) shaper.hardclip = hardclip;
+  for (auto &shaper : shaperBlep) shaper.hardclip = hardclip;
 }
 
 void DSPCORE_NAME::process(
@@ -159,14 +162,10 @@ void DSPCORE_NAME::process(
         break;
     }
 
-    if (hardclip) {
-      frame[0] = std::clamp<float>(frame[0], -1.0f, 1.0f);
-      frame[1] = std::clamp<float>(frame[1], -1.0f, 1.0f);
-    }
     frame[0] *= outGain;
     frame[1] *= outGain;
 
-    out0[i] = std::isfinite(frame[0]) ? frame[0] : 0;
-    out1[i] = std::isfinite(frame[1]) ? frame[1] : 0;
+    out0[i] = std::isfinite(frame[0]) ? std::clamp(frame[0], -128.0f, 128.0f) : 0;
+    out1[i] = std::isfinite(frame[1]) ? std::clamp(frame[1], -128.0f, 128.0f) : 0;
   }
 }

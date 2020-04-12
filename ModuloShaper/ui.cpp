@@ -72,12 +72,16 @@ void CreditSplash::onNanoDisplay()
          << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
   text(20.0f, 20.0f, stream.str().c_str(), nullptr);
 
-  fontSize(textSize);
-  text(20.0f, 45.0f, "© 2020 Takamitsu Endo", nullptr);
-  text(20.0f, 65.0f, "        (ryukau@gmail.com)", nullptr);
+  fontSize(14.0f);
+  text(20.0f, 45.0f, "© 2020-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
 
-  text(20.0f, 95.0f, "- Shift + Left Drag: Fine Adjustment", nullptr);
-  text(20.0f, 115.0f, "- Ctrl + Left Click: Reset to Default", nullptr);
+  text(20.0f, 70.0f, "- Shift + Left Drag: Fine Adjustment", nullptr);
+  text(20.0f, 90.0f, "- Ctrl + Left Click: Reset to Default", nullptr);
+
+  text(
+    20.0f, 115.0f, "Caution! Unchecking hardclip may cause very loud output.", nullptr);
+
+  text(20.0f, 140.0f, "Have a nice day!", nullptr);
 }
 
 START_NAMESPACE_DISTRHO
@@ -94,8 +98,8 @@ constexpr float knobX = 60.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
 constexpr float checkboxWidth = 60.0f;
 constexpr float splashHeight = 30.0f;
-constexpr uint32_t defaultWidth = uint32_t(6 * knobX + 40);
-constexpr uint32_t defaultHeight = uint32_t(40 + 2 * labelY + 1 * knobY);
+constexpr uint32_t defaultWidth = uint32_t(6 * knobX + 30);
+constexpr uint32_t defaultHeight = uint32_t(40 + 2 * knobY + 2 * margin + labelY);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
@@ -555,8 +559,8 @@ public:
 
     using ID = ParameterID::ID;
 
-    const auto top0 = 20.0f;
-    const auto left0 = 20.0f;
+    const auto top0 = 16.0f;
+    const auto left0 = 15.0f;
 
     addKnob(left0 + 0 * knobX, top0, knobX, colorBlue, "Cutoff", ID::lowpassCutoff);
     addKnob(left0 + 1 * knobX, top0, knobX, colorBlue, "Input", ID::inputGain);
@@ -566,21 +570,31 @@ public:
     addKnob(left0 + 5 * knobX, top0, knobX, colorBlue, "Output", ID::outputGain);
 
     const auto top1 = top0 + knobY + 2 * margin;
-    addLabel(left0, top1, 1.5f * knobX, "Antialiasing");
-    std::vector<std::string> typeItems{"None", "OverSampling 4x", "PolyBLEP 4",
-                                       "PolyBLEP 8"};
-    addOptionMenu(left0 + 1.5f * knobX, top1, 2 * knobX, ID::type, typeItems);
 
-    const auto top2 = top1 + labelY;
-    addCheckbox(left0, top2, 1.5f * knobX, "Hardclip", ID::hardclip);
-    addCheckbox(left0 + 2 * knobX, top2, 1.5f * knobX, "Lowpass", ID::lowpass);
+    addKnob(left0 + 2 * knobX, top1, knobX, colorRed, "More Add", ID::moreAdd);
+    addKnob(left0 + 3 * knobX, top1, knobX, colorRed, "More Mul", ID::moreMul);
+
+    const auto top1Checkbox = top1 + 2.5 * margin;
+    const auto leftCheckbox = left0 + 4 * knobX + 2 * margin;
+    auto checkboxHardclip
+      = addCheckbox(leftCheckbox, top1Checkbox, knobX, "Hardclip", ID::hardclip);
+    checkboxHardclip->setHighlightColor(colorRed);
+
+    addCheckbox(leftCheckbox, top1Checkbox + labelY, knobX, "Lowpass", ID::lowpass);
+
+    const auto top2 = top1 + knobY + 3 * margin;
+
+    addLabel(left0, top2, 1.5f * knobX, "Anti-aliasing");
+    std::vector<std::string> typeItems{"None", "16x OverSampling", "PolyBLEP 4",
+                                       "PolyBLEP 8"};
+    addOptionMenu(left0 + 1.5f * knobX, top2, 2 * knobX, ID::type, typeItems);
 
     // Plugin name.
-    const auto splashTop = defaultHeight - splashHeight - 20.0f;
-    const auto splashLeft = defaultWidth - 2 * knobX - 20.0f;
+    const auto splashTop = defaultHeight - splashHeight - 15.0f;
+    const auto splashLeft = defaultWidth + 2 * margin - 2 * knobX - 15.0f;
     addSplashScreen(
-      splashLeft, splashTop, 2.0f * knobX, splashHeight, 20.0f, 20.0f,
-      defaultWidth - 40.0f, defaultHeight - 40.0f, "ModuloShaper");
+      splashLeft, splashTop, 2 * knobX - 2 * margin, splashHeight, 15.0f, 15.0f,
+      defaultWidth - 30.0f, defaultHeight - 30.0f, "ModuloShaper");
   }
 };
 

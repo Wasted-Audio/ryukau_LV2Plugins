@@ -25,8 +25,10 @@ LinearScale<double> Scales::defaultScale(0.0, 1.0);
 
 LogScale<double> Scales::inputGain(0.0, 16.0, 0.5, 2.0);
 LogScale<double> Scales::outputGain(0.0, 1.0, 0.5, 0.1);
-LinearScale<double> Scales::add(0.0, 2.0);
-LinearScale<double> Scales::mul(0.0, 2.0);
+LinearScale<double> Scales::add(0.0, 1.0);
+LinearScale<double> Scales::mul(0.0, 1.0);
+LinearScale<double> Scales::moreAdd(1.0, 2.0);
+LinearScale<double> Scales::moreMul(1.0, 2.0);
 IntScale<double> Scales::type(3);
 
 LogScale<double> Scales::lowpassCutoff(20.0, 20000.0, 0.5, 200.0);

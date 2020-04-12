@@ -49,6 +49,8 @@ enum ID {
   outputGain,
   add,
   mul,
+  moreAdd,
+  moreMul,
   type,
   hardclip,
 
@@ -68,6 +70,8 @@ struct Scales {
   static SomeDSP::LogScale<double> inputGain;
   static SomeDSP::LinearScale<double> add;
   static SomeDSP::LinearScale<double> mul;
+  static SomeDSP::LinearScale<double> moreAdd;
+  static SomeDSP::LinearScale<double> moreMul;
   static SomeDSP::LogScale<double> outputGain;
   static SomeDSP::IntScale<double> type;
 
@@ -95,15 +99,19 @@ struct GlobalParameter {
     value[ID::inputGain] = std::make_unique<LogValue>(
       0.5, Scales::inputGain, "inputGain", kParameterIsAutomable);
     value[ID::add]
-      = std::make_unique<LinearValue>(0.5, Scales::add, "add", kParameterIsAutomable);
+      = std::make_unique<LinearValue>(1.0, Scales::add, "add", kParameterIsAutomable);
     value[ID::mul]
-      = std::make_unique<LinearValue>(0.5, Scales::mul, "mul", kParameterIsAutomable);
+      = std::make_unique<LinearValue>(1.0, Scales::mul, "mul", kParameterIsAutomable);
+    value[ID::moreAdd] = std::make_unique<LinearValue>(
+      0.0, Scales::moreAdd, "moreAdd", kParameterIsAutomable);
+    value[ID::moreMul] = std::make_unique<LinearValue>(
+      0.0, Scales::moreMul, "moreMul", kParameterIsAutomable);
     value[ID::clipGain] = std::make_unique<LogValue>(
       1.0, Scales::outputGain, "clipGain", kParameterIsAutomable);
     value[ID::outputGain] = std::make_unique<LogValue>(
       0.5, Scales::outputGain, "outputGain", kParameterIsAutomable);
     value[ID::type]
-      = std::make_unique<IntValue>(3, Scales::type, "type", kParameterIsAutomable);
+      = std::make_unique<IntValue>(1, Scales::type, "type", kParameterIsAutomable);
     value[ID::hardclip] = std::make_unique<IntValue>(
       true, Scales::boolScale, "hardclip", kParameterIsAutomable | kParameterIsBoolean);
 

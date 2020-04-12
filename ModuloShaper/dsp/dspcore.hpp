@@ -66,7 +66,6 @@ public:
     std::array<Butter8Lowpass<float>, 2> lowpass;                                        \
                                                                                          \
     uint32_t shaperType = 0; /* 0: naive, 1: 4x naive, 2: P-BLEP4, 3: P-BLEP8 */         \
-    bool hardclip = true;                                                                \
     bool activateLowpass = true;                                                         \
     LinearSmoother<float> interpInputGain;                                               \
     LinearSmoother<float> interpClipGain;                                                \

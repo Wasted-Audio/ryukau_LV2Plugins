@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ModuloShaper.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "../../common/dsp/decimationLowpass.hpp"
 #include "../../common/dsp/somemath.hpp"
 
 #include <algorithm>
@@ -95,120 +96,14 @@ public:
   std::array<Sample, 6> co{};
 };
 
-/**
-Lowpass filter specialized for 8x oversampling.
-
-```python
-import numpy
-from scipy import signal
-sos = signal.cheby1(16, 0.1, 19000, "low", output="sos", fs=48000 * 4)
-```
-*/
-template<typename Sample> class DecimationLowpass {
-public:
-  void reset()
-  {
-    x0.fill(0);
-    x1.fill(0);
-    x2.fill(0);
-    y0.fill(0);
-    y1.fill(0);
-    y2.fill(0);
-  }
-
-  void push(Sample input)
-  {
-    x0[0] = input;
-    x0[1] = y0[0];
-    x0[2] = y0[1];
-    x0[3] = y0[2];
-    x0[4] = y0[3];
-    x0[5] = y0[4];
-    x0[6] = y0[5];
-    x0[7] = y0[6];
-
-    y0[0] = co[0][0] * x0[0] + co[0][1] * x1[0] + co[0][2] * x2[0] - co[0][3] * y1[0]
-      - co[0][4] * y2[0];
-    y0[1] = co[1][0] * x0[1] + co[1][1] * x1[1] + co[1][2] * x2[1] - co[1][3] * y1[1]
-      - co[1][4] * y2[1];
-    y0[2] = co[2][0] * x0[2] + co[2][1] * x1[2] + co[2][2] * x2[2] - co[2][3] * y1[2]
-      - co[2][4] * y2[2];
-    y0[3] = co[3][0] * x0[3] + co[3][1] * x1[3] + co[3][2] * x2[3] - co[3][3] * y1[3]
-      - co[3][4] * y2[3];
-    y0[4] = co[4][0] * x0[4] + co[4][1] * x1[4] + co[4][2] * x2[4] - co[4][3] * y1[4]
-      - co[4][4] * y2[4];
-    y0[5] = co[5][0] * x0[5] + co[5][1] * x1[5] + co[5][2] * x2[5] - co[5][3] * y1[5]
-      - co[5][4] * y2[5];
-    y0[6] = co[6][0] * x0[6] + co[6][1] * x1[6] + co[6][2] * x2[6] - co[6][3] * y1[6]
-      - co[6][4] * y2[6];
-    y0[7] = co[7][0] * x0[7] + co[7][1] * x1[7] + co[7][2] * x2[7] - co[7][3] * y1[7]
-      - co[7][4] * y2[7];
-
-    x2[0] = x1[0];
-    x2[1] = x1[1];
-    x2[2] = x1[2];
-    x2[3] = x1[3];
-    x2[4] = x1[4];
-    x2[5] = x1[5];
-    x2[6] = x1[6];
-    x2[7] = x1[7];
-
-    x1[0] = x0[0];
-    x1[1] = x0[1];
-    x1[2] = x0[2];
-    x1[3] = x0[3];
-    x1[4] = x0[4];
-    x1[5] = x0[5];
-    x1[6] = x0[6];
-    x1[7] = x0[7];
-
-    y2[0] = y1[0];
-    y2[1] = y1[1];
-    y2[2] = y1[2];
-    y2[3] = y1[3];
-    y2[4] = y1[4];
-    y2[5] = y1[5];
-    y2[6] = y1[6];
-    y2[7] = y1[7];
-
-    y1[0] = y0[0];
-    y1[1] = y0[1];
-    y1[2] = y0[2];
-    y1[3] = y0[3];
-    y1[4] = y0[4];
-    y1[5] = y0[5];
-    y1[6] = y0[6];
-    y1[7] = y0[7];
-  }
-
-  Sample output() { return y0[7]; }
-
-  std::array<Sample, 8> x0{};
-  std::array<Sample, 8> x1{};
-  std::array<Sample, 8> x2{};
-  std::array<Sample, 8> y0{};
-  std::array<Sample, 8> y1{};
-  std::array<Sample, 8> y2{};
-  const std::array<std::array<Sample, 5>, 8> co{{
-    {1.037461353040174e-12, 2.074922706080348e-12, 1.037461353040174e-12,
-     -1.7996569067448427, 0.8130122505660884},
-    {1.0, 2.0, 1.0, -1.7797400857773829, 0.8208016638807095},
-    {1.0, 2.0, 1.0, -1.7439946113394638, 0.8358014343214331},
-    {1.0, 2.0, 1.0, -1.6996176694028573, 0.8570102011388824},
-    {1.0, 2.0, 1.0, -1.6553794808551048, 0.883245305197156},
-    {1.0, 2.0, 1.0, -1.620088217313659, 0.9133701015095791},
-    {1.0, 2.0, 1.0, -1.6014310832801397, 0.9464360348921607},
-    {1.0, 2.0, 1.0, -1.6052599612535787, 0.9817143017294799},
-  }};
-};
-
 template<typename Sample> struct ModuloShaper {
   Sample gain = 1;
   Sample add = 1;
   Sample mul = 1;
+  bool hardclip = true;
 
   Sample x1 = 0;
-  DecimationLowpass<Sample> lowpass;
+  DecimationLowpass16<Sample> lowpass;
 
   void reset()
   {
@@ -218,22 +113,39 @@ template<typename Sample> struct ModuloShaper {
 
   Sample process(Sample x0)
   {
-    Sample sign = somecopysign<Sample>(Sample(1), x0);
-    x0 = somefabs<Sample>(x0 * gain);
-    Sample floored = somefloor<Sample>(x0);
-    Sample height = somepow<Sample>(add, floored);
-    return sign
-      * ((x0 - floored) * somepow<Sample>(mul, floored) * height + Sample(1) - height);
+    if (hardclip) x0 = std::clamp(x0, Sample(-1), Sample(1));
+    Sample sign = somecopysign(Sample(1), x0);
+    x0 = somefabs(x0 * gain);
+    Sample floored = somefloor(x0);
+    Sample height = somepow(add, floored);
+    return sign * ((x0 - floored) * somepow(mul, floored) * height + Sample(1) - height);
   }
 
   float process4x(Sample x0)
   {
+    if (hardclip) x0 = std::clamp(x0, Sample(-1), Sample(1));
+    Sample diff = x0 - x1;
     lowpass.push(process(x1));
-    lowpass.push(process(x1 + float(0.25) * (x0 - x1)));
-    lowpass.push(process(x1 + float(0.50) * (x0 - x1)));
-    lowpass.push(process(x1 + float(0.75) * (x0 - x1)));
+    lowpass.push(process(x1 + Sample(0.0625) * diff));
+    lowpass.push(process(x1 + Sample(0.1250) * diff));
+    lowpass.push(process(x1 + Sample(0.1875) * diff));
+    lowpass.push(process(x1 + Sample(0.2500) * diff));
+    lowpass.push(process(x1 + Sample(0.3125) * diff));
+    lowpass.push(process(x1 + Sample(0.3750) * diff));
+    lowpass.push(process(x1 + Sample(0.4375) * diff));
+    lowpass.push(process(x1 + Sample(0.5000) * diff));
+    lowpass.push(process(x1 + Sample(0.5625) * diff));
+    lowpass.push(process(x1 + Sample(0.6250) * diff));
+    lowpass.push(process(x1 + Sample(0.6875) * diff));
+    lowpass.push(process(x1 + Sample(0.7500) * diff));
+    lowpass.push(process(x1 + Sample(0.8125) * diff));
+    lowpass.push(process(x1 + Sample(0.8750) * diff));
+    lowpass.push(process(x1 + Sample(0.9375) * diff));
     x1 = x0;
-    return lowpass.output();
+    if (std::isfinite(lowpass.output())) return lowpass.output();
+
+    reset();
+    return 0;
   }
 };
 
@@ -259,6 +171,7 @@ public:
   Sample gain = 1;
   Sample add = 1;
   Sample mul = 1;
+  bool hardclip = true;
 
   void reset()
   {
@@ -269,6 +182,7 @@ public:
 
   Sample process4(Sample input)
   {
+    if (hardclip) input = std::clamp(input, Sample(-1), Sample(1));
     Sample sign = somecopysign<Sample>(Sample(1), input);
     input = somefabs<Sample>(input * gain);
     Sample floored = somefloor<Sample>(input);
@@ -316,6 +230,7 @@ public:
 
   Sample process8(Sample input)
   {
+    if (hardclip) input = std::clamp(input, Sample(-1), Sample(1));
     Sample sign = somecopysign<Sample>(Sample(1), input);
     input = somefabs<Sample>(input * gain);
     Sample floored = somefloor<Sample>(input);
