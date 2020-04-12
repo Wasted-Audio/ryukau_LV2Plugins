@@ -49,6 +49,8 @@ public:
     return false;
   }
 
+  void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
+
 protected:
   Color backgroundColor{0xff, 0xff, 0xff};
   Color foregroundColor{0, 0, 0};
