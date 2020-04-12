@@ -1,0 +1,166 @@
+// (c) 2020 Takamitsu Endo
+//
+// This file is part of ModuloShaper.
+//
+// ModuloShaper is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// ModuloShaper is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with ModuloShaper.  If not, see <https://www.gnu.org/licenses/>.
+
+#include "dspcore.hpp"
+
+#include "../../lib/juce_FastMathApproximations.h"
+#include "../../lib/vcl/vectormath_exp.h"
+
+#include <algorithm>
+
+#if INSTRSET >= 10
+#define PROCESSING_UNIT_NAME ProcessingUnit_AVX512
+#define NOTE_NAME Note_AVX512
+#define DSPCORE_NAME DSPCore_AVX512
+#elif INSTRSET >= 8
+#define PROCESSING_UNIT_NAME ProcessingUnit_AVX2
+#define NOTE_NAME Note_AVX2
+#define DSPCORE_NAME DSPCore_AVX2
+#elif INSTRSET >= 5
+#define PROCESSING_UNIT_NAME ProcessingUnit_SSE41
+#define NOTE_NAME Note_SSE41
+#define DSPCORE_NAME DSPCore_SSE41
+#elif INSTRSET >= 2
+#define PROCESSING_UNIT_NAME ProcessingUnit_SSE2
+#define NOTE_NAME Note_SSE2
+#define DSPCORE_NAME DSPCore_SSE2
+#else
+#error Unsupported instruction set
+#endif
+
+void DSPCORE_NAME::setup(double sampleRate)
+{
+  this->sampleRate = sampleRate;
+
+  SmootherCommon<float>::setSampleRate(sampleRate);
+  SmootherCommon<float>::setTime(0.04f);
+
+  startup();
+}
+
+void DSPCORE_NAME::reset() { startup(); }
+
+void DSPCORE_NAME::startup() {}
+
+uint32_t DSPCORE_NAME::getLatency()
+{
+  if (shaperType == 2) // 4 point PolyBLEP residual.
+    return 4;
+  else if (shaperType == 3) // 8 point PolyBLEP residual.
+    return 8;
+  return 0;
+}
+
+void DSPCORE_NAME::setParameters(float tempo)
+{
+  using ID = ParameterID::ID;
+
+  SmootherCommon<float>::setTime(param.value[ID::smoothness]->getFloat());
+
+  interpInputGain.push(param.value[ID::inputGain]->getFloat());
+  interpClipGain.push(param.value[ID::clipGain]->getFloat());
+  interpOutputGain.push(param.value[ID::outputGain]->getFloat());
+  interpAdd.push(param.value[ID::add]->getFloat());
+  interpMul.push(param.value[ID::mul]->getFloat());
+  interpCutoff.push(param.value[ID::lowpassCutoff]->getFloat());
+
+  shaperType = param.value[ID::type]->getInt();
+  hardclip = param.value[ID::hardclip]->getInt();
+  activateLowpass = param.value[ID::lowpass]->getInt();
+}
+
+void DSPCORE_NAME::process(
+  const size_t length, const float *in0, const float *in1, float *out0, float *out1)
+{
+  SmootherCommon<float>::setBufferSize(length);
+
+  std::array<float, 2> frame;
+  for (uint32_t i = 0; i < length; ++i) {
+    SmootherCommon<float>::setBufferIndex(i);
+
+    auto inGain = interpInputGain.process();
+    auto clipGain = interpClipGain.process();
+    auto outGain = interpOutputGain.process();
+    auto add = interpAdd.process();
+    auto mul = interpMul.process();
+    auto cutoff = interpCutoff.process();
+
+    if (mul > 1.0f) clipGain /= mul;
+
+    if (activateLowpass) {
+      lowpass[0].setCutoff(sampleRate, cutoff);
+      lowpass[1].setCutoff(sampleRate, cutoff);
+      frame[0] = lowpass[0].process(in0[i]);
+      frame[1] = lowpass[1].process(in1[i]);
+    } else {
+      frame[0] = in0[i];
+      frame[1] = in1[i];
+    }
+
+    switch (shaperType) {
+      case 0: // Naive.
+        shaperNaive[0].add = add;
+        shaperNaive[1].add = add;
+        shaperNaive[0].mul = mul;
+        shaperNaive[1].mul = mul;
+
+        frame[0] = clipGain * shaperNaive[0].process(inGain * frame[0]);
+        frame[1] = clipGain * shaperNaive[1].process(inGain * frame[1]);
+        break;
+
+      case 1: // Naive 4x oversampling.
+        shaperNaive[0].add = add;
+        shaperNaive[1].add = add;
+        shaperNaive[0].mul = mul;
+        shaperNaive[1].mul = mul;
+
+        frame[0] = clipGain * shaperNaive[0].process4x(inGain * frame[0]);
+        frame[1] = clipGain * shaperNaive[1].process4x(inGain * frame[1]);
+        break;
+
+      case 2: // 4 point PolyBLEP residual.
+        shaperBlep[0].add = add;
+        shaperBlep[1].add = add;
+        shaperBlep[0].mul = mul;
+        shaperBlep[1].mul = mul;
+
+        frame[0] = clipGain * shaperBlep[0].process4(inGain * frame[0]);
+        frame[1] = clipGain * shaperBlep[1].process4(inGain * frame[1]);
+        break;
+
+      case 3: // 8 point PolyBLEP residual.
+        shaperBlep[0].add = add;
+        shaperBlep[1].add = add;
+        shaperBlep[0].mul = mul;
+        shaperBlep[1].mul = mul;
+
+        frame[0] = clipGain * shaperBlep[0].process8(inGain * frame[0]);
+        frame[1] = clipGain * shaperBlep[1].process8(inGain * frame[1]);
+        break;
+    }
+
+    if (hardclip) {
+      frame[0] = std::clamp<float>(frame[0], -1.0f, 1.0f);
+      frame[1] = std::clamp<float>(frame[1], -1.0f, 1.0f);
+    }
+    frame[0] *= outGain;
+    frame[1] *= outGain;
+
+    out0[i] = std::isfinite(frame[0]) ? frame[0] : 0;
+    out1[i] = std::isfinite(frame[1]) ? frame[1] : 0;
+  }
+}

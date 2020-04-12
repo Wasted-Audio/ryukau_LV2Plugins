@@ -11,6 +11,7 @@ build: common \
 	EnvelopedSine \
 	EsPhaser \
 	CubicPadSynth \
+	ModuloShaper \
 
 .PHONY: generate_ttl
 generate_ttl: build
@@ -34,6 +35,10 @@ common: dpf
 .PHONY: lv2cvport
 lv2cvport: common
 	$(MAKE) -C lv2cvport
+
+.PHONY: ModuloShaper
+ModuloShaper: common
+	$(MAKE) -C ModuloShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: CubicPadSynth
 CubicPadSynth: common
