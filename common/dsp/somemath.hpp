@@ -93,4 +93,14 @@ template<typename T> T somefabs(T x);
 template<> inline double somefabs<double>(double x) { return ::fabs(x); }
 template<> inline float somefabs<float>(float x) { return ::fabsf(x); }
 
+template<typename T> T somecopysign(T x, T y);
+template<> inline double somecopysign<double>(double x, double y)
+{
+  return ::copysign(x, y);
+}
+template<> inline float somecopysign<float>(float x, float y)
+{
+  return ::copysignf(x, y);
+}
+
 } // namespace SomeDSP
