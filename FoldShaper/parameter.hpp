@@ -97,7 +97,7 @@ struct GlobalParameter {
     value[ID::oversample] = std::make_unique<IntValue>(
       true, Scales::boolScale, "oversample", kParameterIsAutomable | kParameterIsBoolean);
     value[ID::hardclip] = std::make_unique<IntValue>(
-      true, Scales::boolScale, "hardclip", kParameterIsAutomable | kParameterIsBoolean);
+      false, Scales::boolScale, "hardclip", kParameterIsAutomable | kParameterIsBoolean);
 
     value[ID::smoothness] = std::make_unique<LogValue>(
       0.1, Scales::smoothness, "smoothness", kParameterIsAutomable);

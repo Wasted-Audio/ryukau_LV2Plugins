@@ -113,7 +113,7 @@ struct GlobalParameter {
     value[ID::type]
       = std::make_unique<IntValue>(1, Scales::type, "type", kParameterIsAutomable);
     value[ID::hardclip] = std::make_unique<IntValue>(
-      true, Scales::boolScale, "hardclip", kParameterIsAutomable | kParameterIsBoolean);
+      false, Scales::boolScale, "hardclip", kParameterIsAutomable | kParameterIsBoolean);
 
     value[ID::lowpass] = std::make_unique<IntValue>(
       true, Scales::boolScale, "lowpass", kParameterIsAutomable | kParameterIsBoolean);
