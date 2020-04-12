@@ -59,7 +59,7 @@ protected:
   const char *getLabel() const override { return "FoldShaper"; }
   const char *getDescription() const override
   {
-    return "A waveshaper which folds waveform by modulo operation.";
+    return "A waveshaper which folds waveform at integer thresholds.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
