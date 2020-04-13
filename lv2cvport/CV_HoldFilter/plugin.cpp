@@ -32,7 +32,7 @@ public:
   // Plugin(nParameters, nPrograms, nStates).
   CV_HoldFilter() : Plugin(ParameterID::ID_ENUM_LENGTH, 0, 0)
   {
-    // setLatency(0);
+    setLatency(0);
     sampleRateChanged(getSampleRate());
   }
 
@@ -119,7 +119,7 @@ protected:
     wasPlaying = timePos.playing;
 
     dsp.setParameters();
-    // setLatency(dsp.getLatency());
+    setLatency(dsp.getLatency());
     dsp.process(frames, inputs[0], inputs[1], inputs[2], inputs[3], outputs[0]);
   }
 
