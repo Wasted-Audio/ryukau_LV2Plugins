@@ -14,6 +14,7 @@ build: common \
 	ModuloShaper \
 	FoldShaper \
 	OddPowShaper \
+	SoftClipper \
 
 .PHONY: generate_ttl
 generate_ttl: build
@@ -37,6 +38,10 @@ common: dpf
 .PHONY: lv2cvport
 lv2cvport: common
 	$(MAKE) -C lv2cvport
+
+.PHONY: SoftClipper
+SoftClipper: common
+	$(MAKE) -C SoftClipper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: OddPowShaper
 OddPowShaper: common
