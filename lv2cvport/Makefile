@@ -6,6 +6,7 @@ build: \
 	CV_ExpADSREnvelope \
 	CV_ExpPolyADEnvelope \
 	CV_HoldFilter \
+  CV_Invert \
 	CV_LinearADSREnvelope \
 	CV_Multiply \
 	CV_ParabolicADEnvelope \
@@ -43,6 +44,10 @@ CV_ExpPolyADEnvelope:
 .PHONY: CV_HoldFilter
 CV_HoldFilter:
 	$(MAKE) -C CV_HoldFilter
+
+.PHONY: CV_Invert
+CV_Invert:
+	$(MAKE) -C CV_Invert
 
 .PHONY: CV_LinearADSREnvelope
 CV_LinearADSREnvelope:

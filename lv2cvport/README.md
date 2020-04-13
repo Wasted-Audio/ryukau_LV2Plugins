@@ -57,6 +57,9 @@ Step decimator combined with resonance filter. Using PolyBLEP residual to reduce
 
 `FilterType` changes order of PolyBLEP aliasing suppression. `Naive` does no aliasing suppression. `PolyBLEP N` suppress aliasing noise where larger `N` for better suppression.
 
+## CV_Invert
+Invert sign of signal. For example, amplitude +1 becomes -1 after passing through CV_Invert.
+
 ## CV_LinearADSREnvelope
 Linear ADSR envelope. 1 event input and 1 CV output.
 
