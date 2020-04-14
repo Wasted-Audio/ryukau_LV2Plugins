@@ -34,12 +34,6 @@ static const uint32_t kParameterIsInteger = 0x04;
 static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
-constexpr int32_t nOvertone = 360;
-constexpr int32_t nLFOWavetable = 64;
-constexpr int32_t tableSize = 262144;
-constexpr int32_t lfoTableSize = 1023;
-constexpr int32_t spectrumSize = tableSize / 2 + 1;
-
 namespace ParameterID {
 enum ID {
   bypass,
