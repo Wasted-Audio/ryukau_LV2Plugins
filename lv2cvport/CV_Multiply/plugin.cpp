@@ -73,10 +73,8 @@ protected:
 
   void run(const float **in, float **out, uint32_t frames) override
   {
-    const auto in0 = in[0];
-    const auto in1 = in[1];
-    const auto out0 = out[0];
-    for (uint32_t i = 0; i < frames; ++i) out0[i] = in0[i] * in1[i];
+    if (in == nullptr || out == nullptr) return;
+    for (uint32_t i = 0; i < frames; ++i) out[0][i] = in[0][i] * in[1][i];
   }
 
 private:

@@ -161,8 +161,7 @@ protected:
     const MidiEvent *midiEvents,
     uint32_t midiEventCount) override
   {
-    if (inputs == nullptr) return;
-    if (outputs == nullptr) return;
+    if (inputs == nullptr || outputs == nullptr) return;
 
     const auto timePos = getTimePosition();
     if (!wasPlaying && timePos.playing) dsp.startup();

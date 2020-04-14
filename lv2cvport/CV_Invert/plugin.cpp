@@ -73,7 +73,7 @@ protected:
 
   void run(const float **inputs, float **outputs, uint32_t frames) override
   {
-    if (outputs[0] == inputs[0]) return;
+    if (inputs == nullptr || outputs == nullptr) return;
 
     const float *in0 = inputs[0];
     float *out0 = outputs[0];
