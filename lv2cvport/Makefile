@@ -4,6 +4,7 @@ build: \
 	CV_CvToAudio \
 	CV_DoubleFilter \
 	CV_ExpADSREnvelope \
+	CV_ExpLoopEnvelope \
 	CV_ExpPolyADEnvelope \
 	CV_HoldFilter \
   CV_Invert \
@@ -36,6 +37,10 @@ CV_DoubleFilter:
 .PHONY: CV_ExpADSREnvelope
 CV_ExpADSREnvelope:
 	$(MAKE) -C CV_ExpADSREnvelope
+
+.PHONY: CV_ExpLoopEnvelope
+CV_ExpLoopEnvelope:
+	$(MAKE) -C CV_ExpLoopEnvelope
 
 .PHONY: CV_ExpPolyADEnvelope
 CV_ExpPolyADEnvelope:

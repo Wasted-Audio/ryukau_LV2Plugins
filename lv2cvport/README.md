@@ -38,10 +38,40 @@ There is a resonance boundary around `cutoff` frequency 3700-3800 Hz depending o
 
 Resonance also appears when the value of `resonance` is close to 0. Try 0.01 or lower.
 
-## ExpADSREnvelope
+## CV_ExpADSREnvelope
 Exponential ADSR Envelope.
 
-## ExpPolyADEnvelope
+### Loop and Trigger/Gate
+`Loop Start` and `Loop End` sets the section to start/end loop. Number 8 is the same as `R` (release) section.
+
+If `Loop End` is set to 8, incoming MIDI note or Trig/Gate signal behaves as trigger. When the envelope is triggered, the output will be entire envelope section without loop or sustain.
+
+If `Loop End` is less than 8, incoming MIDI note or Trig/Gate signal behaves as gate. When the envelope is gated, the output loops between the sections from `Loop Start` and `Loop End`.
+
+To sustain, set `Loop End` to less than or equal to `Loop Start`. For example, if both are set to 4, the envelope sustains at section 4 `Level`.
+
+### Rate Control
+`Rate` parameter changes the frequency of the envelope. The value of `Rate` will be multiplied to the value of `Decay*` and `Hold*` to shorten/lengthen the time.
+
+CV input of `Rate` will be mapped by following expression:
+
+```
+rate = rateUI + powf(2.0, rateCV * 32.0 / 12.0)
+```
+
+When `Rate Key Follow` is checked, MIDI note modifies `Rate`. So it can be played as musical tone. In this case, `Rate` represents the frequency at A4. Due to being envelope, it's most likely that pitch tuning will not match the frequency set by `Rate`.
+
+### Decay, Hold, Level
+CV inputs of `Decay` and `Hold` will be full wave rectified by `fabsf`. Then added to the value set on GUI.
+
+CV inputs of `Level` will be simply added.
+
+## CV_ExpLoopEnvelope
+Exponential curve envelope with 8 sections for loop.
+
+
+
+## CV_ExpPolyADEnvelope
 Exponential polynomial envelope. Note that this envelope resets to 0 for each note-on.
 
 Beware that increasing `curve` parameter may lead to very loud output.
