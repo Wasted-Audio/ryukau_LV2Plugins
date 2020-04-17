@@ -55,7 +55,7 @@ constexpr float knobHeight = 40.0f;
 constexpr float knobX = 80.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
 constexpr uint32_t defaultWidth = uint32_t(9 * knobX + 30);
-constexpr uint32_t defaultHeight = uint32_t(10 * labelY + 30);
+constexpr uint32_t defaultHeight = uint32_t(11 * labelY + 30);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
@@ -252,12 +252,14 @@ public:
     const auto top0 = 15.0f;
     const auto left0 = 15.0f;
 
-    const auto top1 = top0;
+    const auto top1 = top0 + labelY;
     const auto left1 = left0 + knobX;
 
     // addGroupLabel(left0, top0, 2 * knobX, "CV_ExpLoopEnvelope");
 
     const int labelAlign = ALIGN_LEFT | ALIGN_MIDDLE;
+
+    addLabel(left0, top0, 2 * knobX, "CV_ExpLoopEnvelope");
 
     addLabel(left0, top1, knobX, "Gain", labelAlign);
     addTextKnob(left1, top1, knobX, colorBlue, ID::gain, Scales::level, false, 4);
@@ -282,7 +284,7 @@ public:
       left0, top1 + 5 * labelY, 2 * knobX, "Rate Key Follow", ID::rateKeyFollow);
 
     envelopeView = std::make_shared<EnvelopeView>(this, fontId);
-    envelopeView->setSize(7 * knobX - 4 * margin, 6 * labelY - 2 * margin);
+    envelopeView->setSize(7 * knobX - 4 * margin, 7 * labelY - 2 * margin);
     envelopeView->setAbsolutePos(left1 + knobX + 4 * margin, top0);
     envelopeView->update(param);
 
@@ -296,7 +298,7 @@ public:
     const auto leftMatrix7 = leftMatrix6 + knobX;
     const auto leftMatrix8 = leftMatrix7 + knobX;
 
-    const auto topMatrix0 = top0 + 6 * labelY;
+    const auto topMatrix0 = top1 + 6 * labelY;
     const auto topMatrix1 = topMatrix0 + labelY;
     const auto topMatrix2 = topMatrix1 + labelY;
     const auto topMatrix3 = topMatrix2 + labelY;
