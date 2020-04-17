@@ -74,6 +74,15 @@ Exponential polynomial envelope. Note that this envelope resets to 0 for each no
 
 Beware that increasing `curve` parameter may lead to very loud output.
 
+## CV_Gate16
+16 CV trigger/gate/DC signal generator.
+
+`Type` behavior:
+
+- `Trigger`: Outputs impulse at MIDI note-on.
+- `Gate`: Outputs gate signal while at least 1 MIDI note is on.
+- `Direct Current`: Outputs DC signal. Ignores MIDI notes.
+
 ## CV_HoldFilter
 Step decimator combined with resonance filter. Using PolyBLEP residual to reduce aliasing noise.
 
@@ -90,6 +99,13 @@ Invert sign of signal. For example, amplitude +1 becomes -1 after passing throug
 
 ## CV_LinearADSREnvelope
 Linear ADSR envelope. 1 event input and 1 CV output.
+
+## CV_LinearMap
+Maps value as following equation:
+
+```
+Output = Add + Mul * Input.
+```
 
 ## CV_Multiply
 Multiply CV signal. 2 CV inputs and 1 CV output.
