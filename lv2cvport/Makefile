@@ -6,9 +6,11 @@ build: \
 	CV_ExpADSREnvelope \
 	CV_ExpLoopEnvelope \
 	CV_ExpPolyADEnvelope \
+  CV_Gate16 \
 	CV_HoldFilter \
   CV_Invert \
 	CV_LinearADSREnvelope \
+	CV_LinearMap \
 	CV_Multiply \
 	CV_ParabolicADEnvelope \
 	CV_PController \
@@ -46,6 +48,10 @@ CV_ExpLoopEnvelope:
 CV_ExpPolyADEnvelope:
 	$(MAKE) -C CV_ExpPolyADEnvelope
 
+.PHONY: CV_Gate16
+CV_Gate16:
+	$(MAKE) -C CV_Gate16
+
 .PHONY: CV_HoldFilter
 CV_HoldFilter:
 	$(MAKE) -C CV_HoldFilter
@@ -57,6 +63,10 @@ CV_Invert:
 .PHONY: CV_LinearADSREnvelope
 CV_LinearADSREnvelope:
 	$(MAKE) -C CV_LinearADSREnvelope
+
+.PHONY: CV_LinearMap
+CV_LinearMap:
+	$(MAKE) -C CV_LinearMap
 
 .PHONY: CV_Multiply
 CV_Multiply:
