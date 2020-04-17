@@ -41,6 +41,9 @@ Resonance also appears when the value of `resonance` is close to 0. Try 0.01 or 
 ## CV_ExpADSREnvelope
 Exponential ADSR Envelope.
 
+## CV_ExpLoopEnvelope
+Exponential curve envelope with 8 sections for loop.
+
 ### Loop and Trigger/Gate
 `Loop Start` and `Loop End` sets the section to start/end loop. Number 8 is the same as `R` (release) section.
 
@@ -65,11 +68,6 @@ When `Rate Key Follow` is checked, MIDI note modifies `Rate`. So it can be playe
 CV inputs of `Decay` and `Hold` will be full wave rectified by `fabsf`. Then added to the value set on GUI.
 
 CV inputs of `Level` will be simply added.
-
-## CV_ExpLoopEnvelope
-Exponential curve envelope with 8 sections for loop.
-
-
 
 ## CV_ExpPolyADEnvelope
 Exponential polynomial envelope. Note that this envelope resets to 0 for each note-on.
