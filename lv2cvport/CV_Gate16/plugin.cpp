@@ -40,7 +40,10 @@ public:
 protected:
   /* Information */
   const char *getLabel() const override { return "CV_Gate16"; }
-  const char *getDescription() const override { return "16 CV Gate. Peak is +1.0."; }
+  const char *getDescription() const override
+  {
+    return "16 CV trigger/gate/DC signal generator.";
+  }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
   {

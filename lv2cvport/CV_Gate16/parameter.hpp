@@ -31,7 +31,8 @@ static const uint32_t kParameterIsLogarithmic = 0x08;
 
 namespace ParameterID {
 enum ID {
-  dcOut,
+  type,
+
   masterGain,
 
   gain1,
@@ -56,7 +57,7 @@ enum ID {
 } // namespace ParameterID
 
 struct Scales {
-  static SomeDSP::IntScale<double> boolScale;
+  static SomeDSP::IntScale<double> type;
   static SomeDSP::LinearScale<double> defaultScale;
   static SomeDSP::LinearScale<double> masterGain;
 };
@@ -72,8 +73,8 @@ struct GlobalParameter {
     using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
     // using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
-    value[ID::dcOut] = std::make_unique<IntValue>(
-      false, Scales::boolScale, "dcOut", kParameterIsAutomable);
+    value[ID::type]
+      = std::make_unique<IntValue>(1, Scales::type, "type", kParameterIsAutomable);
     value[ID::masterGain] = std::make_unique<LinearValue>(
       1.0, Scales::masterGain, "masterGain", kParameterIsAutomable);
 

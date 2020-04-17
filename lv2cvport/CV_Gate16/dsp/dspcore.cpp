@@ -17,6 +17,8 @@
 
 #include "dspcore.hpp"
 
+enum GateType { typeTrigger, typeGate, typeDC };
+
 void DSPCore::setup(double sampleRate)
 {
   this->sampleRate = sampleRate;
@@ -36,7 +38,7 @@ void DSPCore::setParameters()
 {
   using ID = ParameterID::ID;
 
-  if (param.value[ID::dcOut]->getInt()) gate = 1.0f;
+  if (param.value[ID::type]->getInt() == typeDC) gate = 1.0f;
 
   interpMasterGain.push(param.value[ID::masterGain]->getFloat());
 
@@ -62,6 +64,7 @@ void DSPCore::process(const size_t length, float **outputs)
 {
   SmootherCommon<float>::setBufferSize(length);
 
+  bool trigger = param.value[ParameterID::type]->getInt() == typeTrigger;
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
     SmootherCommon<float>::setBufferIndex(i);
@@ -84,6 +87,8 @@ void DSPCore::process(const size_t length, float **outputs)
     outputs[13][i] = gain * interpGain14.process();
     outputs[14][i] = gain * interpGain15.process();
     outputs[15][i] = gain * interpGain16.process();
+
+    if (trigger && gate > 0.0f) gate = 0.0f;
   }
 }
 
@@ -94,7 +99,7 @@ void DSPCore::noteOn(
   info.id = noteId;
   noteStack.push_back(info);
 
-  if (!param.value[ParameterID::dcOut]->getInt()) gate = 1.0f;
+  if (param.value[ParameterID::type]->getInt() != typeDC) gate = 1.0f;
 }
 
 void DSPCore::noteOff(int32_t noteId)
@@ -105,5 +110,6 @@ void DSPCore::noteOff(int32_t noteId)
   if (it == noteStack.end()) return;
   noteStack.erase(it);
 
-  if (noteStack.size() == 0 && !param.value[ParameterID::dcOut]->getInt()) gate = 0.0f;
+  if (noteStack.size() == 0 && param.value[ParameterID::type]->getInt() == typeGate)
+    gate = 0.0f;
 }

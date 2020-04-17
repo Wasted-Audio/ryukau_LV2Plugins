@@ -176,20 +176,6 @@ private:
     return barBox;
   }
 
-  std::shared_ptr<CheckBox>
-  addCheckbox(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
-    checkbox->id = id;
-    checkbox->setSize(width, labelHeight);
-    checkbox->setAbsolutePos(left, top);
-    checkbox->setForegroundColor(colorFore);
-    checkbox->setHighlightColor(colorBlue);
-    checkbox->setTextSize(uiTextSize);
-    valueWidget.push_back(checkbox);
-    return checkbox;
-  }
-
   std::shared_ptr<Label> addLabel(
     int left,
     int top,
@@ -220,6 +206,25 @@ private:
     widget.push_back(label);
     return label;
   };
+
+  std::shared_ptr<OptionMenu> addOptionMenu(
+    float left,
+    float top,
+    float width,
+    uint32_t id,
+    const std::vector<std::string> &items)
+  {
+    auto menu = std::make_shared<OptionMenu>(this, this, items, fontId);
+    menu->id = id;
+    menu->setSize(width, labelHeight);
+    menu->setAbsolutePos(left, top);
+    menu->setDefaultValue(param.value[id]->getDefaultNormalized());
+    menu->setForegroundColor(colorFore);
+    menu->setHighlightColor(colorBlue);
+    menu->setTextSize(uiTextSize);
+    valueWidget.push_back(menu);
+    return menu;
+  }
 
   template<typename Scale>
   std::shared_ptr<TextKnob<Scale>> addTextKnob(
@@ -275,8 +280,9 @@ public:
       left1 - 0.5f * knobX, top0 + labelY, knobX, colorBlue, ID::masterGain,
       Scales::masterGain, false, 4);
 
-    addCheckbox(
-      left1 + 1.5f * knobX, top0 + labelY, 1.5f * knobX, "Direct Current", ID::dcOut);
+    addLabel(left1 + knobX, top0 + labelY, 0.5f * knobX, "Type", labelAlign);
+    std::vector<std::string> typeItems{"Trigger", "Gate", "Direct Current"};
+    addOptionMenu(left1 + 1.5f * knobX, top0 + labelY, 1.5f * knobX, ID::type, typeItems);
 
     addBarBox(left0, top0 + 2 * labelY, 4 * knobX, 6 * labelY, ID::gain1, 16);
   }

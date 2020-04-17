@@ -20,6 +20,6 @@
 
 using namespace SomeDSP;
 
-IntScale<double> Scales::boolScale(1);
+IntScale<double> Scales::type(2);
 LinearScale<double> Scales::defaultScale(0.0, 1.0);
 LinearScale<double> Scales::masterGain(-1.0, 1.0);
