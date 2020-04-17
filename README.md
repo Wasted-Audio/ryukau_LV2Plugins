@@ -31,7 +31,7 @@ cd LV2Plugins
 # Temporary patch to DPF. See: https://github.com/DISTRHO/DPF/issues/216
 cp patch/NanoVG.cpp lib/DPF/dgl/src/NanoVG.cpp
 
-make -j8     # If building process goes out of memory, try removing the -j option.
+make -j8     # If build process goes out of memory, try removing the -j option.
 make install # Copy *.lv2 to ~/.lv2
 ```
 
@@ -62,7 +62,7 @@ Knobs, sliders etc. has common functionalities listed on below.
 - <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>: Fine adjustment.
 - <kbd>Ctrl</kbd> + <kbd>Left Click</kbd>: Reset to default.
 
-Some controls turns red when pointing. They can be the cause of potential blow up or stopping all sounds for a while. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
+Some controls turn red when pointing. They can be the cause of potential blow up or stopping all sounds for a while. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
 
 TextKnob which is shown in the image below has an additional control <kbd>Mouse Right Click</kbd> to flip min/max.
 
@@ -101,6 +101,31 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 | <kbd>1</kbd>                            | Decrease                                |
 | <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
 
+## WaveShaper Pack
+<figure>
+<img src="docs/img/lv2_foldshaper.png" alt="Image of FoldShaper GUI." style="padding-bottom: 12px;"/>
+</figure>
+
+<figure>
+<img src="docs/img/lv2_moduloshaper.png" alt="Image of ModuloShaper GUI." style="padding-bottom: 12px;"/>
+</figure>
+
+<figure>
+<img src="docs/img/lv2_oddpowshaper.png" alt="Image of OddPowShaper GUI." style="padding-bottom: 12px;"/>
+</figure>
+
+<figure>
+<img src="docs/img/lv2_softclipper.png" alt="Image of SoftClipper GUI." style="padding-bottom: 12px;"/>
+</figure>
+
+WaveShaper Pack contains 4 stereo waveshapers. Waveshaping algorithms are naive, but all provides option for 16x oversampling.
+
+**Caution**: Do not use `More*` parameters without inserting a limiter after waveshaper. Output amplitude may become very loud.
+
+Oversampling may not be necessary for SoftClipper, unless input signal contains high frequency (4000 Hz or higher).
+
+`Hardclip` option guarantees safe output which amplitude is in between -1.0 to 1.0. However, `Hardclip` kills the characteristic of waveshaper.
+
 ## CubicPadSynth
 <figure>
 <img src="docs/img/lv2_cubicpadsynth.png" alt="Image of CubicPadSynth GUI."/>
@@ -112,7 +137,6 @@ CubicPadSynth is a wavetable synthesizer which uses PADsynth algorithm to genera
 
 Some parameters have wide range of value. <kbd>Shift</kbd> + <kbd>Left Drag</kbd> can be used to fine adjustment.
 
-
 ## EsPhaser
 <figure>
 <img src="docs/img/lv2_esphaser.png" alt="Image of EsPhaser GUI."/>
@@ -120,7 +144,7 @@ Some parameters have wide range of value. <kbd>Shift</kbd> + <kbd>Left Drag</kbd
 
 EsPhaser is a phaser with up to 4096 stages of order 2 Thiran all-pass filters. This is the same phaser used in EnvelopedSine.
 
-Caution:
+**Caution**:
 - When `stage` is set to 4096, it will be CPU intensive.
 - Output varies in different sample rate.
 - Output may be loud when changing `Cas. Offset`. Use <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd> to slowly change the value, or insert limiter to prevent hard clipping.
@@ -194,7 +218,7 @@ FDNCymbal is another attempt to make cymbal sounds. This one at least sounds lik
 
 FDNCymbal can be used as both synth/effect. To turn off oscillator, click `Stick` button.
 
-Caution:
+**Caution**:
 - When HP Cutoff is moving fast, it may output massive DC. To avoid this, use <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd> or turn up `Smooth`.
 - When FDN->Feedback is non zero, it may possibly blow up. If that happens, turn `FDN->Feedback` to leftmost.
 
