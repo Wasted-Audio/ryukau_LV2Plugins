@@ -64,7 +64,7 @@ Knobs, sliders etc. has common functionalities listed on below.
 
 Some controls turn red when pointing. They can be the cause of potential blow up or stopping all sounds for a while. It is recommended to always change those controls slowly with <kbd>Shift</kbd> + <kbd>Mouse Left Drag</kbd>.
 
-TextKnob which is shown in the image below has an additional control <kbd>Mouse Right Click</kbd> to flip min/max.
+TextKnob which is shown in the image below has an additional control <kbd>Mouse Right Click</kbd> to cycle min/mid/max.
 
 <figure>
 <img src="docs/img/textknob.png" alt="Image of TextKnob." style="padding-bottom: 12px;"/>

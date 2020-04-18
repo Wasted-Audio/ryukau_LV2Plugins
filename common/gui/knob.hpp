@@ -215,7 +215,7 @@ public:
           updateValue();
         }
       } else if (ev.button == 3) {
-        value = value > 0 ? 0 : 1;
+        value = value >= 1 ? 0 : value < 0.5f ? 0.5f : 1;
         updateValue();
       }
       repaint();
