@@ -1,20 +1,23 @@
 all: build generate_ttl
 
-build: common \
-	lv2cvport \
-	SevenDelay \
-	SyncSawSynth \
-	WaveCymbal \
-	FDNCymbal \
-	TrapezoidSynth \
-	IterativeSinCluster \
-	EnvelopedSine \
-	EsPhaser \
-	CubicPadSynth \
-	ModuloShaper \
-	FoldShaper \
-	OddPowShaper \
-	SoftClipper \
+# build: common \
+# 	lv2cvport \
+# 	SevenDelay \
+# 	SyncSawSynth \
+# 	WaveCymbal \
+# 	FDNCymbal \
+# 	TrapezoidSynth \
+# 	IterativeSinCluster \
+# 	EnvelopedSine \
+# 	EsPhaser \
+# 	CubicPadSynth \
+# 	ModuloShaper \
+# 	FoldShaper \
+# 	OddPowShaper \
+# 	SoftClipper \
+# 	LightPadSynth \
+
+build: common LightPadSynth
 
 .PHONY: generate_ttl
 generate_ttl: build
@@ -38,6 +41,10 @@ common: dpf
 .PHONY: lv2cvport
 lv2cvport: common
 	$(MAKE) -C lv2cvport
+
+.PHONY: LightPadSynth
+LightPadSynth: common
+	$(MAKE) -C LightPadSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: SoftClipper
 SoftClipper: common
