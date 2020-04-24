@@ -22,7 +22,6 @@
 #include "../parameter.hpp"
 #include "delay.hpp"
 #include "envelope.hpp"
-#include "noise.hpp"
 #include "oscillator.hpp"
 
 #include <array>
