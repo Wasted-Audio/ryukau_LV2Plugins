@@ -263,10 +263,7 @@ template<size_t tableSize, size_t nPeak> struct Wavetable {
       for (; bin < spectrumSize; ++bin) {
         float tmpIdx = (bin - 1) / expand;
         int32_t low = int32_t(tmpIdx) + 1;
-        if (low >= spectrumSize)
-          break;
-        else if (low < 0) {
-        }
+        if (low >= spectrumSize) break;
         size_t high = low + 1;
         float frac = tmpIdx - floorf(tmpIdx);
         spectrum[bin][0] = tmpSpec[low][0] + frac * (tmpSpec[high][0] - tmpSpec[low][0]);
