@@ -18,8 +18,6 @@
 #include "parameter.hpp"
 #include "../common/dsp/constants.hpp"
 
-constexpr double pitchRange = 128.0;
-
 using namespace SomeDSP;
 
 IntScale<double> Scales::boolScale(1);
