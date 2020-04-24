@@ -21,12 +21,14 @@
 
 #include "../dsp/constants.hpp"
 
+#include <string>
+
 class Label : public NanoWidget {
 public:
   bool drawBorder = false;
   bool drawUnderline = false;
 
-  explicit Label(NanoWidget *group, const char *labelText, FontId fontId)
+  explicit Label(NanoWidget *group, std::string labelText, FontId fontId)
     : NanoWidget(group), labelText(labelText), fontId(fontId)
   {
   }
@@ -40,7 +42,7 @@ public:
     const auto height = getHeight();
 
     // Text.
-    if (labelText == nullptr) return;
+    if (labelText.size() == 0) return;
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
@@ -57,7 +59,7 @@ public:
 
       auto textBackMargin = 10.0f;
       Rectangle<float> textBack;
-      textBounds(labelX, labelY, labelText, NULL, textBack);
+      textBounds(labelX, labelY, labelText.c_str(), NULL, textBack);
       beginPath();
       rect(
         textBack.getX() - textBackMargin, textBack.getY(),
@@ -67,7 +69,7 @@ public:
     }
 
     fillColor(colorFore);
-    text(labelX, labelY, labelText, nullptr);
+    text(labelX, labelY, labelText.c_str(), nullptr);
   }
 
   void setForegroundColor(Color color) { colorFore = color; }
@@ -80,7 +82,7 @@ protected:
   Color colorFore{0, 0, 0};
   Color colorBack{0xff, 0xff, 0xff};
 
-  const char *labelText = nullptr;
+  std::string labelText;
   FontId fontId = -1;
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
   float borderWidth = 1.0f;
@@ -104,7 +106,7 @@ public:
     rotate(-SomeDSP::pi / 2.0f);
 
     // Text.
-    if (labelText == nullptr) return;
+    if (labelText.size() == 0) return;
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
@@ -121,7 +123,7 @@ public:
 
       auto textBackMargin = 10.0f;
       Rectangle<float> textBack;
-      textBounds(labelX, labelY, labelText, NULL, textBack);
+      textBounds(labelX, labelY, labelText.c_str(), NULL, textBack);
       beginPath();
       rect(
         textBack.getX() - textBackMargin, textBack.getY(),
@@ -131,6 +133,6 @@ public:
     }
 
     fillColor(colorFore);
-    text(labelX, labelY, labelText, nullptr);
+    text(labelX, labelY, labelText.c_str(), nullptr);
   }
 };
