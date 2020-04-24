@@ -53,8 +53,11 @@ constexpr float knobWidth = 50.0f;
 constexpr float knobHeight = 40.0f;
 constexpr float knobX = 80.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
-constexpr uint32_t defaultWidth = uint32_t(4 * knobX + 30);
-constexpr uint32_t defaultHeight = uint32_t(labelHeight + 7 * labelY + 30);
+constexpr float barboxWidth = 4 * knobX;
+constexpr float barboxHeight = labelHeight + 5 * labelY;
+constexpr uint32_t defaultWidth = uint32_t(5 * knobX + 10 * margin + 40);
+constexpr uint32_t defaultHeight
+  = uint32_t(5 * labelY + 2 * barboxHeight + 2 * margin + 40);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
@@ -180,7 +183,7 @@ private:
     int left,
     int top,
     float width,
-    const char *name,
+    std::string name,
     int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
   {
     auto label = std::make_shared<Label>(this, name, fontId);
@@ -254,6 +257,15 @@ private:
     return knob;
   }
 
+  auto addTextView(float left, float top, float width, float height, std::string text)
+  {
+    auto view = std::make_shared<TextView>(this, text, fontId);
+    view->setSize(width, height);
+    view->setAbsolutePos(left, top);
+    widget.push_back(view);
+    return view;
+  }
+
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_Gate16UI)
 
 public:
@@ -267,24 +279,44 @@ public:
 
     using ID = ParameterID::ID;
 
-    const auto top0 = 15.0f;
-    const auto left0 = 15.0f;
-    const auto left1 = left0 + knobX;
+    const auto top0 = 20.0f;
+    const auto left0 = 20.0f;
 
-    addGroupLabel(left0, top0, 4 * knobX, "CV_Gate16");
-
-    const int labelAlign = ALIGN_CENTER | ALIGN_MIDDLE;
-
-    addLabel(left0, top0 + labelY, 0.5f * knobX, "Gain", labelAlign);
+    addGroupLabel(left0, top0, barboxWidth, "Gain");
+    addLabel(left0, top0 + labelY, knobX, "MasterGain");
     addTextKnob(
-      left1 - 0.5f * knobX, top0 + labelY, knobX, colorBlue, ID::masterGain,
-      Scales::masterGain, false, 4);
+      left0 + knobX, top0 + labelY, knobX, colorBlue, ID::masterGain, Scales::masterGain,
+      false, 4);
+    addBarBox(left0, top0 + 2 * labelY, barboxWidth, barboxHeight, ID::gain1, 16);
 
-    addLabel(left1 + knobX, top0 + labelY, 0.5f * knobX, "Type", labelAlign);
-    std::vector<std::string> typeItems{"Trigger", "Gate", "Direct Current"};
-    addOptionMenu(left1 + 1.5f * knobX, top0 + labelY, 1.5f * knobX, ID::type, typeItems);
+    const auto top1 = top0 + 8 * labelY + 2 * margin;
+    addGroupLabel(left0, top1, barboxWidth, "Delay");
+    addLabel(left0, top1 + labelY, knobX, "Multiply");
+    addTextKnob(
+      left0 + knobX, top1 + labelY, knobX, colorBlue, ID::delayMultiply,
+      Scales::delayMultiply, false, 4);
+    addBarBox(left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16);
 
-    addBarBox(left0, top0 + 2 * labelY, 4 * knobX, 6 * labelY, ID::gain1, 16);
+    const auto top2 = top1 + 8 * labelY + 2 * margin;
+    std::stringstream ssPluginName;
+    ssPluginName << "CV_Gate16  " << std::to_string(MAJOR_VERSION) << "."
+                 << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
+    auto pluginNameTextView
+      = addTextView(left0, top2, barboxWidth, labelY, ssPluginName.str());
+    pluginNameTextView->textSize = 24.0f;
+
+    const auto left1 = left0 + barboxWidth + 4 * margin;
+    const auto left2 = left1 + 6 * margin;
+    std::string typeLabel("Type");
+    addGroupLabel(left1, top0, labelY + knobX, "Type");
+    std::vector<std::string> typeItems{"Trigger", "Gate", "DC"};
+    for (size_t idx = 0; idx < nGate; ++idx) {
+      size_t fixed = idx + 1;
+      addLabel(
+        left1, top0 + fixed * labelY, 4 * margin, std::to_string(fixed),
+        ALIGN_RIGHT | ALIGN_MIDDLE);
+      addOptionMenu(left2, top0 + fixed * labelY, knobX, ID::type1 + idx, typeItems);
+    }
   }
 };
 

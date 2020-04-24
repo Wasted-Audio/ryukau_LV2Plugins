@@ -29,37 +29,27 @@ static const uint32_t kParameterIsInteger = 0x04;
 static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
+constexpr size_t nGate = 16;
+
 namespace ParameterID {
 enum ID {
-  type,
+  gain1 = 0,
+  delay1 = 16,
+  type1 = 32,
 
-  masterGain,
-
-  gain1,
-  gain2,
-  gain3,
-  gain4,
-  gain5,
-  gain6,
-  gain7,
-  gain8,
-  gain9,
-  gain10,
-  gain11,
-  gain12,
-  gain13,
-  gain14,
-  gain15,
-  gain16,
+  masterGain = 48,
+  delayMultiply,
 
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
 
 struct Scales {
+  static SomeDSP::LinearScale<double> gain;
+  static SomeDSP::LinearScale<double> delay;
   static SomeDSP::IntScale<double> type;
-  static SomeDSP::LinearScale<double> defaultScale;
   static SomeDSP::LinearScale<double> masterGain;
+  static SomeDSP::LogScale<double> delayMultiply;
 };
 
 struct GlobalParameter {
@@ -71,45 +61,27 @@ struct GlobalParameter {
 
     using ID = ParameterID::ID;
     using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
-    // using LogValue = FloatValue<SomeDSP::LogScale<double>>;
+    using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
-    value[ID::type]
-      = std::make_unique<IntValue>(1, Scales::type, "type", kParameterIsAutomable);
+    std::string gainLabel("gain");
+    std::string delayLabel("delay");
+    std::string typeLabel("type");
+    for (size_t idx = 0; idx < nGate; ++idx) {
+      auto indexStr = std::to_string(idx + 1);
+      value[ID::gain1 + idx] = std::make_unique<LinearValue>(
+        1.0, Scales::gain, (gainLabel + indexStr).c_str(), kParameterIsAutomable);
+      value[ID::delay1 + idx] = std::make_unique<LinearValue>(
+        0.0, Scales::delay, (delayLabel + indexStr).c_str(), kParameterIsAutomable);
+      value[ID::type1 + idx] = std::make_unique<IntValue>(
+        1, Scales::type, (typeLabel + indexStr).c_str(),
+        kParameterIsAutomable | kParameterIsInteger);
+    }
+
     value[ID::masterGain] = std::make_unique<LinearValue>(
       1.0, Scales::masterGain, "masterGain", kParameterIsAutomable);
-
-    value[ID::gain1] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain1", kParameterIsAutomable);
-    value[ID::gain2] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain2", kParameterIsAutomable);
-    value[ID::gain3] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain3", kParameterIsAutomable);
-    value[ID::gain4] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain4", kParameterIsAutomable);
-    value[ID::gain5] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain5", kParameterIsAutomable);
-    value[ID::gain6] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain6", kParameterIsAutomable);
-    value[ID::gain7] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain7", kParameterIsAutomable);
-    value[ID::gain8] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain8", kParameterIsAutomable);
-    value[ID::gain9] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain9", kParameterIsAutomable);
-    value[ID::gain10] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain10", kParameterIsAutomable);
-    value[ID::gain11] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain11", kParameterIsAutomable);
-    value[ID::gain12] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain12", kParameterIsAutomable);
-    value[ID::gain13] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain13", kParameterIsAutomable);
-    value[ID::gain14] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain14", kParameterIsAutomable);
-    value[ID::gain15] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain15", kParameterIsAutomable);
-    value[ID::gain16] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "gain16", kParameterIsAutomable);
+    value[ID::delayMultiply] = std::make_unique<LogValue>(
+      Scales::delayMultiply.invmap(1.0), Scales::delayMultiply, "delayMultiply",
+      kParameterIsAutomable);
   }
 
 #ifndef TEST_BUILD
