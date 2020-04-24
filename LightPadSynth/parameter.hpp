@@ -57,10 +57,8 @@ enum ID {
   padSynthSeed,
   overtoneGainPower,
   overtoneWidthMultiply,
-  overtonePitchRandom,
   overtonePitchMultiply,
   overtonePitchModulo,
-  spectrumInvert,
   spectrumExpand,
   spectrumShift,
   profileComb,
@@ -72,6 +70,22 @@ enum ID {
   gainD,
   gainS,
   gainR,
+  gainCurve,
+
+  filterCutoff,
+  filterResonance,
+  filterA,
+  filterD,
+  filterS,
+  filterR,
+  filterAmount,
+  filterKeyFollow,
+
+  delayMix,
+  delayDetuneSemi,
+  delayDetuneMilli,
+  delayFeedback,
+  delayAttack,
 
   oscOctave,
   oscSemi,
@@ -79,28 +93,12 @@ enum ID {
   equalTemperament,
   pitchA4Hz,
 
-  pitchEnvelopeAmount,
-  pitchEnvelopeAmountNegative,
-  pitchA,
-  pitchD,
-  pitchS,
-  pitchR,
-
   lfoWavetableType,
   lfoTempoNumerator,
   lfoTempoDenominator,
   lfoFrequencyMultiplier,
-  lfoPitchAmount,
-  lfoPhaseReset,
+  lfoDelayAmount,
   lfoLowpass,
-
-  tableLowpass,
-  tableLowpassKeyFollow,
-  tableLowpassEnvelopeAmount,
-  tableLowpassA,
-  tableLowpassD,
-  tableLowpassS,
-  tableLowpassR,
 
   oscInitialPhase,
   oscPhaseReset,
@@ -115,7 +113,6 @@ enum ID {
   unisonPanType,
 
   nVoice,
-  voicePool,
   smoothness,
 
   pitchBend,
@@ -150,23 +147,24 @@ struct Scales {
   static SomeDSP::LogScale<double> envelopeS;
   static SomeDSP::LogScale<double> envelopeR;
 
+  static SomeDSP::LogScale<double> filterCutoff;
+  static SomeDSP::LinearScale<double> filterResonance;
+
+  static SomeDSP::IntScale<double> delayDetuneSemi;
+  static SomeDSP::LinearScale<double> delayFeedback;
+
   static SomeDSP::IntScale<double> oscOctave;
   static SomeDSP::IntScale<double> oscSemi;
   static SomeDSP::IntScale<double> oscMilli;
   static SomeDSP::IntScale<double> equalTemperament;
   static SomeDSP::IntScale<double> pitchA4Hz;
 
-  static SomeDSP::LogScale<double> pitchAmount;
-
   static SomeDSP::LinearScale<double> lfoWavetable;
   static SomeDSP::IntScale<double> lfoWavetableType;
   static SomeDSP::IntScale<double> lfoTempoNumerator;
   static SomeDSP::IntScale<double> lfoTempoDenominator;
   static SomeDSP::LogScale<double> lfoFrequencyMultiplier;
-  static SomeDSP::LogScale<double> lfoLowpass;
-
-  static SomeDSP::LinearScale<double> tableLowpass;
-  static SomeDSP::LinearScale<double> tableLowpassAmount;
+  static SomeDSP::LogScale<double> lfoDelayAmount;
 
   static SomeDSP::IntScale<double> nUnison;
   static SomeDSP::LogScale<double> unisonDetune;
@@ -230,17 +228,11 @@ struct GlobalParameter {
       0.5, Scales::overtoneGainPower, "overtoneGainPower", kParameterIsAutomable);
     value[ID::overtoneWidthMultiply] = std::make_unique<LogValue>(
       0.5, Scales::overtoneWidthMultiply, "overtoneWidthMultiply", kParameterIsAutomable);
-    value[ID::overtonePitchRandom] = std::make_unique<IntValue>(
-      0, Scales::boolScale, "overtonePitchRandom",
-      kParameterIsAutomable | kParameterIsBoolean);
     value[ID::overtonePitchMultiply] = std::make_unique<LinearValue>(
       Scales::overtonePitchMultiply.invmap(1.0), Scales::overtonePitchMultiply,
       "overtonePitchMultiply", kParameterIsAutomable);
     value[ID::overtonePitchModulo] = std::make_unique<LinearValue>(
       0.0, Scales::overtonePitchModulo, "overtonePitchModulo", kParameterIsAutomable);
-    value[ID::spectrumInvert] = std::make_unique<IntValue>(
-      0, Scales::boolScale, "spectrumInvert",
-      kParameterIsAutomable | kParameterIsBoolean);
     value[ID::spectrumExpand] = std::make_unique<LogValue>(
       Scales::spectrumExpand.invmap(1.0), Scales::spectrumExpand, "spectrumExpand",
       kParameterIsAutomable);
@@ -266,35 +258,53 @@ struct GlobalParameter {
       0.5, Scales::envelopeS, "gainS", kParameterIsAutomable);
     value[ID::gainR] = std::make_unique<LogValue>(
       0.0, Scales::envelopeR, "gainR", kParameterIsAutomable);
+    value[ID::gainCurve] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "gainCurve", kParameterIsAutomable);
+
+    value[ID::filterCutoff] = std::make_unique<LogValue>(
+      1.0, Scales::filterCutoff, "filterCutoff", kParameterIsAutomable);
+    value[ID::filterResonance] = std::make_unique<LinearValue>(
+      0.0, Scales::filterResonance, "filterResonance", kParameterIsAutomable);
+    value[ID::filterA] = std::make_unique<LogValue>(
+      0.0, Scales::envelopeA, "filterA", kParameterIsAutomable);
+    value[ID::filterD] = std::make_unique<LogValue>(
+      0.5, Scales::envelopeD, "filterD", kParameterIsAutomable);
+    value[ID::filterS] = std::make_unique<LogValue>(
+      0.5, Scales::envelopeS, "filterS", kParameterIsAutomable);
+    value[ID::filterR] = std::make_unique<LogValue>(
+      1.0, Scales::envelopeR, "filterR", kParameterIsAutomable);
+    value[ID::filterAmount] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "filterAmount", kParameterIsAutomable);
+    value[ID::filterKeyFollow] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "filterKeyFollow", kParameterIsAutomable);
+
+    value[ID::delayMix] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "delayMix", kParameterIsAutomable);
+    value[ID::delayDetuneSemi] = std::make_unique<IntValue>(
+      120, Scales::delayDetuneSemi, "delayDetuneSemi",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::delayDetuneMilli] = std::make_unique<IntValue>(
+      1000, Scales::oscMilli, "delayDetuneMilli",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::delayFeedback] = std::make_unique<LinearValue>(
+      0.5, Scales::delayFeedback, "delayFeedback", kParameterIsAutomable);
+    value[ID::delayAttack] = std::make_unique<LogValue>(
+      0.0, Scales::envelopeA, "delayAttack", kParameterIsAutomable);
 
     value[ID::oscOctave] = std::make_unique<IntValue>(
-      12, Scales::oscOctave, "oscOctave", kParameterIsAutomable);
+      12, Scales::oscOctave, "oscOctave", kParameterIsAutomable | kParameterIsInteger);
     value[ID::oscSemi] = std::make_unique<IntValue>(
-      120, Scales::oscSemi, "oscSemi", kParameterIsAutomable);
+      120, Scales::oscSemi, "oscSemi", kParameterIsAutomable | kParameterIsInteger);
     value[ID::oscMilli] = std::make_unique<IntValue>(
-      1000, Scales::oscMilli, "oscMilli", kParameterIsAutomable);
+      1000, Scales::oscMilli, "oscMilli", kParameterIsAutomable | kParameterIsInteger);
     value[ID::equalTemperament] = std::make_unique<IntValue>(
       11, Scales::equalTemperament, "equalTemperament",
       kParameterIsAutomable | kParameterIsInteger);
     value[ID::pitchA4Hz] = std::make_unique<IntValue>(
       340, Scales::pitchA4Hz, "pitchA4Hz", kParameterIsAutomable | kParameterIsInteger);
 
-    value[ID::pitchEnvelopeAmount] = std::make_unique<LogValue>(
-      0.0, Scales::pitchAmount, "pitchEnvelopeAmount", kParameterIsAutomable);
-    value[ID::pitchEnvelopeAmountNegative] = std::make_unique<IntValue>(
-      false, Scales::boolScale, "pitchEnvelopeAmountNegative",
-      kParameterIsAutomable | kParameterIsBoolean);
-    value[ID::pitchA] = std::make_unique<LogValue>(
-      0.0, Scales::envelopeA, "pitchA", kParameterIsAutomable);
-    value[ID::pitchD] = std::make_unique<LogValue>(
-      0.5, Scales::envelopeD, "pitchD", kParameterIsAutomable);
-    value[ID::pitchS] = std::make_unique<LogValue>(
-      0.0, Scales::envelopeS, "pitchS", kParameterIsAutomable);
-    value[ID::pitchR] = std::make_unique<LogValue>(
-      0.35, Scales::envelopeR, "pitchR", kParameterIsAutomable);
-
     value[ID::lfoWavetableType] = std::make_unique<IntValue>(
-      0, Scales::lfoWavetableType, "lfoWavetableType",
+      2, Scales::lfoWavetableType, "lfoWavetableType",
       kParameterIsAutomable | kParameterIsInteger);
     value[ID::lfoTempoNumerator] = std::make_unique<IntValue>(
       0, Scales::lfoTempoNumerator, "lfoTempoNumerator",
@@ -305,28 +315,10 @@ struct GlobalParameter {
     value[ID::lfoFrequencyMultiplier] = std::make_unique<LogValue>(
       Scales::lfoFrequencyMultiplier.invmap(1.0), Scales::lfoFrequencyMultiplier,
       "lfoFrequencyMultiplier", kParameterIsAutomable);
-    value[ID::lfoPitchAmount] = std::make_unique<LogValue>(
-      0.0, Scales::pitchAmount, "lfoPitchAmount", kParameterIsAutomable);
-    value[ID::lfoPhaseReset] = std::make_unique<IntValue>(
-      1, Scales::boolScale, "lfoPhaseReset", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::lfoDelayAmount] = std::make_unique<LogValue>(
+      0.5, Scales::lfoDelayAmount, "lfoDelayAmount", kParameterIsAutomable);
     value[ID::lfoLowpass] = std::make_unique<LogValue>(
-      1.0, Scales::lfoLowpass, "lfoLowpass", kParameterIsAutomable);
-
-    value[ID::tableLowpass] = std::make_unique<LinearValue>(
-      1.0, Scales::tableLowpass, "tableLowpass", kParameterIsAutomable);
-    value[ID::tableLowpassKeyFollow] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "tableLowpassKeyFollow", kParameterIsAutomable);
-    value[ID::tableLowpassEnvelopeAmount] = std::make_unique<LinearValue>(
-      0.0, Scales::tableLowpassAmount, "tableLowpassEnvelopeAmount",
-      kParameterIsAutomable);
-    value[ID::tableLowpassA] = std::make_unique<LogValue>(
-      0.0, Scales::envelopeA, "tableLowpassA", kParameterIsAutomable);
-    value[ID::tableLowpassD] = std::make_unique<LogValue>(
-      0.5, Scales::envelopeD, "tableLowpassD", kParameterIsAutomable);
-    value[ID::tableLowpassS] = std::make_unique<LogValue>(
-      0.5, Scales::envelopeS, "tableLowpassS", kParameterIsAutomable);
-    value[ID::tableLowpassR] = std::make_unique<LogValue>(
-      0.5, Scales::envelopeR, "tableLowpassR", kParameterIsAutomable);
+      1.0, Scales::filterCutoff, "lfoLowpass", kParameterIsAutomable);
 
     value[ID::oscInitialPhase] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "oscInitialPhase", kParameterIsAutomable);
@@ -356,8 +348,6 @@ struct GlobalParameter {
 
     value[ID::nVoice] = std::make_unique<IntValue>(
       1, Scales::nVoice, "nVoice", kParameterIsAutomable | kParameterIsInteger);
-    value[ID::voicePool] = std::make_unique<IntValue>(
-      1, Scales::boolScale, "voicePool", kParameterIsAutomable | kParameterIsBoolean);
     value[ID::smoothness] = std::make_unique<LogValue>(
       0.1, Scales::smoothness, "smoothness", kParameterIsAutomable);
 

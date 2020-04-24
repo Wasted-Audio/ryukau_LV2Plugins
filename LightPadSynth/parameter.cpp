@@ -30,8 +30,7 @@ LinearScale<double> Scales::overtoneWidth(0.0, 100.0);
 LogScale<double> Scales::overtonePitch(0.0625, 16.0, 0.5, 1.0);
 LinearScale<double> Scales::overtonePhase(0.0, twopi);
 
-// LogScale<double> Scales::tableBaseFrequency(0.1, 100.0, 0.5, 10.0);
-LogScale<double> Scales::tableBaseFrequency(0.1, 25.0, 0.5, 2.5);
+LogScale<double> Scales::tableBaseFrequency(0.1, 100.0, 0.5, 2.5);
 LogScale<double> Scales::overtoneGainPower(0.2, 10.0, 0.5, 1.0);
 LogScale<double> Scales::overtoneWidthMultiply(0.05, 12.0, 0.5, 1.0);
 LinearScale<double> Scales::overtonePitchMultiply(0.0001, 16.0);
@@ -48,23 +47,24 @@ LogScale<double> Scales::envelopeD(0.0001, 16.0, 0.5, 4.0);
 LogScale<double> Scales::envelopeS(0.0001, 0.9995, 0.5, 0.3);
 LogScale<double> Scales::envelopeR(0.001, 16.0, 0.5, 2.0);
 
+LogScale<double> Scales::filterCutoff(0.0, 22000.0, 0.5, 400.0);
+LinearScale<double> Scales::filterResonance(0.0, 0.999);
+
+LinearScale<double> Scales::delayFeedback(-1.0, 1.0);
+IntScale<double> Scales::delayDetuneSemi(240);
+
 IntScale<double> Scales::oscOctave(16);
 IntScale<double> Scales::oscSemi(168);
 IntScale<double> Scales::oscMilli(2000);
 IntScale<double> Scales::equalTemperament(119);
 IntScale<double> Scales::pitchA4Hz(900);
 
-LogScale<double> Scales::pitchAmount(0.0, pitchRange, 0.5, 24.0);
-
 LinearScale<double> Scales::lfoWavetable(-1.0, 1.0);
 IntScale<double> Scales::lfoWavetableType(2);
 IntScale<double> Scales::lfoTempoNumerator(255);
 IntScale<double> Scales::lfoTempoDenominator(255);
 LogScale<double> Scales::lfoFrequencyMultiplier(0.0, 16.0, 0.5, 1.0);
-LogScale<double> Scales::lfoLowpass(0.0, 1.0, 0.5, 0.01);
-
-LinearScale<double> Scales::tableLowpass(0.0, 1.0);
-LinearScale<double> Scales::tableLowpassAmount(0.0, pitchRange);
+LogScale<double> Scales::lfoDelayAmount(0.0, 1.0, 0.5, 0.2);
 
 IntScale<double> Scales::nUnison(15);
 LogScale<double> Scales::unisonDetune(0.0, 1.0, 0.5, 0.05);

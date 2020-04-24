@@ -42,6 +42,8 @@
   #error Unsupported instruction set
 #endif
 
+constexpr float delayMaxTime = 1.0f;
+
 inline float clamp(float value, float min, float max)
 {
   return (value < min) ? min : (value > max) ? max : value;
@@ -52,13 +54,28 @@ inline float calcMasterPitch(int32_t octave, int32_t semi, int32_t milli, float 
   return 12 * octave + semi + milli / 1000.0f + (bend - 0.5f) * 4.0f;
 }
 
+inline float calcDelayPitch(int32_t semi, int32_t milli, float equalTemperament)
+{
+  return powf(2.0f, -(semi + 0.001f * milli) / equalTemperament);
+}
+
 inline float
 notePitchToFrequency(float notePitch, float equalTemperament, float a4Hz = 440.0f)
 {
   return a4Hz * powf(2.0f, (notePitch - 69.0f) / equalTemperament);
 }
 
-void NOTE_NAME::setup(float sampleRate) {}
+// Approximation of `440 * powf(2, x * 10 - 5.75);`.
+// x in [0.0, 1.0].
+inline float mapCutoff(float x)
+{
+  return (float(2.358608708691953) + float(12.017595467921483) * x
+          + float(12.200543970909193) * x * x + float(65.1589512791118) * x * x * x)
+    / (float(0.2835017917034045) + float(-0.6282361955447577) * x
+       + float(0.4872433705867005) * x * x + float(-0.13155292689641543) * x * x * x);
+}
+
+void NOTE_NAME::setup(float sampleRate) { delay.setup(sampleRate, 0.0f, delayMaxTime); }
 
 void NOTE_NAME::noteOn(
   int32_t noteId,
@@ -66,6 +83,7 @@ void NOTE_NAME::noteOn(
   float velocity,
   float pan,
   float phase,
+  float sampleRate,
   WaveTable<tableSize> &wavetable,
   NoteProcessInfo &info,
   GlobalParameter &param)
@@ -76,9 +94,10 @@ void NOTE_NAME::noteOn(
   id = noteId;
 
   this->velocity = velocity;
+  this->pan = pan;
   gain = 1.0f;
 
-  const float noteFreq = notePitchToFrequency(
+  noteFreq = notePitchToFrequency(
     notePitch + info.masterPitch.getValue(), info.equalTemperament.getValue(),
     info.pitchA4Hz.getValue());
 
@@ -92,13 +111,21 @@ void NOTE_NAME::noteOn(
     osc.setPhase(phase + phaseRnd * param.value[ID::oscInitialPhase]->getFloat());
   }
 
-  this->pan = pan;
+  filter.reset();
 
-  const float curve = 0.5f; // TODO: add curve parameter.
+  delay.reset();
+  delaySeconds = 1.0f / noteFreq;
+  while (delaySeconds > delayMaxTime) delaySeconds *= 0.5f;
+
   gainEnvelope.reset(
-    param.value[ID::gainA]->getFloat(), param.value[ID::gainD]->getFloat(),
-    param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(), curve,
-    noteFreq);
+    sampleRate, param.value[ID::gainA]->getFloat(), param.value[ID::gainD]->getFloat(),
+    param.value[ID::gainS]->getFloat(), param.value[ID::gainR]->getFloat(),
+    param.value[ID::gainCurve]->getFloat(), noteFreq);
+  filterEnvelope.reset(
+    sampleRate, param.value[ID::filterA]->getFloat(),
+    param.value[ID::filterD]->getFloat(), param.value[ID::filterS]->getFloat(),
+    param.value[ID::filterR]->getFloat(), noteFreq);
+  delayGate.reset(sampleRate, param.value[ID::delayAttack]->getFloat(), noteFreq);
 }
 
 void NOTE_NAME::release()
@@ -106,6 +133,7 @@ void NOTE_NAME::release()
   if (state == NoteState::rest) return;
   state = NoteState::release;
   gainEnvelope.release();
+  filterEnvelope.release();
 }
 
 void NOTE_NAME::rest() { state = NoteState::rest; }
@@ -116,19 +144,28 @@ float NOTE_NAME::getGain() { return gain; }
 
 std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
 {
-  std::array<float, 2> frame{};
-
   gain = velocity * gainEnvelope.process();
   if (gainEnvelope.isTerminated()) state = NoteState::rest;
 
-  const auto gain1 = gain * pan;
-  const auto gain0 = gain - gain1;
   const auto oscOut = osc.process();
 
-  frame[0] = gain0 * oscOut;
-  frame[1] = gain1 * oscOut;
+  const auto cutAmt = info.filterAmount.getValue();
+  const auto cutoff = std::clamp(
+    info.filterCutoff.getValue() + info.filterKeyFollow.getValue() * noteFreq
+      + mapCutoff(cutAmt * filterEnvelope.process()),
+    0.0f, 22000.0f);
+  const auto filterOut
+    = filter.process(oscOut, sampleRate, cutoff, info.filterResonance.getValue());
 
-  return frame;
+  delay.setTime(sampleRate, delaySeconds * info.delayDetune.getValue() * info.lfoOut);
+  const auto delayOut
+    = delay.process(delayGate.process() * filterOut, info.delayFeedback.getValue());
+
+  const auto mix = filterOut + info.delayMix.getValue() * (delayOut - filterOut);
+
+  const auto gain1 = gain * pan;
+  const auto gain0 = gain - gain1;
+  return {gain0 * mix, gain1 * mix};
 }
 
 DSPCORE_NAME::DSPCORE_NAME()
@@ -181,23 +218,29 @@ void DSPCORE_NAME::setParameters(float tempo)
     int32_t(param.value[ID::oscOctave]->getInt()) - 12,
     param.value[ID::oscSemi]->getInt() - 120, param.value[ID::oscMilli]->getInt() - 1000,
     param.value[ID::pitchBend]->getFloat()));
-  info.equalTemperament.push(param.value[ID::equalTemperament]->getFloat() + 1);
+
+  auto equalTemperament = param.value[ID::equalTemperament]->getFloat() + 1;
+  info.equalTemperament.push(equalTemperament);
   info.pitchA4Hz.push(param.value[ID::pitchA4Hz]->getFloat() + 100);
-  info.tableLowpass.push(
-    Scales::tableLowpass.getMax() - param.value[ID::tableLowpass]->getFloat());
-  info.tableLowpassKeyFollow.push(param.value[ID::tableLowpassKeyFollow]->getFloat());
-  info.tableLowpassEnvelopeAmount.push(
-    param.value[ID::tableLowpassEnvelopeAmount]->getFloat());
-  info.pitchEnvelopeAmount.push(
-    param.value[ID::pitchEnvelopeAmount]->getFloat()
-    * (param.value[ID::pitchEnvelopeAmountNegative]->getInt() ? -1 : 1));
+
+  info.filterCutoff.push(param.value[ID::filterCutoff]->getFloat());
+  info.filterResonance.push(param.value[ID::filterResonance]->getFloat());
+  info.filterAmount.push(param.value[ID::filterAmount]->getFloat());
+  info.filterKeyFollow.push(param.value[ID::filterKeyFollow]->getFloat());
+
+  info.delayMix.push(param.value[ID::delayMix]->getFloat());
+  info.delayDetune.push(calcDelayPitch(
+    param.value[ID::delayDetuneSemi]->getInt() - 120,
+    param.value[ID::delayDetuneMilli]->getInt() - 1000, equalTemperament));
+  info.delayFeedback.push(param.value[ID::delayFeedback]->getFloat());
 
   const float beat = float(param.value[ID::lfoTempoNumerator]->getInt() + 1)
     / float(param.value[ID::lfoTempoDenominator]->getInt() + 1);
   info.lfoFrequency.push(
     param.value[ID::lfoFrequencyMultiplier]->getFloat() * tempo / 240.0f / beat);
-  info.lfoPitchAmount.push(param.value[ID::lfoPitchAmount]->getFloat());
-  info.lfoLowpass.push(param.value[ID::lfoLowpass]->getFloat());
+  info.lfoAmount.push(param.value[ID::lfoDelayAmount]->getFloat());
+  info.lfoLowpass.push(
+    PController<float>::cutoffToP(sampleRate, param.value[ID::lfoLowpass]->getFloat()));
 
   nVoice = 16 * (param.value[ID::nVoice]->getInt() + 1);
   if (nVoice > notes.size()) nVoice = notes.size();
@@ -212,16 +255,7 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
     SmootherCommon<float>::setBufferIndex(i);
     processMidiNote(i);
 
-    info.masterPitch.process();
-    info.equalTemperament.process();
-    info.pitchA4Hz.process();
-    info.tableLowpass.process();
-    info.tableLowpassKeyFollow.process();
-    info.tableLowpassEnvelopeAmount.process();
-    info.pitchEnvelopeAmount.process();
-    info.lfoFrequency.process();
-    info.lfoPitchAmount.process();
-    info.lfoLowpass.process();
+    info.process(sampleRate, lfoWavetable);
 
     frame.fill(0.0f);
 
@@ -246,54 +280,22 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
   }
 }
 
-enum UnisonPanType {
-  unisonPanAlternateLR,
-  unisonPanAlternateMS,
-  unisonPanAscendLR,
-  unisonPanAscendRL,
-  unisonPanHighOnMid,
-  unisonPanHighOnSide,
-  unisonPanRandom,
-  unisonPanRotateL,
-  unisonPanRotateR,
-  unisonPanShuffle
-};
-
-void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float velocity)
+void DSPCORE_NAME::setUnisonPan(size_t nUnison)
 {
+  enum UnisonPanType {
+    unisonPanAlternateLR,
+    unisonPanAlternateMS,
+    unisonPanAscendLR,
+    unisonPanAscendRL,
+    unisonPanHighOnMid,
+    unisonPanHighOnSide,
+    unisonPanRandom,
+    unisonPanRotateL,
+    unisonPanRotateR,
+    unisonPanShuffle
+  };
+
   using ID = ParameterID::ID;
-
-  const size_t nUnison = 1 + param.value[ID::nUnison]->getInt();
-
-  noteIndices.resize(0);
-
-  // Pick up note from resting one.
-  for (size_t index = 0; index < nVoice; ++index) {
-    if (notes[index].id == identifier) noteIndices.push_back(index);
-    if (notes[index].state == NoteState::rest) noteIndices.push_back(index);
-    if (noteIndices.size() >= nUnison) break;
-  }
-
-  // If there aren't enought resting note, pick up from most quiet one.
-  if (noteIndices.size() < nUnison) {
-    voiceIndices.resize(nVoice);
-    std::iota(voiceIndices.begin(), voiceIndices.end(), 0);
-    std::sort(voiceIndices.begin(), voiceIndices.end(), [&](size_t lhs, size_t rhs) {
-      return !notes[lhs].isAttacking() && (notes[lhs].getGain() < notes[rhs].getGain());
-    });
-
-    for (auto &index : voiceIndices) {
-      fillTransitionBuffer(index);
-      noteIndices.push_back(index);
-      if (noteIndices.size() >= nUnison) break;
-    }
-  }
-
-  if (nUnison <= 1) {
-    notes[noteIndices[0]].noteOn(
-      identifier, float(pitch) + tuning, velocity, 0.5f, 0.0f, wavetable, info, param);
-    return;
-  }
 
   unisonPan.resize(nUnison);
   const auto unisonPanRange = param.value[ID::unisonPan]->getFloat();
@@ -387,6 +389,46 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
       std::shuffle(unisonPan.begin(), unisonPan.end(), info.rng);
     } break;
   }
+}
+
+void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float velocity)
+{
+  using ID = ParameterID::ID;
+
+  const size_t nUnison = 1 + param.value[ID::nUnison]->getInt();
+
+  noteIndices.resize(0);
+
+  // Pick up note from resting one.
+  for (size_t index = 0; index < nVoice; ++index) {
+    if (notes[index].id == identifier) noteIndices.push_back(index);
+    if (notes[index].state == NoteState::rest) noteIndices.push_back(index);
+    if (noteIndices.size() >= nUnison) break;
+  }
+
+  // If there aren't enought resting note, pick up from most quiet one.
+  if (noteIndices.size() < nUnison) {
+    voiceIndices.resize(nVoice);
+    std::iota(voiceIndices.begin(), voiceIndices.end(), 0);
+    std::sort(voiceIndices.begin(), voiceIndices.end(), [&](size_t lhs, size_t rhs) {
+      return !notes[lhs].isAttacking() && (notes[lhs].getGain() < notes[rhs].getGain());
+    });
+
+    for (auto &index : voiceIndices) {
+      fillTransitionBuffer(index);
+      noteIndices.push_back(index);
+      if (noteIndices.size() >= nUnison) break;
+    }
+  }
+
+  if (nUnison <= 1) {
+    notes[noteIndices[0]].noteOn(
+      identifier, float(pitch) + tuning, velocity, 0.5f, 0.0f, sampleRate, wavetable,
+      info, param);
+    return;
+  }
+
+  setUnisonPan(nUnison);
 
   const auto unisonDetune = param.value[ID::unisonDetune]->getFloat();
   const auto unisonPhase = param.value[ID::unisonPhase]->getFloat();
@@ -401,7 +443,7 @@ void DSPCORE_NAME::noteOn(int32_t identifier, int16_t pitch, float tuning, float
     auto phase = unisonPhase * unison / float(nUnison);
     notes[noteIndices[unison]].noteOn(
       identifier, notePitch, distGain(info.rng) * velocity, unisonPan[unison], phase,
-      wavetable, info, param);
+      sampleRate, wavetable, info, param);
   }
 }
 
@@ -476,4 +518,10 @@ void DSPCORE_NAME::refreshLfo()
   using ID = ParameterID::ID;
 
   reset();
+
+  std::vector<float> table(nLFOWavetable);
+  for (size_t idx = 0; idx < nLFOWavetable; ++idx)
+    table[idx] = param.value[ID::lfoWavetable0 + idx]->getFloat();
+
+  lfoWavetable.refreshTable(table, param.value[ID::lfoWavetableType]->getInt());
 }

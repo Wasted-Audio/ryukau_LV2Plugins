@@ -25,6 +25,17 @@
 
 namespace SomeDSP {
 
+template<typename Sample> inline void trimNoteFreq(Sample &noteFreq)
+{
+  if (somefabs(noteFreq) < Sample(0.001)) noteFreq = Sample(0.001);
+}
+
+template<typename Sample> inline Sample adaptTime(Sample seconds, Sample noteFreq)
+{
+  const Sample cycle = Sample(1) / noteFreq;
+  return seconds >= cycle ? seconds : cycle > Sample(0.1) ? Sample(0.1) : cycle;
+}
+
 template<typename Sample> class ExpDecayCurve {
 public:
   void reset(Sample sampleRate, Sample seconds)
@@ -109,17 +120,23 @@ protected:
   Sample ramp = 0;
 };
 
-template<typename Sample> class ExpADSREnvelope {
+template<typename Sample> class AttackGate {
 public:
-  void setup(Sample sampleRate) { this->sampleRate = sampleRate; }
-
-  Sample adaptTime(Sample seconds, Sample noteFreq)
+  void reset(Sample sampleRate, Sample attackTime, Sample noteFreq)
   {
-    const Sample cycle = Sample(1) / noteFreq;
-    return seconds < cycle ? cycle : seconds;
+    trimNoteFreq(noteFreq);
+    atk.reset(sampleRate, adaptTime(attackTime, noteFreq));
   }
 
+  Sample process() { return atk.process(); }
+
+  LinAttackCurve<Sample> atk;
+};
+
+template<typename Sample> class ExpADSREnvelope {
+public:
   void reset(
+    Sample sampleRate,
     Sample attackTime,
     Sample decayTime,
     Sample sustainLevel,
@@ -127,6 +144,8 @@ public:
     Sample curve,
     Sample noteFreq)
   {
+    trimNoteFreq(noteFreq);
+
     state = State::attack;
     sus.reset(sustainLevel);
 
@@ -143,6 +162,7 @@ public:
   }
 
   void set(
+    Sample sampleRate,
     Sample attackTime,
     Sample decayTime,
     Sample sustainLevel,
@@ -150,6 +170,8 @@ public:
     Sample curve,
     Sample noteFreq)
   {
+    trimNoteFreq(noteFreq);
+
     switch (state) {
       default:
       case State::attack:
@@ -233,23 +255,18 @@ protected:
   State state = State::terminated;
   Sample value = 0;
   Sample curve = 0;
-  Sample sampleRate = 44100;
   Sample range = 1;
 };
 
 template<typename Sample> class LinearADSREnvelope {
 public:
-  void setup(Sample sampleRate) { this->sampleRate = sampleRate; }
-
-  Sample adaptTime(Sample seconds, Sample noteFreq)
+  Sample secondToDelta(Sample sampleRate, Sample seconds)
   {
-    const Sample cycle = Sample(1) / noteFreq;
-    return seconds >= cycle ? seconds : cycle > Sample(0.1) ? Sample(0.1) : cycle;
+    return Sample(1) / (sampleRate * seconds);
   }
 
-  Sample secondToDelta(Sample seconds) { return Sample(1) / (sampleRate * seconds); }
-
   void reset(
+    Sample sampleRate,
     Sample attackTime,
     Sample decayTime,
     Sample sustainLevel,
@@ -259,10 +276,11 @@ public:
     state = State::attack;
     value = Sample(1);
     sus.reset(sustainLevel);
-    set(attackTime, decayTime, sustainLevel, releaseTime, noteFreq);
+    set(sampleRate, attackTime, decayTime, sustainLevel, releaseTime, noteFreq);
   }
 
   void set(
+    Sample sampleRate,
     Sample attackTime,
     Sample decayTime,
     Sample sustainLevel,
@@ -270,9 +288,10 @@ public:
     Sample noteFreq)
   {
     sus.push(std::clamp<Sample>(sustainLevel, Sample(0), Sample(1)));
-    atk = secondToDelta(adaptTime(attackTime, noteFreq));
-    dec = secondToDelta(adaptTime(decayTime, noteFreq));
-    rel = secondToDelta(adaptTime(releaseTime, noteFreq));
+    trimNoteFreq(noteFreq);
+    atk = secondToDelta(sampleRate, adaptTime(attackTime, noteFreq));
+    dec = secondToDelta(sampleRate, adaptTime(decayTime, noteFreq));
+    rel = secondToDelta(sampleRate, adaptTime(releaseTime, noteFreq));
   }
 
   void release()
@@ -327,7 +346,6 @@ protected:
   State state = State::terminated;
   LinearSmoother<Sample> sus;
 
-  Sample sampleRate = 44100;
   Sample atk = 0.01;
   Sample dec = 0.01;
   Sample rel = 0.01;

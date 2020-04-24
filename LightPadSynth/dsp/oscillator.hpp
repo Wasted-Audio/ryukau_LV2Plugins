@@ -255,9 +255,7 @@ template<size_t tableSize> struct TableOsc {
 };
 
 template<size_t tableSize> struct LfoWavetable {
-  std::vector<float> table;
-
-  LfoWavetable() { table.resize(tableSize + 1); }
+  std::array<float, tableSize + 1> table;
 
   enum InterpType : int32_t { interpStep, interpLinear, interpCubic };
 
@@ -287,6 +285,7 @@ template<size_t tableSize> struct LfoWavetable {
       default: {
         uiTable.insert(uiTable.begin(), uiTable.back());
         uiTable.push_back(uiTable[1]);
+        uiTable.push_back(uiTable[2]);
         const size_t uiTableLast = uiTable.size() - 2;
         for (size_t idx = 0; idx < last; ++idx) {
           float targetIdx = 1 + float(uiTableLast * idx / float(last));
@@ -302,21 +301,18 @@ template<size_t tableSize> struct LfoWavetable {
   }
 };
 
-template<size_t tableSize> struct alignas(64) LfoTableOsc {
+template<size_t tableSize> struct LfoTableOsc {
 public:
   float phase = 0;
-  float tick = 0;
-
-  void setFrequency(float sampleRate, float frequency)
-  {
-    tick = frequency * tableSize / sampleRate;
-    if (tick >= tableSize) tick = 0;
-  }
 
   void reset() { phase = 0; }
 
-  float process(std::vector<float> &table)
+  float process(
+    const std::array<float, tableSize + 1> &table, float sampleRate, float frequency)
   {
+    float tick = frequency * tableSize / sampleRate;
+    if (tick >= tableSize) tick = 0;
+
     phase += tick;
     if (phase >= tableSize) phase -= tableSize;
 
@@ -324,6 +320,35 @@ public:
     int ix0 = phase;
     return table[ix0] + xFrac * (table[ix0 + 1] - table[ix0]);
   }
+};
+
+template<typename Sample> class LP3 {
+public:
+  void reset() { acc = vel = pos = x1 = 0; }
+
+  Sample process(const Sample x0, Sample sampleRate, Sample lowpassHz, Sample resonance)
+  {
+    // Map cutoff to filter coefficient `c`.
+    Sample fc = lowpassHz / sampleRate;
+    auto c = Sample(14.57922056987288) * fc * fc * fc
+      + Sample(-15.50319149517482) * fc * fc + Sample(5.8725399228949335) * fc;
+
+    auto k = resonance;
+
+    // Process filter.
+    acc = k * acc + c * vel;
+    vel -= acc + x0 - x1;
+    pos -= c / (1 - k) * vel;
+
+    x1 = x0;
+    return pos;
+  }
+
+private:
+  Sample acc = 0;
+  Sample vel = 0;
+  Sample pos = 0;
+  Sample x1 = 0;
 };
 
 } // namespace SomeDSP

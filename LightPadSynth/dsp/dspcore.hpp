@@ -20,6 +20,7 @@
 #include "../../common/dsp/constants.hpp"
 #include "../../common/dsp/smoother.hpp"
 #include "../parameter.hpp"
+#include "delay.hpp"
 #include "envelope.hpp"
 #include "noise.hpp"
 #include "oscillator.hpp"
@@ -39,26 +40,64 @@ struct NoteProcessInfo {
   LinearSmoother<float> masterPitch;
   LinearSmoother<float> equalTemperament;
   LinearSmoother<float> pitchA4Hz;
-  LinearSmoother<float> tableLowpass;
-  LinearSmoother<float> tableLowpassKeyFollow;
-  LinearSmoother<float> tableLowpassEnvelopeAmount;
-  LinearSmoother<float> pitchEnvelopeAmount;
+  LinearSmoother<float> filterCutoff;
+  LinearSmoother<float> filterResonance;
+  LinearSmoother<float> filterAmount;
+  LinearSmoother<float> filterKeyFollow;
+  LinearSmoother<float> delayMix;
+  LinearSmoother<float> delayDetune;
+  LinearSmoother<float> delayFeedback;
   LinearSmoother<float> lfoFrequency;
-  LinearSmoother<float> lfoPitchAmount;
+  LinearSmoother<float> lfoAmount;
   LinearSmoother<float> lfoLowpass;
+
+  LfoTableOsc<lfoTableSize> lfo;
+  PController<float> lowpass;
+  float lfoOut = 0;
+
+  void process(float sampleRate, LfoWavetable<lfoTableSize> &lfoWavetable)
+  {
+    masterPitch.process();
+    equalTemperament.process();
+    pitchA4Hz.process();
+    filterCutoff.process();
+    filterResonance.process();
+    filterAmount.process();
+    filterKeyFollow.process();
+    delayMix.process();
+    delayDetune.process();
+    delayFeedback.process();
+    lfoFrequency.process();
+    lfoAmount.process();
+    lfoLowpass.process();
+
+    lowpass.setP(lfoLowpass.getValue());
+    lfoOut = 1.0f
+      + lfoAmount.getValue()
+        * lowpass.process(
+          lfo.process(lfoWavetable.table, sampleRate, lfoFrequency.getValue()));
+    if (lfoOut < 0.0f) lfoOut = 0.0f;
+  }
 
   void reset()
   {
     masterPitch.reset(1.0f);
     equalTemperament.reset(12.0f);
     pitchA4Hz.reset(440.0f);
-    tableLowpass.reset(0);
-    tableLowpassKeyFollow.reset(1.0);
-    tableLowpassEnvelopeAmount.reset(0);
-    pitchEnvelopeAmount.reset(0);
-    lfoFrequency.reset(0);
-    lfoPitchAmount.reset(0);
-    lfoLowpass.reset(1);
+    filterCutoff.reset(0.0f);
+    filterResonance.reset(0.0f);
+    filterAmount.reset(0.0f);
+    filterKeyFollow.reset(0.0f);
+    delayMix.reset(0.5f);
+    delayDetune.reset(1.0f);
+    delayFeedback.reset(0.5f);
+    lfoFrequency.reset(0.0f);
+    lfoAmount.reset(0.0f);
+    lfoLowpass.reset(1.0f);
+
+    lfo.reset();
+    lowpass.reset();
+    lfoOut = 0;
   }
 };
 
@@ -69,12 +108,17 @@ struct NoteProcessInfo {
                                                                                          \
     int32_t id = -1;                                                                     \
     float velocity = 0;                                                                  \
-    float frequency = 1;                                                                 \
+    float noteFreq = 1;                                                                  \
     float pan = 0.5f;                                                                    \
     float gain = 0;                                                                      \
                                                                                          \
     ExpADSREnvelope<float> gainEnvelope;                                                 \
+    LinearADSREnvelope<float> filterEnvelope;                                            \
+    AttackGate<float> delayGate;                                                         \
     TableOsc<tableSize> osc;                                                             \
+    LP3<float> filter;                                                                   \
+    Delay<float> delay;                                                                  \
+    float delaySeconds = 0;                                                              \
                                                                                          \
     void setup(float sampleRate);                                                        \
     void noteOn(                                                                         \
@@ -83,6 +127,7 @@ struct NoteProcessInfo {
       float velocity,                                                                    \
       float pan,                                                                         \
       float phase,                                                                       \
+      float sampleRate,                                                                  \
       WaveTable<tableSize> &wavetable,                                                   \
       NoteProcessInfo &info,                                                             \
       GlobalParameter &param);                                                           \
@@ -189,11 +234,14 @@ public:
     }                                                                                    \
                                                                                          \
   private:                                                                               \
+    void setUnisonPan(size_t nUnison);                                                   \
+                                                                                         \
     float sampleRate = 44100.0f;                                                         \
                                                                                          \
     std::vector<PeakInfo<float>> peakInfos;                                              \
                                                                                          \
     WaveTable<tableSize> wavetable;                                                      \
+    LfoWavetable<lfoTableSize> lfoWavetable;                                             \
                                                                                          \
     size_t nVoice = 32;                                                                  \
     int32_t panCounter = 0;                                                              \
