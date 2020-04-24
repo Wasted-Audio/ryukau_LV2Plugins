@@ -17,9 +17,6 @@
 
 #include "dspcore.hpp"
 
-#include "../../lib/juce_FastMathApproximations.h"
-#include "../../lib/vcl/vectormath_exp.h"
-
 #include <algorithm>
 #include <numeric>
 #include <random>
