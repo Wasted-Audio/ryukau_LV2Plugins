@@ -585,11 +585,31 @@ public:
         filterLeft + 7.0f * knobX, filterTop0, knobWidth, colorBlue, "KeyFollow",
         ID::filterKeyFollow));
 
-    // Unison.
-    const auto unisonTop = tabInsideTop0 + labelY + knobY;
-    const auto unisonLeft = gainLeft;
+    // Tuning.
+    const auto tuningTop = tabInsideTop0 + labelY + knobY;
+    const auto tuningLeft = gainLeft;
     tabview->addWidget(
-      tabMain, addGroupLabel(unisonLeft, unisonTop, 7.0f * knobX, "Unison"));
+      tabMain,
+      addGroupLabel(tuningLeft, tuningTop, 4.0f * knobX - 4.0f * margin, "Tuning"));
+
+    const auto tuningLabelWidth = knobX - 2.0f * margin;
+    const auto tuningLeft1 = tuningLeft;
+    const auto tuningLeft2 = tuningLeft1 + tuningLabelWidth;
+
+    const auto tuningTop1 = tuningTop + labelY;
+    tabview->addWidget(
+      tabMain, addLabel(tuningLeft1, tuningTop1, tuningLabelWidth, "Octave"));
+    tabview->addWidget(
+      tabMain,
+      addTextKnob(
+        tuningLeft2, tuningTop1, knobWidth, colorBlue, ID::oscOctave, Scales::oscOctave,
+        false, 0, -12));
+
+    // Unison.
+    const auto unisonTop = tuningTop;
+    const auto unisonLeft = tuningLeft + 4.0f * knobX;
+    tabview->addWidget(
+      tabMain, addGroupLabel(unisonLeft, unisonTop, 5.0f * knobX, "Unison"));
     const auto unisonKnobTop = unisonTop + labelY;
     tabview->addWidget(
       tabMain, addLabel(unisonLeft, unisonKnobTop, knobWidth, "nUnison"));
@@ -624,31 +644,18 @@ public:
         unisonLeft + 1.0f * knobX - 1.5f * margin, unisonKnobTop + knobY, knobWidth,
         "Random Detune", ID::unisonDetuneRandom));
 
-    std::vector<std::string> nVoiceOptions
-      = {"16 Voices", "32 Voices", "48 Voices",  "64 Voices",
-         "80 Voices", "96 Voices", "112 Voices", "128 Voices"};
-    tabview->addWidget(
-      tabMain,
-      addOptionMenu(
-        unisonLeft + 3.0f * knobX - 1.0f * margin, unisonKnobTop + knobY, checkboxWidth,
-        ID::nVoice, nVoiceOptions));
-
     std::vector<std::string> unisonPanTypeOptions{
       "Alternate L-R", "Alternate M-S", "Ascend L -> R", "Ascend R -> L", "High on Mid",
       "High on Side",  "Random",        "Rotate L",      "Rotate R",      "Shuffle"};
     tabview->addWidget(
       tabMain,
-      addLabel(
-        unisonLeft + 5.0f * knobX, unisonKnobTop, 2.0f * knobWidth, "Spread Type"));
-    tabview->addWidget(
-      tabMain,
       addOptionMenu(
-        unisonLeft + 5.0f * knobX, unisonKnobTop + labelY, 2.0f * knobWidth,
+        unisonLeft + 3.5f * knobX + margin, unisonKnobTop + knobY, 2.0f * knobWidth,
         ID::unisonPanType, unisonPanTypeOptions));
 
     // Phase.
     const auto phaseTop = unisonTop;
-    const auto phaseLeft = unisonLeft + 7.0f * knobX + 2.0f * margin;
+    const auto phaseLeft = unisonLeft + 5.0f * knobX + 2.0f * margin;
     tabview->addWidget(
       tabMain, addGroupLabel(phaseLeft, phaseTop, 2.0f * knobX, "Phase"));
     const auto phaseKnobTop = phaseTop + labelY;
@@ -671,33 +678,31 @@ public:
     const auto miscTop = phaseTop;
     const auto miscLeft = phaseLeft + 2.0f * knobX + 2.0f * margin;
     tabview->addWidget(
-      tabMain, addGroupLabel(miscLeft, miscTop, 1.0f * knobX + 2.0f * margin, "Misc."));
+      tabMain, addGroupLabel(miscLeft, miscTop, 3.0f * knobX - 2.0f * margin, "Misc."));
 
     const auto miscTop0 = miscTop + labelY;
-    const auto miscLeft0 = miscLeft + 2.0f * margin;
+    const auto miscLeft0 = miscLeft;
     tabview->addWidget(
       tabMain,
-      addKnob(miscLeft0, miscTop0, knobWidth, colorBlue, "Smooth", ID::smoothness));
+      addKnob(
+        miscLeft0 + margin, miscTop0, knobWidth, colorBlue, "Smooth", ID::smoothness));
 
-    // Tuning.
-    const auto tuningTop = unisonTop;
-    const auto tuningLeft = miscLeft + 1.0f * knobX + 4.0f * margin;
+    const auto nVoiceLeft = miscLeft0 + knobX + margin;
+    std::vector<std::string> nVoiceOptions
+      = {"16 Voices", "32 Voices", "48 Voices",  "64 Voices",
+         "80 Voices", "96 Voices", "112 Voices", "128 Voices"};
+    tabview->addWidget(tabMain, addLabel(nVoiceLeft, miscTop0, 8 * margin, "Poly"));
     tabview->addWidget(
       tabMain,
-      addGroupLabel(tuningLeft, tuningTop, 4.0f * knobX - 6.0 * margin, "Tuning"));
+      addOptionMenu(nVoiceLeft + 8 * margin, miscTop0, knobX, ID::nVoice, nVoiceOptions));
 
-    const auto tuningLabelWidth = knobX - 2.0f * margin;
-    const auto tuningLeft1 = tuningLeft;
-    const auto tuningLeft2 = tuningLeft1 + tuningLabelWidth;
-
-    const auto tuningTop1 = tuningTop + labelY;
     tabview->addWidget(
-      tabMain, addLabel(tuningLeft1, tuningTop1, tuningLabelWidth, "Octave"));
+      tabMain, addLabel(nVoiceLeft, miscTop0 + labelY, 8 * margin, "Seed"));
     tabview->addWidget(
       tabMain,
       addTextKnob(
-        tuningLeft2, tuningTop1, knobWidth, colorBlue, ID::oscOctave, Scales::oscOctave,
-        false, 0, -12));
+        nVoiceLeft + 8 * margin, miscTop0 + labelY, knobX, colorBlue, ID::seed,
+        Scales::seed));
 
     const auto tuningTop2 = tuningTop1 + labelY;
     tabview->addWidget(
@@ -782,8 +787,7 @@ public:
     // LFO.
     const auto lfoTop = delayTop;
     const auto lfoLeft = delayLeft + 5.0f * knobX + 2.0f * margin;
-    tabview->addWidget(
-      tabMain, addGroupLabel(lfoLeft, lfoTop, 9.0f * knobX, "Delay LFO"));
+    tabview->addWidget(tabMain, addGroupLabel(lfoLeft, lfoTop, 9.0f * knobX, "LFO"));
     const auto lfoKnobTop = lfoTop + labelY;
 
     const auto lfoLeft1 = lfoLeft;
