@@ -605,6 +605,46 @@ public:
         tuningLeft2, tuningTop1, knobWidth, colorBlue, ID::oscOctave, Scales::oscOctave,
         false, 0, -12));
 
+    const auto tuningTop2 = tuningTop1 + labelY;
+    tabview->addWidget(
+      tabMain, addLabel(tuningLeft1, tuningTop2, tuningLabelWidth, "Semi"));
+    tabview->addWidget(
+      tabMain,
+      addTextKnob(
+        tuningLeft2, tuningTop2, knobWidth, colorBlue, ID::oscSemi, Scales::oscSemi,
+        false, 0, -120));
+
+    const auto tuningTop3 = tuningTop2 + labelY;
+    tabview->addWidget(
+      tabMain, addLabel(tuningLeft1, tuningTop3, tuningLabelWidth, "Milli"));
+    auto knobOscMilli = addTextKnob(
+      tuningLeft2, tuningTop3, knobWidth, colorBlue, ID::oscMilli, Scales::oscMilli,
+      false, 0, -1000);
+    knobOscMilli->sensitivity = 0.001f;
+    knobOscMilli->lowSensitivity = 0.00025f;
+    tabview->addWidget(tabMain, knobOscMilli);
+
+    const auto tuningLeft3 = tuningLeft + 2.0f * knobX - 2.0f * margin;
+    const auto tuningLeft4 = tuningLeft3 + tuningLabelWidth;
+
+    const auto tuningTop4 = tuningTop + 1.0f * labelY;
+    tabview->addWidget(
+      tabMain, addLabel(tuningLeft3, tuningTop4, tuningLabelWidth, "ET"));
+    tabview->addWidget(
+      tabMain,
+      addTextKnob(
+        tuningLeft4, tuningTop4, knobWidth, colorBlue, ID::equalTemperament,
+        Scales::equalTemperament, false, 0, 1));
+
+    const auto tuningTop5 = tuningTop4 + labelY;
+    tabview->addWidget(
+      tabMain, addLabel(tuningLeft3, tuningTop5, tuningLabelWidth, "A4 [Hz]"));
+    tabview->addWidget(
+      tabMain,
+      addTextKnob(
+        tuningLeft4, tuningTop5, knobWidth, colorBlue, ID::pitchA4Hz, Scales::pitchA4Hz,
+        false, 0, 100));
+
     // Unison.
     const auto unisonTop = tuningTop;
     const auto unisonLeft = tuningLeft + 4.0f * knobX;
@@ -703,46 +743,6 @@ public:
       addTextKnob(
         nVoiceLeft + 8 * margin, miscTop0 + labelY, knobX, colorBlue, ID::seed,
         Scales::seed));
-
-    const auto tuningTop2 = tuningTop1 + labelY;
-    tabview->addWidget(
-      tabMain, addLabel(tuningLeft1, tuningTop2, tuningLabelWidth, "Semi"));
-    tabview->addWidget(
-      tabMain,
-      addTextKnob(
-        tuningLeft2, tuningTop2, knobWidth, colorBlue, ID::oscSemi, Scales::oscSemi,
-        false, 0, -120));
-
-    const auto tuningTop3 = tuningTop2 + labelY;
-    tabview->addWidget(
-      tabMain, addLabel(tuningLeft1, tuningTop3, tuningLabelWidth, "Milli"));
-    auto knobOscMilli = addTextKnob(
-      tuningLeft2, tuningTop3, knobWidth, colorBlue, ID::oscMilli, Scales::oscMilli,
-      false, 0, -1000);
-    knobOscMilli->sensitivity = 0.001f;
-    knobOscMilli->lowSensitivity = 0.00025f;
-    tabview->addWidget(tabMain, knobOscMilli);
-
-    const auto tuningLeft3 = tuningLeft + 2.0f * knobX - 2.0f * margin;
-    const auto tuningLeft4 = tuningLeft3 + tuningLabelWidth;
-
-    const auto tuningTop4 = tuningTop + 1.0f * labelY;
-    tabview->addWidget(
-      tabMain, addLabel(tuningLeft3, tuningTop4, tuningLabelWidth, "ET"));
-    tabview->addWidget(
-      tabMain,
-      addTextKnob(
-        tuningLeft4, tuningTop4, knobWidth, colorBlue, ID::equalTemperament,
-        Scales::equalTemperament, false, 0, 1));
-
-    const auto tuningTop5 = tuningTop4 + labelY;
-    tabview->addWidget(
-      tabMain, addLabel(tuningLeft3, tuningTop5, tuningLabelWidth, "A4 [Hz]"));
-    tabview->addWidget(
-      tabMain,
-      addTextKnob(
-        tuningLeft4, tuningTop5, knobWidth, colorBlue, ID::pitchA4Hz, Scales::pitchA4Hz,
-        false, 0, 100));
 
     // Delay.
     const auto delayTop = unisonTop + 2.0f * labelY + knobY;
