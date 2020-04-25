@@ -114,7 +114,7 @@ struct NoteProcessInfo {
     ExpADSREnvelope<float> gainEnvelope;                                                 \
     LinearADSREnvelope<float> filterEnvelope;                                            \
     AttackGate<float> delayGate;                                                         \
-    TableOsc<tableSize> osc;                                                             \
+    TableOsc osc;                                                                        \
     LP3<float> filter;                                                                   \
     Delay<float> delay;                                                                  \
     float delaySeconds = 0;                                                              \
@@ -127,7 +127,7 @@ struct NoteProcessInfo {
       float pan,                                                                         \
       float phase,                                                                       \
       float sampleRate,                                                                  \
-      Wavetable<tableSize> &wavetable,                                                   \
+      Wavetable &wavetable,                                                              \
       NoteProcessInfo &info,                                                             \
       GlobalParameter &param);                                                           \
     void release();                                                                      \
@@ -135,7 +135,8 @@ struct NoteProcessInfo {
     void rest();                                                                         \
     bool isAttacking();                                                                  \
     float getGain();                                                                     \
-    std::array<float, 2> process(float sampleRate, NoteProcessInfo &info);               \
+    std::array<float, 2>                                                                 \
+    process(float sampleRate, Wavetable &wavetable, NoteProcessInfo &info);              \
   };
 
 NOTE_CLASS(AVX512)
@@ -239,7 +240,7 @@ public:
                                                                                          \
     std::vector<PeakInfo<float>> peakInfos;                                              \
                                                                                          \
-    Wavetable<tableSize> wavetable;                                                      \
+    Wavetable wavetable;                                                                 \
     LfoWavetable<lfoTableSize> lfoWavetable;                                             \
                                                                                          \
     size_t nVoice = 32;                                                                  \

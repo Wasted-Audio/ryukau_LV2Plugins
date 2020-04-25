@@ -54,13 +54,14 @@ enum ID {
   // Do not add parameter here.
 
   tableBaseFrequency = 1505,
+  tableBufferSize,
   padSynthSeed,
   overtoneGainPower,
   overtoneWidthMultiply,
   overtonePitchMultiply,
   overtonePitchModulo,
   spectrumExpand,
-  spectrumShift,
+  spectrumRotate,
   profileComb,
   profileShape,
   uniformPhaseProfile,
@@ -132,12 +133,12 @@ struct Scales {
   static SomeDSP::LinearScale<double> overtonePhase;
 
   static SomeDSP::LogScale<double> tableBaseFrequency;
+  static SomeDSP::IntScale<double> tableBufferSize;
   static SomeDSP::LogScale<double> overtoneGainPower;
   static SomeDSP::LogScale<double> overtoneWidthMultiply;
   static SomeDSP::LinearScale<double> overtonePitchMultiply;
   static SomeDSP::LinearScale<double> overtonePitchModulo;
   static SomeDSP::LogScale<double> spectrumExpand;
-  static SomeDSP::IntScale<double> spectrumShift;
   static SomeDSP::IntScale<double> profileComb;
   static SomeDSP::LogScale<double> profileShape;
   static SomeDSP::IntScale<double> seed;
@@ -223,6 +224,9 @@ struct GlobalParameter {
     value[ID::tableBaseFrequency] = std::make_unique<LogValue>(
       Scales::tableBaseFrequency.invmap(10.0), Scales::tableBaseFrequency,
       "tableBaseFrequency", kParameterIsAutomable);
+    value[ID::tableBufferSize] = std::make_unique<IntValue>(
+      8, Scales::tableBufferSize, "tableBufferSize",
+      kParameterIsAutomable | kParameterIsInteger);
     value[ID::padSynthSeed] = std::make_unique<IntValue>(
       0, Scales::seed, "padSynthSeed", kParameterIsAutomable | kParameterIsInteger);
     value[ID::overtoneGainPower] = std::make_unique<LogValue>(
@@ -237,9 +241,8 @@ struct GlobalParameter {
     value[ID::spectrumExpand] = std::make_unique<LogValue>(
       Scales::spectrumExpand.invmap(1.0), Scales::spectrumExpand, "spectrumExpand",
       kParameterIsAutomable);
-    value[ID::spectrumShift] = std::make_unique<IntValue>(
-      spectrumSize, Scales::spectrumShift, "spectrumShift",
-      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::spectrumRotate] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "spectrumRotate", kParameterIsAutomable);
     value[ID::profileComb] = std::make_unique<IntValue>(
       0, Scales::profileComb, "profileComb", kParameterIsAutomable | kParameterIsInteger);
     value[ID::profileShape] = std::make_unique<LogValue>(
@@ -277,7 +280,7 @@ struct GlobalParameter {
     value[ID::filterAmount] = std::make_unique<LinearValue>(
       0.0, Scales::defaultScale, "filterAmount", kParameterIsAutomable);
     value[ID::filterKeyFollow] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "filterKeyFollow", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "filterKeyFollow", kParameterIsAutomable);
 
     value[ID::delayMix] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "delayMix", kParameterIsAutomable);
