@@ -23,8 +23,6 @@
 #include <array>
 #include <numeric>
 
-#include <iostream>
-
 namespace SomeDSP {
 
 template<typename Sample> class ExpLoopEnvelope {
@@ -41,8 +39,6 @@ public: // For UI.
   {
     size_t start = static_cast<size_t>(loopStart);
     size_t end = static_cast<size_t>(loopEnd);
-
-    std::cout << std::to_string(start) << std::endl;
 
     Sample sum = 0;
     for (size_t i = start; i <= end; ++i) sum += decayTime[i] + holdTime[i];
