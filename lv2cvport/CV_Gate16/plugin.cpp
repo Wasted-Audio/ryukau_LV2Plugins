@@ -54,7 +54,7 @@ protected:
   {
     return d_version(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
   }
-  int64_t getUniqueId() const override { return d_cconst('u', 'f', 'c', 'y'); }
+  int64_t getUniqueId() const override { return d_cconst('u', '0', '0', '0'); }
 
   void initAudioPort(bool input, uint32_t index, AudioPort &port)
   {

@@ -39,7 +39,7 @@ public:
   void setType(uint32_t type)
   {
     this->type = type;
-    open = type == typeDC;
+    open = open || type == typeDC;
   }
 
   void reset()
