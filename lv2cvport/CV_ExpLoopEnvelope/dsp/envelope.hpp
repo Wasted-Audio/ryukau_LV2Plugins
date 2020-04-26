@@ -43,10 +43,6 @@ public: // For UI.
     Sample sum = 0;
     for (size_t i = start; i <= end; ++i) sum += decayTime[i] + holdTime[i];
     return sum;
-
-    // return std::accumulate(decayTime.begin() + start, decayTime.begin() + end,
-    // Sample(0))
-    //   + std::accumulate(holdTime.begin() + start, holdTime.begin() + end, Sample(0));
   }
 
   Sample getReleaseTime() { return releaseTime + 0.01f; }
