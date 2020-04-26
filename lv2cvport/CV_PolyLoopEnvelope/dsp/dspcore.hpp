@@ -144,7 +144,7 @@ private:
   float noteRatio = 1.0f;
   bool isGateOpen = false;
 
-  ExpLoopEnvelope<float> envelope;
+  PolyLoopEnvelope<float> envelope;
 
   LinearSmoother<float> interpGain;
   LinearSmoother<float> interpRate;

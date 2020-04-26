@@ -119,6 +119,11 @@ public:
     std::string textTotalTime = "Total=" + std::to_string(totalTime);
     text(infoLeft, 3 * textSize, textTotalTime.c_str(), nullptr);
 
+    if (isCvGainReady) {
+      fillColor(colorCvMode);
+      text(infoLeft, 4 * textSize, "CV Gain Ready", nullptr);
+    }
+
     // Draw border.
     strokeColor(colorFore);
     strokeWidth(2.0f);
@@ -154,11 +159,14 @@ public:
       param.value[ID::s6Level]->getFloat(), param.value[ID::s7Level]->getFloat());
 
     gain = param.value[ID::gain]->getFloat();
+    isCvGainReady = gain == 0;
+    if (isCvGainReady) gain = 1; // For convenience when using CV gain port.
+
     attackTime = envelope.getAttackTime();
     loopTime = envelope.getLoopTime();
     totalTime = attackTime + loopTime + envelope.getReleaseTime();
 
-    auto sampleRate = getWidth() / totalTime;
+    auto sampleRate = getWidth() / (totalTime);
 
     auto offset = 2 * marginX;
     data.resize(getWidth() >= offset ? (getWidth() - offset) : 0);
@@ -202,6 +210,7 @@ protected:
   Color colorBack{0xff, 0xff, 0xff};
   Color colorEnvelope{0x10, 0x77, 0xcc};
   Color colorSplitter{0x10, 0x77, 0xcc, 0x88};
+  Color colorCvMode{0xff, 0x00, 0x00, 0x88};
   Color colorZero{0xdd, 0xdd, 0xdd};
 
   FontId fontId = -1;
@@ -216,6 +225,7 @@ protected:
   float attackTime = 0;
   float loopTime = 1;
   float totalTime = 1;
+  bool isCvGainReady = false;
   size_t marginX = 8;
   size_t releaseAt = 0;
   float sectionTextMargin = 8.0f;

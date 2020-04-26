@@ -25,27 +25,31 @@
 
 namespace SomeDSP {
 
-template<typename Sample> class ExpLoopEnvelope {
+template<typename Sample> class PolyLoopEnvelope {
 public: // For UI.
   Sample getAttackTime()
   {
-    size_t start = static_cast<size_t>(loopStart) + 1;
+    size_t start = static_cast<size_t>(loopStart);
     if (start > decayTime.size()) start = decayTime.size();
-    return std::accumulate(decayTime.begin(), decayTime.begin() + start, Sample(0))
-      + std::accumulate(holdTime.begin(), holdTime.begin() + start, Sample(0));
+
+    Sample sum = 0;
+    for (size_t i = 0; i < start; ++i) sum += decayTime[i] + holdTime[i];
+    return sum;
   }
 
   Sample getLoopTime()
   {
     size_t start = static_cast<size_t>(loopStart);
     size_t end = static_cast<size_t>(loopEnd);
+    if (start > decayTime.size()) start = decayTime.size();
+    if (end >= decayTime.size()) end = decayTime.size() - 1;
 
     Sample sum = 0;
     for (size_t i = start; i <= end; ++i) sum += decayTime[i] + holdTime[i];
     return sum;
   }
 
-  Sample getReleaseTime() { return releaseTime + 0.01f; }
+  Sample getReleaseTime() { return releaseTime; }
   uint8_t getState() { return static_cast<uint8_t>(state); }
   Sample getMax() { return *std::max_element(level.begin(), level.end()); }
   Sample getMin() { return *std::min_element(level.begin(), level.end()); }
@@ -130,6 +134,26 @@ public: // DSP.
     return level;
   }
 
+  Sample processRelease(Sample sectionTime, Sample transitionTime, Sample curve)
+  {
+    ++counter;
+    if (counter >= uint32_t(sampleRate * sectionTime)) {
+      state = State::terminated;
+      counter = 0;
+      prevLevel = 0;
+    }
+
+    Sample trLen = sampleRate * transitionTime;
+    if (counter < uint32_t(trLen)) {
+      Sample ratio = curve >= 0
+        ? somepow(counter / trLen, curve + Sample(1))
+        : Sample(1) - somepow((trLen - counter) / trLen, somefabs(curve) + Sample(1));
+      return prevLevel - ratio * prevLevel;
+    }
+
+    return 0;
+  }
+
   Sample process()
   {
     switch (state) {
@@ -174,7 +198,7 @@ public: // DSP.
         break;
 
       case State::release:
-        value = processSection(0, releaseTime, releaseTime, releaseCurve);
+        value = processRelease(releaseTime, releaseTime, releaseCurve);
         break;
 
       default:

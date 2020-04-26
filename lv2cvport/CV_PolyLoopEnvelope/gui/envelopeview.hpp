@@ -28,8 +28,6 @@
 #include <string>
 #include <vector>
 
-#include <iostream> // debug
-
 class EnvelopeView : public NanoWidget {
 public:
   explicit EnvelopeView(NanoWidget *group, FontId fontId)
@@ -121,6 +119,11 @@ public:
     std::string textTotalTime = "Total=" + std::to_string(totalTime);
     text(infoLeft, 3 * textSize, textTotalTime.c_str(), nullptr);
 
+    if (isCvGainReady) {
+      fillColor(colorCvMode);
+      text(infoLeft, 4 * textSize, "CV Gain Ready", nullptr);
+    }
+
     // Draw border.
     strokeColor(colorFore);
     strokeWidth(2.0f);
@@ -134,7 +137,6 @@ public:
     using ID = ParameterID::ID;
 
     auto loopEnd = param.value[ID::loopEnd]->getInt();
-    // if (loopEnd >= 8) loopEnd = 7;
     envelope.setLoop(param.value[ID::loopStart]->getInt(), loopEnd);
 
     envelope.set(
@@ -182,11 +184,14 @@ public:
       });
 
     gain = param.value[ID::gain]->getFloat();
+    isCvGainReady = gain == 0;
+    if (isCvGainReady) gain = 1; // For convenience when using CV gain port.
+
     attackTime = envelope.getAttackTime();
     loopTime = envelope.getLoopTime();
     totalTime = attackTime + loopTime + envelope.getReleaseTime();
 
-    auto sampleRate = getWidth() / totalTime;
+    float sampleRate = getWidth() / (totalTime);
 
     auto offset = 2 * marginX;
     data.resize(getWidth() >= offset ? (getWidth() - offset) : 0);
@@ -230,12 +235,13 @@ protected:
   Color colorBack{0xff, 0xff, 0xff};
   Color colorEnvelope{0x10, 0x77, 0xcc};
   Color colorSplitter{0x10, 0x77, 0xcc, 0x88};
+  Color colorCvMode{0xff, 0x00, 0x00, 0x88};
   Color colorZero{0xdd, 0xdd, 0xdd};
 
   FontId fontId = -1;
   float textSize = 14.0f;
 
-  SomeDSP::ExpLoopEnvelope<float> envelope;
+  SomeDSP::PolyLoopEnvelope<float> envelope;
   std::vector<float> data;
   std::vector<size_t> sectionTime;
   float gain = 1;
@@ -244,6 +250,7 @@ protected:
   float attackTime = 0;
   float loopTime = 1;
   float totalTime = 1;
+  bool isCvGainReady = false;
   size_t marginX = 8;
   size_t releaseAt = 0;
   float sectionTextMargin = 8.0f;
