@@ -103,7 +103,13 @@ protected:
     dsp->param.initProgramName(index, programName);
   }
 
-  void loadProgram(uint32_t index) override { dsp->param.loadProgram(index); }
+  void loadProgram(uint32_t index) override
+  {
+    dsp->param.loadProgram(index);
+
+    dsp->refreshTable();
+    dsp->refreshLfo();
+  }
 
   void initState(uint32_t index, String &stateKey, String &defaultStateValue)
   {
