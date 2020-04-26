@@ -101,6 +101,24 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 | <kbd>1</kbd>                            | Decrease                                |
 | <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
 
+## LightPadSynth (WIP: Presets)
+<figure>
+<img src="docs/img/lv2_lightpadsynth.png" alt="Image of LightPadSynth GUI."/>
+</figure>
+
+LightPadSynth is a lighter version of CubicPadSynth. For efficiency, following changes are made:
+
+- Removed pitch modulation. Feedback delay is added instead.
+- Changed LFO to modulate delay time.
+- Changed interpolation from cubic to linear.
+- Changed filter from wavetable low-pass to naive IIR low-pass.
+
+**Caution**: Filter is a bit peaky. Be careful when changing `resonance`.
+
+Wavetable and LFO will not refresh automatically. To refresh, press `Refresh Wavetable` or `Refresh LFO` button.
+
+Cheat sheet of shortcuts is available on Information tab.
+
 ## WaveShaper Pack
 <figure>
 <img src="docs/img/lv2_foldshaper.png" alt="Image of FoldShaper GUI." style="padding-bottom: 12px;"/>
@@ -135,7 +153,11 @@ CubicPadSynth is a wavetable synthesizer which uses PADsynth algorithm to genera
 
 - [PADsynth algorithm](https://zynaddsubfx.sourceforge.io/doc/PADsynth/PADsynth.htm)
 
+Wavetable and LFO will not refresh automatically. To refresh, press `Refresh Wavetable` or `Refresh LFO` button.
+
 Some parameters have wide range of value. <kbd>Shift</kbd> + <kbd>Left Drag</kbd> can be used to fine adjustment.
+
+Cheat sheet of shortcuts is available on Information tab.
 
 ## EsPhaser
 <figure>
