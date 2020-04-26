@@ -36,10 +36,14 @@ public:
   uint32_t delay = 0;
   LinearSmoother<Sample> gain;
 
-  void setType(uint32_t type)
+  void setType(uint32_t type, bool isNoteOn)
   {
     this->type = type;
-    open = open || type == typeDC;
+
+    if (type == typeGate)
+      open = isNoteOn;
+    else
+      open = type == typeDC;
   }
 
   void reset()

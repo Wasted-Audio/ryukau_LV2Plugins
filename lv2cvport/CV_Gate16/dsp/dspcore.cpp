@@ -40,9 +40,10 @@ void DSPCore::setParameters()
 {
   using ID = ParameterID::ID;
 
+  bool isNoteOn = noteStack.size() != 0;
   for (size_t idx = 0; idx < nGate; ++idx) {
     gates[idx].gain.push(param.value[ID::gain1 + idx]->getFloat());
-    gates[idx].setType(param.value[ID::type1 + idx]->getInt());
+    gates[idx].setType(param.value[ID::type1 + idx]->getInt(), isNoteOn);
   }
 
   interpMasterGain.push(param.value[ID::masterGain]->getFloat());
