@@ -314,6 +314,7 @@ GPLv3. See License directory for the complete license.
 - [juce_FastMathApproximations.h](https://github.com/WeAreROLI/JUCE/blob/master/modules/juce_dsp/maths/juce_FastMathApproximations.h) from [JUCE](https://juce.com/)
 - [VCL - Vector class library version2](https://github.com/vectorclass/version2)
 - [FFTW](http://fftw.org/)
+- [PocketFFT for C++](https://gitlab.mpcdf.mpg.de/mtr/pocketfft/-/tree/cpp)
 
 ## Font
 - [Tinos](https://fonts.google.com/specimen/Tinos)
