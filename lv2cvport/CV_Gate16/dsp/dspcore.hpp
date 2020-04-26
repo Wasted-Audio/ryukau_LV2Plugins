@@ -27,6 +27,51 @@
 
 using namespace SomeDSP;
 
+enum GateType : uint32_t { typeTrigger, typeGate, typeDC };
+
+template<typename Sample> class Gate {
+public:
+  bool open = false;
+  uint32_t type = 0;
+  uint32_t delay = 0;
+  LinearSmoother<Sample> gain;
+
+  void setType(uint32_t type)
+  {
+    this->type = type;
+    open = type == typeDC;
+  }
+
+  void reset()
+  {
+    open = false;
+    delay = 0;
+    gain.reset(0);
+  }
+
+  void trigger(Sample sampleRate, Sample delaySeconds)
+  {
+    open = true;
+    delay = type == typeDC ? 0 : uint32_t(delaySeconds * sampleRate);
+  }
+
+  void release()
+  {
+    if (type == typeGate) open = false;
+  }
+
+  Sample process()
+  {
+    if (delay > 0) {
+      --delay;
+      return 0;
+    }
+    Sample out = open * gain.process();
+    if (type == typeTrigger) open = false;
+    return out;
+  }
+};
+
 struct NoteInfo {
   int32_t id;
   float velocity;
@@ -91,24 +136,9 @@ public:
 private:
   float sampleRate = 44100.0f;
 
-  float gate = 0.0f;
-
   std::vector<NoteInfo> noteStack; // Top of this stack is current note.
+
+  std::array<Gate<float>, nGate> gates;
+
   LinearSmoother<float> interpMasterGain;
-  LinearSmoother<float> interpGain1;
-  LinearSmoother<float> interpGain2;
-  LinearSmoother<float> interpGain3;
-  LinearSmoother<float> interpGain4;
-  LinearSmoother<float> interpGain5;
-  LinearSmoother<float> interpGain6;
-  LinearSmoother<float> interpGain7;
-  LinearSmoother<float> interpGain8;
-  LinearSmoother<float> interpGain9;
-  LinearSmoother<float> interpGain10;
-  LinearSmoother<float> interpGain11;
-  LinearSmoother<float> interpGain12;
-  LinearSmoother<float> interpGain13;
-  LinearSmoother<float> interpGain14;
-  LinearSmoother<float> interpGain15;
-  LinearSmoother<float> interpGain16;
 };

@@ -81,7 +81,11 @@ Beware that increasing `curve` parameter may lead to very loud output.
 
 - `Trigger`: Outputs impulse at MIDI note-on.
 - `Gate`: Outputs gate signal while at least 1 MIDI note is on.
-- `Direct Current`: Outputs DC signal. Ignores MIDI notes.
+- `DC`: Outputs DC signal. Ignores MIDI notes.
+
+Unit of `Delay` is in seconds.
+
+Note that delay time resets for each note-on.
 
 ## CV_HoldFilter
 Step decimator combined with resonance filter. Using PolyBLEP residual to reduce aliasing noise.

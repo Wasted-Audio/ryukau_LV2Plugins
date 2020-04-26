@@ -20,6 +20,8 @@
 
 using namespace SomeDSP;
 
+LinearScale<double> Scales::gain(0.0, 1.0);
+LinearScale<double> Scales::delay(0.0, 1.0);
 IntScale<double> Scales::type(2);
-LinearScale<double> Scales::defaultScale(0.0, 1.0);
 LinearScale<double> Scales::masterGain(-1.0, 1.0);
+LogScale<double> Scales::delayMultiply(0.0, 16.0, 0.5, 1.0);

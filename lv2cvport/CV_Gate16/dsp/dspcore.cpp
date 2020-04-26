@@ -17,8 +17,6 @@
 
 #include "dspcore.hpp"
 
-enum GateType { typeTrigger, typeGate, typeDC };
-
 void DSPCore::setup(double sampleRate)
 {
   this->sampleRate = sampleRate;
@@ -32,63 +30,36 @@ void DSPCore::setup(double sampleRate)
   reset();
 }
 
-void DSPCore::reset() { noteStack.resize(0); }
+void DSPCore::reset()
+{
+  noteStack.resize(0);
+  for (auto &gate : gates) gate.reset();
+}
 
 void DSPCore::setParameters()
 {
   using ID = ParameterID::ID;
 
-  if (param.value[ID::type]->getInt() == typeDC) gate = 1.0f;
+  for (size_t idx = 0; idx < nGate; ++idx) {
+    gates[idx].gain.push(param.value[ID::gain1 + idx]->getFloat());
+    gates[idx].setType(param.value[ID::type1 + idx]->getInt());
+  }
 
   interpMasterGain.push(param.value[ID::masterGain]->getFloat());
-
-  interpGain1.push(param.value[ID::gain1]->getFloat());
-  interpGain2.push(param.value[ID::gain2]->getFloat());
-  interpGain3.push(param.value[ID::gain3]->getFloat());
-  interpGain4.push(param.value[ID::gain4]->getFloat());
-  interpGain5.push(param.value[ID::gain5]->getFloat());
-  interpGain6.push(param.value[ID::gain6]->getFloat());
-  interpGain7.push(param.value[ID::gain7]->getFloat());
-  interpGain8.push(param.value[ID::gain8]->getFloat());
-  interpGain9.push(param.value[ID::gain9]->getFloat());
-  interpGain10.push(param.value[ID::gain10]->getFloat());
-  interpGain11.push(param.value[ID::gain11]->getFloat());
-  interpGain12.push(param.value[ID::gain12]->getFloat());
-  interpGain13.push(param.value[ID::gain13]->getFloat());
-  interpGain14.push(param.value[ID::gain14]->getFloat());
-  interpGain15.push(param.value[ID::gain15]->getFloat());
-  interpGain16.push(param.value[ID::gain16]->getFloat());
 }
 
 void DSPCore::process(const size_t length, float **outputs)
 {
   SmootherCommon<float>::setBufferSize(length);
 
-  bool trigger = param.value[ParameterID::type]->getInt() == typeTrigger;
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
     SmootherCommon<float>::setBufferIndex(i);
 
-    float gain = gate * interpMasterGain.process();
+    const float gain = interpMasterGain.process();
 
-    outputs[0][i] = gain * interpGain1.process();
-    outputs[1][i] = gain * interpGain2.process();
-    outputs[2][i] = gain * interpGain3.process();
-    outputs[3][i] = gain * interpGain4.process();
-    outputs[4][i] = gain * interpGain5.process();
-    outputs[5][i] = gain * interpGain6.process();
-    outputs[6][i] = gain * interpGain7.process();
-    outputs[7][i] = gain * interpGain8.process();
-    outputs[8][i] = gain * interpGain9.process();
-    outputs[9][i] = gain * interpGain10.process();
-    outputs[10][i] = gain * interpGain11.process();
-    outputs[11][i] = gain * interpGain12.process();
-    outputs[12][i] = gain * interpGain13.process();
-    outputs[13][i] = gain * interpGain14.process();
-    outputs[14][i] = gain * interpGain15.process();
-    outputs[15][i] = gain * interpGain16.process();
-
-    if (trigger && gate > 0.0f) gate = 0.0f;
+    for (size_t idx = 0; idx < nGate; ++idx)
+      outputs[idx][i] = gain * gates[idx].process();
   }
 }
 
@@ -99,7 +70,10 @@ void DSPCore::noteOn(
   info.id = noteId;
   noteStack.push_back(info);
 
-  if (param.value[ParameterID::type]->getInt() != typeDC) gate = 1.0f;
+  auto delayMul = param.value[ParameterID::delayMultiply]->getFloat();
+  for (size_t idx = 0; idx < gates.size(); ++idx)
+    gates[idx].trigger(
+      sampleRate, delayMul * param.value[ParameterID::delay1 + idx]->getFloat());
 }
 
 void DSPCore::noteOff(int32_t noteId)
@@ -110,6 +84,6 @@ void DSPCore::noteOff(int32_t noteId)
   if (it == noteStack.end()) return;
   noteStack.erase(it);
 
-  if (noteStack.size() == 0 && param.value[ParameterID::type]->getInt() == typeGate)
-    gate = 0.0f;
+  if (noteStack.size() == 0)
+    for (auto &gate : gates) gate.release();
 }
