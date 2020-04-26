@@ -141,7 +141,7 @@ This formula is described in the link below.
 ## CV_PolyLoopEnvelope
 Polynomial curve envelope with 8 sections for loop.
 
-Most of the parameters are same as `CV_ExpLoopEnvelope`. For details, see [CV_ExpLoopEnvelope](#cvexploopenvelope) section.
+Most of the parameters are same as `CV_ExpLoopEnvelope`. For details, see [CV_ExpLoopEnvelope](#cv_exploopenvelope) section.
 
 Curve parameter equation is following:
 
