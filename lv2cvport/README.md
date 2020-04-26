@@ -138,6 +138,22 @@ This formula is described in the link below.
 
 - [Single-pole IIR low-pass filter - which is the correct formula for the decay coefficient? - Signal Processing Stack Exchange](https://dsp.stackexchange.com/questions/54086/single-pole-iir-low-pass-filter-which-is-the-correct-formula-for-the-decay-coe)
 
+## CV_PolyLoopEnvelope
+Polynomial curve envelope with 8 sections for loop.
+
+Most of the parameters are same as `CV_ExpLoopEnvelope`. For details, see [CV_ExpLoopEnvelope](#cvexploopenvelope) section.
+
+Curve parameter equation is following:
+
+```
+// decay is normalized in [0, 1].
+
+if (curve >= 0)
+  value = pow(decay, curve + 1)
+else
+  value = 1 - pow(decayReverse, abs(curve) + 1)
+```
+
 ## CV_PTRSaw
 Monophonic order 10 PTR sawtooth oscillator. Double precision is used internally.
 
