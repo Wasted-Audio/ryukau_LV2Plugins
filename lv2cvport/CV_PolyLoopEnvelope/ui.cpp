@@ -84,8 +84,6 @@ protected:
         return;
       }
     }
-
-    envelopeView->update(param);
   }
 
   void updateValue(uint32_t id, float normalized) override
@@ -93,7 +91,6 @@ protected:
     if (id >= ParameterID::ID_ENUM_LENGTH) return;
     setParameterValue(id, param.updateValue(id, normalized));
     repaint();
-    envelopeView->update(param);
     // dumpParameter(); // Used to make preset. There may be better way to do this.
   }
 
@@ -118,7 +115,6 @@ protected:
       }
     }
 
-    envelopeView->update(param);
     repaint();
   }
 
@@ -129,6 +125,8 @@ protected:
 
   void onNanoDisplay() override
   {
+    envelopeView->update(param);
+
     beginPath();
     rect(0, 0, getWidth(), getHeight());
     fillColor(colorBack);
@@ -279,7 +277,6 @@ public:
     envelopeView = std::make_shared<EnvelopeView>(this, fontId);
     envelopeView->setSize(8 * knobX - 4 * margin, 7 * labelY - 2 * margin);
     envelopeView->setAbsolutePos(left1 + knobX + 4 * margin, top0);
-    envelopeView->update(param);
 
     constexpr size_t nEnvelopeSection = 8;
 
@@ -324,7 +321,7 @@ public:
     addTextKnob(
       leftMatrixRelease, topMatrix1, knobX, colorBlue, ID::releaseTime, Scales::decay,
       false, 4);
-    addTextKnob(
+    auto knob = addTextKnob(
       leftMatrixRelease, topMatrix4, knobX, colorBlue, ID::releaseCurve, Scales::curve,
       false, 4);
   }
