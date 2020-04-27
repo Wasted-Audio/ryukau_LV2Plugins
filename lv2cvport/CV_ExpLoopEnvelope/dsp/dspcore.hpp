@@ -68,6 +68,7 @@ enum Input {
 struct NoteInfo {
   int32_t id;
   float velocity;
+  float noteRatio;
 };
 
 class DSPCore {
@@ -135,8 +136,9 @@ private:
 
   ExpLoopEnvelope<float> envelope;
 
+  LinearSmootherLocal<float> interpRate;
+
   LinearSmoother<float> interpGain;
-  LinearSmoother<float> interpRate;
   LinearSmoother<float> interpReleaseTime;
 
   LinearSmoother<float> interpS0DecayTime;

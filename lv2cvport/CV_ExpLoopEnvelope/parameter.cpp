@@ -24,6 +24,7 @@ IntScale<double> Scales::boolScale(1);
 LinearScale<double> Scales::defaultScale(0.0, 1.0);
 
 LogScale<double> Scales::rate(0.01, 440.0, 0.5, 1.0);
+LogScale<double> Scales::rateSlideTime(0.0, 1.0, 0.5, 0.04);
 IntScale<double> Scales::section(8);
 LinearScale<double> Scales::level(-1.0, 1.0);
 LogScale<double> Scales::decay(0.0, 16.0, 0.5, 2.0);

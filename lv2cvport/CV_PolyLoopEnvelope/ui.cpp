@@ -271,8 +271,13 @@ public:
     addTextKnob(
       left1, top1 + 3 * labelY, knobX, colorBlue, ID::rate, Scales::rate, false, 2);
 
+    addLabel(left0, top1 + 4 * labelY, knobX, "Slide [s]", labelAlign);
+    addTextKnob(
+      left1, top1 + 4 * labelY, knobX, colorBlue, ID::rateSlideTime,
+      Scales::rateSlideTime, false, 5);
+
     addCheckbox(
-      left0, top1 + 4 * labelY, 2 * knobX, "Rate Key Follow", ID::rateKeyFollow);
+      left0, top1 + 5 * labelY, 2 * knobX, "Rate Key Follow", ID::rateKeyFollow);
 
     envelopeView = std::make_shared<EnvelopeView>(this, fontId);
     envelopeView->setSize(8 * knobX - 4 * margin, 7 * labelY - 2 * margin);

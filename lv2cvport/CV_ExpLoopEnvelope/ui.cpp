@@ -54,7 +54,7 @@ constexpr float knobWidth = 50.0f;
 constexpr float knobHeight = 40.0f;
 constexpr float knobX = 80.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
-constexpr uint32_t defaultWidth = uint32_t(9 * knobX + 30);
+constexpr uint32_t defaultWidth = uint32_t(10 * knobX + 30);
 constexpr uint32_t defaultHeight = uint32_t(11 * labelY + 30);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
@@ -262,27 +262,27 @@ public:
     addLabel(left0, top1, knobX, "Gain", labelAlign);
     addTextKnob(left1, top1, knobX, colorBlue, ID::gain, Scales::level, false, 4);
 
-    addLabel(left0, top1 + 1 * labelY, knobX, "Release [s]", labelAlign);
+    addLabel(left0, top1 + 1 * labelY, knobX, "Loop Start", labelAlign);
     addTextKnob(
-      left1, top1 + 1 * labelY, knobX, colorBlue, ID::releaseTime, Scales::decay, false,
-      4);
+      left1, top1 + 1 * labelY, knobX, colorBlue, ID::loopStart, Scales::section);
 
-    addLabel(left0, top1 + 2 * labelY, knobX, "Loop Start", labelAlign);
+    addLabel(left0, top1 + 2 * labelY, knobX, "Loop End", labelAlign);
+    addTextKnob(left1, top1 + 2 * labelY, knobX, colorBlue, ID::loopEnd, Scales::section);
+
+    addLabel(left0, top1 + 3 * labelY, knobX, "Rate", labelAlign);
     addTextKnob(
-      left1, top1 + 2 * labelY, knobX, colorBlue, ID::loopStart, Scales::section);
+      left1, top1 + 3 * labelY, knobX, colorBlue, ID::rate, Scales::rate, false, 2);
 
-    addLabel(left0, top1 + 3 * labelY, knobX, "Loop End", labelAlign);
-    addTextKnob(left1, top1 + 3 * labelY, knobX, colorBlue, ID::loopEnd, Scales::section);
-
-    addLabel(left0, top1 + 4 * labelY, knobX, "Rate", labelAlign);
+    addLabel(left0, top1 + 4 * labelY, knobX, "Slide [s]", labelAlign);
     addTextKnob(
-      left1, top1 + 4 * labelY, knobX, colorBlue, ID::rate, Scales::rate, false, 2);
+      left1, top1 + 4 * labelY, knobX, colorBlue, ID::rateSlideTime,
+      Scales::rateSlideTime, false, 5);
 
     addCheckbox(
       left0, top1 + 5 * labelY, 2 * knobX, "Rate Key Follow", ID::rateKeyFollow);
 
     envelopeView = std::make_shared<EnvelopeView>(this, fontId);
-    envelopeView->setSize(7 * knobX - 4 * margin, 7 * labelY - 2 * margin);
+    envelopeView->setSize(8 * knobX - 4 * margin, 7 * labelY - 2 * margin);
     envelopeView->setAbsolutePos(left1 + knobX + 4 * margin, top0);
 
     const auto leftMatrix0 = left0;
@@ -294,6 +294,7 @@ public:
     const auto leftMatrix6 = leftMatrix5 + knobX;
     const auto leftMatrix7 = leftMatrix6 + knobX;
     const auto leftMatrix8 = leftMatrix7 + knobX;
+    const auto leftMatrix9 = leftMatrix8 + knobX;
 
     const auto topMatrix0 = top1 + 6 * labelY;
     const auto topMatrix1 = topMatrix0 + labelY;
@@ -308,6 +309,7 @@ public:
     addLabel(leftMatrix6, topMatrix0, knobX, "Section 5");
     addLabel(leftMatrix7, topMatrix0, knobX, "Section 6");
     addLabel(leftMatrix8, topMatrix0, knobX, "Section 7");
+    addLabel(leftMatrix9, topMatrix0, knobX, "Release");
 
     addLabel(leftMatrix0, topMatrix1, knobX, "Decay [s]");
     addTextKnob(
@@ -333,6 +335,9 @@ public:
       4);
     addTextKnob(
       leftMatrix8, topMatrix1, knobX, colorBlue, ID::s7DecayTime, Scales::decay, false,
+      4);
+    addTextKnob(
+      leftMatrix9, topMatrix1, knobX, colorBlue, ID::releaseTime, Scales::decay, false,
       4);
 
     addLabel(leftMatrix0, topMatrix2, knobX, "Hold [s]");

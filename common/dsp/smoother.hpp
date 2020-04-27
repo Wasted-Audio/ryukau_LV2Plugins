@@ -91,11 +91,17 @@ public:
   void refresh() { push(target); }
   inline Sample getValue() { return value; }
 
-  void push(Sample newTarget)
+  void push(Sample newTarget, bool immediate = false)
   {
     target = newTarget;
+
+    if (immediate) {
+      v0 = v1 = newTarget;
+      return;
+    }
+
     v1 = v0;
-    v0 = (timeInSamples >= bufferSize) && (somefabs<Sample>(v0 - newTarget) >= 1e-5)
+    v0 = timeInSamples >= bufferSize && somefabs<Sample>(v0 - newTarget) >= 1e-5
       ? (newTarget - v0) * bufferSize / timeInSamples + v0
       : newTarget;
   }

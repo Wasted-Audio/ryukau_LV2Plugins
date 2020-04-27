@@ -30,6 +30,8 @@ void DSPCore::setup(double sampleRate)
   SmootherCommon<float>::setSampleRate(sampleRate);
   SmootherCommon<float>::setTime(0.01f);
 
+  interpRate.setSampleRate(sampleRate);
+
   envelope.setup(sampleRate);
 
   noteStack.reserve(128);
@@ -42,6 +44,7 @@ void DSPCore::reset()
 {
   noteStack.resize(0);
   interpGain.reset(param.value[ParameterID::gain]->getFloat());
+  interpRate.reset(0);
   envelope.terminate();
 }
 
@@ -56,7 +59,9 @@ void DSPCore::setParameters()
   interpGain.push(param.value[ID::gain]->getFloat());
 
   float rateRatio = param.value[ID::rateKeyFollow]->getInt() ? noteRatio : 1.0f;
-  interpRate.push(param.value[ID::rate]->getFloat() * rateRatio);
+  float rateSlideTime = param.value[ParameterID::rateSlideTime]->getFloat();
+  interpRate.push(param.value[ID::rate]->getFloat() * rateRatio, rateSlideTime < 1e-5f);
+  interpRate.setTime(rateSlideTime);
 
   interpReleaseTime.push(param.value[ID::releaseTime]->getFloat());
   interpReleaseCurve.push(param.value[ID::releaseCurve]->getFloat());
@@ -74,6 +79,7 @@ void DSPCore::process(const size_t length, const float **inputs, float *out0)
   constexpr float gateThreshold = 1e-5f;
 
   SmootherCommon<float>::setBufferSize(length);
+  interpRate.setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
@@ -88,7 +94,7 @@ void DSPCore::process(const size_t length, const float **inputs, float *out0)
     }
 
     envelope.set(
-      interpRate.process() + powf(2.0f, inputs[inRate][i] * 32.0f / 12.0f),
+      interpRate.process(i) + powf(2.0f, inputs[inRate][i] * 32.0f / 12.0f),
       interpReleaseTime.process() + fabsf(inputs[inReleaseTime][i]),
       interpReleaseCurve.process() + inputs[inReleaseCurve][i],
       {
@@ -142,11 +148,14 @@ void DSPCore::noteOn(int32_t noteId, int16_t pitch, float tuning, float /* veloc
 
   NoteInfo info;
   info.id = noteId;
+  info.noteRatio = midiNoteToRatio(pitch, tuning, 0.5f);
   noteStack.push_back(info);
 
   if (param.value[ID::rateKeyFollow]->getInt()) {
-    noteRatio = midiNoteToRatio(pitch, tuning, 0.5f);
-    interpRate.push(param.value[ID::rate]->getFloat() * noteRatio);
+    noteRatio = info.noteRatio;
+    interpRate.push(
+      param.value[ID::rate]->getFloat() * noteRatio,
+      param.value[ParameterID::rateSlideTime]->getFloat() < 1e-5);
   }
 
   envelope.trigger();
@@ -159,6 +168,14 @@ void DSPCore::noteOff(int32_t noteId)
   });
   if (it == noteStack.end()) return;
   noteStack.erase(it);
+
+  using ID = ParameterID::ID;
+  if (param.value[ID::rateKeyFollow]->getInt() && !noteStack.empty()) {
+    noteRatio = noteStack.back().noteRatio;
+    interpRate.push(
+      param.value[ID::rate]->getFloat() * noteRatio,
+      param.value[ParameterID::rateSlideTime]->getFloat() < 1e-5);
+  }
 
   if (noteStack.size() == 0 && !isGateOpen) envelope.release();
 }

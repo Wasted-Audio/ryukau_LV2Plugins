@@ -35,6 +35,7 @@ enum ID {
 
   rate,
   rateKeyFollow,
+  rateSlideTime,
 
   loopStart,
   loopEnd,
@@ -77,6 +78,7 @@ struct Scales {
   static SomeDSP::LinearScale<double> defaultScale;
 
   static SomeDSP::LogScale<double> rate;
+  static SomeDSP::LogScale<double> rateSlideTime;
   static SomeDSP::IntScale<double> section;
   static SomeDSP::LinearScale<double> level;
   static SomeDSP::LogScale<double> decay;
@@ -102,6 +104,9 @@ struct GlobalParameter {
     value[ID::rateKeyFollow] = std::make_unique<IntValue>(
       true, Scales::boolScale, "rateKeyFollow",
       kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::rateSlideTime] = std::make_unique<LogValue>(
+      0.0, Scales::rateSlideTime, "rateSlideTime",
+      kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::releaseTime] = std::make_unique<LogValue>(
       Scales::decay.invmap(0.2), Scales::decay, "releaseTime",
