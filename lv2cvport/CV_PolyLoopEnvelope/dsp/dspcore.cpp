@@ -71,16 +71,18 @@ void DSPCore::setParameters()
 
 void DSPCore::process(const size_t length, const float **inputs, float *out0)
 {
+  constexpr float gateThreshold = 1e-5f;
+
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
     SmootherCommon<float>::setBufferIndex(i);
 
-    if (!isGateOpen && inputs[inGate][i] >= 0.1f) {
+    if (!isGateOpen && inputs[inGate][i] >= gateThreshold) {
       isGateOpen = true;
       envelope.trigger();
-    } else if (isGateOpen && inputs[inGate][i] < 0.1f) {
+    } else if (isGateOpen && inputs[inGate][i] < gateThreshold) {
       isGateOpen = false;
       if (noteStack.size() == 0) envelope.release();
     }
