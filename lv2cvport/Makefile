@@ -2,6 +2,7 @@ build: \
 	CV_3PoleLP \
 	CV_AudioToCv \
 	CV_CvToAudio \
+	CV_DelayLP3 \
 	CV_DoubleFilter \
 	CV_ExpADSREnvelope \
 	CV_ExpLoopEnvelope \
@@ -32,6 +33,10 @@ CV_AudioToCv:
 .PHONY: CV_CvToAudio
 CV_CvToAudio:
 	$(MAKE) -C CV_CvToAudio
+
+.PHONY: CV_DelayLP3
+CV_DelayLP3:
+	$(MAKE) -C CV_DelayLP3
 
 .PHONY: CV_DoubleFilter
 CV_DoubleFilter:

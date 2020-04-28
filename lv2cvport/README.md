@@ -22,6 +22,11 @@ Convert audio port signal to CV port signal.
 ## CV_CvToAudio
 Convert CV port signal to audio port signal.
 
+## CV_DelayLP3
+Feedback delay. A filter used in feedback path is same as CV_3PoleLP, but with slightly different tuning.
+
+**Caution**: May be blow up when `Resonance` is not 0.
+
 ## CV_DoubleFilter
 Strange 4-pole filter inspired from double-spring.
 
