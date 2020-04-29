@@ -94,6 +94,7 @@ public:
 };
 
 constexpr size_t initialTableSize = 262144;
+constexpr size_t maxMidiNoteNumber = 128;
 
 /**
 Last element of table is padded for linear interpolation.
@@ -128,7 +129,7 @@ struct Wavetable {
     spectrum.resize(spectrumSize);
     tmpSpec.resize(spectrumSize);
 
-    table.resize(128); // Resize to max MIDI note number.
+    table.resize(maxMidiNoteNumber);
     for (auto &tbl : table) tbl.resize(tableSize + 1);
 
     pocketfft::shape_t shape{tableSize};
@@ -190,8 +191,7 @@ struct Wavetable {
       if (rot < spectrum.size()) {
         std::rotate_copy(
           spectrum.begin(), spectrum.begin() + rot, spectrum.end(), tmpSpec.begin());
-      }
-      else {
+      } else {
         tmpSpec = spectrum;
       }
 
@@ -247,9 +247,10 @@ struct TableOsc {
   setFrequency(float notePitch, float frequency, float tableBaseFreq, size_t tableSize)
   {
     tableIndex = size_t(notePitch);
+    if (tableIndex > maxMidiNoteNumber) tableIndex = maxMidiNoteNumber - 1;
 
     tick = frequency / tableBaseFreq;
-    if (tick >= tableSize) tick = 0;
+    if (tick >= tableSize || tick < 0.0f) tick = 0;
   }
 
   // Input phase is normalized in [0, 1], member phase is in [0, tableSize].
