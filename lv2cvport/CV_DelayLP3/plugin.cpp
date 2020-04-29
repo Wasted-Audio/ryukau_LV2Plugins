@@ -40,7 +40,7 @@ protected:
   const char *getLabel() const override { return "CV_DelayLP3"; }
   const char *getDescription() const override
   {
-    return "Naive slew limiter based on PID controller without I and D.";
+    return "A feedback delay with a 3-pole lowpass filter on feedback path.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
