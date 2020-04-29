@@ -20,7 +20,9 @@ build: \
 	CV_PTRTrapezoid \
 	CV_RampFilter \
 	CV_RateLimiter \
+	CV_SchroederAllpass \
 	CV_Sin \
+  CV_StereoGain \
 
 .PHONY: CV_3PoleLP
 CV_3PoleLP:
@@ -106,6 +108,14 @@ CV_RampFilter:
 CV_RateLimiter:
 	$(MAKE) -C CV_RateLimiter
 
+.PHONY: CV_SchroederAllpass
+CV_SchroederAllpass:
+	$(MAKE) -C CV_SchroederAllpass
+
 .PHONY: CV_Sin
 CV_Sin:
 	$(MAKE) -C CV_Sin
+
+.PHONY: CV_StereoGain
+CV_StereoGain:
+	$(MAKE) -C CV_StereoGain
