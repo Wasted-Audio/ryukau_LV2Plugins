@@ -107,7 +107,8 @@ void DSPCore::process(
       pulseWidth = std::clamp<float>(pulseWidth + inPulseWidth[i], 0.1f, 1.9f);
 
       filter.set(sampleRate * overSample, cutoff, resonance, pulseWidth, edge);
-      output = interpGain.process() * filter.process(in0[i]);
+      output = interpGain.process()
+        * filter.process(inputInterp.process(float(j) / overSample));
 
       decimationLowpass.push(output);
     }
