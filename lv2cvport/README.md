@@ -119,6 +119,11 @@ Output = Add + Mul * Input.
 ## CV_Multiply
 Multiply CV signal. 2 CV inputs and 1 CV output.
 
+## CV_NaiveDelay
+Naive feedback delay.
+
+CV_NaiveDelay doesn't use any interpolation when reading. Buffer is 2 times oversampled.
+
 ## CV_ParabolicADEnvelope
 Parabolic envelope. Note that this envelope resets to 0 for each note-on.
 
@@ -227,6 +232,11 @@ Slew rate limiter.
 CV_RateLimiter is an implementation of Rate Limiter described in the link below.
 
 - [Limit rate of change of signal - Simulink](https://www.mathworks.com/help/simulink/slref/ratelimiter.html)
+
+## CV_SchroederAllpass
+Shroeder allpass filter. In other words, this is a delay with a feedback and a feedforward path.
+
+- [Allpass from Two Combs](https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html)
 
 ## CV_Sin
 Monophonic sine oscillator.
