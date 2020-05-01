@@ -136,7 +136,7 @@ struct Scales {
   static SomeDSP::IntScale<double> tableBufferSize;
   static SomeDSP::LogScale<double> overtoneGainPower;
   static SomeDSP::LogScale<double> overtoneWidthMultiply;
-  static SomeDSP::LinearScale<double> overtonePitchMultiply;
+  static SomeDSP::LogScale<double> overtonePitchMultiply;
   static SomeDSP::LinearScale<double> overtonePitchModulo;
   static SomeDSP::LogScale<double> spectrumExpand;
   static SomeDSP::IntScale<double> profileComb;
@@ -233,7 +233,7 @@ struct GlobalParameter {
       0.5, Scales::overtoneGainPower, "overtoneGainPower", kParameterIsAutomable);
     value[ID::overtoneWidthMultiply] = std::make_unique<LogValue>(
       0.5, Scales::overtoneWidthMultiply, "overtoneWidthMultiply", kParameterIsAutomable);
-    value[ID::overtonePitchMultiply] = std::make_unique<LinearValue>(
+    value[ID::overtonePitchMultiply] = std::make_unique<LogValue>(
       Scales::overtonePitchMultiply.invmap(1.0), Scales::overtonePitchMultiply,
       "overtonePitchMultiply", kParameterIsAutomable);
     value[ID::overtonePitchModulo] = std::make_unique<LinearValue>(
@@ -402,12 +402,60 @@ struct GlobalParameter {
 
   enum Preset {
     presetDefault,
+    presetAlienTalk,
+    presetBells,
+    presetBelong,
+    presetBoilFor10Hours,
+    presetBuyAndSell,
+    presetCeremonial,
+    presetCold,
+    presetCommercialTransaction,
+    presetConcerned,
+    presetCourteous,
+    presetEnvironmentallyFriendly,
+    presetExhibition,
+    presetInhale,
+    presetOnceUponATime,
+    presetPleasant,
+    presetPreliminaryDesign,
+    presetProposal,
+    presetRetrospective,
+    presetShading,
+    presetSituations,
+    presetSpeakingToYou,
+    presetSword,
+    presetTabVsSpace,
+    presetYawning,
 
     Preset_ENUM_LENGTH,
   };
 
-  std::array<const char *, 26> programName{
+  std::array<const char *, 25> programName{
     "Default",
+    "AlienTalk",
+    "Bells",
+    "Belong",
+    "BoilFor10Hours",
+    "BuyAndSell",
+    "Ceremonial",
+    "Cold",
+    "CommercialTransaction",
+    "Concerned",
+    "Courteous",
+    "EnvironmentallyFriendly",
+    "Exhibition",
+    "Inhale",
+    "OnceUponATime",
+    "Pleasant",
+    "PreliminaryDesign",
+    "Proposal",
+    "Retrospective",
+    "Shading",
+    "Situations",
+    "SpeakingToYou",
+    "Sword",
+    "TabVsSpace",
+    "Yawning",
   };
 
 #ifndef TEST_BUILD
