@@ -64,6 +64,6 @@ void DSPCore::process(
     out0[i] = delay.process(
       in0[i], sampleRate,
       std::clamp(interpTime.process() + inTime[i], 0.0f, float(Scales::time.getMax())),
-      std::clamp(interpFeedback.process() + inFeedback[i], 0.0f, 1.0f));
+      std::clamp(interpFeedback.process() + inFeedback[i], -1.0f, 1.0f));
   }
 }
