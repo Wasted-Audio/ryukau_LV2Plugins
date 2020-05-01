@@ -61,16 +61,18 @@ struct GlobalParameter {
     using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
     value[ID::time] = std::make_unique<LogValue>(
-      0.1, Scales::time, "time", kParameterIsAutomable | kParameterIsLogarithmic);
+      Scales::time.invmap(0.1), Scales::time, "time",
+      kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::feedback] = std::make_unique<LinearValue>(
       0.1, Scales::feedback, "feedback", kParameterIsAutomable);
 
     value[ID::lowpassHz] = std::make_unique<LogValue>(
-      0.1, Scales::cutoff, "lowpassHz", kParameterIsAutomable | kParameterIsLogarithmic);
+      1.0, Scales::cutoff, "lowpassHz", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::resonance] = std::make_unique<LinearValue>(
-      0.1, Scales::resonance, "resonance", kParameterIsAutomable);
+      0.0, Scales::resonance, "resonance", kParameterIsAutomable);
     value[ID::highpassHz] = std::make_unique<LogValue>(
-      0.1, Scales::cutoff, "highpassHz", kParameterIsAutomable | kParameterIsLogarithmic);
+      Scales::cutoff.invmap(1), Scales::cutoff, "highpassHz",
+      kParameterIsAutomable | kParameterIsLogarithmic);
   }
 
 #ifndef TEST_BUILD

@@ -56,7 +56,8 @@ struct GlobalParameter {
     using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
     value[ID::time] = std::make_unique<LogValue>(
-      0.1, Scales::time, "time", kParameterIsAutomable | kParameterIsLogarithmic);
+      Scales::time.invmap(0.1), Scales::time, "time",
+      kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::feedback] = std::make_unique<LinearValue>(
       0.1, Scales::feedback, "feedback", kParameterIsAutomable);
   }
