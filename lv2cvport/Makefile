@@ -13,6 +13,7 @@ build: \
 	CV_LinearADSREnvelope \
 	CV_LinearMap \
 	CV_Multiply \
+	CV_NaiveDelay \
 	CV_ParabolicADEnvelope \
 	CV_PController \
  	CV_PolyLoopEnvelope \
@@ -79,6 +80,10 @@ CV_LinearMap:
 .PHONY: CV_Multiply
 CV_Multiply:
 	$(MAKE) -C CV_Multiply
+
+.PHONY: CV_NaiveDelay
+CV_NaiveDelay:
+	$(MAKE) -C CV_NaiveDelay
 
 .PHONY: CV_ParabolicADEnvelope
 CV_ParabolicADEnvelope:
