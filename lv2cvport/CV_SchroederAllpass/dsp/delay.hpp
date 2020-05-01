@@ -108,8 +108,8 @@ public:
   // gain in [0, 1].
   Sample process(Sample input, Sample sampleRate, Sample seconds, Sample gain)
   {
-    input += gain * buffer;
-    auto output = buffer - gain * input;
+    input -= gain * buffer;
+    auto output = buffer + gain * input;
     buffer = delay.process(input, sampleRate, seconds);
     return output;
   }
