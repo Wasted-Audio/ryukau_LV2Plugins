@@ -101,7 +101,7 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 | <kbd>1</kbd>                            | Decrease                                |
 | <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
 
-## LightPadSynth (WIP: Presets)
+## LightPadSynth
 <figure>
 <img src="docs/img/lv2_lightpadsynth.png" alt="Image of LightPadSynth GUI."/>
 </figure>
