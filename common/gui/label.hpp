@@ -91,7 +91,7 @@ protected:
 
 class VLabel : public Label {
 public:
-  explicit VLabel(NanoWidget *group, const char *labelText, FontId fontId)
+  explicit VLabel(NanoWidget *group, std::string labelText, FontId fontId)
     : Label(group, labelText, fontId)
   {
   }
