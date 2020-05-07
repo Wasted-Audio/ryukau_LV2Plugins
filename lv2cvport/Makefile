@@ -14,6 +14,7 @@ build: \
 	CV_LinearMap \
 	CV_Multiply \
 	CV_NaiveDelay \
+	CV_NestedSchroeder8 \
 	CV_ParabolicADEnvelope \
 	CV_PController \
  	CV_PolyLoopEnvelope \
@@ -84,6 +85,10 @@ CV_Multiply:
 .PHONY: CV_NaiveDelay
 CV_NaiveDelay:
 	$(MAKE) -C CV_NaiveDelay
+
+.PHONY: CV_NestedSchroeder8
+CV_NestedSchroeder8:
+	$(MAKE) -C CV_NestedSchroeder8
 
 .PHONY: CV_ParabolicADEnvelope
 CV_ParabolicADEnvelope:
