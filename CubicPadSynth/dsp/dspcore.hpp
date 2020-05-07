@@ -234,6 +234,9 @@ public:
     std::array<float, nOvertone> otGain{};                                               \
     std::array<float, nOvertone> otPhase{};                                              \
     std::array<float, nOvertone> otBandWidth{};                                          \
+    bool prepareRefresh = true;                                                          \
+    bool isTableRefeshed = false;                                                        \
+    bool isLFORefreshed = false;                                                         \
                                                                                          \
     Wavetable<tableSize, nOvertone> wavetable;                                           \
     LfoWavetable<lfoTableSize> lfoWavetable;                                             \

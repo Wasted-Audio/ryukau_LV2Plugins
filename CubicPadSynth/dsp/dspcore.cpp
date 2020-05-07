@@ -27,23 +27,23 @@
 #include <iostream>
 
 #if INSTRSET >= 10
-#define PROCESSING_UNIT_NAME ProcessingUnit_AVX512
-#define NOTE_NAME Note_AVX512
-#define DSPCORE_NAME DSPCore_AVX512
+  #define PROCESSING_UNIT_NAME ProcessingUnit_AVX512
+  #define NOTE_NAME Note_AVX512
+  #define DSPCORE_NAME DSPCore_AVX512
 #elif INSTRSET >= 8
-#define PROCESSING_UNIT_NAME ProcessingUnit_AVX2
-#define NOTE_NAME Note_AVX2
-#define DSPCORE_NAME DSPCore_AVX2
+  #define PROCESSING_UNIT_NAME ProcessingUnit_AVX2
+  #define NOTE_NAME Note_AVX2
+  #define DSPCORE_NAME DSPCore_AVX2
 #elif INSTRSET >= 5
-#define PROCESSING_UNIT_NAME ProcessingUnit_SSE41
-#define NOTE_NAME Note_SSE41
-#define DSPCORE_NAME DSPCore_SSE41
+  #define PROCESSING_UNIT_NAME ProcessingUnit_SSE41
+  #define NOTE_NAME Note_SSE41
+  #define DSPCORE_NAME DSPCore_SSE41
 #elif INSTRSET >= 2
-#define PROCESSING_UNIT_NAME ProcessingUnit_SSE2
-#define NOTE_NAME Note_SSE2
-#define DSPCORE_NAME DSPCore_SSE2
+  #define PROCESSING_UNIT_NAME ProcessingUnit_SSE2
+  #define NOTE_NAME Note_SSE2
+  #define DSPCORE_NAME DSPCore_SSE2
 #else
-#error Unsupported instruction set
+  #error Unsupported instruction set
 #endif
 
 inline float clamp(float value, float min, float max)
@@ -173,8 +173,7 @@ void DSPCORE_NAME::setup(double sampleRate)
   transitionBuffer.resize(1 + size_t(sampleRate * 0.01), {0.0f, 0.0f});
 
   startup();
-  refreshTable();
-  refreshLfo();
+  prepareRefresh = true;
 }
 
 void PROCESSING_UNIT_NAME::reset()
@@ -260,6 +259,16 @@ void DSPCORE_NAME::setParameters(float tempo)
 
   nVoice = 16 * (param.value[ID::nVoice]->getInt() + 1);
   if (nVoice > notes.size()) nVoice = notes.size();
+
+  if (prepareRefresh || (!isLFORefreshed && param.value[ID::refreshLFO]->getInt()))
+    refreshLfo();
+  isLFORefreshed = param.value[ID::refreshLFO]->getInt();
+
+  if (prepareRefresh || (!isTableRefeshed && param.value[ID::refreshTable]->getInt()))
+    refreshTable();
+  isTableRefeshed = param.value[ID::refreshTable]->getInt();
+
+  prepareRefresh = false;
 }
 
 std::array<float, 2> PROCESSING_UNIT_NAME::process(

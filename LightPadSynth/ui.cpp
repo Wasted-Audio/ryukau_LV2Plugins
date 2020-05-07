@@ -182,8 +182,22 @@ private:
     return barBox;
   }
 
+  std::shared_ptr<Button>
+  addKickButton(float left, float top, float width, const char *title, uint32_t id)
+  {
+    auto button = std::make_shared<Button>(this, this, title, fontId);
+    button->id = id;
+    button->setSize(width, 2.0f * labelHeight);
+    button->setAbsolutePos(left, top);
+    button->setForegroundColor(colorFore);
+    button->setHighlightColor(colorOrange);
+    button->setTextSize(midTextSize);
+    valueWidget.push_back(button);
+    return button;
+  }
+
   std::shared_ptr<ToggleButton>
-  addButton(float left, float top, float width, const char *title, uint32_t id)
+  addToggleButton(float left, float top, float width, const char *title, uint32_t id)
   {
     auto button = std::make_shared<ToggleButton>(this, this, title, fontId);
     button->id = id;
@@ -841,9 +855,9 @@ public:
 
     tabview->addWidget(
       tabMain,
-      addStateButton(
+      addKickButton(
         lfoLeft2 + 2.0f * knobX, lfoKnobTop + 2.0f * margin, 2.0f * knobX, "Refresh LFO",
-        "lfo", "N/A"));
+        ID::refreshLFO));
 
     // LFO wavetable.
     const auto lfoWaveTop = lfoKnobTop + knobY + 0.5f * labelY;
@@ -1004,8 +1018,8 @@ public:
     const auto refreshLeft = tabInsideLeft0;
     tabview->addWidget(
       tabPadSynth,
-      addStateButton(
-        refreshLeft, refreshTop, 2.0f * knobX, "Refresh Table", "padsynth", "N/A"));
+      addKickButton(
+        refreshLeft, refreshTop, 2.0f * knobX, "Refresh Table", ID::refreshTable));
 
     // Overtone Gain.
     const auto otGainTop = tabInsideTop0;

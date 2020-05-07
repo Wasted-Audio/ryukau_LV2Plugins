@@ -119,6 +119,9 @@ enum ID {
 
   pitchBend,
 
+  refreshLFO,
+  refreshTable,
+
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
@@ -359,6 +362,11 @@ struct GlobalParameter {
 
     value[ID::pitchBend] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "pitchBend", kParameterIsAutomable);
+
+    value[ID::refreshLFO] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "refreshLFO", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::refreshTable] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "refreshTable", kParameterIsAutomable | kParameterIsBoolean);
   }
 
 #ifndef TEST_BUILD

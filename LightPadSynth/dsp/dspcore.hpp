@@ -240,6 +240,9 @@ public:
                                                                                          \
     std::vector<PeakInfo<float>> peakInfos;                                              \
                                                                                          \
+    bool prepareRefresh = true;                                                          \
+    bool isTableRefeshed = false;                                                        \
+    bool isLFORefreshed = false;                                                         \
     Wavetable wavetable;                                                                 \
     LfoWavetable<lfoTableSize> lfoWavetable;                                             \
                                                                                          \
