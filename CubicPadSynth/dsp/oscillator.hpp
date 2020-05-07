@@ -246,13 +246,11 @@ template<size_t tableSize, size_t nPeak> struct Wavetable {
     if (expand != 1.0f || shift != 0) {
       if (abs(shift) >= spectrumSize) {
         std::memcpy(tmpSpec, spectrum, sizeof(fftwf_complex) * spectrumSize);
-      }
-      else if (shift >= 0) {
+      } else if (shift >= 0) {
         std::memset(tmpSpec, 0, sizeof(fftwf_complex) * shift);
         std::memcpy(
           tmpSpec + shift, spectrum, sizeof(fftwf_complex) * (spectrumSize - shift));
-      }
-      else { // shift < 0
+      } else { // shift < 0
         shift = abs(shift);
         std::memcpy(
           tmpSpec, spectrum + shift, sizeof(fftwf_complex) * (spectrumSize - shift));
@@ -308,8 +306,7 @@ template<size_t tableSize> struct TableOsc {
       size_t x2 = x1 + 1;
       size_t x3 = x1 + 2;
       return cubicInterp(table[0][x0], table[0][x1], table[0][x2], table[0][x3], frac);
-    }
-    else if (notePitch >= notePitchUpperBound) {
+    } else if (notePitch >= notePitchUpperBound) {
       return 0;
     }
     notePitch += 1.0f;
@@ -483,7 +480,7 @@ template<size_t tableSize> struct alignas(64) LfoWavetable {
     switch (interpType) {
       case interpStep: {
         for (size_t idx = 0; idx < last; ++idx) {
-          size_t uiIdx = float(uiTable.size() * idx / float(last));
+          size_t uiIdx = uiTable.size() * idx / float(last);
           table[idx] = uiTable[uiIdx];
         }
       } break;
@@ -492,7 +489,7 @@ template<size_t tableSize> struct alignas(64) LfoWavetable {
         uiTable.push_back(uiTable[0]);
         const size_t uiTableLast = uiTable.size() - 1;
         for (size_t idx = 0; idx < last; ++idx) {
-          float targetIdx = float(uiTableLast * idx / float(last));
+          float targetIdx = uiTableLast * idx / float(last);
           float frac = targetIdx - floorf(targetIdx);
           size_t uiIdx = size_t(targetIdx);
           table[idx] = uiTable[uiIdx] + frac * (uiTable[uiIdx + 1] - uiTable[uiIdx]);
@@ -504,9 +501,9 @@ template<size_t tableSize> struct alignas(64) LfoWavetable {
         uiTable.insert(uiTable.begin(), uiTable.back());
         uiTable.push_back(uiTable[1]);
         uiTable.push_back(uiTable[2]);
-        const size_t uiTableLast = uiTable.size() - 2;
+        const size_t uiTableLast = uiTable.size() - 3;
         for (size_t idx = 0; idx < last; ++idx) {
-          float targetIdx = 1 + float(uiTableLast * idx / float(last));
+          float targetIdx = 1 + uiTableLast * idx / float(last);
           float frac = targetIdx - floorf(targetIdx);
           size_t uiIdx = size_t(targetIdx);
           table[idx] = cubicInterp(

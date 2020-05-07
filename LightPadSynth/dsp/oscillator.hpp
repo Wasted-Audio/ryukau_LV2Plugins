@@ -284,7 +284,7 @@ template<size_t tableSize> struct LfoWavetable {
     switch (interpType) {
       case interpStep: {
         for (size_t idx = 0; idx < last; ++idx) {
-          size_t uiIdx = float(uiTable.size() * idx / float(last));
+          size_t uiIdx = uiTable.size() * idx / float(last);
           table[idx] = uiTable[uiIdx];
         }
       } break;
@@ -293,7 +293,7 @@ template<size_t tableSize> struct LfoWavetable {
         uiTable.push_back(uiTable[0]);
         const size_t uiTableLast = uiTable.size() - 1;
         for (size_t idx = 0; idx < last; ++idx) {
-          float targetIdx = float(uiTableLast * idx / float(last));
+          float targetIdx = uiTableLast * idx / float(last);
           float frac = targetIdx - floorf(targetIdx);
           size_t uiIdx = size_t(targetIdx);
           table[idx] = uiTable[uiIdx] + frac * (uiTable[uiIdx + 1] - uiTable[uiIdx]);
@@ -305,9 +305,9 @@ template<size_t tableSize> struct LfoWavetable {
         uiTable.insert(uiTable.begin(), uiTable.back());
         uiTable.push_back(uiTable[1]);
         uiTable.push_back(uiTable[2]);
-        const size_t uiTableLast = uiTable.size() - 2;
+        const size_t uiTableLast = uiTable.size() - 3;
         for (size_t idx = 0; idx < last; ++idx) {
-          float targetIdx = 1 + float(uiTableLast * idx / float(last));
+          float targetIdx = 1 + uiTableLast * idx / float(last);
           float frac = targetIdx - floorf(targetIdx);
           size_t uiIdx = size_t(targetIdx);
           table[idx] = cubicInterp(
