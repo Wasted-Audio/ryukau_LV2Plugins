@@ -22,7 +22,7 @@ void DSPCore::setup(double sampleRate)
   this->sampleRate = sampleRate;
 
   SmootherCommon<float>::setSampleRate(sampleRate);
-  SmootherCommon<float>::setTime(0.01f);
+  SmootherCommon<float>::setTime(0.04f);
 
   delay.setup(sampleRate, Scales::time.getMax());
 
@@ -50,6 +50,8 @@ void DSPCore::startup() {}
 void DSPCore::setParameters()
 {
   using ID = ParameterID::ID;
+
+  SmootherCommon<float>::setTime(param.value[ID::smoothness]->getFloat());
 
   auto timeMul = param.value[ID::timeMultiply]->getFloat();
   auto outerMul = param.value[ID::outerFeedMultiply]->getFloat();

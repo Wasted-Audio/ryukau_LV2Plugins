@@ -300,6 +300,7 @@ public:
     const auto top1 = 15.0f + labelY;
     const auto top2 = top1 + barboxHeight + 2 * margin;
     const auto top3 = top2 + barboxHeight + 2 * margin;
+    const auto top4 = top3 + barboxHeight + 2 * margin;
     const auto left1 = 15.0f + labelY;
     const auto left2 = left1 + barboxWidth + 2 * margin;
 
@@ -330,6 +331,11 @@ public:
     addTextKnob(
       left2, top3 + labelY, knobX, colorBlue, ID::innerFeedMultiply, Scales::multiply,
       false, 4);
+
+    addLabel(left1, top4, knobX, "Smoothness");
+    addTextKnob(
+      left1 + knobX, top4, knobX, colorBlue, ID::smoothness, Scales::smoothness, false,
+      4);
   }
 };
 

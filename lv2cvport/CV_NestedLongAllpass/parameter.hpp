@@ -41,6 +41,8 @@ enum ID {
   outerFeedMultiply,
   innerFeedMultiply,
 
+  smoothness,
+
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
@@ -50,6 +52,7 @@ struct Scales {
   static SomeDSP::IntScale<double> boolScale;
   static SomeDSP::LogScale<double> time;
   static SomeDSP::LinearScale<double> feed;
+  static SomeDSP::LogScale<double> smoothness;
 };
 
 struct GlobalParameter {
@@ -83,6 +86,9 @@ struct GlobalParameter {
       1.0, Scales::multiply, "outerFeedMultiply", kParameterIsAutomable);
     value[ID::innerFeedMultiply] = std::make_unique<LinearValue>(
       1.0, Scales::multiply, "innerFeedMultiply", kParameterIsAutomable);
+
+    value[ID::smoothness] = std::make_unique<LogValue>(
+      0.5, Scales::smoothness, "smoothness", kParameterIsAutomable);
   }
 
 #ifndef TEST_BUILD

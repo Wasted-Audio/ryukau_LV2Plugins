@@ -24,3 +24,4 @@ IntScale<double> Scales::boolScale(1);
 LogScale<double> Scales::time(0.0, 1.0, 0.5, 0.05);
 LinearScale<double> Scales::feed(-1.0, 1.0);
 LinearScale<double> Scales::multiply(0.0, 1.0);
+LogScale<double> Scales::smoothness(0.0, 0.5, 0.1, 0.04);
