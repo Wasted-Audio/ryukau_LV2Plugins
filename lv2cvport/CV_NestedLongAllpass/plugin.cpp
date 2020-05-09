@@ -5,20 +5,20 @@
 // Modified by:
 // (c) 2020 Takamitsu Endo
 //
-// This file is part of CV_NestedSchroeder8.
+// This file is part of CV_NestedLongAllpass.
 //
-// CV_NestedSchroeder8 is free software: you can redistribute it and/or modify
+// CV_NestedLongAllpass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_NestedSchroeder8 is distributed in the hope that it will be useful,
+// CV_NestedLongAllpass is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_NestedSchroeder8.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_NestedLongAllpass.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <utility>
 
@@ -27,20 +27,20 @@
 
 START_NAMESPACE_DISTRHO
 
-class CV_NestedSchroeder8 : public Plugin {
+class CV_NestedLongAllpass : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
-  CV_NestedSchroeder8() : Plugin(ParameterID::ID_ENUM_LENGTH, 0, 0)
+  CV_NestedLongAllpass() : Plugin(ParameterID::ID_ENUM_LENGTH, 0, 0)
   {
     sampleRateChanged(getSampleRate());
   }
 
 protected:
   /* Information */
-  const char *getLabel() const override { return "CV_NestedSchroeder8"; }
+  const char *getLabel() const override { return "CV_NestedLongAllpass"; }
   const char *getDescription() const override
   {
-    return "8 shroeder allpass filter with additional feedback.";
+    return "8 allpass filters nested in lattice filter structure.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
@@ -116,9 +116,9 @@ private:
   DSPCore dsp;
   bool wasPlaying = false;
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_NestedSchroeder8)
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_NestedLongAllpass)
 };
 
-Plugin *createPlugin() { return new CV_NestedSchroeder8(); }
+Plugin *createPlugin() { return new CV_NestedLongAllpass(); }
 
 END_NAMESPACE_DISTRHO

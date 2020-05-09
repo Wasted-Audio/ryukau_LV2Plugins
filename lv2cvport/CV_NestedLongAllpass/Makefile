@@ -1,5 +1,5 @@
 # Project name, used for binaries
-NAME = CV_NestedSchroeder8
+NAME = CV_NestedLongAllpass
 
 # Files to build
 FILES_DSP = plugin.cpp \

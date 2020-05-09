@@ -12,9 +12,10 @@ build: \
   CV_Invert \
 	CV_LinearADSREnvelope \
 	CV_LinearMap \
+	CV_LongAllpass \
 	CV_Multiply \
 	CV_NaiveDelay \
-	CV_NestedSchroeder8 \
+	CV_NestedLongAllpass \
 	CV_ParabolicADEnvelope \
 	CV_PController \
  	CV_PolyLoopEnvelope \
@@ -22,7 +23,6 @@ build: \
 	CV_PTRTrapezoid \
 	CV_RampFilter \
 	CV_RateLimiter \
-	CV_SchroederAllpass \
 	CV_Sin \
   CV_StereoGain \
 
@@ -78,6 +78,10 @@ CV_LinearADSREnvelope:
 CV_LinearMap:
 	$(MAKE) -C CV_LinearMap
 
+.PHONY: CV_LongAllpass
+CV_LongAllpass:
+	$(MAKE) -C CV_LongAllpass
+
 .PHONY: CV_Multiply
 CV_Multiply:
 	$(MAKE) -C CV_Multiply
@@ -86,9 +90,9 @@ CV_Multiply:
 CV_NaiveDelay:
 	$(MAKE) -C CV_NaiveDelay
 
-.PHONY: CV_NestedSchroeder8
-CV_NestedSchroeder8:
-	$(MAKE) -C CV_NestedSchroeder8
+.PHONY: CV_NestedLongAllpass
+CV_NestedLongAllpass:
+	$(MAKE) -C CV_NestedLongAllpass
 
 .PHONY: CV_ParabolicADEnvelope
 CV_ParabolicADEnvelope:
@@ -117,10 +121,6 @@ CV_RampFilter:
 .PHONY: CV_RateLimiter
 CV_RateLimiter:
 	$(MAKE) -C CV_RateLimiter
-
-.PHONY: CV_SchroederAllpass
-CV_SchroederAllpass:
-	$(MAKE) -C CV_SchroederAllpass
 
 .PHONY: CV_Sin
 CV_Sin:

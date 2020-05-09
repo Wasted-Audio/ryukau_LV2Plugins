@@ -1,19 +1,19 @@
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of CV_NestedSchroeder8.
+// This file is part of CV_LongAllpass.
 //
-// CV_NestedSchroeder8 is free software: you can redistribute it and/or modify
+// CV_LongAllpass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_NestedSchroeder8 is distributed in the hope that it will be useful,
+// CV_LongAllpass is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_NestedSchroeder8.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_LongAllpass.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
@@ -29,27 +29,19 @@ static const uint32_t kParameterIsInteger = 0x04;
 static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
-constexpr size_t nestingDepth = 8;
-
 namespace ParameterID {
 enum ID {
-  time0 = 0,
-  outerFeed0 = 8,
-  innerFeed0 = 16,
-
-  timeMultiply = 24,
-  outerFeedMultiply,
-  innerFeedMultiply,
+  time,
+  feedback,
 
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
 
 struct Scales {
-  static SomeDSP::LinearScale<double> multiply;
   static SomeDSP::IntScale<double> boolScale;
   static SomeDSP::LogScale<double> time;
-  static SomeDSP::LinearScale<double> feed;
+  static SomeDSP::LinearScale<double> feedback;
 };
 
 struct GlobalParameter {
@@ -63,26 +55,11 @@ struct GlobalParameter {
     using LinearValue = FloatValue<SomeDSP::LinearScale<double>>;
     using LogValue = FloatValue<SomeDSP::LogScale<double>>;
 
-    std::string timeLabel("time");
-    std::string outerFeedLabel("outerFeed");
-    std::string innerFeedLabel("innerFeed");
-    for (size_t idx = 0; idx < nestingDepth; ++idx) {
-      auto indexStr = std::to_string(idx);
-      value[ID::time0 + idx] = std::make_unique<LogValue>(
-        Scales::time.invmap(0.1), Scales::time, (timeLabel + indexStr).c_str(),
-        kParameterIsAutomable | kParameterIsLogarithmic);
-      value[ID::outerFeed0 + idx] = std::make_unique<LinearValue>(
-        0.5, Scales::feed, (outerFeedLabel + indexStr).c_str(), kParameterIsAutomable);
-      value[ID::innerFeed0 + idx] = std::make_unique<LinearValue>(
-        0.5, Scales::feed, (innerFeedLabel + indexStr).c_str(), kParameterIsAutomable);
-    }
-
-    value[ID::timeMultiply] = std::make_unique<LinearValue>(
-      1.0, Scales::multiply, "timeMultiply", kParameterIsAutomable);
-    value[ID::outerFeedMultiply] = std::make_unique<LinearValue>(
-      1.0, Scales::multiply, "outerFeedMultiply", kParameterIsAutomable);
-    value[ID::innerFeedMultiply] = std::make_unique<LinearValue>(
-      1.0, Scales::multiply, "innerFeedMultiply", kParameterIsAutomable);
+    value[ID::time] = std::make_unique<LogValue>(
+      Scales::time.invmap(0.1), Scales::time, "time",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::feedback] = std::make_unique<LinearValue>(
+      0.1, Scales::feedback, "feedback", kParameterIsAutomable);
   }
 
 #ifndef TEST_BUILD

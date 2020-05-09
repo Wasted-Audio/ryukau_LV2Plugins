@@ -1,19 +1,19 @@
 // (c) 2020 Takamitsu Endo
 //
-// This file is part of CV_NestedSchroeder8.
+// This file is part of CV_NestedLongAllpass.
 //
-// CV_NestedSchroeder8 is free software: you can redistribute it and/or modify
+// CV_NestedLongAllpass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_NestedSchroeder8 is distributed in the hope that it will be useful,
+// CV_NestedLongAllpass is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_NestedSchroeder8.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_NestedLongAllpass.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
@@ -59,6 +59,20 @@ public:
     text(0, 2 * textSize, textA.c_str(), nullptr);
   }
 
+  /**
+  This method calculates stability conditions for lattice filter.
+
+  Note that referenced paper has some typo with l and 1 (small L and number one).
+  For example, Result 4.6 has `A_n > l / n`, but I couldn't find the definition of l
+  (small L). It may be a typo of `A_n > 1 / n`.
+
+  Reference:
+  - https://hal-centralesupelec.archives-ouvertes.fr/hal-01800375/document
+
+    Bernard Picinbono, Messaoud Benidir. Some Properties of Lattice Autoregressive
+    Filters. IEEE trans-actions on acoustics, speech, and signal processing, Institute of
+    Electrical and Electronics Engineers(IEEE), 1986, pp.342 - 349. hal-01800375
+  */
   void update(GlobalParameter &param)
   {
     using ID = ParameterID::ID;

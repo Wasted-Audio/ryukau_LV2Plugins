@@ -5,33 +5,33 @@
 // Modified by:
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of CV_SchroederAllpass.
+// This file is part of CV_NestedLongAllpass.
 //
-// CV_SchroederAllpass is free software: you can redistribute it and/or modify
+// CV_NestedLongAllpass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_SchroederAllpass is distributed in the hope that it will be useful,
+// CV_NestedLongAllpass is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_SchroederAllpass.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_NestedLongAllpass.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_BRAND "Uhhyou"
-#define DISTRHO_PLUGIN_NAME "CV_SchroederAllpass"
+#define DISTRHO_PLUGIN_NAME "CV_NestedLongAllpass"
 #define DISTRHO_PLUGIN_URI                                                               \
-  "https://github.com/ryukau/LV2Plugins/tree/master/CV_SchroederAllpass"
+  "https://github.com/ryukau/LV2Plugins/tree/master/CV_NestedLongAllpass"
 
 #define DISTRHO_PLUGIN_HAS_UI 1
 #define DISTRHO_PLUGIN_IS_RT_SAFE 1
 #define DISTRHO_PLUGIN_IS_SYNTH 0
-#define DISTRHO_PLUGIN_NUM_INPUTS 3
+#define DISTRHO_PLUGIN_NUM_INPUTS 1
 #define DISTRHO_PLUGIN_NUM_OUTPUTS 1
 #define DISTRHO_PLUGIN_WANT_PROGRAMS 1
 #define DISTRHO_PLUGIN_WANT_TIMEPOS 1

@@ -1,5 +1,5 @@
 # Project name, used for binaries
-NAME = CV_SchroederAllpass
+NAME = CV_LongAllpass
 
 # Files to build
 FILES_DSP = plugin.cpp \

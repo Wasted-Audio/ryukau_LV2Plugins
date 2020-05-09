@@ -5,20 +5,20 @@
 // Modified by:
 // (c) 2019-2020 Takamitsu Endo
 //
-// This file is part of CV_SchroederAllpass.
+// This file is part of CV_NestedLongAllpass.
 //
-// CV_SchroederAllpass is free software: you can redistribute it and/or modify
+// CV_NestedLongAllpass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_SchroederAllpass is distributed in the hope that it will be useful,
+// CV_NestedLongAllpass is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_SchroederAllpass.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_NestedLongAllpass.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <memory>
@@ -40,6 +40,7 @@
 #include "../../common/gui/tabview.hpp"
 #include "../../common/gui/textview.hpp"
 #include "../../common/gui/vslider.hpp"
+#include "gui/stabilityview.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -53,12 +54,16 @@ constexpr float knobWidth = 50.0f;
 constexpr float knobHeight = 40.0f;
 constexpr float knobX = 80.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
-constexpr uint32_t defaultWidth = uint32_t(2 * knobX + 40);
-constexpr uint32_t defaultHeight = uint32_t(labelHeight + 2 * labelY + 30);
+constexpr float barboxWidth = 4 * knobX;
+constexpr float barboxHeight = 2 * knobY;
+constexpr uint32_t defaultWidth
+  = uint32_t(labelY + barboxWidth + knobX + 2 * margin + 30);
+constexpr uint32_t defaultHeight
+  = uint32_t(labelY + 3 * barboxHeight + 2 * labelHeight + 6 * margin + 30);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
-class CV_SchroederAllpassUI : public PluginUI {
+class CV_NestedLongAllpassUI : public PluginUI {
 protected:
   void parameterChanged(uint32_t index, float value) override
   {
@@ -124,6 +129,8 @@ protected:
 
   void onNanoDisplay() override
   {
+    stabilityView->update(param);
+
     beginPath();
     rect(0, 0, getWidth(), getHeight());
     fillColor(colorBack);
@@ -143,6 +150,7 @@ private:
 
   FontId fontId = -1;
 
+  std::shared_ptr<StabilityView> stabilityView;
   std::vector<std::shared_ptr<Widget>> widget;
   std::vector<std::shared_ptr<ValueWidget>> valueWidget;
   std::vector<std::shared_ptr<ArrayWidget>> arrayWidget;
@@ -155,6 +163,25 @@ private:
       std::cout << "\"" << value->getName()
                 << "\": " << std::to_string(value->getNormalized()) << ",\n";
     std::cout << "}" << std::endl;
+  }
+
+  std::shared_ptr<BarBox> addBarBox(
+    float left, float top, float width, float height, uint32_t id0, size_t nElement)
+  {
+    std::vector<uint32_t> id(nElement);
+    for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
+    std::vector<double> value(id.size());
+    for (size_t i = 0; i < value.size(); ++i)
+      value[i] = param.value[id[i]]->getDefaultNormalized();
+    std::vector<double> defaultValue(value);
+
+    auto barBox = std::make_shared<BarBox>(this, this, id, value, defaultValue, fontId);
+    barBox->setSize(width, height);
+    barBox->setAbsolutePos(left, top);
+    barBox->setBorderColor(colorFore);
+    barBox->setValueColor(colorBlue);
+    arrayWidget.push_back(barBox);
+    return barBox;
   }
 
   std::shared_ptr<CheckBox>
@@ -175,7 +202,7 @@ private:
     int left,
     int top,
     float width,
-    const char *name,
+    std::string name,
     int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
   {
     auto label = std::make_shared<Label>(this, name, fontId);
@@ -187,9 +214,14 @@ private:
     label->setTextAlign(textAlign);
     widget.push_back(label);
     return label;
-  };
+  }
 
-  std::shared_ptr<Label> addGroupLabel(int left, int top, float width, const char *name)
+  std::shared_ptr<Label> addGroupLabel(
+    int left,
+    int top,
+    float width,
+    std::string name,
+    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
   {
     auto label = std::make_shared<Label>(this, name, fontId);
     label->setSize(width, labelHeight);
@@ -198,6 +230,26 @@ private:
     label->drawBorder = true;
     label->setBorderWidth(2.0f);
     label->setTextSize(midTextSize);
+    label->setTextAlign(textAlign);
+    widget.push_back(label);
+    return label;
+  }
+
+  std::shared_ptr<VLabel> addGroupVerticalLabel(
+    int left,
+    int top,
+    float width,
+    std::string name,
+    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
+  {
+    auto label = std::make_shared<VLabel>(this, name, fontId);
+    label->setSize(width, labelHeight);
+    label->setAbsolutePos(left, top);
+    label->setForegroundColor(colorFore);
+    label->drawBorder = false;
+    label->setBorderWidth(2.0f);
+    label->setTextSize(midTextSize);
+    label->setTextAlign(textAlign);
     widget.push_back(label);
     return label;
   };
@@ -230,10 +282,10 @@ private:
     return knob;
   }
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_SchroederAllpassUI)
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_NestedLongAllpassUI)
 
 public:
-  CV_SchroederAllpassUI() : PluginUI(defaultWidth, defaultHeight)
+  CV_NestedLongAllpassUI() : PluginUI(defaultWidth, defaultHeight)
   {
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
@@ -244,23 +296,58 @@ public:
     using ID = ParameterID::ID;
 
     const auto top0 = 15.0f;
-    const auto left0 = 20.0f;
-    const auto left1 = 20.0f + knobX;
+    const auto left0 = 15.0f;
+    const auto uiWidth = labelY + barboxWidth + knobX + 2 * margin;
 
-    addGroupLabel(left0, top0, 2 * knobX, "CV_SchroederAllpass");
+    addGroupLabel(left0, top0, uiWidth, "CV_NestedLongAllpass");
 
-    const int labelAlign = ALIGN_LEFT | ALIGN_MIDDLE;
+    const auto top1 = 15.0f + labelY;
+    const auto top2 = top1 + barboxHeight + 2 * margin;
+    const auto top3 = top2 + barboxHeight + 2 * margin;
+    const auto left1 = 15.0f + labelY;
+    const auto left2 = left1 + barboxWidth + 2 * margin;
 
-    addLabel(left0, top0 + labelY, knobX, "Time [s]", labelAlign);
-    addTextKnob(left1, top0 + labelY, knobX, colorBlue, ID::time, Scales::time, false, 5);
+    addGroupVerticalLabel(left0, top1, barboxHeight, "Time [s]");
+    addBarBox(left1, top1, barboxWidth, barboxHeight, ID::time0, 8);
 
-    addLabel(left0, top0 + 2 * labelY, knobX, "Feedback", labelAlign);
+    addLabel(left2, top1, knobX, "Multiply");
     addTextKnob(
-      left1, top0 + 2 * labelY, knobX, colorBlue, ID::feedback, Scales::feedback, false,
-      5);
+      left2, top1 + labelY, knobX, colorBlue, ID::timeMultiply, Scales::multiply, false,
+      4);
+
+    addGroupVerticalLabel(left0, top2, barboxHeight, "OuterFeed");
+    auto barboxOuterFeed
+      = addBarBox(left1, top2, barboxWidth, barboxHeight, ID::outerFeed0, 8);
+    barboxOuterFeed->drawCenterLine = true;
+
+    addLabel(left2, top2, knobX, "Multiply");
+    addTextKnob(
+      left2, top2 + labelY, knobX, colorBlue, ID::outerFeedMultiply, Scales::multiply,
+      false, 4);
+
+    addLabel(left2, top2 + 2 * labelY, knobX, "Stability");
+    stabilityView = std::make_shared<StabilityView>(this, fontId);
+    stabilityView->setSize(barboxWidth, 3 * labelHeight);
+    stabilityView->setAbsolutePos(left2, top2 + 3 * labelY);
+
+    addGroupVerticalLabel(left0, top3, barboxHeight, "InnerFeed");
+    auto barboxInnerFeed
+      = addBarBox(left1, top3, barboxWidth, barboxHeight, ID::innerFeed0, 8);
+    barboxInnerFeed->drawCenterLine = true;
+
+    addLabel(left2, top3, knobX, "Multiply");
+    addTextKnob(
+      left2, top3 + labelY, knobX, colorBlue, ID::innerFeedMultiply, Scales::multiply,
+      false, 4);
+
+    const auto top4 = top3 + barboxHeight + 2 * margin;
+    addLabel(left0, top4, uiWidth, "Be careful!");
+    addLabel(
+      left0, top4 + labelHeight, uiWidth,
+      "If any of OuterFeed Stability indicator is red, output may blow up.");
   }
 };
 
-UI *createUI() { return new CV_SchroederAllpassUI(); }
+UI *createUI() { return new CV_NestedLongAllpassUI(); }
 
 END_NAMESPACE_DISTRHO

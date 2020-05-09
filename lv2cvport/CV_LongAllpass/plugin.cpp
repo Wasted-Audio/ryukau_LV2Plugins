@@ -5,20 +5,20 @@
 // Modified by:
 // (c) 2020 Takamitsu Endo
 //
-// This file is part of CV_SchroederAllpass.
+// This file is part of CV_LongAllpass.
 //
-// CV_SchroederAllpass is free software: you can redistribute it and/or modify
+// CV_LongAllpass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// CV_SchroederAllpass is distributed in the hope that it will be useful,
+// CV_LongAllpass is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with CV_SchroederAllpass.  If not, see <https://www.gnu.org/licenses/>.
+// along with CV_LongAllpass.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <utility>
 
@@ -27,21 +27,21 @@
 
 START_NAMESPACE_DISTRHO
 
-class CV_SchroederAllpass : public Plugin {
+class CV_LongAllpass : public Plugin {
 public:
   // Plugin(nParameters, nPrograms, nStates).
-  CV_SchroederAllpass() : Plugin(ParameterID::ID_ENUM_LENGTH, 0, 0)
+  CV_LongAllpass() : Plugin(ParameterID::ID_ENUM_LENGTH, 0, 0)
   {
     sampleRateChanged(getSampleRate());
   }
 
 protected:
   /* Information */
-  const char *getLabel() const override { return "CV_SchroederAllpass"; }
+  const char *getLabel() const override { return "CV_LongAllpass"; }
   const char *getDescription() const override
   {
-    return "Shroeder allpass filter. In other words, this is a delay with a feedback and "
-           "a feedforward path.";
+    return "A delay with a feedback and a feedforward path. This is technically an "
+           "allpass filter.";
   }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
@@ -125,9 +125,9 @@ private:
   DSPCore dsp;
   bool wasPlaying = false;
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_SchroederAllpass)
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_LongAllpass)
 };
 
-Plugin *createPlugin() { return new CV_SchroederAllpass(); }
+Plugin *createPlugin() { return new CV_LongAllpass(); }
 
 END_NAMESPACE_DISTRHO
