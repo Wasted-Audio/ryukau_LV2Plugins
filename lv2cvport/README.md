@@ -116,6 +116,11 @@ Maps value as following equation:
 Output = Add + Mul * Input.
 ```
 
+## CV_LongAllpass
+A delay with a feedback and a feedforward path. This is technically an allpass filter.
+
+- [Allpass from Two Combs](https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html)
+
 ## CV_Multiply
 Multiply CV signal. 2 CV inputs and 1 CV output.
 
@@ -123,6 +128,14 @@ Multiply CV signal. 2 CV inputs and 1 CV output.
 Naive feedback delay.
 
 CV_NaiveDelay doesn't use any interpolation when reading. Buffer is 2 times oversampled.
+
+## CV_NestedLongAllpass
+8 allpass filters nested in lattice filter structure.
+
+Beware that some OuterFeed configurations may blow up the output. It will not blow up if at least one Stability text stays black.
+
+- [Some Properties of Lattice Autoregressive
+    Filters](https://hal-centralesupelec.archives-ouvertes.fr/hal-01800375/document)
 
 ## CV_ParabolicADEnvelope
 Parabolic envelope. Note that this envelope resets to 0 for each note-on.
@@ -232,11 +245,6 @@ Slew rate limiter.
 CV_RateLimiter is an implementation of Rate Limiter described in the link below.
 
 - [Limit rate of change of signal - Simulink](https://www.mathworks.com/help/simulink/slref/ratelimiter.html)
-
-## CV_SchroederAllpass
-Shroeder allpass filter. In other words, this is a delay with a feedback and a feedforward path.
-
-- [Allpass from Two Combs](https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html)
 
 ## CV_Sin
 Monophonic sine oscillator.
