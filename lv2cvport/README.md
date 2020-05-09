@@ -130,12 +130,7 @@ Naive feedback delay.
 CV_NaiveDelay doesn't use any interpolation when reading. Buffer is 2 times oversampled.
 
 ## CV_NestedLongAllpass
-8 allpass filters nested in lattice filter structure.
-
-Beware that some OuterFeed configurations may blow up the output. It will not blow up if at least one Stability text stays black.
-
-- [Some Properties of Lattice Autoregressive
-    Filters](https://hal-centralesupelec.archives-ouvertes.fr/hal-01800375/document)
+8 allpass filters nested in lattice filter structure. May be used for a part of reverb.
 
 ## CV_ParabolicADEnvelope
 Parabolic envelope. Note that this envelope resets to 0 for each note-on.
