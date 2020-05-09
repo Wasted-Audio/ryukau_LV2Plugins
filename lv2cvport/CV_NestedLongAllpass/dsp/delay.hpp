@@ -86,13 +86,10 @@ public:
 };
 
 /**
-Schroeder allpass filter
+Allpass filter with arbitrary length delay.
 https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html
-
-Transfer function H(z):
-H(z) = (gain + z^{-M}) / (1 + gain * z^{-M})
 */
-template<typename Sample> class SchroederAllpass {
+template<typename Sample> class LongAllpass {
 public:
   Sample buffer = 0;
   Delay<Sample> delay;
@@ -115,18 +112,18 @@ public:
   }
 };
 
-template<typename Sample> struct SchroederAllpassData {
+template<typename Sample> struct LongAllpassData {
   Sample seconds = 0;
   Sample outerFeed = 0; // in [-1, 1].
   Sample innerFeed = 0; // in [-1, 1].
 };
 
-template<typename Sample, size_t nest> class NestedSchroeder {
+template<typename Sample, size_t nest> class NestedLongAllpass {
 public:
   std::array<Sample, nest> in{};
   std::array<Sample, nest> buffer{};
-  std::array<SchroederAllpass<Sample>, nest> allpass;
-  std::array<SchroederAllpassData<Sample>, nest> data;
+  std::array<LongAllpass<Sample>, nest> allpass;
+  std::array<LongAllpassData<Sample>, nest> data;
 
   void setup(Sample sampleRate, Sample maxTime)
   {
@@ -150,10 +147,10 @@ public:
 
     Sample out = in.back();
     for (size_t idx = nest - 1; idx < nest; --idx) {
-      buffer[idx]
-        = allpass[idx].process(out, sampleRate, data[idx].seconds, data[idx].innerFeed)
-        + data[idx].outerFeed * in[idx];
-      out = buffer[idx];
+      auto buf
+        = allpass[idx].process(out, sampleRate, data[idx].seconds, data[idx].innerFeed);
+      out = buffer[idx] + data[idx].outerFeed * in[idx];
+      buffer[idx] = buf;
     }
 
     return out;

@@ -40,7 +40,6 @@
 #include "../../common/gui/tabview.hpp"
 #include "../../common/gui/textview.hpp"
 #include "../../common/gui/vslider.hpp"
-#include "gui/stabilityview.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -129,8 +128,6 @@ protected:
 
   void onNanoDisplay() override
   {
-    stabilityView->update(param);
-
     beginPath();
     rect(0, 0, getWidth(), getHeight());
     fillColor(colorBack);
@@ -150,7 +147,6 @@ private:
 
   FontId fontId = -1;
 
-  std::shared_ptr<StabilityView> stabilityView;
   std::vector<std::shared_ptr<Widget>> widget;
   std::vector<std::shared_ptr<ValueWidget>> valueWidget;
   std::vector<std::shared_ptr<ArrayWidget>> arrayWidget;
@@ -325,11 +321,6 @@ public:
       left2, top2 + labelY, knobX, colorBlue, ID::outerFeedMultiply, Scales::multiply,
       false, 4);
 
-    addLabel(left2, top2 + 2 * labelY, knobX, "Stability");
-    stabilityView = std::make_shared<StabilityView>(this, fontId);
-    stabilityView->setSize(barboxWidth, 3 * labelHeight);
-    stabilityView->setAbsolutePos(left2, top2 + 3 * labelY);
-
     addGroupVerticalLabel(left0, top3, barboxHeight, "InnerFeed");
     auto barboxInnerFeed
       = addBarBox(left1, top3, barboxWidth, barboxHeight, ID::innerFeed0, 8);
@@ -339,12 +330,6 @@ public:
     addTextKnob(
       left2, top3 + labelY, knobX, colorBlue, ID::innerFeedMultiply, Scales::multiply,
       false, 4);
-
-    const auto top4 = top3 + barboxHeight + 2 * margin;
-    addLabel(left0, top4, uiWidth, "Be careful!");
-    addLabel(
-      left0, top4 + labelHeight, uiWidth,
-      "If any of OuterFeed Stability indicator is red, output may blow up.");
   }
 };
 

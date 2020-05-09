@@ -40,7 +40,7 @@ public:
 
 private:
   float sampleRate = 44100.0f;
-  NestedSchroeder<float, nestingDepth> delay;
+  NestedLongAllpass<float, nestingDepth> delay;
   std::array<LinearSmoother<float>, nestingDepth> interpTime;
   std::array<LinearSmoother<float>, nestingDepth> interpOuterFeed;
   std::array<LinearSmoother<float>, nestingDepth> interpInnerFeed;
