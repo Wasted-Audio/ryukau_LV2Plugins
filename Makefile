@@ -2,20 +2,21 @@ all: build generate_ttl
 
 build: common \
 	lv2cvport \
-	SevenDelay \
-	SyncSawSynth \
-	WaveCymbal \
-	FDNCymbal \
-	TrapezoidSynth \
-	IterativeSinCluster \
+	CubicPadSynth \
 	EnvelopedSine \
 	EsPhaser \
-	CubicPadSynth \
-	ModuloShaper \
+	FDNCymbal \
 	FoldShaper \
-	OddPowShaper \
-	SoftClipper \
+	IterativeSinCluster \
+	LatticeReverb \
 	LightPadSynth \
+	ModuloShaper \
+	OddPowShaper \
+	SevenDelay \
+	SoftClipper \
+	SyncSawSynth \
+	TrapezoidSynth \
+	WaveCymbal \
 
 .PHONY: generate_ttl
 generate_ttl: build
@@ -40,61 +41,65 @@ common: dpf
 lv2cvport: common
 	$(MAKE) -C lv2cvport
 
-.PHONY: LightPadSynth
-LightPadSynth: common
-	$(MAKE) -C LightPadSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
-
-.PHONY: SoftClipper
-SoftClipper: common
-	$(MAKE) -C SoftClipper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
-
-.PHONY: OddPowShaper
-OddPowShaper: common
-	$(MAKE) -C OddPowShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
-
-.PHONY: FoldShaper
-FoldShaper: common
-	$(MAKE) -C FoldShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
-
-.PHONY: ModuloShaper
-ModuloShaper: common
-	$(MAKE) -C ModuloShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
-
 .PHONY: CubicPadSynth
 CubicPadSynth: common
 	$(MAKE) -C CubicPadSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
-
-.PHONY: EsPhaser
-EsPhaser: common
-	$(MAKE) -C EsPhaser LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: EnvelopedSine
 EnvelopedSine: common
 	$(MAKE) -C EnvelopedSine LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
-.PHONY: IterativeSinCluster
-IterativeSinCluster: common
-	$(MAKE) -C IterativeSinCluster LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
-
-.PHONY: TrapezoidSynth
-TrapezoidSynth: common
-	$(MAKE) -C TrapezoidSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+.PHONY: EsPhaser
+EsPhaser: common
+	$(MAKE) -C EsPhaser LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: FDNCymbal
 FDNCymbal: common
 	$(MAKE) -C FDNCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
-.PHONY: WaveCymbal
-WaveCymbal: common
-	$(MAKE) -C WaveCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+.PHONY: FoldShaper
+FoldShaper: common
+	$(MAKE) -C FoldShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: IterativeSinCluster
+IterativeSinCluster: common
+	$(MAKE) -C IterativeSinCluster LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: LatticeReverb
+LatticeReverb: common
+	$(MAKE) -C LatticeReverb LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: LightPadSynth
+LightPadSynth: common
+	$(MAKE) -C LightPadSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: ModuloShaper
+ModuloShaper: common
+	$(MAKE) -C ModuloShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: OddPowShaper
+OddPowShaper: common
+	$(MAKE) -C OddPowShaper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: SevenDelay
+SevenDelay: common
+	$(MAKE) -C SevenDelay LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: SoftClipper
+SoftClipper: common
+	$(MAKE) -C SoftClipper LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: SyncSawSynth
 SyncSawSynth: common
 	$(MAKE) -C SyncSawSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
-.PHONY: SevenDelay
-SevenDelay: common
-	$(MAKE) -C SevenDelay LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+.PHONY: TrapezoidSynth
+TrapezoidSynth: common
+	$(MAKE) -C TrapezoidSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
+.PHONY: WaveCymbal
+WaveCymbal: common
+	$(MAKE) -C WaveCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: install
 install:
