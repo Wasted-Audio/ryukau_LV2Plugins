@@ -293,12 +293,11 @@ protected:
 
   void updateUI(uint32_t id, float normalized)
   {
-    for (auto &vWidget : valueWidget) {
-      if (vWidget->id != id) continue;
-      vWidget->setValue(normalized);
-      break;
+    auto vWidget = valueWidget.find(id);
+    if (vWidget != valueWidget.end()) {
+      vWidget->second->setValue(normalized);
+      repaint();
     }
-    repaint();
   }
 
   void updateValue(uint32_t id, float normalized) override
@@ -312,8 +311,12 @@ protected:
   void programLoaded(uint32_t index) override
   {
     param.loadProgram(index);
-    for (auto &vWidget : valueWidget)
-      vWidget->setValue(param.value[vWidget->id]->getNormalized());
+
+    for (auto &vPair : valueWidget) {
+      if (vPair.second->id >= ParameterID::ID_ENUM_LENGTH) continue;
+      vPair.second->setValue(param.value[vPair.second->id]->getNormalized());
+    }
+
     repaint();
   }
 
@@ -339,7 +342,7 @@ private:
   FontId fontId = -1;
 
   std::vector<std::shared_ptr<Widget>> widget;
-  std::vector<std::shared_ptr<ValueWidget>> valueWidget;
+  std::unordered_map<int, std::shared_ptr<ValueWidget>> valueWidget;
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)
   {
@@ -350,7 +353,7 @@ private:
     button->setForegroundColor(colorFore);
     button->setHighlightColor(colorOrange);
     button->setTextSize(midTextSize);
-    valueWidget.push_back(button);
+    valueWidget.emplace(std::make_pair(id, button));
   }
 
   void addCheckbox(float left, float top, float width, const char *title, uint32_t id)
@@ -363,7 +366,7 @@ private:
     checkbox->setHighlightColor(colorBlue);
     checkbox->setTextSize(uiTextSize);
     checkbox->drawBackground = true;
-    valueWidget.push_back(checkbox);
+    valueWidget.emplace(std::make_pair(id, checkbox));
   }
 
   void addGroupLabel(int left, int top, float width, const char *name)
@@ -405,7 +408,7 @@ private:
     auto defaultValue = param.value[id]->getDefaultNormalized();
     knob->setDefaultValue(defaultValue);
     knob->setValue(defaultValue);
-    valueWidget.push_back(knob);
+    valueWidget.emplace(std::make_pair(id, knob));
 
     addKnobLabel(left, top, width, height, name, labelPosition);
   }
@@ -432,7 +435,7 @@ private:
     auto defaultValue = param.value[id]->getDefaultNormalized();
     knob->setDefaultValue(defaultValue);
     knob->setValue(defaultValue);
-    valueWidget.push_back(knob);
+    valueWidget.emplace(std::make_pair(id, knob));
 
     addKnobLabel(left, top, width, height, name, labelPosition);
   }
@@ -497,7 +500,7 @@ private:
     menu->setHighlightColor(colorBlue);
     menu->setTextSize(uiTextSize);
     menu->drawBackground = true;
-    valueWidget.push_back(menu);
+    valueWidget.emplace(std::make_pair(id, menu));
   }
 
   void addSplashScreen(
@@ -524,32 +527,6 @@ private:
     credit->setAbsolutePos(splashLeft, splashTop);
     button->setSplashWidget(credit);
     widget.push_back(credit);
-  }
-
-  void addVSlider(float left, float top, Color valueColor, const char *name, uint32_t id)
-  {
-    // width, height = 100, 270.
-
-    auto slider = std::make_shared<VSlider>(this, this);
-    slider->id = id;
-    slider->setSize(sliderWidth, sliderHeight);
-    slider->setAbsolutePos(left, top);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    slider->setDefaultValue(defaultValue);
-    slider->setValue(defaultValue);
-    slider->setHighlightColor(valueColor);
-    slider->setValueColor(valueColor);
-    slider->setBorderColor(colorFore);
-    valueWidget.push_back(slider);
-
-    top += sliderHeight + margin;
-
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(sliderWidth, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->setTextSize(uiTextSize);
-    widget.push_back(label);
   }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrapezoidSynthUI)

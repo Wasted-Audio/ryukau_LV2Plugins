@@ -97,6 +97,13 @@ public:
       value[index] = normalized < 0.0 ? 0.0 : normalized > 1.0 ? 1.0 : normalized;
   }
 
+  virtual void setValueFromId(int id, double normalized)
+  {
+    auto index = id - this->id[0];
+    if (index < value.size())
+      value[index] = normalized < 0.0 ? 0.0 : normalized > 1.0 ? 1.0 : normalized;
+  }
+
   virtual void updateValueAt(size_t index)
   {
     if (ui == nullptr) return;

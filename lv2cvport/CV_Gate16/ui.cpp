@@ -70,21 +70,18 @@ protected:
 
   void updateUI(uint32_t id, float normalized)
   {
-    for (auto &vWidget : valueWidget) {
-      if (vWidget->id != id) continue;
-      vWidget->setValue(normalized);
+    auto vWidget = valueWidget.find(id);
+    if (vWidget != valueWidget.end()) {
+      vWidget->second->setValue(normalized);
       repaint();
       return;
     }
 
-    for (auto &aWidget : arrayWidget) {
-      auto &idVec = aWidget->id;
-      auto iter = std::find(idVec.begin(), idVec.end(), id);
-      if (iter != idVec.end()) {
-        aWidget->setValueAt(std::distance(idVec.begin(), iter), normalized);
-        repaint();
-        return;
-      }
+    auto aWidget = arrayWidget.find(id);
+    if (aWidget != arrayWidget.end()) {
+      aWidget->second->setValueFromId(id, normalized);
+      repaint();
+      return;
     }
   }
 
@@ -105,12 +102,13 @@ protected:
   {
     param.loadProgram(index);
 
-    for (auto &vWidget : valueWidget) {
-      if (vWidget->id >= ParameterID::ID_ENUM_LENGTH) continue;
-      vWidget->setValue(param.value[vWidget->id]->getNormalized());
+    for (auto &vPair : valueWidget) {
+      if (vPair.second->id >= ParameterID::ID_ENUM_LENGTH) continue;
+      vPair.second->setValue(param.value[vPair.second->id]->getNormalized());
     }
 
-    for (auto &aWidget : arrayWidget) {
+    for (auto &aPair : arrayWidget) {
+      auto &aWidget = aPair.second;
       for (size_t idx = 0; idx < aWidget->id.size(); ++idx) {
         if (aWidget->id[idx] >= ParameterID::ID_ENUM_LENGTH) continue;
         aWidget->setValueAt(idx, param.value[aWidget->id[idx]]->getNormalized());
@@ -147,9 +145,8 @@ private:
   FontId fontId = -1;
 
   std::vector<std::shared_ptr<Widget>> widget;
-  std::vector<std::shared_ptr<ValueWidget>> valueWidget;
-  std::vector<std::shared_ptr<ArrayWidget>> arrayWidget;
-  std::vector<std::shared_ptr<StateWidget>> stateWidget;
+  std::unordered_map<int, std::shared_ptr<ValueWidget>> valueWidget;
+  std::unordered_map<int, std::shared_ptr<ArrayWidget>> arrayWidget;
 
   void dumpParameter()
   {
@@ -183,7 +180,9 @@ private:
     barBox->setAbsolutePos(left, top);
     barBox->setBorderColor(colorFore);
     barBox->setValueColor(colorBlue);
-    arrayWidget.push_back(barBox);
+
+    for (size_t i = 0; i < value.size(); ++i)
+      arrayWidget.emplace(std::make_pair(id0 + i, barBox));
     return barBox;
   }
 
@@ -233,7 +232,7 @@ private:
     menu->setForegroundColor(colorFore);
     menu->setHighlightColor(colorBlue);
     menu->setTextSize(uiTextSize);
-    valueWidget.push_back(menu);
+    valueWidget.emplace(std::make_pair(id, menu));
     return menu;
   }
 
@@ -261,7 +260,7 @@ private:
     knob->setPrecision(precision);
     knob->offset = offset;
     knob->setTextSize(uiTextSize);
-    valueWidget.push_back(knob);
+    valueWidget.emplace(std::make_pair(id, knob));
     return knob;
   }
 
