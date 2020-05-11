@@ -394,23 +394,9 @@ public:
     const float topOvertone0 = topChord0;
     const float leftOvertone = left0 + 5.0f * knobX + 2.0f * margin;
     addGroupLabel(leftOvertone, topOvertone0, 4.0f * knobX, "Overtone");
-
-    std::vector<uint32_t> sBoxId(16);
-    for (size_t i = 0; i < sBoxId.size(); ++i) sBoxId[i] = ID::overtone0 + i;
-
-    std::vector<double> sBoxValue(sBoxId.size());
-    for (size_t i = 0; i < sBoxValue.size(); ++i)
-      sBoxValue[i] = param.value[sBoxId[i]]->getDefaultNormalized();
-
-    std::vector<double> sBoxDefaultValue(sBoxValue);
-
-    auto sliderBox
-      = std::make_shared<BarBox>(this, this, sBoxId, sBoxValue, sBoxDefaultValue, fontId);
-    sliderBox->setSize(4.0f * knobX, 2.0f * knobY);
-    sliderBox->setAbsolutePos(leftOvertone, topOvertone0 + labelY);
-    sliderBox->setBorderColor(colorFore);
-    sliderBox->setValueColor(colorBlue);
-    arrayWidget.push_back(sliderBox);
+    addBarBox(
+      leftOvertone, topOvertone0 + labelY, 4.0f * knobX, 2.0f * knobY, ID::overtone0, 16,
+      Scales::gainDecibel);
 
     // Plugin name.
     const auto splashTop = defaultHeight - splashHeight - 20.0f;
@@ -502,6 +488,33 @@ private:
       std::cout << "\"" << value->getName()
                 << "\": " << std::to_string(value->getNormalized()) << ",\n";
     std::cout << "}" << std::endl;
+  }
+
+  template<typename Scale>
+  std::shared_ptr<BarBox<Scale>> addBarBox(
+    float left,
+    float top,
+    float width,
+    float height,
+    uint32_t id0,
+    size_t nElement,
+    Scale &scale)
+  {
+    std::vector<uint32_t> id(nElement);
+    for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
+    std::vector<double> value(id.size());
+    for (size_t i = 0; i < value.size(); ++i)
+      value[i] = param.value[id[i]]->getDefaultNormalized();
+    std::vector<double> defaultValue(value);
+
+    auto barBox = std::make_shared<BarBox<Scale>>(
+      this, this, id, scale, value, defaultValue, fontId);
+    barBox->setSize(width, height);
+    barBox->setAbsolutePos(left, top);
+    barBox->setBorderColor(colorFore);
+    barBox->setValueColor(colorBlue);
+    arrayWidget.push_back(barBox);
+    return barBox;
   }
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)

@@ -161,8 +161,15 @@ private:
     std::cout << "}" << std::endl;
   }
 
-  std::shared_ptr<BarBox> addBarBox(
-    float left, float top, float width, float height, uint32_t id0, size_t nElement)
+  template<typename Scale>
+  std::shared_ptr<BarBox<Scale>> addBarBox(
+    float left,
+    float top,
+    float width,
+    float height,
+    uint32_t id0,
+    size_t nElement,
+    Scale &scale)
   {
     std::vector<uint32_t> id(nElement);
     for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
@@ -171,7 +178,8 @@ private:
       value[i] = param.value[id[i]]->getDefaultNormalized();
     std::vector<double> defaultValue(value);
 
-    auto barBox = std::make_shared<BarBox>(this, this, id, value, defaultValue, fontId);
+    auto barBox = std::make_shared<BarBox<Scale>>(
+      this, this, id, scale, value, defaultValue, fontId);
     barBox->setSize(width, height);
     barBox->setAbsolutePos(left, top);
     barBox->setBorderColor(colorFore);
@@ -305,7 +313,7 @@ public:
     const auto left2 = left1 + barboxWidth + 2 * margin;
 
     addGroupVerticalLabel(left0, top1, barboxHeight, "Time [s]");
-    addBarBox(left1, top1, barboxWidth, barboxHeight, ID::time0, 8);
+    addBarBox(left1, top1, barboxWidth, barboxHeight, ID::time0, 8, Scales::time);
 
     addLabel(left2, top1, knobX, "Multiply");
     addTextKnob(
@@ -313,9 +321,9 @@ public:
       4);
 
     addGroupVerticalLabel(left0, top2, barboxHeight, "OuterFeed");
-    auto barboxOuterFeed
-      = addBarBox(left1, top2, barboxWidth, barboxHeight, ID::outerFeed0, 8);
-    barboxOuterFeed->drawCenterLine = true;
+    auto barboxOuterFeed = addBarBox(
+      left1, top2, barboxWidth, barboxHeight, ID::outerFeed0, 8, Scales::feed);
+    barboxOuterFeed->sliderZero = 0.5f;
 
     addLabel(left2, top2, knobX, "Multiply");
     addTextKnob(
@@ -323,9 +331,9 @@ public:
       false, 4);
 
     addGroupVerticalLabel(left0, top3, barboxHeight, "InnerFeed");
-    auto barboxInnerFeed
-      = addBarBox(left1, top3, barboxWidth, barboxHeight, ID::innerFeed0, 8);
-    barboxInnerFeed->drawCenterLine = true;
+    auto barboxInnerFeed = addBarBox(
+      left1, top3, barboxWidth, barboxHeight, ID::innerFeed0, 8, Scales::feed);
+    barboxInnerFeed->sliderZero = 0.5f;
 
     addLabel(left2, top3, knobX, "Multiply");
     addTextKnob(

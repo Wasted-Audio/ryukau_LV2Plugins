@@ -157,23 +157,6 @@ public:
       defaultWidth - 40.0f, defaultHeight - 40.0f, "EsPhaser");
   }
 
-  void addBarBox(float left, float top, float width, float height, uint32_t id0)
-  {
-    std::vector<uint32_t> id(64);
-    for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
-    std::vector<double> value(id.size());
-    for (size_t i = 0; i < value.size(); ++i)
-      value[i] = param.value[id[i]]->getDefaultNormalized();
-    std::vector<double> defaultValue(value);
-
-    auto barBox = std::make_shared<BarBox>(this, this, id, value, defaultValue, fontId);
-    barBox->setSize(width, height);
-    barBox->setAbsolutePos(left, top);
-    barBox->setBorderColor(colorFore);
-    barBox->setValueColor(colorBlue);
-    arrayWidget.push_back(barBox);
-  }
-
 protected:
   void parameterChanged(uint32_t index, float value) override
   {

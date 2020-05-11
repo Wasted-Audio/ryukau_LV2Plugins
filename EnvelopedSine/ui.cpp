@@ -293,7 +293,9 @@ public:
     addGroupVerticalLabel(attackLeft, attackTop, barboxHeight, "Attack");
 
     const auto attackLeft0 = attackLeft + labelY;
-    addBarBox(attackLeft0, attackTop, barboxWidth, barboxHeight, ID::attack0);
+    addBarBox(
+      attackLeft0, attackTop, barboxWidth, barboxHeight, ID::attack0, nOvertone,
+      Scales::envelopeA);
 
     // Decay.
     const auto decayTop = attackTop + barboxY + margin;
@@ -301,7 +303,9 @@ public:
     addGroupVerticalLabel(decayLeft, decayTop, barboxHeight, "Decay");
 
     const auto decayLeft0 = decayLeft + labelY;
-    addBarBox(decayLeft0, decayTop, barboxWidth, barboxHeight, ID::decay0);
+    addBarBox(
+      decayLeft0, decayTop, barboxWidth, barboxHeight, ID::decay0, nOvertone,
+      Scales::envelopeD);
 
     // Overtone.
     const auto overtoneTop = decayTop + barboxY + margin;
@@ -309,7 +313,9 @@ public:
     addGroupVerticalLabel(overtoneLeft, overtoneTop, barboxHeight, "Gain");
 
     const auto overtoneLeft0 = overtoneLeft + labelY;
-    addBarBox(overtoneLeft0, overtoneTop, barboxWidth, barboxHeight, ID::overtone0);
+    addBarBox(
+      overtoneLeft0, overtoneTop, barboxWidth, barboxHeight, ID::overtone0, nOvertone,
+      Scales::gainDecibel);
 
     // Saturation.
     const auto saturationTop = overtoneTop + barboxY + margin;
@@ -317,7 +323,9 @@ public:
     addGroupVerticalLabel(saturationLeft, saturationTop, barboxHeight, "Saturation");
 
     const auto saturationLeft0 = saturationLeft + labelY;
-    addBarBox(saturationLeft0, saturationTop, barboxWidth, barboxHeight, ID::saturation0);
+    addBarBox(
+      saturationLeft0, saturationTop, barboxWidth, barboxHeight, ID::saturation0,
+      nOvertone, Scales::saturation);
 
     // Plugin name.
     const auto splashTop = defaultHeight - splashHeight - 20.0f;
@@ -325,23 +333,6 @@ public:
     addSplashScreen(
       splashLeft, splashTop, 2.5f * knobX, splashHeight, 20.0f, 20.0f,
       defaultWidth - splashHeight, defaultHeight - splashHeight, "EnvelopedSine");
-  }
-
-  void addBarBox(float left, float top, float width, float height, uint32_t id0)
-  {
-    std::vector<uint32_t> id(64);
-    for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
-    std::vector<double> value(id.size());
-    for (size_t i = 0; i < value.size(); ++i)
-      value[i] = param.value[id[i]]->getDefaultNormalized();
-    std::vector<double> defaultValue(value);
-
-    auto barBox = std::make_shared<BarBox>(this, this, id, value, defaultValue, fontId);
-    barBox->setSize(width, height);
-    barBox->setAbsolutePos(left, top);
-    barBox->setBorderColor(colorFore);
-    barBox->setValueColor(colorBlue);
-    arrayWidget.push_back(barBox);
   }
 
 protected:
@@ -427,6 +418,33 @@ private:
       std::cout << "\"" << value->getName()
                 << "\": " << std::to_string(value->getNormalized()) << ",\n";
     std::cout << "}" << std::endl;
+  }
+
+  template<typename Scale>
+  std::shared_ptr<BarBox<Scale>> addBarBox(
+    float left,
+    float top,
+    float width,
+    float height,
+    uint32_t id0,
+    size_t nElement,
+    Scale &scale)
+  {
+    std::vector<uint32_t> id(nElement);
+    for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
+    std::vector<double> value(id.size());
+    for (size_t i = 0; i < value.size(); ++i)
+      value[i] = param.value[id[i]]->getDefaultNormalized();
+    std::vector<double> defaultValue(value);
+
+    auto barBox = std::make_shared<BarBox<Scale>>(
+      this, this, id, scale, value, defaultValue, fontId);
+    barBox->setSize(width, height);
+    barBox->setAbsolutePos(left, top);
+    barBox->setBorderColor(colorFore);
+    barBox->setValueColor(colorBlue);
+    arrayWidget.push_back(barBox);
+    return barBox;
   }
 
   void addButton(float left, float top, float width, const char *title, uint32_t id)

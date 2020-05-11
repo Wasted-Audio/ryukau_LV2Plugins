@@ -163,8 +163,15 @@ private:
     std::cout << "}" << std::endl;
   }
 
-  std::shared_ptr<BarBox> addBarBox(
-    float left, float top, float width, float height, uint32_t id0, size_t nElement)
+  template<typename Scale>
+  std::shared_ptr<BarBox<Scale>> addBarBox(
+    float left,
+    float top,
+    float width,
+    float height,
+    uint32_t id0,
+    size_t nElement,
+    Scale &scale)
   {
     std::vector<uint32_t> id(nElement);
     for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
@@ -173,7 +180,8 @@ private:
       value[i] = param.value[id[i]]->getDefaultNormalized();
     std::vector<double> defaultValue(value);
 
-    auto barBox = std::make_shared<BarBox>(this, this, id, value, defaultValue, fontId);
+    auto barBox = std::make_shared<BarBox<Scale>>(
+      this, this, id, scale, value, defaultValue, fontId);
     barBox->setSize(width, height);
     barBox->setAbsolutePos(left, top);
     barBox->setBorderColor(colorFore);
@@ -868,8 +876,8 @@ public:
       addGroupVerticalLabel(lfoWaveLeft, lfoWaveTop, lfoBarboxHeight, "LFO Wave"));
     auto barboxLfoWavetable = addBarBox(
       lfoWaveLeft + labelY, lfoWaveTop, barboxWidth + 2.0f * knobX + 4.0f * margin,
-      lfoBarboxHeight, ID::lfoWavetable0, nLFOWavetable);
-    barboxLfoWavetable->drawCenterLine = true;
+      lfoBarboxHeight, ID::lfoWavetable0, nLFOWavetable, Scales::lfoWavetable);
+    barboxLfoWavetable->sliderZero = 0.5f;
     tabview->addWidget(tabMain, barboxLfoWavetable);
 
     // Wavetable pitch.
@@ -1028,10 +1036,11 @@ public:
       tabPadSynth, addGroupVerticalLabel(otGainLeft, otGainTop, barboxHeight, "Gain"));
 
     const auto otGainLeft0 = otGainLeft + labelY;
-    tabview->addWidget(
-      tabPadSynth,
-      addBarBox(
-        otGainLeft0, otGainTop, barboxWidth, barboxHeight, ID::overtoneGain0, nOvertone));
+    auto barboxOtGain = addBarBox(
+      otGainLeft0, otGainTop, barboxWidth, barboxHeight, ID::overtoneGain0, nOvertone,
+      Scales::overtoneGain);
+    barboxOtGain->liveUpdateLineEdit = false;
+    tabview->addWidget(tabPadSynth, barboxOtGain);
 
     // Overtone Width.
     const auto otWidthTop = otGainTop + barboxY + margin;
@@ -1040,11 +1049,11 @@ public:
       tabPadSynth, addGroupVerticalLabel(otWidthLeft, otWidthTop, barboxHeight, "Width"));
 
     const auto otWidthLeft0 = otWidthLeft + labelY;
-    tabview->addWidget(
-      tabPadSynth,
-      addBarBox(
-        otWidthLeft0, otWidthTop, barboxWidth, barboxHeight, ID::overtoneWidth0,
-        nOvertone));
+    auto barboxOtWidth = addBarBox(
+      otWidthLeft0, otWidthTop, barboxWidth, barboxHeight, ID::overtoneWidth0, nOvertone,
+      Scales::overtoneWidth);
+    barboxOtWidth->liveUpdateLineEdit = false;
+    tabview->addWidget(tabPadSynth, barboxOtWidth);
 
     // Overtone Pitch.
     const auto otPitchTop = otWidthTop + barboxY + margin;
@@ -1053,11 +1062,11 @@ public:
       tabPadSynth, addGroupVerticalLabel(otPitchLeft, otPitchTop, barboxHeight, "Pitch"));
 
     const auto otPitchLeft0 = otPitchLeft + labelY;
-    tabview->addWidget(
-      tabPadSynth,
-      addBarBox(
-        otPitchLeft0, otPitchTop, barboxWidth, barboxHeight, ID::overtonePitch0,
-        nOvertone));
+    auto barboxOtPitch = addBarBox(
+      otPitchLeft0, otPitchTop, barboxWidth, barboxHeight, ID::overtonePitch0, nOvertone,
+      Scales::overtonePitch);
+    barboxOtPitch->liveUpdateLineEdit = false;
+    tabview->addWidget(tabPadSynth, barboxOtPitch);
 
     // Overtone Phase.
     const auto otPhaseTop = otPitchTop + barboxY + margin;
@@ -1066,11 +1075,11 @@ public:
       tabPadSynth, addGroupVerticalLabel(otPhaseLeft, otPhaseTop, barboxHeight, "Phase"));
 
     const auto otPhaseLeft0 = otPhaseLeft + labelY;
-    tabview->addWidget(
-      tabPadSynth,
-      addBarBox(
-        otPhaseLeft0, otPhaseTop, barboxWidth, barboxHeight, ID::overtonePhase0,
-        nOvertone));
+    auto barboxOtPhase = addBarBox(
+      otPhaseLeft0, otPhaseTop, barboxWidth, barboxHeight, ID::overtonePhase0, nOvertone,
+      Scales::overtonePhase);
+    barboxOtPhase->liveUpdateLineEdit = false;
+    tabview->addWidget(tabPadSynth, barboxOtPhase);
 
     auto textKnobControl = R"(- Knob -
 Shift + Left Drag|Fine Adjustment

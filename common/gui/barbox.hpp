@@ -24,18 +24,24 @@
 #include <sstream>
 #include <string>
 
-class BarBox : public ArrayWidget {
+template<typename Scale> class BarBox : public ArrayWidget {
 public:
-  bool drawCenterLine = false;
+  float sliderZero = 0.0f;
+  int32_t indexOffset = 0;
+  bool liveUpdateLineEdit = true; // Set this false when line edit is slow.
 
   explicit BarBox(
     NanoWidget *group,
     PluginUI *ui,
     std::vector<uint32_t> id,
+    Scale &scale,
     std::vector<double> value,
     std::vector<double> defaultValue,
     FontId fontId)
-    : ArrayWidget(group, ui, id, value), defaultValue(defaultValue), fontId(fontId)
+    : ArrayWidget(group, ui, id, value)
+    , defaultValue(defaultValue)
+    , fontId(fontId)
+    , scale(scale)
   {
   }
 
@@ -49,12 +55,14 @@ public:
 
     // Value bar.
     fillColor(valueColor);
+
+    float sliderZeroHeight = height * (1.0f - sliderZero);
     for (size_t i = 0; i < value.size(); ++i) {
-      auto sliderHeight = value[i] * height;
+      float rectH = value[i] >= sliderZero ? (value[i] - sliderZero) * height
+                                           : (sliderZero - value[i]) * height;
+      float rectY = value[i] >= sliderZero ? sliderZeroHeight - rectH : sliderZeroHeight;
       beginPath();
-      rect(
-        i * sliderWidth, height - sliderHeight, sliderWidth - defaultBorderWidth,
-        sliderHeight);
+      rect(i * sliderWidth, rectY, sliderWidth - defaultBorderWidth, rectH);
       fill();
     }
 
@@ -77,7 +85,8 @@ public:
       textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
       for (size_t i = 0; i < value.size(); ++i)
         text(
-          (i + 0.5f) * sliderWidth, height - 4, std::to_string(i + 1).c_str(), nullptr);
+          (i + 0.5f) * sliderWidth, height - 4, std::to_string(i + indexOffset).c_str(),
+          nullptr);
     }
 
     // Border.
@@ -102,19 +111,11 @@ public:
         fontSize(textSize * 4.0f);
         textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
         std::ostringstream os;
-        os << "#" << std::to_string(index + 1) << ": " << std::to_string(value[index]);
+        os << "#" << std::to_string(int32_t(index) + indexOffset) << ": "
+           << std::to_string(scale.map(value[index]));
         std::string indexText(os.str());
         text(width / 2, height / 2, indexText.c_str(), nullptr);
       }
-    }
-
-    if (drawCenterLine) {
-      strokeWidth(1.0f);
-      strokeColor(centerLineColor);
-      beginPath();
-      moveTo(0, height / 2.0f);
-      lineTo(width, height / 2.0f);
-      stroke();
     }
   }
 
@@ -319,6 +320,7 @@ public:
       return true;
     } else if (isMouseRightDown) {
       setValueFromLine(anchor, ev.pos);
+      if (liveUpdateLineEdit) updateValue();
       return true;
     }
     return false;
@@ -429,6 +431,8 @@ private:
 
   float textSize = 9.0f;
   FontId fontId = -1;
+
+  Scale &scale;
 
   Point<int> anchor{0, 0};
   bool isMouseLeftDown = false;

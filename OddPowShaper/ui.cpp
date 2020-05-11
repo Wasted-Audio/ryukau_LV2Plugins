@@ -197,25 +197,6 @@ private:
     std::cout << "}" << std::endl;
   }
 
-  std::shared_ptr<BarBox> addBarBox(
-    float left, float top, float width, float height, uint32_t id0, size_t nElement)
-  {
-    std::vector<uint32_t> id(nElement);
-    for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
-    std::vector<double> value(id.size());
-    for (size_t i = 0; i < value.size(); ++i)
-      value[i] = param.value[id[i]]->getDefaultNormalized();
-    std::vector<double> defaultValue(value);
-
-    auto barBox = std::make_shared<BarBox>(this, this, id, value, defaultValue, fontId);
-    barBox->setSize(width, height);
-    barBox->setAbsolutePos(left, top);
-    barBox->setBorderColor(colorFore);
-    barBox->setValueColor(colorBlue);
-    arrayWidget.push_back(barBox);
-    return barBox;
-  }
-
   std::shared_ptr<ToggleButton>
   addButton(float left, float top, float width, const char *title, uint32_t id)
   {

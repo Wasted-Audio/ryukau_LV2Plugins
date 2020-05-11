@@ -160,8 +160,15 @@ private:
     std::cout << "}" << std::endl;
   }
 
-  std::shared_ptr<BarBox> addBarBox(
-    float left, float top, float width, float height, uint32_t id0, size_t nElement)
+  template<typename Scale>
+  std::shared_ptr<BarBox<Scale>> addBarBox(
+    float left,
+    float top,
+    float width,
+    float height,
+    uint32_t id0,
+    size_t nElement,
+    Scale &scale)
   {
     std::vector<uint32_t> id(nElement);
     for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
@@ -170,7 +177,8 @@ private:
       value[i] = param.value[id[i]]->getDefaultNormalized();
     std::vector<double> defaultValue(value);
 
-    auto barBox = std::make_shared<BarBox>(this, this, id, value, defaultValue, fontId);
+    auto barBox = std::make_shared<BarBox<Scale>>(
+      this, this, id, scale, value, defaultValue, fontId);
     barBox->setSize(width, height);
     barBox->setAbsolutePos(left, top);
     barBox->setBorderColor(colorFore);
@@ -287,7 +295,8 @@ public:
     addTextKnob(
       left0 + knobX, top0 + labelY, knobX, colorBlue, ID::masterGain, Scales::masterGain,
       false, 4);
-    addBarBox(left0, top0 + 2 * labelY, barboxWidth, barboxHeight, ID::gain1, 16);
+    addBarBox(
+      left0, top0 + 2 * labelY, barboxWidth, barboxHeight, ID::gain1, 16, Scales::gain);
 
     const auto top1 = top0 + 8 * labelY + 2 * margin;
     addGroupLabel(left0, top1, barboxWidth, "Delay");
@@ -295,7 +304,8 @@ public:
     addTextKnob(
       left0 + knobX, top1 + labelY, knobX, colorBlue, ID::delayMultiply,
       Scales::delayMultiply, false, 4);
-    addBarBox(left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16);
+    addBarBox(
+      left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16, Scales::delay);
 
     const auto top2 = top1 + 8 * labelY + 2 * margin;
     std::stringstream ssPluginName;
