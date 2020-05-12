@@ -74,6 +74,13 @@ protected:
   void initParameter(uint32_t index, Parameter &parameter) override
   {
     dsp->param.initParameter(index, parameter);
+
+    switch (index) {
+      case ParameterID::bypass:
+        parameter.designation = kParameterDesignationBypass;
+        break;
+    }
+
     parameter.symbol = parameter.name;
   }
 
@@ -101,6 +108,14 @@ protected:
   void run(const float **inputs, float **outputs, uint32_t frames) override
   {
     if (inputs == nullptr || outputs == nullptr) return;
+
+    if (dsp->param.value[ParameterID::bypass]->getInt()) {
+      if (outputs[0] != inputs[0])
+        std::memcpy(outputs[0], inputs[0], sizeof(float) * frames);
+      if (outputs[1] != inputs[1])
+        std::memcpy(outputs[1], inputs[1], sizeof(float) * frames);
+      return;
+    }
 
     const auto timePos = getTimePosition();
     if (!wasPlaying && timePos.playing) dsp->startup();

@@ -62,6 +62,7 @@ enum ID {
   wet,
 
   smoothness,
+  bypass,
 
   ID_ENUM_LENGTH,
 };
@@ -162,6 +163,8 @@ struct GlobalParameter {
 
     value[ID::smoothness] = std::make_unique<LogValue>(
       0.5, Scales::smoothness, "smoothness", kParameterIsAutomable);
+    value[ID::bypass] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "bypass", kParameterIsAutomable | kParameterIsBoolean);
   }
 
 #ifndef TEST_BUILD
