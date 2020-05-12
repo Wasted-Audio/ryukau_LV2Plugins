@@ -41,6 +41,35 @@
 #include "../common/gui/tabview.hpp"
 #include "../common/gui/textview.hpp"
 #include "../common/gui/vslider.hpp"
+#include "gui/panicbutton.hpp"
+
+constexpr float uiMargin = 20.0f;
+constexpr float uiTextSize = 14.0f;
+constexpr float midTextSize = 16.0f;
+constexpr float pluginNameTextSize = 22.0f;
+constexpr float margin = 5.0f;
+constexpr float labelHeight = 20.0f;
+constexpr float labelY = 30.0f;
+constexpr float knobWidth = 50.0f;
+constexpr float knobHeight = 40.0f;
+constexpr float knobX = 60.0f; // With margin.
+constexpr float knobY = knobHeight + labelY;
+constexpr float textKnobX = 80.0f;
+constexpr float splashHeight = 40.0f;
+constexpr float barboxWidth = 4 * textKnobX;
+constexpr float barboxHeight = 2 * knobY;
+
+constexpr float tabViewWidth = barboxWidth + labelY + 2 * uiMargin;
+constexpr float tabViewHeight
+  = labelY + 3 * barboxHeight + 2 * labelHeight + 2 * uiMargin;
+
+constexpr float leftPanelWidth = 4 * knobX + 6 * margin + labelHeight;
+
+constexpr uint32_t defaultWidth
+  = uint32_t(leftPanelWidth + labelY + tabViewWidth + 2 * uiMargin);
+constexpr uint32_t defaultHeight = uint32_t(tabViewHeight + 2 * uiMargin);
+
+enum tabIndex { tabBase, tabOffset, tabModulation };
 
 void CreditSplash::onNanoDisplay()
 {
@@ -73,40 +102,52 @@ void CreditSplash::onNanoDisplay()
   text(20.0f, 50.0f, stream.str().c_str(), nullptr);
 
   fontSize(textSize);
-  text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
+  text(20.0f, 90.0f, "© 2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
 
-  text(20.0f, 200.0f, "Have a nice day!", nullptr);
+  text(20.0f, 140.0f, "- Knob -", nullptr);
+  text(20.0f, 160.0f, "Shift + Left Drag", nullptr);
+  text(180.0f, 160.0f, "Fine Adjustment", nullptr);
+  text(20.0f, 180.0f, "Ctrl + Left Click", nullptr);
+  text(180.0f, 180.0f, "Reset to Default", nullptr);
+
+  text(20.0f, 220.0f, "- Number -", nullptr);
+  text(20.0f, 240.0f, "Shares same controls with knob, and:", nullptr);
+  text(20.0f, 260.0f, "Right Click", nullptr);
+  text(180.0f, 260.0f, "Flip Min/Max", nullptr);
+
+  text(20.0f, 300.0f, "- BarBox -", nullptr);
+  text(20.0f, 320.0f, "Ctrl + Left Click", nullptr);
+  text(180.0f, 320.0f, "Reset to Default", nullptr);
+  text(20.0f, 340.0f, "Right Drag", nullptr);
+  text(180.0f, 340.0f, "Draw Line", nullptr);
+  text(20.0f, 360.0f, "Shift + D", nullptr);
+  text(180.0f, 360.0f, "Toggle Min/Mid/Max", nullptr);
+  text(20.0f, 380.0f, "I", nullptr);
+  text(180.0f, 380.0f, "Invert Value", nullptr);
+  text(20.0f, 400.0f, "R", nullptr);
+  text(180.0f, 400.0f, "Randomize", nullptr);
+  text(20.0f, 420.0f, "T", nullptr);
+  text(180.0f, 420.0f, "Subtle Randomize", nullptr);
+  text(20.0f, 440.0f, ", (Comma)", nullptr);
+  text(180.0f, 440.0f, "Rotate Back", nullptr);
+  text(20.0f, 460.0f, ". (Period)", nullptr);
+  text(180.0f, 460.0f, "Rotate Forward", nullptr);
+  text(20.0f, 480.0f, "1", nullptr);
+  text(180.0f, 480.0f, "Decrease", nullptr);
+  text(20.0f, 500.0f, "2-9", nullptr);
+  text(180.0f, 500.0f, "Decrease 2n-9n", nullptr);
+
+  const float mid = (defaultWidth - 2 * uiMargin) / 2;
+
+  text(mid, 140.0f, "Changing InnerFeed or OuterFeed may outputs", nullptr);
+  text(mid, 160.0f, "loud signal.", nullptr);
+
+  text(mid, 200.0f, "Use Panic! button in case of blow up.", nullptr);
+
+  text(mid, 240.0f, "Have a nice day!", nullptr);
 }
 
 START_NAMESPACE_DISTRHO
-
-constexpr float uiMargin = 20.0f;
-constexpr float uiTextSize = 14.0f;
-constexpr float midTextSize = 16.0f;
-constexpr float pluginNameTextSize = 22.0f;
-constexpr float margin = 5.0f;
-constexpr float labelHeight = 20.0f;
-constexpr float labelY = 30.0f;
-constexpr float knobWidth = 50.0f;
-constexpr float knobHeight = 40.0f;
-constexpr float knobX = 60.0f; // With margin.
-constexpr float knobY = knobHeight + labelY;
-constexpr float textKnobX = 80.0f;
-constexpr float splashHeight = 40.0f;
-constexpr float barboxWidth = 4 * textKnobX;
-constexpr float barboxHeight = 2 * knobY;
-
-constexpr float tabViewWidth = barboxWidth + labelY + 2 * uiMargin;
-constexpr float tabViewHeight
-  = labelY + 3 * barboxHeight + 2 * labelHeight + 2 * uiMargin;
-
-constexpr float leftPanelWidth = 4 * knobX + 6 * margin + labelHeight;
-
-constexpr uint32_t defaultWidth
-  = uint32_t(leftPanelWidth + labelY + tabViewWidth + 2 * uiMargin);
-constexpr uint32_t defaultHeight = uint32_t(tabViewHeight + 2 * uiMargin);
-
-enum tabIndex { tabBase, tabOffset, tabModulation };
 
 class LatticeReverbUI : public PluginUI {
 protected:
@@ -472,9 +513,9 @@ public:
     addLabel(mulLeft1, mulTop1, textKnobX, "Base");
     addLabel(mulLeft2, mulTop1, textKnobX, "Offset");
 
-    addLabel(mulLeft0, mulTop2, textKnobX, "Time");
-    addLabel(mulLeft0, mulTop3, textKnobX, "OuterFeed");
-    addLabel(mulLeft0, mulTop4, textKnobX, "InnerFeed");
+    addLabel(mulLeft0, mulTop2, textKnobX, "Time", ALIGN_LEFT | ALIGN_MIDDLE);
+    addLabel(mulLeft0, mulTop3, textKnobX, "OuterFeed", ALIGN_LEFT | ALIGN_MIDDLE);
+    addLabel(mulLeft0, mulTop4, textKnobX, "InnerFeed", ALIGN_LEFT | ALIGN_MIDDLE);
 
     addTextKnob(
       mulLeft1, mulTop2, textKnobX, colorBlue, ID::timeMultiply, Scales::multiply, false,
@@ -495,8 +536,17 @@ public:
       mulLeft2, mulTop4, textKnobX, colorBlue, ID::innerFeedOffsetMultiply,
       Scales::multiply, false, 4);
 
-    // Mix and Misc.
-    const auto miscTop0 = mulTop0 + 6 * labelY;
+    // Panic button.
+    auto panicButton = std::make_shared<PanicButton>(this, this, "Panic!", fontId);
+    panicButton->setSize(leftPanelWidth - 3.0f * knobX, 2 * labelHeight);
+    panicButton->setAbsolutePos(left0 + 1.5f * knobX, mulTop4 + 2 * labelY);
+    panicButton->setForegroundColor(colorFore);
+    panicButton->setHighlightColor(colorOrange);
+    panicButton->setTextSize(midTextSize);
+    widget.push_back(panicButton);
+
+    // Mix.
+    const auto miscTop0 = mulTop0 + 8 * labelY + 3 * margin;
     const auto miscTop1 = miscTop0 + labelY;
 
     const auto mixLeft0 = left0;
@@ -506,12 +556,18 @@ public:
     addKnob(mixLeft0, miscTop1, knobX, colorBlue, "Dry", ID::dry);
     addKnob(mixLeft1, miscTop1, knobX, colorBlue, "Wet", ID::wet);
 
+    // Misc.
     const auto miscLeft0 = left0 + 2 * knobX + 2 * margin + labelHeight;
     const auto miscLeft1 = miscLeft0 + knobX + 2 * margin;
 
-    addGroupLabel(miscLeft0, miscTop0, 2 * knobX + 2 * margin, "Misc.");
-    addKnob(miscLeft0, miscTop1, knobX, colorBlue, "Smooth", ID::smoothness);
-    addKnob(miscLeft1, miscTop1, knobX, colorBlue, "StereoCross", ID::stereoCross);
+    addGroupLabel(miscLeft0, miscTop0, 2 * knobX + 2 * margin, "Stereo");
+    addKnob(miscLeft0, miscTop1, knobX, colorBlue, "Cross", ID::stereoCross);
+    addKnob(miscLeft1, miscTop1, knobX, colorBlue, "Spread", ID::stereoSpread);
+
+    // Smooth.
+    const auto leftSmooth = left0 + 1.5f * knobX + 3 * margin + 0.5f * labelHeight;
+    addKnob(
+      leftSmooth, miscTop1 + knobY + labelY, knobX, colorBlue, "Smooth", ID::smoothness);
 
     // Right side.
     const auto tabViewLeft = left0 + leftPanelWidth + labelY;
@@ -600,7 +656,7 @@ public:
       tabModulation,
       addTextKnob(
         tabInsideLeft0 + 2 * textKnobX, tabViewCenter1, textKnobX, colorBlue,
-        ID::timeLfoLowpass, Scales::defaultScale, false, 4));
+        ID::timeLfoLowpass, Scales::timeLfoLowpas, false, 5));
 
     tabview->addWidget(
       tabModulation,

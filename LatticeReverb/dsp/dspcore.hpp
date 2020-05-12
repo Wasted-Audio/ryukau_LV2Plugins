@@ -70,6 +70,7 @@ public:
     std::array<std::array<LinearSmoother<float>, nestingDepth>, 2> interpInnerFeed;      \
     std::array<LinearSmoother<float>, nestingDepth> interpLowpassCutoff;                 \
     LinearSmoother<float> interpStereoCross;                                             \
+    LinearSmoother<float> interpStereoSpread;                                            \
     LinearSmoother<float> interpDry;                                                     \
     LinearSmoother<float> interpWet;                                                     \
   };

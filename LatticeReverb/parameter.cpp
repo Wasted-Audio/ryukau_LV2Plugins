@@ -27,9 +27,10 @@ LinearScale<double> Scales::feed(-1.0, 1.0);
 LinearScale<double> Scales::timeOffset(-1.0, 1.0);
 LinearScale<double> Scales::feedOffset(-1.0, 1.0);
 LinearScale<double> Scales::multiply(0.0, 1.0);
+LogScale<double> Scales::timeLfoLowpas(0.0, 1.0, 0.5, 0.2);
 LinearScale<double> Scales::stereoCross(0.0, 1.0);
 LogScale<double> Scales::gain(0.0, 4.0, 0.5, 1.0);
-LogScale<double> Scales::smoothness(0.0, 0.5, 0.1, 0.04);
+LogScale<double> Scales::smoothness(0.0, 1.0, 0.5, 0.25);
 
 // Generated from preset dump. This works, but hard coding preset data is seriously bad.
 #ifndef TEST_BUILD

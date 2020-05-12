@@ -86,6 +86,7 @@ void DSPCORE_NAME::reset()
     interpLowpassCutoff[idx].reset(param.value[ID::lowpassCutoff0 + idx]->getFloat());
   }
   interpStereoCross.reset(param.value[ID::stereoCross]->getFloat());
+  interpStereoSpread.reset(param.value[ID::stereoSpread]->getFloat());
   interpDry.reset(param.value[ID::dry]->getFloat());
   interpWet.reset(param.value[ID::wet]->getFloat());
 }
@@ -138,6 +139,7 @@ void DSPCORE_NAME::setParameters(float tempo)
     interpLowpassCutoff[idx].push(param.value[ID::lowpassCutoff0 + idx]->getFloat());
   }
   interpStereoCross.push(param.value[ID::stereoCross]->getFloat());
+  interpStereoSpread.push(param.value[ID::stereoSpread]->getFloat());
   interpDry.push(param.value[ID::dry]->getFloat());
   interpWet.push(param.value[ID::wet]->getFloat());
 }
@@ -166,6 +168,12 @@ void DSPCORE_NAME::process(
 
     auto delayOut
       = delay.process(in0[i], in1[i], sampleRate, interpStereoCross.process());
+    const auto mid = delayOut[0] + delayOut[1];
+    const auto side = delayOut[0] - delayOut[1];
+
+    const auto spread = interpStereoSpread.process();
+    delayOut[0] = mid - spread * (mid - side);
+    delayOut[1] = mid - spread * (mid + side);
 
     const auto dry = interpDry.process();
     const auto wet = interpWet.process();

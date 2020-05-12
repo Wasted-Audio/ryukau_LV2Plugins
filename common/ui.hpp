@@ -25,4 +25,5 @@ public:
 
   virtual void updateValue(uint32_t index, float normalized) = 0;
   virtual void updateState(std::string key, std::string value) = 0;
+  virtual void updateUI(uint32_t id, float normalized) = 0;
 };

@@ -56,6 +56,7 @@ enum ID {
   timeLfoLowpass,
 
   stereoCross,
+  stereoSpread,
 
   dry,
   wet,
@@ -74,6 +75,7 @@ struct Scales {
   static SomeDSP::LinearScale<double> feed;
   static SomeDSP::LinearScale<double> timeOffset;
   static SomeDSP::LinearScale<double> feedOffset;
+  static SomeDSP::LogScale<double> timeLfoLowpas;
   static SomeDSP::LinearScale<double> stereoCross;
   static SomeDSP::LogScale<double> gain;
   static SomeDSP::LogScale<double> smoothness;
@@ -144,11 +146,14 @@ struct GlobalParameter {
     value[ID::innerFeedOffsetMultiply] = std::make_unique<LinearValue>(
       1.0, Scales::multiply, "innerFeedOffsetMultiply", kParameterIsAutomable);
 
-    value[ID::timeLfoLowpass] = std::make_unique<LinearValue>(
-      0.01, Scales::defaultScale, "timeLfoLowpass", kParameterIsAutomable);
+    value[ID::timeLfoLowpass] = std::make_unique<LogValue>(
+      Scales::timeLfoLowpas.invmap(0.01), Scales::timeLfoLowpas, "timeLfoLowpass",
+      kParameterIsAutomable);
 
     value[ID::stereoCross] = std::make_unique<LinearValue>(
       0.0, Scales::stereoCross, "stereoCross", kParameterIsAutomable);
+    value[ID::stereoSpread] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "stereoSpread", kParameterIsAutomable);
 
     value[ID::dry]
       = std::make_unique<LogValue>(0.5, Scales::gain, "dry", kParameterIsAutomable);
