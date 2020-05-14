@@ -35,9 +35,11 @@ public:
     if (contains(ev.pos)) {
       value = ev.press;
 
+      ui->updateValue(ID::timeMultiply, 0.0f);
       ui->updateValue(ID::innerFeedMultiply, 0.0f);
       ui->updateValue(ID::outerFeedMultiply, 0.0f);
 
+      ui->updateUI(ID::timeMultiply, 0.0f);
       ui->updateUI(ID::innerFeedMultiply, 0.0f);
       ui->updateUI(ID::outerFeedMultiply, 0.0f);
 
