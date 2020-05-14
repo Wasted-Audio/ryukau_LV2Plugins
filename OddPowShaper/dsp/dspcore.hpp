@@ -64,8 +64,8 @@ public:
     std::array<OddPowShaper<float>, 2> shaper;                                           \
                                                                                          \
     bool oversample = true;                                                              \
-    LinearSmoother<float> interpDrive;                                                   \
-    LinearSmoother<float> interpOutputGain;                                              \
+    ExpSmoother<float> interpDrive;                                                      \
+    ExpSmoother<float> interpOutputGain;                                                 \
   };
 
 DSPCORE_CLASS(AVX512)

@@ -90,8 +90,6 @@ void DSPCore::process(
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     auto lowpassHz = interpLowpassHz.process() + mapCutoffHz(inLowpass[i]);
     auto highpassHz = interpHighpassHz.process() + mapCutoffHz(inHighpass[i]);
 

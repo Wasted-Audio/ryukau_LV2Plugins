@@ -59,8 +59,6 @@ void DSPCore::process(
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     out0[i] = delay.process(
       in0[i], sampleRate,
       std::clamp(interpTime.process() + inTime[i], 0.0f, float(Scales::time.getMax())),

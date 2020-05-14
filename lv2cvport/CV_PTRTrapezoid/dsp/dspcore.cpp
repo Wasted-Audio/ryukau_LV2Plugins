@@ -88,7 +88,6 @@ void DSPCore::process(
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
-    SmootherCommon<float>::setBufferIndex(i);
 
     oscillator.setFreq(
       interpFrequency.process() * powf(2.0f, inOscPitch[i] * 32.0f / 12.0f));

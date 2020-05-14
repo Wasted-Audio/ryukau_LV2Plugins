@@ -60,7 +60,7 @@ void DSPCore::setParameters()
 
   float rateRatio = param.value[ID::rateKeyFollow]->getInt() ? noteRatio : 1.0f;
   float rateSlideTime = param.value[ParameterID::rateSlideTime]->getFloat();
-  interpRate.push(param.value[ID::rate]->getFloat() * rateRatio, rateSlideTime < 1e-5f);
+  interpRate.push(param.value[ID::rate]->getFloat() * rateRatio);
   interpRate.setTime(rateSlideTime);
 
   interpReleaseTime.push(param.value[ID::releaseTime]->getFloat());
@@ -102,7 +102,6 @@ void DSPCore::process(const size_t length, const float **inputs, float *out0)
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
-    SmootherCommon<float>::setBufferIndex(i);
 
     if (!isGateOpen && inputs[inGate][i] >= gateThreshold) {
       isGateOpen = true;
@@ -113,7 +112,7 @@ void DSPCore::process(const size_t length, const float **inputs, float *out0)
     }
 
     envelope.set(
-      interpRate.process(i) + powf(2.0f, inputs[inRate][i] * 32.0f / 12.0f),
+      interpRate.process() + powf(2.0f, inputs[inRate][i] * 32.0f / 12.0f),
       interpReleaseTime.process() + fabsf(inputs[inReleaseTime][i]));
     envelope.setDecayTime(
       interpS0DecayTime.process() + fabsf(inputs[inDecay0][i]),
@@ -158,9 +157,7 @@ void DSPCore::noteOn(int32_t noteId, int16_t pitch, float tuning, float /* veloc
 
   if (param.value[ID::rateKeyFollow]->getInt()) {
     noteRatio = info.noteRatio;
-    interpRate.push(
-      param.value[ID::rate]->getFloat() * noteRatio,
-      param.value[ParameterID::rateSlideTime]->getFloat() < 1e-5);
+    interpRate.push(param.value[ID::rate]->getFloat() * noteRatio);
   }
 
   envelope.trigger();
@@ -177,9 +174,7 @@ void DSPCore::noteOff(int32_t noteId)
   using ID = ParameterID::ID;
   if (param.value[ID::rateKeyFollow]->getInt() && !noteStack.empty()) {
     noteRatio = noteStack.back().noteRatio;
-    interpRate.push(
-      param.value[ID::rate]->getFloat() * noteRatio,
-      param.value[ParameterID::rateSlideTime]->getFloat() < 1e-5);
+    interpRate.push(param.value[ID::rate]->getFloat() * noteRatio);
   }
 
   if (noteStack.empty() && !isGateOpen) envelope.release();

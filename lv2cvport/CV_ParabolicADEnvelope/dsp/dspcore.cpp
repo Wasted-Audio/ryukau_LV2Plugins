@@ -52,7 +52,6 @@ void DSPCore::process(const size_t length, float *out0)
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
-    SmootherCommon<float>::setBufferIndex(i);
 
     // out0[i] = interpGain.process() * envelope.process();
     out0[i] = envelope.process();

@@ -23,15 +23,15 @@
 #include <numeric>
 
 #if INSTRSET >= 10
-#define DSPCORE_NAME DSPCore_AVX512
+  #define DSPCORE_NAME DSPCore_AVX512
 #elif INSTRSET >= 8
-#define DSPCORE_NAME DSPCore_AVX2
+  #define DSPCORE_NAME DSPCore_AVX2
 #elif INSTRSET >= 5
-#define DSPCORE_NAME DSPCore_SSE41
+  #define DSPCORE_NAME DSPCore_SSE41
 #elif INSTRSET == 2
-#define DSPCORE_NAME DSPCore_SSE2
+  #define DSPCORE_NAME DSPCore_SSE2
 #else
-#error Unsupported instruction set
+  #error Unsupported instruction set
 #endif
 
 inline float clamp(float value, float min, float max)
@@ -110,7 +110,6 @@ void DSPCORE_NAME::process(
   phaser[1].interpStage.setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
     const auto freq = interpFrequency.process();
     const auto spread = interpFreqSpread.process();
     const auto feedback = interpFeedback.process();

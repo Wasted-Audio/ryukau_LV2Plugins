@@ -55,7 +55,6 @@ void DSPCore::process(const size_t length, float **outputs)
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
-    SmootherCommon<float>::setBufferIndex(i);
 
     const float gain = interpMasterGain.process();
 

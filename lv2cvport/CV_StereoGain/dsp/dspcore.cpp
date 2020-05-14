@@ -52,8 +52,6 @@ void DSPCore::process(
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     const float dc = interpDc.process();
     const float gain = interpGain.process() + inGain[i];
 

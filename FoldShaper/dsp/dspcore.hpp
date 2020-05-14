@@ -64,9 +64,9 @@ public:
     std::array<FoldShaper<float>, 2> shaper;                                             \
                                                                                          \
     bool oversample = true;                                                              \
-    LinearSmoother<float> interpInputGain;                                               \
-    LinearSmoother<float> interpOutputGain;                                              \
-    LinearSmoother<float> interpMul;                                                     \
+    ExpSmoother<float> interpInputGain;                                                  \
+    ExpSmoother<float> interpOutputGain;                                                 \
+    ExpSmoother<float> interpMul;                                                        \
   };
 
 DSPCORE_CLASS(AVX512)

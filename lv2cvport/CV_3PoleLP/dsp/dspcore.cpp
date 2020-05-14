@@ -55,8 +55,6 @@ void DSPCore::process(
   bool uniformPeak = param.value[ParameterID::uniformPeak]->getInt();
   bool uniformGain = param.value[ParameterID::uniformGain]->getInt();
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     const float cutoff = interpCutoff.process();
     const float resonance = interpResonance.process();
     const float decay = interpLpDecay.process();

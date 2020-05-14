@@ -23,19 +23,19 @@
 #include <numeric>
 
 #if INSTRSET >= 10
-#define NOTE_NAME Note_AVX512
-#define DSPCORE_NAME DSPCore_AVX512
+  #define NOTE_NAME Note_AVX512
+  #define DSPCORE_NAME DSPCore_AVX512
 #elif INSTRSET >= 8
-#define NOTE_NAME Note_AVX2
-#define DSPCORE_NAME DSPCore_AVX2
+  #define NOTE_NAME Note_AVX2
+  #define DSPCORE_NAME DSPCore_AVX2
 #elif INSTRSET >= 5
-#define NOTE_NAME Note_SSE41
-#define DSPCORE_NAME DSPCore_SSE41
+  #define NOTE_NAME Note_SSE41
+  #define DSPCORE_NAME DSPCore_SSE41
 #elif INSTRSET == 2
-#define NOTE_NAME Note_SSE2
-#define DSPCORE_NAME DSPCore_SSE2
+  #define NOTE_NAME Note_SSE2
+  #define DSPCORE_NAME DSPCore_SSE2
 #else
-#error Unsupported instruction set
+  #error Unsupported instruction set
 #endif
 
 inline float clamp(float value, float min, float max)
@@ -293,7 +293,6 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
 
   std::array<float, 2> frame{};
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
     processMidiNote(i);
 
     frame.fill(0.0f);

@@ -80,7 +80,6 @@ void DSPCore::process(
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
-    SmootherCommon<float>::setBufferIndex(i);
 
     const float freq = interpFrequency.process() * powf(2.0f, inPitch[i] * 32.0f / 12.0f);
     const float gain = interpGain.process() + inGain[i];

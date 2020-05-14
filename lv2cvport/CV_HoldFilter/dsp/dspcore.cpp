@@ -93,8 +93,6 @@ void DSPCore::process(
     inputInterp.push(in0[i]);
 
     for (size_t j = 0; j < overSample; ++j) {
-      SmootherCommon<float>::setBufferIndex(overSample * i);
-
       float cutoff = interpCutoff.process();
       float resonance = interpResonance.process();
       float pulseWidth = interpPulseWidth.process();

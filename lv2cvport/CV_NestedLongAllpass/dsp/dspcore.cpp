@@ -68,8 +68,6 @@ void DSPCore::process(const size_t length, const float *in0, float *out0)
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     for (size_t idx = 0; idx < nestingDepth; ++idx) {
       delay.data[idx].seconds = interpTime[idx].process();
       delay.data[idx].outerFeed = interpOuterFeed[idx].process();

@@ -50,8 +50,6 @@ void DSPCore::process(
   const bool uniformGain = param.value[ParameterID::uniformGain]->getInt();
   const bool highpass = param.value[ParameterID::highpass]->getInt();
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     const float cutoff = interpCutoff.process();
     const float resonance = interpResonance.process();
 

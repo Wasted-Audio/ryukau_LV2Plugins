@@ -45,8 +45,6 @@ void DSPCore::process(const size_t length, const float *in0, float *out0)
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     pController.setP(interpP.process());
     out0[i] = pController.process(in0[i]);
   }

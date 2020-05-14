@@ -23,23 +23,23 @@
 #include <algorithm>
 
 #if INSTRSET >= 10
-#define PROCESSING_UNIT_NAME ProcessingUnit_AVX512
-#define NOTE_NAME Note_AVX512
-#define DSPCORE_NAME DSPCore_AVX512
+  #define PROCESSING_UNIT_NAME ProcessingUnit_AVX512
+  #define NOTE_NAME Note_AVX512
+  #define DSPCORE_NAME DSPCore_AVX512
 #elif INSTRSET >= 8
-#define PROCESSING_UNIT_NAME ProcessingUnit_AVX2
-#define NOTE_NAME Note_AVX2
-#define DSPCORE_NAME DSPCore_AVX2
+  #define PROCESSING_UNIT_NAME ProcessingUnit_AVX2
+  #define NOTE_NAME Note_AVX2
+  #define DSPCORE_NAME DSPCore_AVX2
 #elif INSTRSET >= 5
-#define PROCESSING_UNIT_NAME ProcessingUnit_SSE41
-#define NOTE_NAME Note_SSE41
-#define DSPCORE_NAME DSPCore_SSE41
+  #define PROCESSING_UNIT_NAME ProcessingUnit_SSE41
+  #define NOTE_NAME Note_SSE41
+  #define DSPCORE_NAME DSPCore_SSE41
 #elif INSTRSET >= 2
-#define PROCESSING_UNIT_NAME ProcessingUnit_SSE2
-#define NOTE_NAME Note_SSE2
-#define DSPCORE_NAME DSPCore_SSE2
+  #define PROCESSING_UNIT_NAME ProcessingUnit_SSE2
+  #define NOTE_NAME Note_SSE2
+  #define DSPCORE_NAME DSPCore_SSE2
 #else
-#error Unsupported instruction set
+  #error Unsupported instruction set
 #endif
 
 void DSPCORE_NAME::setup(double sampleRate)
@@ -47,7 +47,7 @@ void DSPCORE_NAME::setup(double sampleRate)
   this->sampleRate = sampleRate;
 
   SmootherCommon<float>::setSampleRate(sampleRate);
-  SmootherCommon<float>::setTime(0.04f);
+  SmootherCommon<float>::setTime(0.2f);
 
   startup();
 }
@@ -99,8 +99,6 @@ void DSPCORE_NAME::process(
 
   std::array<float, 2> frame;
   for (uint32_t i = 0; i < length; ++i) {
-    SmootherCommon<float>::setBufferIndex(i);
-
     auto inGain = interpInputGain.process();
     auto clipGain = interpClipGain.process();
     auto outGain = interpOutputGain.process();
