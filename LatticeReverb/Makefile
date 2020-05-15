@@ -27,10 +27,12 @@ FILES_DSP = \
 	../lib/vcl/instrset_detect.cpp \
 	plugin.cpp \
 	parameter.cpp \
+	parameter_preset.cpp \
 
 FILES_UI  = \
 	ui.cpp \
 	parameter.cpp \
+	parameter_preset.cpp \
 
 OBJS_UI = ../build/common/gui/TinosBoldItalic.cpp.o
 

@@ -205,9 +205,53 @@ struct GlobalParameter {
     value[index]->setFromNormalized(normalized);
     return value[index]->getFloat();
   }
+  enum Preset {
+    presetDefault,
+    presetBadPhase,
+    presetBarrel,
+    presetBoing,
+    presetColdPlace,
+    presetDamped,
+    presetHappyLittleTrees,
+    presetInterleave,
+    presetLateToParty,
+    presetLongLongReverb,
+    presetMessingUp,
+    presetModulateTimeBaseMultiplier,
+    presetNoisyModulation,
+    presetPerhapsHall,
+    presetPipe,
+    presetR2L,
+    presetRightBehind,
+    presetSadMic,
+    presetSober,
+    presetWindy,
 
-  enum Preset { presetDefault, Preset_ENUM_LENGTH };
-  std::array<const char *, 12> programName{"Default"};
+    Preset_ENUM_LENGTH,
+  };
+
+  std::array<const char *, 20> programName{
+    "Default",
+    "BadPhase",
+    "Barrel",
+    "Boing",
+    "ColdPlace",
+    "Damped",
+    "HappyLittleTrees",
+    "Interleave",
+    "LateToParty",
+    "LongLongReverb",
+    "MessingUp",
+    "ModulateTimeBaseMultiplier",
+    "NoisyModulation",
+    "PerhapsHall",
+    "Pipe",
+    "R2L",
+    "RightBehind",
+    "SadMic",
+    "Sober",
+    "Windy",
+  };
 
 #ifndef TEST_BUILD
   void initProgramName(uint32_t index, String &programName)
