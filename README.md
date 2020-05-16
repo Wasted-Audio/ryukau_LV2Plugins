@@ -101,6 +101,21 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 | <kbd>1</kbd>                            | Decrease                                |
 | <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
 
+## LatticeReverb
+<figure>
+<img src="docs/img/lv2_latticereverb.png" alt="Image of LatticeReverb GUI."/>
+</figure>
+
+LatticeReverb is a reverb using lattice structure. Equipped with 16 delays per channel.
+
+**Caution**:
+
+- Output may change with different sample rate.
+- Output may become loud when following steps are performed.
+  1. Set some of the OuterFeed or InnerFeed to close to minimum or maximum.
+  2. Input signals.
+  3. Change the value of OuterFeed or InnerFeed which was set at step 1.
+
 ## LightPadSynth
 <figure>
 <img src="docs/img/lv2_lightpadsynth.png" alt="Image of LightPadSynth GUI."/>
