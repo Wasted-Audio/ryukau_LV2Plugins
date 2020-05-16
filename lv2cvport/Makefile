@@ -7,9 +7,9 @@ build: \
 	CV_ExpADSREnvelope \
 	CV_ExpLoopEnvelope \
 	CV_ExpPolyADEnvelope \
-  CV_Gate16 \
+	CV_Gate16 \
 	CV_HoldFilter \
-  CV_Invert \
+	CV_Invert \
 	CV_LinearADSREnvelope \
 	CV_LinearMap \
 	CV_LongAllpass \
@@ -18,13 +18,13 @@ build: \
 	CV_NestedLongAllpass \
 	CV_ParabolicADEnvelope \
 	CV_PController \
- 	CV_PolyLoopEnvelope \
+	CV_PolyLoopEnvelope \
 	CV_PTRSaw \
 	CV_PTRTrapezoid \
 	CV_RampFilter \
 	CV_RateLimiter \
 	CV_Sin \
-  CV_StereoGain \
+	CV_StereoGain \
 
 .PHONY: CV_3PoleLP
 CV_3PoleLP:
