@@ -116,6 +116,10 @@ LatticeReverb is a reverb using lattice structure. Equipped with 16 delays per c
   2. Input signals.
   3. Change the value of OuterFeed or InnerFeed which was set at step 1.
 
+Lattice structure reference.
+
+- [Nested Allpass Filters](https://ccrma.stanford.edu/~jos/pasp/Nested_Allpass_Filters.html)
+
 ## LightPadSynth
 <figure>
 <img src="docs/img/lv2_lightpadsynth.png" alt="Image of LightPadSynth GUI."/>
