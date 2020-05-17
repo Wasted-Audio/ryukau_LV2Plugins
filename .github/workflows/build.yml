@@ -1,0 +1,13 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Run script
+      run: ci/ci_ubuntu.sh
