@@ -24,6 +24,7 @@
 #include <memory>
 #include <sstream>
 #include <tuple>
+#include <unordered_map>
 #include <vector>
 
 #include "../common/ui.hpp"
