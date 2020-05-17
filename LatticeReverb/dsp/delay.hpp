@@ -159,8 +159,6 @@ public:
 
       lowpass[idx].kp = data[idx].lowpassKp;
       buffer[idx] = lowpass[idx].process(apOut);
-
-      // buffer[idx] = apOut;
     }
 
     return out;
