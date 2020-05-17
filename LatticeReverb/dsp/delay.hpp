@@ -65,7 +65,7 @@ public:
     if (rptr < 0) rptr += size;
 
     // Write to buffer.
-    buf[wptr] = input - Sample(0.5) * (input - w1);
+    buf[wptr] = Sample(0.5) * (input + w1);
     ++wptr;
     if (wptr >= size) wptr -= size;
 
