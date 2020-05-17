@@ -19,6 +19,8 @@ build: \
 	CV_ParabolicADEnvelope \
 	CV_PController \
 	CV_PolyLoopEnvelope \
+	CV_PolyLoopEnvelope2 \
+	CV_PolyLoopEnvelope4 \
 	CV_PTRSaw \
 	CV_PTRTrapezoid \
 	CV_RampFilter \
@@ -105,6 +107,14 @@ CV_PController:
 .PHONY: CV_PolyLoopEnvelope
 CV_PolyLoopEnvelope:
 	$(MAKE) -C CV_PolyLoopEnvelope
+
+.PHONY: CV_PolyLoopEnvelope2
+CV_PolyLoopEnvelope2:
+	$(MAKE) -C CV_PolyLoopEnvelope2
+
+.PHONY: CV_PolyLoopEnvelope4
+CV_PolyLoopEnvelope4:
+	$(MAKE) -C CV_PolyLoopEnvelope4
 
 .PHONY: CV_PTRSaw
 CV_PTRSaw:
