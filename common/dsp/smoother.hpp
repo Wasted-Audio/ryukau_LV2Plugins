@@ -30,7 +30,7 @@ namespace SomeDSP {
 // PID controller without I and D.
 template<typename Sample> class PController {
 public:
-  Sample kp; // In [0, 1].
+  Sample kp = 1; // In [0, 1].
   Sample value = 0;
 
   // Lower bound of cutoffHz is around 3 to 4 Hz for single presision (float).
@@ -94,6 +94,24 @@ public:
   void reset(Sample value = 0) { this->value = value; }
   void push(Sample newTarget) { target = newTarget; }
   Sample process() { return value += SmootherCommon<Sample>::kp * (target - value); }
+};
+
+template<typename Sample> class ExpSmootherLocal {
+public:
+  Sample kp = 1; // In [0, 1].
+  Sample value = 0;
+  Sample target = 0;
+
+  void setCutoff(Sample sampleRate, Sample cutoffHz)
+  {
+    setP(PController<double>::cutoffToP(sampleRate, cutoffHz));
+  };
+
+  void setP(Sample p) { kp = std::clamp<Sample>(p, Sample(0), Sample(1)); };
+  inline Sample getValue() { return value; }
+  void reset(Sample value = 0) { this->value = value; }
+  void push(Sample newTarget) { target = newTarget; }
+  Sample process() { return value += kp * (target - value); }
 };
 
 /**
