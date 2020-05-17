@@ -22,8 +22,7 @@ sudo apt install \
   pkg-config \
   libjack-jackd2-dev \
   libgl-dev \
-  liblo-dev \
-  python-rdflib
+  liblo-dev
 
 git clone --recursive <this repository url>
 cd LV2Plugins
