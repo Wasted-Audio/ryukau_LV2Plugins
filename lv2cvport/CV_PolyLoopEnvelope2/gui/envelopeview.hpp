@@ -167,7 +167,8 @@ public:
     loopTime = envelope.getLoopTime();
     totalTime = attackTime + loopTime + envelope.getReleaseTime();
 
-    float sampleRate = getWidth() / (totalTime);
+    float sampleRate = getWidth() / totalTime;
+    if (sampleRate > 1e6) sampleRate = 1e6;
 
     auto offset = 2 * marginX;
     data.resize(getWidth() >= offset ? (getWidth() - offset) : 0);
@@ -177,6 +178,7 @@ public:
     envelope.setLoop(loopEnd, loopEnd); // Do not loop while rendering.
     envelope.trigger();
     releaseAt = size_t((attackTime + loopTime) * sampleRate);
+
     int16_t prevState = -1;
     for (size_t i = 0; i < data.size(); ++i) {
       if (i == releaseAt) envelope.release();
@@ -187,6 +189,8 @@ public:
       data[i] = 0.95f * gain * envelope.process();
     }
     envelope.terminate();
+
+    if (sectionTime.size() > envelope.nSections) sectionTime.resize(envelope.nSections);
 
     // Trim data.
     auto rate = param.value[ID::rate]->getFloat();

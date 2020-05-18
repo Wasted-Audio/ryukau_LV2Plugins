@@ -175,7 +175,8 @@ public:
     loopTime = envelope.getLoopTime();
     totalTime = attackTime + loopTime + envelope.getReleaseTime();
 
-    float sampleRate = getWidth() / (totalTime);
+    float sampleRate = getWidth() / totalTime;
+    if (sampleRate > 1e6) sampleRate = 1e6;
 
     auto offset = 2 * marginX;
     data.resize(getWidth() >= offset ? (getWidth() - offset) : 0);
@@ -195,6 +196,8 @@ public:
       data[i] = 0.95f * gain * envelope.process();
     }
     envelope.terminate();
+
+    if (sectionTime.size() > envelope.nSections) sectionTime.resize(envelope.nSections);
 
     // Trim data.
     auto rate = param.value[ID::rate]->getFloat();
