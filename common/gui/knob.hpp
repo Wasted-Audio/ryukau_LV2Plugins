@@ -18,70 +18,27 @@
 #pragma once
 
 #include "../dsp/constants.hpp"
+#include "style.hpp"
 #include "valuewidget.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 
-class Knob : public ValueWidget {
+class KnobBase : public ValueWidget {
 public:
   float sensitivity = 0.004f; // MovedPixel * sensitivity = valueChanged.
   float lowSensitivity = sensitivity / 5.0f;
 
-  explicit Knob(NanoWidget *group, PluginUI *ui) : ValueWidget(group, ui, 0.1f) {}
+  explicit KnobBase(NanoWidget *group, PluginUI *ui, Palette &palette)
+    : ValueWidget(group, ui, 0.1f), pal(palette)
+  {
+  }
 
   Point<float> mapValueToArc(float normalized, float length)
   {
     auto radian = (2.0 * normalized - 1.0) * (SomeDSP::pi - arcNotchHalf);
     return Point<float>(-sin(radian) * length, cos(radian) * length);
-  }
-
-  void onNanoDisplay() override
-  {
-    resetTransform();
-    translate(getAbsoluteX(), getAbsoluteY());
-
-    const auto width = getWidth();
-    const auto height = getHeight();
-    const auto centerX = width / 2;
-    const auto centerY = height / 2;
-
-    // Arc.
-    strokeColor(isMouseEntered ? highlightColor : arcColor);
-    lineCap(ROUND);
-    lineJoin(ROUND);
-    strokeWidth(halfArcWidth * 2.0f);
-    const auto radius = (centerX > centerY ? centerY : centerX) - halfArcWidth;
-    beginPath();
-    arc(
-      centerX, centerY, radius, float(SomeDSP::pi) / 2.0f - arcNotchHalf,
-      float(SomeDSP::pi) / 2.0f + arcNotchHalf, CCW);
-    stroke();
-
-    // Tick for default value. Sharing color and style with Arc.
-    strokeWidth(halfArcWidth / 2.0f);
-    beginPath();
-    auto point = mapValueToArc(defaultValue, -radius * defaultTickLength);
-    moveTo(point.getX() + centerX, point.getY() + centerY);
-    point = mapValueToArc(defaultValue, -radius);
-    lineTo(point.getX() + centerX, point.getY() + centerY);
-    stroke();
-
-    // Line from center to tip.
-    strokeColor(tipColor);
-    beginPath();
-    moveTo(centerX, centerY);
-    const auto tip = mapValueToArc(value, -radius);
-    lineTo(tip.getX() + centerX, tip.getY() + centerY);
-    stroke();
-
-    // Tip.
-    fillColor(tipColor);
-    beginPath();
-    arc(
-      tip.getX() + centerX, tip.getY() + centerY, halfArcWidth, -SomeDSP::pi, SomeDSP::pi,
-      CCW);
-    fill();
   }
 
   virtual bool onMouse(const MouseEvent &ev) override
@@ -133,17 +90,9 @@ public:
     return true;
   }
 
-  void setDefaultValue(double value)
-  {
-    defaultValue = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
-  }
-  void setValue(double value) override
-  {
-    this->value = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
-  }
-  void setHighlightColor(Color color) { highlightColor = color; }
-  void setArcColor(Color color) { arcColor = color; }
-  void setTipColor(Color color) { tipColor = color; }
+  void setDefaultValue(double value) { defaultValue = std::clamp(value, 0.0, 1.0); }
+  void setValue(double value) override { this->value = std::clamp(value, 0.0, 1.0); }
+
   void setArcWidth(float width)
   {
     if (width > 0.0f) halfArcWidth = width / 2.0f;
@@ -152,10 +101,6 @@ public:
 protected:
   double defaultValue = 0.5;
 
-  Color highlightColor{0x33, 0xaa, 0xff};
-  Color arcColor{0xdd, 0xdd, 0xdd};
-  Color tipColor{0, 0, 0};
-
   float halfArcWidth = 4.0f;
   const float arcNotchHalf = float(SomeDSP::pi) / 6.0f; // Radian.
   float defaultTickLength = 0.5f;
@@ -163,13 +108,84 @@ protected:
   Point<int> anchorPoint{0, 0};
   bool isMouseLeftDown = false;
   bool isMouseEntered = false;
+
+  Palette &pal;
 };
 
-template<typename Scale> class TextKnob : public Knob {
+template<Style style = Style::common> class Knob : public KnobBase {
 public:
+  explicit Knob(NanoWidget *group, PluginUI *ui, Palette &palette)
+    : KnobBase(group, ui, palette)
+  {
+  }
+
+  void onNanoDisplay() override
+  {
+    resetTransform();
+    translate(getAbsoluteX(), getAbsoluteY());
+
+    const auto width = getWidth();
+    const auto height = getHeight();
+    const auto centerX = width / 2;
+    const auto centerY = height / 2;
+
+    // Arc.
+    if constexpr (style == Style::accent) {
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.unfocused());
+    } else if (style == Style::warning) {
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.unfocused());
+    } else {
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.unfocused());
+    }
+    lineCap(ROUND);
+    lineJoin(ROUND);
+    strokeWidth(halfArcWidth * 2.0f);
+    const auto radius = (centerX > centerY ? centerY : centerX) - halfArcWidth;
+    beginPath();
+    arc(
+      centerX, centerY, radius, float(SomeDSP::pi) / 2.0f - arcNotchHalf,
+      float(SomeDSP::pi) / 2.0f + arcNotchHalf, CCW);
+    stroke();
+
+    // Tick for default value. Sharing color and style with Arc.
+    strokeWidth(halfArcWidth / 2.0f);
+    beginPath();
+    auto point = mapValueToArc(defaultValue, -radius * defaultTickLength);
+    moveTo(point.getX() + centerX, point.getY() + centerY);
+    point = mapValueToArc(defaultValue, -radius);
+    lineTo(point.getX() + centerX, point.getY() + centerY);
+    stroke();
+
+    // Line from center to tip.
+    strokeColor(pal.foreground());
+    beginPath();
+    moveTo(centerX, centerY);
+    const auto tip = mapValueToArc(value, -radius);
+    lineTo(tip.getX() + centerX, tip.getY() + centerY);
+    stroke();
+
+    // Tip.
+    fillColor(pal.foreground());
+    beginPath();
+    arc(
+      tip.getX() + centerX, tip.getY() + centerY, halfArcWidth, -SomeDSP::pi, SomeDSP::pi,
+      CCW);
+    fill();
+  }
+};
+
+template<typename Scale, Style style = Style::common> class TextKnob : public KnobBase {
+public:
+  int32_t offset = 0;
+
   explicit TextKnob(
-    NanoWidget *group, PluginUI *ui, FontId fontId, Scale &scale, bool isDecibel)
-    : Knob(group, ui), fontId(fontId), scale(scale), isDecibel(isDecibel)
+    NanoWidget *group,
+    PluginUI *ui,
+    FontId fontId,
+    Palette &palette,
+    Scale &scale,
+    bool isDecibel)
+    : KnobBase(group, ui, palette), fontId(fontId), scale(scale), isDecibel(isDecibel)
   {
     sensitivity = 0.002f;
     lowSensitivity = sensitivity / 10.0f;
@@ -186,12 +202,20 @@ public:
     // Border.
     beginPath();
     rect(0, 0, width, height);
-    strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+    if constexpr (style == Style::accent) {
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+    } else if (style == Style::warning) {
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+    } else {
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
+    }
     strokeWidth(borderWidth);
     stroke();
+    fillColor(pal.boxBackground());
+    fill();
 
     // Text.
-    fillColor(foregroundColor);
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
@@ -226,14 +250,10 @@ public:
     return false;
   }
 
-  void setForegroundColor(Color color) { foregroundColor = color; }
   void setPrecision(uint32_t precision) { this->precision = precision; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
-  int32_t offset = 0;
-
 protected:
-  Color foregroundColor{0, 0, 0};
   float borderWidth = 1.0f;
   uint32_t precision = 0;
 
@@ -243,11 +263,16 @@ protected:
   const bool isDecibel;
 };
 
-template<typename Scale> class NumberKnob : public Knob {
+template<typename Scale, Style style = Style::common> class NumberKnob : public KnobBase {
 public:
   explicit NumberKnob(
-    NanoWidget *group, PluginUI *ui, FontId fontId, Scale &scale, uint32_t offset = 0)
-    : Knob(group, ui), fontId(fontId), scale(scale), offset(offset)
+    NanoWidget *group,
+    PluginUI *ui,
+    FontId fontId,
+    Palette &palette,
+    Scale &scale,
+    uint32_t offset = 0)
+    : KnobBase(group, ui, palette), fontId(fontId), scale(scale), offset(offset)
   {
   }
 
@@ -262,7 +287,13 @@ public:
     const auto centerY = height / 2;
 
     // Arc.
-    strokeColor(isMouseEntered ? highlightColor : arcColor);
+    if constexpr (style == Style::accent) {
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.unfocused());
+    } else if (style == Style::warning) {
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.unfocused());
+    } else {
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.unfocused());
+    }
     lineCap(ROUND);
     lineJoin(ROUND);
     strokeWidth(halfArcWidth * 2.0f);
@@ -283,6 +314,7 @@ public:
     stroke();
 
     // Text.
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
@@ -292,7 +324,7 @@ public:
 
     // Tip.
     const auto tip = mapValueToArc(value, -radius);
-    fillColor(tipColor);
+    fillColor(pal.foreground());
     beginPath();
     arc(
       tip.getX() + centerX, tip.getY() + centerY, halfArcWidth, -SomeDSP::pi, SomeDSP::pi,

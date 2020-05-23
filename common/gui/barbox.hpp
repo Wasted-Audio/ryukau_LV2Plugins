@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "style.hpp"
 #include "valuewidget.hpp"
 
 #include <algorithm>
@@ -37,10 +38,12 @@ public:
     Scale &scale,
     std::vector<double> value,
     std::vector<double> defaultValue,
-    FontId fontId)
+    FontId fontId,
+    Palette &palette)
     : ArrayWidget(group, ui, id, value)
     , defaultValue(defaultValue)
     , fontId(fontId)
+    , pal(palette)
     , scale(scale)
   {
   }
@@ -54,7 +57,7 @@ public:
     const auto height = getHeight();
 
     // Value bar.
-    fillColor(valueColor);
+    fillColor(pal.highlightMain());
 
     float sliderZeroHeight = height * (1.0f - sliderZero);
     for (size_t i = 0; i < value.size(); ++i) {
@@ -68,7 +71,7 @@ public:
 
     // Splitter.
     strokeWidth(defaultBorderWidth);
-    strokeColor(splitterColor);
+    strokeColor(pal.boxBackground());
     for (size_t i = 0; i < value.size(); ++i) {
       auto x = i * sliderWidth;
       beginPath();
@@ -78,8 +81,8 @@ public:
     }
 
     // Index text.
-    if (sliderWidth >= 4.0f) {
-      fillColor(borderColor);
+    if (sliderWidth >= 8.0f) {
+      fillColor(pal.border());
       fontFaceId(fontId);
       fontSize(textSize);
       textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
@@ -93,7 +96,7 @@ public:
     beginPath();
     rect(0, 0, width, height);
     strokeWidth(defaultBorderWidth);
-    strokeColor(borderColor);
+    strokeColor(pal.border());
     stroke();
 
     // Highlight.
@@ -102,11 +105,11 @@ public:
       if (index < value.size()) {
         beginPath();
         rect(index * sliderWidth, 0, sliderWidth, height);
-        fillColor(highlightColor);
+        fillColor(pal.overlayHighlight());
         fill();
 
         // Index text.
-        fillColor(Color(0, 0, 0, 0x88));
+        fillColor(pal.overlay());
         fontFaceId(fontId);
         fontSize(textSize * 4.0f);
         textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
@@ -346,12 +349,9 @@ public:
   void onResize(const ResizeEvent &ev)
   {
     sliderWidth = float(ev.size.getWidth()) / value.size();
-    defaultBorderWidth = sliderWidth < 4.0f ? 1.0f : 2.0f;
+    defaultBorderWidth = sliderWidth <= 4.0f ? 1.0f : 2.0f;
   }
 
-  void setHighlightColor(Color color) { highlightColor = color; }
-  void setValueColor(Color color) { valueColor = color; }
-  void setBorderColor(Color color) { borderColor = color; }
   void setDefaultBorderWidth(float width) { defaultBorderWidth = width; }
   void setHighlightBorderWidth(float width) { highlightBorderWidth = width; }
 
@@ -419,18 +419,12 @@ private:
   }
 
   std::vector<double> defaultValue;
-
-  Color highlightColor{0x00, 0xff, 0x00, 0x33};
-  Color splitterColor{0xff, 0xff, 0xff};
-  Color valueColor{0xdd, 0xdd, 0xdd};
-  Color borderColor{0, 0, 0};
-  Color centerLineColor{0, 0, 0, 0x88};
-
   float defaultBorderWidth = 2.0f;
   float highlightBorderWidth = 4.0f;
 
   float textSize = 9.0f;
   FontId fontId = -1;
+  Palette &pal;
 
   Scale &scale;
 

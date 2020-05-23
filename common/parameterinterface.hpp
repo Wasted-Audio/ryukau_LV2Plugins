@@ -1,4 +1,4 @@
-// (c) 2019-2020 Takamitsu Endo
+// (c) 2020 Takamitsu Endo
 //
 // This file is part of Uhhyou Plugins.
 //
@@ -17,15 +17,20 @@
 
 #pragma once
 
-#include "DistrhoUI.hpp"
+#include <cstddef>
+#include <cstdint>
 
-#include <string>
-
-class PluginUI : public UI {
+class ParameterInterface {
 public:
-  PluginUI(uint width = 0, uint height = 0) : UI(width, height) {}
+  virtual size_t idLength() = 0;
+  virtual double getNormalized(uint32_t index) const = 0;
+  virtual double getDefaultNormalized(uint32_t index) const = 0;
+  virtual double getFloat(uint32_t index) const = 0;
+  virtual double getInt(uint32_t index) const = 0;
+  virtual double parameterChanged(uint32_t index, float raw) = 0;
+  virtual double updateValue(uint32_t index, float normalized) = 0;
 
-  virtual void updateValue(uint32_t index, float normalized) = 0;
-  virtual void updateState(std::string key, std::string value) = 0;
-  virtual void updateUI(uint32_t id, float normalized) = 0;
+#ifndef TEST_BUILD
+  virtual void loadProgram(uint32_t index) = 0;
+#endif
 };

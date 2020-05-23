@@ -17,16 +17,18 @@
 
 #pragma once
 
+#include "Widget.hpp"
+#include "style.hpp"
+
 #include <memory>
 #include <sstream>
 #include <string>
 
-#include "Widget.hpp"
-
 class CreditSplash : public NanoWidget {
 public:
-  explicit CreditSplash(NanoWidget *group, const char *name, FontId fontId)
-    : NanoWidget(group), name(name), fontId(fontId)
+  explicit CreditSplash(
+    NanoWidget *group, std::string name, FontId fontId, Palette &palette)
+    : NanoWidget(group), name(name), fontId(fontId), pal(palette)
   {
     hide();
   }
@@ -52,23 +54,22 @@ public:
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  Color backgroundColor{0xff, 0xff, 0xff};
-  Color foregroundColor{0, 0, 0};
-  Color highlightColor{0x22, 0x99, 0xff};
-
   bool isMouseEntered = false;
 
-  const char *name = nullptr;
+  std::string name = nullptr;
   FontId fontId = -1;
   int align = ALIGN_BASELINE | ALIGN_MIDDLE;
   float borderWidth = 8.0f;
   float textSize = 18.0f;
+
+  Palette &pal;
 };
 
 class SplashButton : public NanoWidget {
 public:
-  explicit SplashButton(NanoWidget *group, const char *labelText, FontId fontId)
-    : NanoWidget(group), labelText(labelText), fontId(fontId)
+  explicit SplashButton(
+    NanoWidget *group, std::string labelText, FontId fontId, Palette &palette)
+    : NanoWidget(group), labelText(labelText), fontId(fontId), pal(palette)
   {
   }
 
@@ -83,17 +84,19 @@ public:
     // Rect.
     beginPath();
     rect(0, 0, width, height);
-    strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+    strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
     strokeWidth(borderWidth);
     stroke();
+    fillColor(pal.boxBackground());
+    fill();
 
     // Text.
-    if (labelText == nullptr) return;
-    fillColor(foregroundColor);
+    if (labelText.size() == 0) return;
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
-    text(width / 2, height / 2, labelText, nullptr);
+    text(width / 2, height / 2, labelText.c_str(), nullptr);
   }
 
   bool onMouse(const MouseEvent &ev) override
@@ -113,8 +116,6 @@ public:
     return false;
   }
 
-  void setForegroundColor(Color color) { foregroundColor = color; }
-  void setHighlightColor(Color color) { highlightColor = color; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
   /**
@@ -133,13 +134,11 @@ public:
   }
 
 protected:
-  Color foregroundColor{0, 0, 0};
-  Color highlightColor{0x22, 0x99, 0xff};
-
   bool isMouseEntered = false;
 
-  const char *labelText = nullptr;
+  std::string labelText = nullptr;
   FontId fontId = -1;
+  Palette &pal;
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
   float borderWidth = 2.0f;
   float textSize = 18.0f;

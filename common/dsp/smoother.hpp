@@ -46,7 +46,7 @@ public:
   Sample process(Sample input) { return value += kp * (input - value); }
 };
 
-class PController16 {
+class alignas(64) PController16 {
 public:
   void setP(float p) { kp = std::clamp<float>(p, float(0), float(1)); };
   void setP(int index, float p) { kp.insert(index, p); };
@@ -94,6 +94,20 @@ public:
   void reset(Sample value = 0) { this->value = value; }
   void push(Sample newTarget) { target = newTarget; }
   Sample process() { return value += SmootherCommon<Sample>::kp * (target - value); }
+};
+
+class alignas(64) ExpSmoother16 {
+public:
+  Vec16f value = 0.0f;
+  Vec16f target = 0.0f;
+
+  inline Vec16f getValue() { return value; }
+  inline float getValue(int index) { return value[index]; }
+  void reset(float value = 0.0f) { this->value = value; }
+  void reset(int index, float value = 0.0f) { this->value.insert(index, value); }
+  void push(Vec16f newTarget) { target = newTarget; }
+  void push(int index, float newTarget) { target.insert(index, newTarget); }
+  Vec16f process() { return value += SmootherCommon<float>::kp * (target - value); }
 };
 
 template<typename Sample> class ExpSmootherLocal {

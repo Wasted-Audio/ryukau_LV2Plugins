@@ -18,6 +18,7 @@
 #pragma once
 
 #include "Widget.hpp"
+#include "style.hpp"
 
 #include "../dsp/constants.hpp"
 
@@ -28,8 +29,9 @@ public:
   bool drawBorder = false;
   bool drawUnderline = false;
 
-  explicit Label(NanoWidget *group, std::string labelText, FontId fontId)
-    : NanoWidget(group), labelText(labelText), fontId(fontId)
+  explicit Label(
+    NanoWidget *group, std::string labelText, FontId fontId, Palette &palette)
+    : NanoWidget(group), labelText(labelText), fontId(fontId), pal(palette)
   {
   }
 
@@ -53,7 +55,7 @@ public:
       beginPath();
       moveTo(0, height / 2);
       lineTo(width, height / 2);
-      strokeColor(colorFore);
+      strokeColor(pal.border());
       strokeWidth(borderWidth);
       stroke();
 
@@ -64,26 +66,22 @@ public:
       rect(
         textBack.getX() - textBackMargin, textBack.getY(),
         textBack.getWidth() + 2 * textBackMargin, textBack.getHeight());
-      fillColor(colorBack);
+      fillColor(pal.background());
       fill();
     }
 
-    fillColor(colorFore);
+    fillColor(pal.foreground());
     text(labelX, labelY, labelText.c_str(), nullptr);
   }
 
-  void setForegroundColor(Color color) { colorFore = color; }
-  void setBackgroundColor(Color color) { colorBack = color; }
   void setBorderWidth(float width) { borderWidth = width < 0.0f ? 0.0f : width; }
   void setTextAlign(int align) { this->align = align; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  Color colorFore{0, 0, 0};
-  Color colorBack{0xff, 0xff, 0xff};
-
   std::string labelText;
   FontId fontId = -1;
+  Palette &pal;
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
   float borderWidth = 1.0f;
   float textSize = 18.0f;
@@ -91,8 +89,9 @@ protected:
 
 class VLabel : public Label {
 public:
-  explicit VLabel(NanoWidget *group, std::string labelText, FontId fontId)
-    : Label(group, labelText, fontId)
+  explicit VLabel(
+    NanoWidget *group, std::string labelText, FontId fontId, Palette &palette)
+    : Label(group, labelText, fontId, palette)
   {
   }
 
@@ -117,7 +116,7 @@ public:
       beginPath();
       moveTo(0, height / 2);
       lineTo(width, height / 2);
-      strokeColor(colorFore);
+      strokeColor(pal.background());
       strokeWidth(borderWidth);
       stroke();
 
@@ -128,11 +127,11 @@ public:
       rect(
         textBack.getX() - textBackMargin, textBack.getY(),
         textBack.getWidth() + 2 * textBackMargin, textBack.getHeight());
-      fillColor(colorBack);
+      fillColor(pal.background());
       fill();
     }
 
-    fillColor(colorFore);
+    fillColor(pal.foreground());
     text(labelX, labelY, labelText.c_str(), nullptr);
   }
 };

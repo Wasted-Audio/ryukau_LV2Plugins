@@ -17,13 +17,14 @@
 
 #pragma once
 
+#include "style.hpp"
 #include "valuewidget.hpp"
 
 #include <string>
 
 #include <iostream>
 
-class StateButton : public StateWidget {
+template<Style style = Style::common> class StateButton : public StateWidget {
 public:
   explicit StateButton(
     NanoWidget *group,
@@ -31,8 +32,12 @@ public:
     std::string labelText,
     std::string key,
     std::string value,
-    FontId fontId)
-    : StateWidget(group, ui, key, value), labelText(labelText), fontId(fontId)
+    FontId fontId,
+    Palette &palette)
+    : StateWidget(group, ui, key, value)
+    , labelText(labelText)
+    , fontId(fontId)
+    , pal(palette)
   {
   }
 
@@ -47,16 +52,22 @@ public:
     // Rect.
     beginPath();
     rect(0, 0, width, height);
-    if (isPressed) {
-      fillColor(highlightColor);
-      fill();
+    fill();
+    if constexpr (style == Style::accent) {
+      fillColor(isPressed ? pal.highlightAccent() : pal.background());
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+    } else if (style == Style::warning) {
+      fillColor(isPressed ? pal.highlightWarning() : pal.background());
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+    } else {
+      fillColor(isPressed ? pal.highlightMain() : pal.background());
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
     }
-    strokeColor(isMouseEntered ? highlightColor : foregroundColor);
     strokeWidth(borderWidth);
     stroke();
 
     // Text.
-    fillColor(foregroundColor);
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
@@ -84,14 +95,9 @@ public:
     return false;
   }
 
-  void setForegroundColor(Color color) { foregroundColor = color; }
-  void setHighlightColor(Color color) { highlightColor = color; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  Color foregroundColor{0, 0, 0};
-  Color highlightColor{0x22, 0x99, 0xff};
-
   bool isMouseEntered = false;
   bool isPressed = false;
 
@@ -100,12 +106,18 @@ protected:
   float borderWidth = 1.0f;
   float textSize = 18.0f;
   FontId fontId = -1;
+  Palette &pal;
 };
 
-class Button : public ValueWidget {
+class ButtonBase : public ValueWidget {
 public:
-  explicit Button(NanoWidget *group, PluginUI *ui, std::string labelText, FontId fontId)
-    : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId)
+  explicit ButtonBase(
+    NanoWidget *group,
+    PluginUI *ui,
+    std::string labelText,
+    FontId fontId,
+    Palette &palette)
+    : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId), pal(palette)
   {
   }
 
@@ -120,35 +132,18 @@ public:
     // Rect.
     beginPath();
     rect(0, 0, width, height);
-    if (value) {
-      fillColor(highlightColor);
-      fill();
-    }
-    strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+    strokeColor(isMouseEntered ? pal.highlightButton() : pal.border());
     strokeWidth(borderWidth);
+    fillColor(value ? pal.highlightButton() : pal.boxBackground());
+    fill();
     stroke();
 
     // Text.
-    fillColor(foregroundColor);
+    fillColor(value ? pal.boxBackground() : pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
     text(width / 2, height / 2, labelText.c_str(), nullptr);
-  }
-
-  virtual bool onMouse(const MouseEvent &ev) override
-  {
-    if (contains(ev.pos)) {
-      value = ev.press;
-      updateValue();
-      repaint();
-      return true;
-    } else if (!ev.press) {
-      value = false;
-      updateValue();
-      repaint();
-    }
-    return false;
   }
 
   virtual bool onMotion(const MotionEvent &ev) override
@@ -170,14 +165,9 @@ public:
     return true;
   }
 
-  void setForegroundColor(Color color) { foregroundColor = color; }
-  void setHighlightColor(Color color) { highlightColor = color; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  Color foregroundColor{0, 0, 0};
-  Color highlightColor{0x22, 0x99, 0xff};
-
   bool isMouseEntered = false;
 
   std::string labelText{""};
@@ -185,14 +175,113 @@ protected:
   float borderWidth = 1.0f;
   float textSize = 18.0f;
   FontId fontId = -1;
+  Palette &pal;
 };
 
-class ToggleButton : public Button {
+template<Style style = Style::common> class KickButton : public ButtonBase {
+public:
+  explicit KickButton(
+    NanoWidget *group,
+    PluginUI *ui,
+    std::string labelText,
+    FontId fontId,
+    Palette &palette)
+    : ButtonBase(group, ui, labelText, fontId, palette)
+  {
+  }
+
+  void onNanoDisplay() override
+  {
+    resetTransform();
+    translate(getAbsoluteX(), getAbsoluteY());
+
+    const auto width = getWidth();
+    const auto height = getHeight();
+
+    // Rect.
+    beginPath();
+    rect(0, 0, width, height);
+    if constexpr (style == Style::accent) {
+      fillColor(value ? pal.highlightAccent() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+    } else if (style == Style::warning) {
+      fillColor(value ? pal.highlightWarning() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+    } else {
+      fillColor(value ? pal.highlightButton() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightButton() : pal.border());
+    }
+    strokeWidth(borderWidth);
+    fill();
+    stroke();
+
+    // Text.
+    fillColor(value ? pal.boxBackground() : pal.foreground());
+    fontFaceId(fontId);
+    fontSize(textSize);
+    textAlign(align);
+    text(width / 2, height / 2, labelText.c_str(), nullptr);
+  }
+
+  bool onMouse(const MouseEvent &ev) override
+  {
+    if (contains(ev.pos)) {
+      value = ev.press;
+      updateValue();
+      repaint();
+      return true;
+    } else if (!ev.press) {
+      value = false;
+      updateValue();
+      repaint();
+    }
+    return false;
+  }
+};
+
+template<Style style = Style::common> class ToggleButton : public ButtonBase {
 public:
   explicit ToggleButton(
-    NanoWidget *group, PluginUI *ui, std::string labelText, FontId fontId)
-    : Button(group, ui, labelText, fontId)
+    NanoWidget *group,
+    PluginUI *ui,
+    std::string labelText,
+    FontId fontId,
+    Palette &palette)
+    : ButtonBase(group, ui, labelText, fontId, palette)
   {
+  }
+
+  void onNanoDisplay() override
+  {
+    resetTransform();
+    translate(getAbsoluteX(), getAbsoluteY());
+
+    const auto width = getWidth();
+    const auto height = getHeight();
+
+    // Rect.
+    beginPath();
+    rect(0, 0, width, height);
+    if constexpr (style == Style::accent) {
+      fillColor(value ? pal.highlightAccent() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+    } else if (style == Style::warning) {
+      fillColor(value ? pal.highlightWarning() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+    } else {
+      fillColor(value ? pal.highlightButton() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightButton() : pal.border());
+    }
+    strokeWidth(borderWidth);
+    fill();
+    stroke();
+
+    // Text.
+    fillColor(value ? pal.boxBackground() : pal.foreground());
+    fontFaceId(fontId);
+    fontSize(textSize);
+    textAlign(align);
+    text(width / 2, height / 2, labelText.c_str(), nullptr);
   }
 
   bool onMouse(const MouseEvent &ev) override

@@ -17,10 +17,11 @@
 
 #pragma once
 
-#include <algorithm>
-
 #include "constants.hpp"
 #include "somemath.hpp"
+
+#include <algorithm>
+#include <cstdint>
 
 namespace SomeDSP {
 

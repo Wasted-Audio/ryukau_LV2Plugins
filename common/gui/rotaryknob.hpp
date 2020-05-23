@@ -18,15 +18,20 @@
 #pragma once
 
 #include "../dsp/constants.hpp"
+#include "style.hpp"
 #include "valuewidget.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 
 // Incremental encoder.
-class RotaryKnob : public ValueWidget {
+template<Style style = Style::common> class RotaryKnob : public ValueWidget {
 public:
-  explicit RotaryKnob(NanoWidget *group, PluginUI *ui) : ValueWidget(group, ui, 0.1f) {}
+  explicit RotaryKnob(NanoWidget *group, PluginUI *ui, Palette &palette)
+    : ValueWidget(group, ui, 0.1f), pal(palette)
+  {
+  }
 
   void onNanoDisplay() override
   {
@@ -39,7 +44,13 @@ public:
     const auto centerY = height / 2;
 
     // Arc.
-    strokeColor(isMouseEntered ? highlightColor : arcColor);
+    if constexpr (style == Style::accent) {
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.unfocused());
+    } else if (style == Style::warning) {
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.unfocused());
+    } else {
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.unfocused());
+    }
     lineCap(ROUND);
     lineJoin(ROUND);
     strokeWidth(halfArcWidth * 2.0f);
@@ -58,7 +69,7 @@ public:
     stroke();
 
     // Line from center to tip.
-    strokeColor(tipColor);
+    strokeColor(pal.foreground());
     beginPath();
     moveTo(centerX, centerY);
     const auto tip = mapValueToArc(value, -radius);
@@ -66,7 +77,7 @@ public:
     stroke();
 
     // Tip.
-    fillColor(tipColor);
+    fillColor(pal.foreground());
     beginPath();
     circle(tip.getX() + centerX, tip.getY() + centerY, halfArcWidth);
     fill();
@@ -121,17 +132,9 @@ public:
     return true;
   }
 
-  void setDefaultValue(double value)
-  {
-    defaultValue = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
-  }
-  void setValue(double value) override
-  {
-    this->value = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
-  }
-  void setHighlightColor(Color color) { highlightColor = color; }
-  void setArcColor(Color color) { arcColor = color; }
-  void setTipColor(Color color) { tipColor = color; }
+  void setDefaultValue(double value) { defaultValue = std::clamp(value, 0.0, 1.0); }
+  void setValue(double value) override { this->value = std::clamp(value, 0.0, 1.0); }
+
   void setArcWidth(float width)
   {
     if (width > 0.0f) halfArcWidth = width / 2.0f;
@@ -146,10 +149,6 @@ protected:
 
   double defaultValue = 0.5;
 
-  Color highlightColor{0x33, 0xaa, 0xff};
-  Color arcColor{0xdd, 0xdd, 0xdd};
-  Color tipColor{0, 0, 0};
-
   float halfArcWidth = 4.0f;
   const float arcNotchHalf = float(SomeDSP::pi) / 6.0f; // Radian.
   float defaultTickLength = 0.5f;
@@ -160,4 +159,6 @@ protected:
   Point<int> anchorPoint{0, 0};
   bool isMouseLeftDown = false;
   bool isMouseEntered = false;
+
+  Palette &pal;
 };

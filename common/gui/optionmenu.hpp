@@ -17,17 +17,20 @@
 
 #pragma once
 
+#include "style.hpp"
 #include "valuewidget.hpp"
 
 #include <string>
 
-class OptionMenu : public ValueWidget {
+template<Style style = Style::common> class OptionMenu : public ValueWidget {
 public:
-  bool drawBackground = false;
-
   explicit OptionMenu(
-    NanoWidget *group, PluginUI *ui, std::vector<std::string> item, FontId fontId)
-    : ValueWidget(group, ui, 0.0f), item(item), fontId(fontId)
+    NanoWidget *group,
+    PluginUI *ui,
+    std::vector<std::string> item,
+    FontId fontId,
+    Palette &palette)
+    : ValueWidget(group, ui, 0.0f), item(item), fontId(fontId), pal(palette)
   {
   }
 
@@ -42,17 +45,21 @@ public:
     // Border.
     beginPath();
     rect(0, 0, width, height);
-    strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+    if constexpr (style == Style::accent) {
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+    } else if (style == Style::warning) {
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+    } else {
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
+    }
     strokeWidth(borderWidth);
     stroke();
-    if (drawBackground) {
-      fillColor(backgroundColor);
-      fill();
-    }
+    fillColor(pal.boxBackground());
+    fill();
 
     // Text.
     if (item.size() == 0 || item.size() <= index) return;
-    fillColor(foregroundColor);
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
@@ -116,8 +123,6 @@ public:
     return true;
   }
 
-  void setForegroundColor(Color color) { foregroundColor = color; }
-  void setHighlightColor(Color color) { highlightColor = color; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
   void setDefaultValue(uint32_t index)
@@ -145,13 +150,10 @@ protected:
   uint32_t index = 0;
   std::vector<std::string> item{};
 
-  Color highlightColor{0x33, 0xaa, 0xff};
-  Color foregroundColor{0, 0, 0};
-  Color backgroundColor{0xff, 0xff, 0xff};
-
   float borderWidth = 1.0f;
   float textSize = 18.0f;
   FontId fontId = -1;
+  Palette &pal;
 
   const float sensitivity = 24.0f; // Pixels.
 

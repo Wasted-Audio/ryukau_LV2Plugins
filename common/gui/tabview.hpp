@@ -17,8 +17,10 @@
 
 #pragma once
 
-#include "../ui.hpp"
 #include "Widget.hpp"
+
+#include "../ui.hpp"
+#include "style.hpp"
 
 #include <memory>
 #include <string>
@@ -62,12 +64,13 @@ public:
     NanoWidget *group,
     std::vector<std::string> tabNames,
     FontId fontId,
+    Palette &palette,
     float tabHeight,
     float left,
     float top,
     float width,
     float height)
-    : NanoWidget(group), tabHeight(tabHeight), fontId(fontId)
+    : NanoWidget(group), tabHeight(tabHeight), fontId(fontId), pal(palette)
   {
     setAbsolutePos(left, top);
     setSize(width, height);
@@ -123,14 +126,14 @@ public:
 
       beginPath();
       rect(tab.left, tab.top, tab.width, tab.height);
-      fillColor(tab.isMouseEntered ? colorFocus : colorBack);
+      fillColor(tab.isMouseEntered ? pal.overlayHighlight() : pal.boxBackground());
       fill();
-      strokeColor(colorFore);
+      strokeColor(pal.foreground());
       stroke();
 
       float labelX = tab.left + tab.width / 2.0f;
       float labelY = tab.top + tab.height / 2.0f;
-      fillColor(colorFore);
+      fillColor(pal.foreground());
       text(labelX, labelY, tab.name.c_str(), nullptr);
     }
 
@@ -138,7 +141,7 @@ public:
     // NanoVG couldn't fill concave shape. Instead it fills boundary box (AABB).
     beginPath();
     rect(0, tabHeight, width, height - tabHeight);
-    fillColor(colorBack);
+    fillColor(pal.background());
     fill();
 
     const TabButton &activeTab = tabs[activeTabIndex];
@@ -152,13 +155,13 @@ public:
     lineTo(width, height);
     lineTo(0, height);
     closePath();
-    strokeColor(colorFore);
+    strokeColor(pal.foreground());
     strokeWidth(2.0f);
     stroke();
 
     float labelX = activeTab.left + activeTab.width / 2.0f;
     float labelY = activeTab.height / 2.0f;
-    fillColor(colorFore);
+    fillColor(pal.foreground());
     text(labelX, labelY, activeTab.name.c_str(), nullptr);
   }
 
@@ -195,8 +198,6 @@ public:
     return true;
   }
 
-  void setHighlightColor(Color color) { colorFocus = color; }
-  void setForegroundColor(Color color) { colorFore = color; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
@@ -207,13 +208,10 @@ protected:
       && pos.getY() <= tabHeight;
   }
 
-  Color colorFocus{0x33, 0xaa, 0xff};
-  Color colorFore{0, 0, 0};
-  Color colorBack{0xff, 0xff, 0xff};
-
   float tabHeight = 30.0f;
 
   const int align = ALIGN_CENTER | ALIGN_MIDDLE;
   float textSize = 14.0f;
   FontId fontId = -1;
+  Palette &pal;
 };

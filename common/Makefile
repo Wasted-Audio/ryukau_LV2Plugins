@@ -1,8 +1,11 @@
 BUILD_DIR = ../build/common
 
-TINOS_CPP ::= gui/TinosBoldItalic.cpp
-TINOS_OBJ ::= $(TINOS_CPP:%=$(BUILD_DIR)/%.o)
+OBJ ::= \
+	$(BUILD_DIR)/gui/style.o \
+	$(BUILD_DIR)/gui/TinosBoldItalic.o \
 
-$(TINOS_OBJ): $(TINOS_CPP)
-	@mkdir -p $(dir $(TINOS_OBJ))
-	g++ -O3 -c -o $@ $<
+build: $(OBJ)
+
+$(BUILD_DIR)/%.o : %.cpp
+	@mkdir -p $(dir $@)
+	g++ -std=c++17 -O3 -fPIC -c -o $@ $<

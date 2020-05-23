@@ -17,14 +17,20 @@
 
 #pragma once
 
+#include "style.hpp"
 #include "valuewidget.hpp"
 
-class CheckBox : public ValueWidget {
+template<Style style = Style::common> class CheckBox : public ValueWidget {
 public:
   bool drawBackground = false;
 
-  explicit CheckBox(NanoWidget *group, PluginUI *ui, const char *labelText, FontId fontId)
-    : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId)
+  explicit CheckBox(
+    NanoWidget *group,
+    PluginUI *ui,
+    const char *labelText,
+    FontId fontId,
+    Palette &palette)
+    : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId), pal(palette)
   {
   }
 
@@ -41,16 +47,24 @@ public:
     if (drawBackground) {
       beginPath();
       rect(0, 0, width, height);
-      fillColor(backgroundColor);
+      fillColor(pal.background());
       fill();
     }
 
     // Box.
     beginPath();
     rect(2, centerY - boxSize / 2, boxSize, boxSize);
-    strokeColor(isMouseEntered ? highlightColor : foregroundColor);
     strokeWidth(2.0f);
+    if constexpr (style == Style::accent) {
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.foreground());
+    } else if (style == Style::warning) {
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.foreground());
+    } else {
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.foreground());
+    }
+    fillColor(pal.boxBackground());
     stroke();
+    fill();
 
     if (value) {
       const auto innerBoxSize = boxSize - 4;
@@ -58,13 +72,19 @@ public:
       rect(
         2 + (boxSize - innerBoxSize) / 2, centerY - innerBoxSize / 2, innerBoxSize,
         innerBoxSize);
-      fillColor(isMouseEntered ? highlightColor : foregroundColor);
+      if constexpr (style == Style::accent) {
+        fillColor(isMouseEntered ? pal.highlightAccent() : pal.foreground());
+      } else if (style == Style::warning) {
+        fillColor(isMouseEntered ? pal.highlightWarning() : pal.foreground());
+      } else {
+        fillColor(isMouseEntered ? pal.highlightMain() : pal.foreground());
+      }
       fill();
     }
 
     // Text.
     if (labelText == nullptr) return;
-    fillColor(foregroundColor);
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
@@ -101,20 +121,15 @@ public:
     return true;
   }
 
-  void setHighlightColor(Color color) { highlightColor = color; }
-  void setForegroundColor(Color color) { foregroundColor = color; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  Color highlightColor{0x33, 0xaa, 0xff};
-  Color foregroundColor{0, 0, 0};
-  Color backgroundColor{0xff, 0xff, 0xff};
-
   const char *labelText = nullptr;
   int align = ALIGN_LEFT | ALIGN_MIDDLE;
   int32_t boxSize = 10;
   float textSize = 14.0f;
   FontId fontId = -1;
+  Palette &pal;
 
   bool isMouseEntered = false;
 };

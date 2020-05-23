@@ -17,18 +17,21 @@
 
 #pragma once
 
+#include "Widget.hpp"
+
+#include "style.hpp"
+
 #include <memory>
 #include <sstream>
 #include <string>
-
-#include "Widget.hpp"
 
 class TextView : public NanoWidget {
 public:
   float textSize = 18.0f;
 
-  explicit TextView(NanoWidget *group, std::string content, FontId fontId)
-    : NanoWidget(group), fontId(fontId)
+  explicit TextView(
+    NanoWidget *group, std::string content, FontId fontId, Palette &palette)
+    : NanoWidget(group), fontId(fontId), pal(palette)
   {
     std::stringstream ss(content);
     std::string line;
@@ -46,7 +49,7 @@ public:
     translate(getAbsoluteX(), getAbsoluteY());
 
     // Text.
-    fillColor(foregroundColor);
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     textAlign(align);
     fontSize(textSize);
@@ -55,12 +58,9 @@ public:
   }
 
 protected:
-  Color backgroundColor{0xff, 0xff, 0xff};
-  Color foregroundColor{0, 0, 0};
-  Color highlightColor{0x22, 0x99, 0xff};
-
   std::vector<std::string> str;
   FontId fontId = -1;
+  Palette &pal;
   int align = ALIGN_BASELINE | ALIGN_MIDDLE;
 };
 
@@ -71,8 +71,12 @@ public:
   float textSize = 18.0f;
 
   explicit TextTableView(
-    NanoWidget *group, std::string content, float cellWidth, FontId fontId)
-    : NanoWidget(group), cellWidth(cellWidth), fontId(fontId)
+    NanoWidget *group,
+    std::string content,
+    float cellWidth,
+    FontId fontId,
+    Palette &palette)
+    : NanoWidget(group), cellWidth(cellWidth), fontId(fontId), pal(palette)
   {
     std::stringstream ssContent(content);
     std::string line;
@@ -95,7 +99,7 @@ public:
     translate(getAbsoluteX(), getAbsoluteY());
 
     // Text.
-    fillColor(foregroundColor);
+    fillColor(pal.foreground());
     fontFaceId(fontId);
     textAlign(align);
     fontSize(textSize);
@@ -105,12 +109,9 @@ public:
   }
 
 protected:
-  Color backgroundColor{0xff, 0xff, 0xff};
-  Color foregroundColor{0, 0, 0};
-  Color highlightColor{0x22, 0x99, 0xff};
-
   std::vector<std::vector<std::string>> table;
   float cellWidth = 100.0f;
   FontId fontId = -1;
+  Palette &pal;
   int align = ALIGN_BASELINE | ALIGN_MIDDLE;
 };

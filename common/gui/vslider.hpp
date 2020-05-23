@@ -17,13 +17,17 @@
 
 #pragma once
 
-#include <cmath>
-
+#include "style.hpp"
 #include "valuewidget.hpp"
 
-class VSlider : public ValueWidget {
+#include <cmath>
+
+template<Style style = Style::common> class VSlider : public ValueWidget {
 public:
-  explicit VSlider(NanoWidget *group, PluginUI *ui) : ValueWidget(group, ui, 0.1f) {}
+  explicit VSlider(NanoWidget *group, PluginUI *ui, Palette &palette)
+    : ValueWidget(group, ui, 0.1f), pal(palette)
+  {
+  }
 
   void onNanoDisplay() override
   {
@@ -33,17 +37,35 @@ public:
     const auto width = getWidth();
     const auto height = getHeight();
 
+    // Background.
+    beginPath();
+    rect(0, 0, width, height);
+    fillColor(pal.background());
+    fill();
+
     // Value.
     beginPath();
     rect(0, (1.0f - value) * height, width, value * height);
-    fillColor(valueColor);
+    if constexpr (style == Style::accent) {
+      fillColor(pal.highlightAccent());
+    } else if (style == Style::warning) {
+      fillColor(pal.highlightWarning());
+    } else {
+      fillColor(pal.highlightMain());
+    }
     fill();
 
     // Border.
     beginPath();
     rect(0, 0, width, height);
     strokeWidth(isMouseEntered ? highlightBorderWidth : defaultBorderWidth);
-    strokeColor(isMouseEntered ? highlightColor : borderColor);
+    if constexpr (style == Style::accent) {
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+    } else if (style == Style::warning) {
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+    } else {
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
+    }
     stroke();
   }
 
@@ -100,22 +122,17 @@ public:
   {
     defaultValue = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
   }
+
   void setValue(double value) override
   {
     this->value = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
   }
-  void setHighlightColor(Color color) { highlightColor = color; }
-  void setValueColor(Color color) { valueColor = color; }
-  void setBorderColor(Color color) { borderColor = color; }
+
   void setDefaultBorderWidth(float width) { defaultBorderWidth = width; }
   void setHighlightBorderWidth(float width) { highlightBorderWidth = width; }
 
 private:
   double defaultValue = 0.5;
-
-  Color highlightColor{0x33, 0xaa, 0xff};
-  Color valueColor{0xdd, 0xdd, 0xdd};
-  Color borderColor{0, 0, 0};
 
   float defaultBorderWidth = 2.0f;
   float highlightBorderWidth = 4.0f;
@@ -126,4 +143,6 @@ private:
   Point<int> anchorPoint{0, 0};
   bool isMouseLeftDown = false;
   bool isMouseEntered = false;
+
+  Palette &pal;
 };
