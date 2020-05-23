@@ -20,11 +20,15 @@
 #include "../../common/gui/button.hpp"
 #include "../parameter.hpp"
 
-class PanicButton : public Button {
+class PanicButton : public ButtonBase {
 public:
   explicit PanicButton(
-    NanoWidget *group, PluginUI *ui, std::string labelText, FontId fontId)
-    : Button(group, ui, labelText, fontId)
+    NanoWidget *group,
+    PluginUI *ui,
+    std::string labelText,
+    FontId fontId,
+    Palette &palette)
+    : ButtonBase(group, ui, labelText, fontId, palette)
   {
   }
 

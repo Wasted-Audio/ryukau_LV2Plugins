@@ -27,21 +27,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../common/ui.hpp"
+#include "../common/uibase.hpp"
 #include "parameter.hpp"
 
-#include "../common/gui/TinosBoldItalic.hpp"
-#include "../common/gui/barbox.hpp"
-#include "../common/gui/button.hpp"
-#include "../common/gui/checkbox.hpp"
-#include "../common/gui/knob.hpp"
-#include "../common/gui/label.hpp"
-#include "../common/gui/optionmenu.hpp"
-#include "../common/gui/rotaryknob.hpp"
-#include "../common/gui/splash.hpp"
-#include "../common/gui/tabview.hpp"
-#include "../common/gui/textview.hpp"
-#include "../common/gui/vslider.hpp"
 #include "gui/panicbutton.hpp"
 
 constexpr float uiMargin = 20.0f;
@@ -85,14 +73,14 @@ void CreditSplash::onNanoDisplay()
   // Border.
   beginPath();
   rect(0, 0, width, height);
-  fillColor(backgroundColor);
+  fillColor(pal.background());
   fill();
-  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeColor(isMouseEntered ? pal.highlightMain() : pal.foreground());
   strokeWidth(borderWidth);
   stroke();
 
   // Text.
-  fillColor(foregroundColor);
+  fillColor(pal.foreground());
   fontFaceId(fontId);
   textAlign(align);
 
@@ -150,344 +138,23 @@ void CreditSplash::onNanoDisplay()
 
 START_NAMESPACE_DISTRHO
 
-class LatticeReverbUI : public PluginUI {
+class LatticeReverbUI : public PluginUIBase {
 protected:
-  void parameterChanged(uint32_t index, float value) override
-  {
-    updateUI(index, param.parameterChanged(index, value));
-  }
-
-  void updateUI(uint32_t id, float normalized)
-  {
-    auto vWidget = valueWidget.find(id);
-    if (vWidget != valueWidget.end()) {
-      vWidget->second->setValue(normalized);
-      repaint();
-      return;
-    }
-
-    auto aWidget = arrayWidget.find(id);
-    if (aWidget != arrayWidget.end()) {
-      aWidget->second->setValueFromId(id, normalized);
-      repaint();
-      return;
-    }
-  }
-
-  void updateValue(uint32_t id, float normalized) override
-  {
-    if (id >= ParameterID::ID_ENUM_LENGTH) return;
-    setParameterValue(id, param.updateValue(id, normalized));
-    repaint();
-    // dumpParameter(); // Used to make preset. There may be better way to do this.
-  }
-
-  void updateState(std::string /* key */, std::string /* value */)
-  {
-    // setState(key.c_str(), value.c_str());
-  }
-
-  void programLoaded(uint32_t index) override
-  {
-    param.loadProgram(index);
-
-    for (auto &vPair : valueWidget) {
-      if (vPair.second->id >= ParameterID::ID_ENUM_LENGTH) continue;
-      vPair.second->setValue(param.value[vPair.second->id]->getNormalized());
-    }
-
-    for (auto &aPair : arrayWidget) {
-      auto &aWidget = aPair.second;
-      for (size_t idx = 0; idx < aWidget->id.size(); ++idx) {
-        if (aWidget->id[idx] >= ParameterID::ID_ENUM_LENGTH) continue;
-        aWidget->setValueAt(idx, param.value[aWidget->id[idx]]->getNormalized());
-      }
-    }
-
-    repaint();
-  }
-
-  void stateChanged(const char * /* key */, const char * /* value */)
-  {
-    // This method is required by DPF.
-  }
-
   void onNanoDisplay() override
   {
     beginPath();
     rect(0, 0, getWidth(), getHeight());
-    fillColor(colorBack);
+    fillColor(palette.background());
     fill();
-  }
-
-private:
-  GlobalParameter param;
-
-  Color colorBack{255, 255, 255};
-  Color colorFore{0, 0, 0};
-  Color colorInactive{237, 237, 237};
-  Color colorBlue{11, 164, 241};
-  Color colorGreen{19, 193, 54};
-  Color colorOrange{252, 192, 79};
-  Color colorRed{252, 128, 128};
-
-  FontId fontId = -1;
-
-  std::vector<std::shared_ptr<Widget>> widget;
-  std::unordered_map<int, std::shared_ptr<ValueWidget>> valueWidget;
-  std::unordered_map<int, std::shared_ptr<ArrayWidget>> arrayWidget;
-  std::unordered_map<std::string, std::shared_ptr<StateWidget>> stateWidget;
-
-  void dumpParameter()
-  {
-    std::cout << "{\n";
-    for (const auto &value : param.value)
-      std::cout << "\"" << value->getName()
-                << "\": " << std::to_string(value->getNormalized()) << ",\n";
-    std::cout << "}" << std::endl;
-  }
-
-  template<typename Scale>
-  std::shared_ptr<BarBox<Scale>> addBarBox(
-    float left,
-    float top,
-    float width,
-    float height,
-    uint32_t id0,
-    size_t nElement,
-    Scale &scale)
-  {
-    std::vector<uint32_t> id(nElement);
-    for (size_t i = 0; i < id.size(); ++i) id[i] = id0 + i;
-    std::vector<double> value(id.size());
-    for (size_t i = 0; i < value.size(); ++i)
-      value[i] = param.value[id[i]]->getDefaultNormalized();
-    std::vector<double> defaultValue(value);
-
-    auto barBox = std::make_shared<BarBox<Scale>>(
-      this, this, id, scale, value, defaultValue, fontId);
-    barBox->setSize(width, height);
-    barBox->setAbsolutePos(left, top);
-    barBox->setBorderColor(colorFore);
-    barBox->setValueColor(colorBlue);
-
-    for (size_t i = 0; i < value.size(); ++i)
-      arrayWidget.emplace(std::make_pair(id0 + i, barBox));
-    return barBox;
-  }
-
-  std::shared_ptr<CheckBox>
-  addCheckbox(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
-    checkbox->id = id;
-    checkbox->setSize(width, labelHeight);
-    checkbox->setAbsolutePos(left, top);
-    checkbox->setForegroundColor(colorFore);
-    checkbox->setHighlightColor(colorBlue);
-    checkbox->setTextSize(uiTextSize);
-    valueWidget.emplace(std::make_pair(id, checkbox));
-    return checkbox;
-  }
-
-  std::shared_ptr<Label> addLabel(
-    int left,
-    int top,
-    float width,
-    std::string name,
-    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = false;
-    label->setTextSize(uiTextSize);
-    label->setTextAlign(textAlign);
-    widget.push_back(label);
-    return label;
-  }
-
-  std::shared_ptr<Label> addGroupLabel(
-    int left,
-    int top,
-    float width,
-    std::string name,
-    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = true;
-    label->setBorderWidth(2.0f);
-    label->setTextSize(midTextSize);
-    label->setTextAlign(textAlign);
-    widget.push_back(label);
-    return label;
-  }
-
-  std::shared_ptr<VLabel> addGroupVerticalLabel(
-    int left,
-    int top,
-    float width,
-    std::string name,
-    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
-  {
-    auto label = std::make_shared<VLabel>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = false;
-    label->setBorderWidth(2.0f);
-    label->setTextSize(midTextSize);
-    label->setTextAlign(textAlign);
-    widget.push_back(label);
-    return label;
-  };
-
-  enum class LabelPosition {
-    top,
-    left,
-    bottom,
-    right,
-  };
-
-  auto addKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    const char *name,
-    uint32_t id,
-    LabelPosition labelPosition = LabelPosition::bottom)
-  {
-    auto height = width - 2.0f * margin;
-
-    auto knob = std::make_shared<Knob>(this, this);
-    knob->id = id;
-    knob->setSize(width - 2.0f * margin, height);
-    knob->setAbsolutePos(left + margin, top + margin);
-    knob->setHighlightColor(highlightColor);
-    if (id < param.value.size()) {
-      auto defaultValue = param.value[id]->getDefaultNormalized();
-      knob->setDefaultValue(defaultValue);
-      knob->setValue(defaultValue);
-    }
-    valueWidget.emplace(std::make_pair(id, knob));
-
-    auto label = addKnobLabel(left, top, width, height, name, labelPosition);
-    return std::make_tuple(knob, label);
-  }
-
-  std::shared_ptr<Label> addKnobLabel(
-    float left,
-    float top,
-    float width,
-    float height,
-    const char *name,
-    LabelPosition labelPosition)
-  {
-    switch (labelPosition) {
-      default:
-      case LabelPosition::bottom:
-        top = top + height;
-        height = 30.0f;
-        break;
-
-      case LabelPosition::right:
-        height = width;
-        left = left + width + 10.0;
-        width *= 2.0f;
-        break;
-    }
-
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, height);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->setTextSize(uiTextSize);
-    if (labelPosition == LabelPosition::right)
-      label->setTextAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-    widget.push_back(label);
-    return label;
-  }
-
-  template<typename Scale>
-  std::shared_ptr<TextKnob<Scale>> addTextKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    uint32_t id,
-    Scale &scale,
-    bool isDecibel = false,
-    uint32_t precision = 0,
-    int32_t offset = 0)
-  {
-    auto knob = std::make_shared<TextKnob<Scale>>(this, this, fontId, scale, isDecibel);
-    knob->id = id;
-    knob->setSize(width, labelHeight);
-    knob->setAbsolutePos(left, top);
-    knob->setForegroundColor(colorFore);
-    knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
-    knob->setPrecision(precision);
-    knob->offset = offset;
-    knob->setTextSize(uiTextSize);
-    valueWidget.emplace(std::make_pair(id, knob));
-    return knob;
-  }
-
-  std::shared_ptr<TabView> addTabView(
-    float left,
-    float top,
-    float width,
-    float hegiht,
-    float tabHeight,
-    Color highlightColor,
-    std::vector<std::string> tabs)
-  {
-    auto tabview = std::make_shared<TabView>(
-      this, tabs, fontId, tabHeight, left, top, width, hegiht);
-    tabview->setHighlightColor(highlightColor);
-    widget.push_back(tabview);
-    return tabview;
-  }
-
-  void addSplashScreen(
-    float buttonLeft,
-    float buttonTop,
-    float buttonWidth,
-    float buttonHeight,
-    float splashLeft,
-    float splashTop,
-    float splashWidth,
-    float splashHeight,
-    const char *name)
-  {
-    auto button = std::make_shared<SplashButton>(this, name, fontId);
-    button->setSize(buttonWidth, buttonHeight);
-    button->setAbsolutePos(buttonLeft, buttonTop);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(pluginNameTextSize);
-    widget.push_back(button);
-
-    auto credit = std::make_shared<CreditSplash>(this, name, fontId);
-    credit->setSize(splashWidth, splashHeight);
-    credit->setAbsolutePos(splashLeft, splashTop);
-    button->setSplashWidget(credit);
-    widget.push_back(credit);
   }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LatticeReverbUI)
 
 public:
-  LatticeReverbUI() : PluginUI(defaultWidth, defaultHeight)
+  LatticeReverbUI() : PluginUIBase(defaultWidth, defaultHeight)
   {
+    param = std::make_unique<GlobalParameter>();
+
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
     fontId = createFontFromMemory(
@@ -509,40 +176,46 @@ public:
     const auto mulLeft1 = mulLeft0 + textKnobX + 2 * margin;
     const auto mulLeft2 = mulLeft1 + textKnobX + 2 * margin;
 
-    addGroupLabel(mulLeft0, mulTop0, leftPanelWidth, "Multiplier");
+    addGroupLabel(
+      mulLeft0, mulTop0, leftPanelWidth, labelHeight, midTextSize, "Multiplier");
 
-    addLabel(mulLeft1, mulTop1, textKnobX, "Base");
-    addLabel(mulLeft2, mulTop1, textKnobX, "Offset");
+    addLabel(mulLeft1, mulTop1, textKnobX, labelHeight, uiTextSize, "Base");
+    addLabel(mulLeft2, mulTop1, textKnobX, labelHeight, uiTextSize, "Offset");
 
-    addLabel(mulLeft0, mulTop2, textKnobX, "Time", ALIGN_LEFT | ALIGN_MIDDLE);
-    addLabel(mulLeft0, mulTop3, textKnobX, "OuterFeed", ALIGN_LEFT | ALIGN_MIDDLE);
-    addLabel(mulLeft0, mulTop4, textKnobX, "InnerFeed", ALIGN_LEFT | ALIGN_MIDDLE);
+    addLabel(
+      mulLeft0, mulTop2, textKnobX, labelHeight, uiTextSize, "Time",
+      ALIGN_LEFT | ALIGN_MIDDLE);
+    addLabel(
+      mulLeft0, mulTop3, textKnobX, labelHeight, uiTextSize, "OuterFeed",
+      ALIGN_LEFT | ALIGN_MIDDLE);
+    addLabel(
+      mulLeft0, mulTop4, textKnobX, labelHeight, uiTextSize, "InnerFeed",
+      ALIGN_LEFT | ALIGN_MIDDLE);
 
     addTextKnob(
-      mulLeft1, mulTop2, textKnobX, colorBlue, ID::timeMultiply, Scales::multiply, false,
-      4);
-    addTextKnob(
-      mulLeft1, mulTop3, textKnobX, colorBlue, ID::outerFeedMultiply, Scales::multiply,
-      false, 4);
-    addTextKnob(
-      mulLeft1, mulTop4, textKnobX, colorBlue, ID::innerFeedMultiply, Scales::multiply,
-      false, 4);
-    addTextKnob(
-      mulLeft2, mulTop2, textKnobX, colorBlue, ID::timeOffsetMultiply, Scales::multiply,
-      false, 4);
-    addTextKnob(
-      mulLeft2, mulTop3, textKnobX, colorBlue, ID::outerFeedOffsetMultiply,
+      mulLeft1, mulTop2, textKnobX, labelHeight, uiTextSize, ID::timeMultiply,
       Scales::multiply, false, 4);
     addTextKnob(
-      mulLeft2, mulTop4, textKnobX, colorBlue, ID::innerFeedOffsetMultiply,
+      mulLeft1, mulTop3, textKnobX, labelHeight, uiTextSize, ID::outerFeedMultiply,
+      Scales::multiply, false, 4);
+    addTextKnob(
+      mulLeft1, mulTop4, textKnobX, labelHeight, uiTextSize, ID::innerFeedMultiply,
+      Scales::multiply, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop2, textKnobX, labelHeight, uiTextSize, ID::timeOffsetMultiply,
+      Scales::multiply, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop3, textKnobX, labelHeight, uiTextSize, ID::outerFeedOffsetMultiply,
+      Scales::multiply, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop4, textKnobX, labelHeight, uiTextSize, ID::innerFeedOffsetMultiply,
       Scales::multiply, false, 4);
 
     // Panic button.
-    auto panicButton = std::make_shared<PanicButton>(this, this, "Panic!", fontId);
+    auto panicButton
+      = std::make_shared<PanicButton>(this, this, "Panic!", fontId, palette);
     panicButton->setSize(leftPanelWidth - 3.0f * knobX, 2 * labelHeight);
     panicButton->setAbsolutePos(left0 + 1.5f * knobX, mulTop4 + 2 * labelY);
-    panicButton->setForegroundColor(colorFore);
-    panicButton->setHighlightColor(colorOrange);
     panicButton->setTextSize(midTextSize);
     widget.push_back(panicButton);
 
@@ -553,29 +226,32 @@ public:
     const auto mixLeft0 = left0;
     const auto mixLeft1 = mixLeft0 + knobX + 2 * margin;
 
-    addGroupLabel(mixLeft0, miscTop0, 2 * knobX + 2 * margin, "Mix");
-    addKnob(mixLeft0, miscTop1, knobX, colorBlue, "Dry", ID::dry);
-    addKnob(mixLeft1, miscTop1, knobX, colorBlue, "Wet", ID::wet);
+    addGroupLabel(
+      mixLeft0, miscTop0, 2 * knobX + 2 * margin, labelHeight, midTextSize, "Mix");
+    addKnob(mixLeft0, miscTop1, knobX, margin, uiTextSize, "Dry", ID::dry);
+    addKnob(mixLeft1, miscTop1, knobX, margin, uiTextSize, "Wet", ID::wet);
 
     // Misc.
     const auto miscLeft0 = left0 + 2 * knobX + 2 * margin + labelHeight;
     const auto miscLeft1 = miscLeft0 + knobX + 2 * margin;
 
-    addGroupLabel(miscLeft0, miscTop0, 2 * knobX + 2 * margin, "Stereo");
-    addKnob(miscLeft0, miscTop1, knobX, colorBlue, "Cross", ID::stereoCross);
-    addKnob(miscLeft1, miscTop1, knobX, colorBlue, "Spread", ID::stereoSpread);
+    addGroupLabel(
+      miscLeft0, miscTop0, 2 * knobX + 2 * margin, labelHeight, midTextSize, "Stereo");
+    addKnob(miscLeft0, miscTop1, knobX, margin, uiTextSize, "Cross", ID::stereoCross);
+    addKnob(miscLeft1, miscTop1, knobX, margin, uiTextSize, "Spread", ID::stereoSpread);
 
     // Smooth.
     const auto leftSmooth = left0 + 1.5f * knobX + 3 * margin + 0.5f * labelHeight;
     addKnob(
-      leftSmooth, miscTop1 + knobY + labelY, knobX, colorBlue, "Smooth", ID::smoothness);
+      leftSmooth, miscTop1 + knobY + labelY, knobX, margin, uiTextSize, "Smooth",
+      ID::smoothness);
 
     // Right side.
     const auto tabViewLeft = left0 + leftPanelWidth + labelY;
 
     std::vector<std::string> tabs{"Base", "Offset", "Modulation"};
-    auto tabview = addTabView(
-      tabViewLeft, top0, tabViewWidth, tabViewHeight, labelY, colorBlue, tabs);
+    auto tabview
+      = addTabView(tabViewLeft, top0, tabViewWidth, tabViewHeight, labelY, tabs);
 
     const auto tabInsideTop0 = top0 + labelY + uiMargin;
     const auto tabInsideTop1 = tabInsideTop0 + barboxHeight + labelHeight;
@@ -586,7 +262,8 @@ public:
     // Base tab.
     tabview->addWidget(
       tabBase,
-      addGroupVerticalLabel(tabInsideLeft0, tabInsideTop0, barboxHeight, "Time"));
+      addGroupVerticalLabel(
+        tabInsideLeft0, tabInsideTop0, barboxHeight, labelHeight, midTextSize, "Time"));
     tabview->addWidget(
       tabBase,
       addBarBox(
@@ -595,7 +272,9 @@ public:
 
     tabview->addWidget(
       tabBase,
-      addGroupVerticalLabel(tabInsideLeft0, tabInsideTop1, barboxHeight, "OuterFeed"));
+      addGroupVerticalLabel(
+        tabInsideLeft0, tabInsideTop1, barboxHeight, labelHeight, midTextSize,
+        "OuterFeed"));
     auto barboxOuterFeed = addBarBox(
       tabInsideLeft1, tabInsideTop1, barboxWidth, barboxHeight, ID::outerFeed0,
       nestingDepth, Scales::feed);
@@ -604,7 +283,9 @@ public:
 
     tabview->addWidget(
       tabBase,
-      addGroupVerticalLabel(tabInsideLeft0, tabInsideTop2, barboxHeight, "InnerFeed"));
+      addGroupVerticalLabel(
+        tabInsideLeft0, tabInsideTop2, barboxHeight, labelHeight, midTextSize,
+        "InnerFeed"));
     auto barboxInnerFeed = addBarBox(
       tabInsideLeft1, tabInsideTop2, barboxWidth, barboxHeight, ID::innerFeed0,
       nestingDepth, Scales::feed);
@@ -614,7 +295,8 @@ public:
     // Tab offset.
     tabview->addWidget(
       tabOffset,
-      addGroupVerticalLabel(tabInsideLeft0, tabInsideTop0, barboxHeight, "Time"));
+      addGroupVerticalLabel(
+        tabInsideLeft0, tabInsideTop0, barboxHeight, labelHeight, midTextSize, "Time"));
     auto barboxTimeOffset = addBarBox(
       tabInsideLeft1, tabInsideTop0, barboxWidth, barboxHeight, ID::timeOffset0,
       nestingDepth, Scales::timeOffset);
@@ -623,7 +305,9 @@ public:
 
     tabview->addWidget(
       tabOffset,
-      addGroupVerticalLabel(tabInsideLeft0, tabInsideTop1, barboxHeight, "OuterFeed"));
+      addGroupVerticalLabel(
+        tabInsideLeft0, tabInsideTop1, barboxHeight, labelHeight, midTextSize,
+        "OuterFeed"));
     auto barboxOuterOffset = addBarBox(
       tabInsideLeft1, tabInsideTop1, barboxWidth, barboxHeight, ID::outerFeedOffset0,
       nestingDepth, Scales::feedOffset);
@@ -632,7 +316,9 @@ public:
 
     tabview->addWidget(
       tabOffset,
-      addGroupVerticalLabel(tabInsideLeft0, tabInsideTop2, barboxHeight, "InnerFeed"));
+      addGroupVerticalLabel(
+        tabInsideLeft0, tabInsideTop2, barboxHeight, labelHeight, midTextSize,
+        "InnerFeed"));
     auto barboxInnerOffset = addBarBox(
       tabInsideLeft1, tabInsideTop2, barboxWidth, barboxHeight, ID::innerFeedOffset0,
       nestingDepth, Scales::feedOffset);
@@ -642,7 +328,9 @@ public:
     // Tab modulation
     tabview->addWidget(
       tabModulation,
-      addGroupVerticalLabel(tabInsideLeft0, tabInsideTop0, barboxHeight, "Time LFO"));
+      addGroupVerticalLabel(
+        tabInsideLeft0, tabInsideTop0, barboxHeight, labelHeight, midTextSize,
+        "Time LFO"));
     tabview->addWidget(
       tabModulation,
       addBarBox(
@@ -652,17 +340,20 @@ public:
     const auto tabViewCenter1 = tabInsideTop1 + (barboxHeight - labelHeight) / 2;
     tabview->addWidget(
       tabModulation,
-      addLabel(tabInsideLeft0, tabViewCenter1, barboxHeight, "Time LFO Cutoff"));
+      addLabel(
+        tabInsideLeft0, tabViewCenter1, barboxHeight, labelHeight, uiTextSize,
+        "Time LFO Cutoff"));
     tabview->addWidget(
       tabModulation,
       addTextKnob(
-        tabInsideLeft0 + 2 * textKnobX, tabViewCenter1, textKnobX, colorBlue,
-        ID::timeLfoLowpass, Scales::timeLfoLowpas, false, 5));
+        tabInsideLeft0 + 2 * textKnobX, tabViewCenter1, textKnobX, labelHeight,
+        uiTextSize, ID::timeLfoLowpass, Scales::timeLfoLowpas, false, 5));
 
     tabview->addWidget(
       tabModulation,
       addGroupVerticalLabel(
-        tabInsideLeft0, tabInsideTop2, barboxHeight, "Lowpass Cutoff"));
+        tabInsideLeft0, tabInsideTop2, barboxHeight, labelHeight, midTextSize,
+        "Lowpass Cutoff"));
     tabview->addWidget(
       tabModulation,
       addBarBox(
@@ -676,7 +367,8 @@ public:
     const auto splashLeft = left0 + knobX;
     addSplashScreen(
       splashLeft, splashTop, leftPanelWidth - 2 * knobX, splashHeight, uiMargin, uiMargin,
-      defaultWidth - splashHeight, defaultHeight - splashHeight, "LatticeReverb");
+      defaultWidth - splashHeight, defaultHeight - splashHeight, pluginNameTextSize,
+      "LatticeReverb");
   }
 };
 

@@ -34,7 +34,9 @@ FILES_UI  = \
 	parameter.cpp \
 	parameter_preset.cpp \
 
-OBJS_UI = ../build/common/gui/TinosBoldItalic.cpp.o
+OBJS_UI = \
+	../build/common/gui/style.o \
+	../build/common/gui/TinosBoldItalic.o \
 
 # Do some magic
 include ../Makefile.plugins.mk
