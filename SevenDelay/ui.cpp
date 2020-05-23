@@ -25,16 +25,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../common/ui.hpp"
+#include "../common/uibase.hpp"
 #include "parameter.hpp"
 
-#include "../common/gui/TinosBoldItalic.hpp"
-#include "../common/gui/button.hpp"
-#include "../common/gui/checkbox.hpp"
-#include "../common/gui/knob.hpp"
-#include "../common/gui/label.hpp"
-#include "../common/gui/splash.hpp"
-#include "../common/gui/vslider.hpp"
 #include "gui/waveview.hpp"
 
 void CreditSplash::onNanoDisplay()
@@ -50,14 +43,14 @@ void CreditSplash::onNanoDisplay()
   // Border.
   beginPath();
   rect(0, 0, width, height);
-  fillColor(backgroundColor);
+  fillColor(pal.background());
   fill();
-  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeColor(isMouseEntered ? pal.highlightMain() : pal.foreground());
   strokeWidth(borderWidth);
   stroke();
 
   // Text.
-  fillColor(foregroundColor);
+  fillColor(pal.foreground());
   fontFaceId(fontId);
   textAlign(align);
 
@@ -83,12 +76,37 @@ constexpr float labelHeight = 30.0f;
 constexpr float midTextSize = 20.0f;
 constexpr float uiTextSize = 16.0f;
 constexpr float checkboxWidth = 100.0f;
+constexpr float sliderWidth = 70.0f;
+constexpr float sliderHeight = 230.0f;
 constexpr float margin = 0.0f;
 
-class SevenDelayUI : public PluginUI {
-public:
-  SevenDelayUI() : PluginUI(defaultWidth, defaultHeight)
+class SevenDelayUI : public PluginUIBase {
+protected:
+  std::shared_ptr<WaveView> waveView;
+
+  void updateWaveView()
   {
+    waveView->shape = param->getFloat(ParameterID::lfoShape);
+    waveView->phase = param->getFloat(ParameterID::lfoInitialPhase);
+  }
+
+  void onNanoDisplay() override
+  {
+    updateWaveView();
+
+    beginPath();
+    rect(0, 0, getWidth(), getHeight());
+    fillColor(palette.background());
+    fill();
+  }
+
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SevenDelayUI)
+
+public:
+  SevenDelayUI() : PluginUIBase(defaultWidth, defaultHeight)
+  {
+    param = std::make_unique<GlobalParameter>();
+
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
     fontId = createFontFromMemory(
@@ -104,78 +122,85 @@ public:
     // Delay.
     const auto delayTop1 = 50.0f;
     const auto delayLeft = 20.0f;
-    addGroupLabel(delayLeft, 10.0f, 480.0f, "Delay");
-    addKnob(delayLeft, delayTop1, normalWidth, colorBlue, "Time", ParameterID::time);
+    addGroupLabel(delayLeft, 10.0f, 480.0f, labelHeight, midTextSize, "Delay");
     addKnob(
-      1.0f * interval + delayLeft, delayTop1, normalWidth, colorBlue, "Feedback",
+      delayLeft, delayTop1, normalWidth, margin, uiTextSize, "Time", ParameterID::time);
+    addKnob(
+      1.0f * interval + delayLeft, delayTop1, normalWidth, margin, uiTextSize, "Feedback",
       ParameterID::feedback);
     addKnob(
-      2.0f * interval + delayLeft, delayTop1, normalWidth, colorBlue, "Stereo",
+      2.0f * interval + delayLeft, delayTop1, normalWidth, margin, uiTextSize, "Stereo",
       ParameterID::offset);
     addKnob(
-      3.0f * interval + delayLeft, delayTop1, normalWidth, colorBlue, "Wet",
+      3.0f * interval + delayLeft, delayTop1, normalWidth, margin, uiTextSize, "Wet",
       ParameterID::wetMix);
-    addKnob(
-      4.0f * interval + delayLeft, delayTop1, normalWidth, colorGreen, "Dry",
+    addKnob<Style::accent>(
+      4.0f * interval + delayLeft, delayTop1, normalWidth, margin, uiTextSize, "Dry",
       ParameterID::dryMix);
 
     const auto delayTop2 = delayTop1 + normalHeight;
     const auto delayTop3 = delayTop2 + smallHeight;
     const auto delayTop4 = delayTop3 + smallHeight;
     addCheckbox(
-      delayLeft + 10.0f, delayTop2, checkboxWidth, "Sync", ParameterID::tempoSync);
+      delayLeft + 10.0f, delayTop2, checkboxWidth, labelHeight, uiTextSize, "Sync",
+      ParameterID::tempoSync);
     addCheckbox(
-      delayLeft + 10.0f, delayTop3, checkboxWidth, "Negative",
+      delayLeft + 10.0f, delayTop3, checkboxWidth, labelHeight, uiTextSize, "Negative",
       ParameterID::negativeFeedback);
 
     addKnob(
-      1.0f * interval + delayLeft, delayTop2, smallWidth, colorBlue, "In Spread",
+      1.0f * interval + delayLeft, delayTop2, smallWidth, margin, uiTextSize, "In Spread",
       ParameterID::inSpread, LabelPosition::right);
     addKnob(
-      1.0f * interval + delayLeft, delayTop3, smallWidth, colorBlue, "Out Spread",
-      ParameterID::outSpread, LabelPosition::right);
+      1.0f * interval + delayLeft, delayTop3, smallWidth, margin, uiTextSize,
+      "Out Spread", ParameterID::outSpread, LabelPosition::right);
     addKnob(
-      2.3f * interval + delayLeft, delayTop2, smallWidth, colorBlue, "In Pan",
+      2.3f * interval + delayLeft, delayTop2, smallWidth, margin, uiTextSize, "In Pan",
       ParameterID::inPan, LabelPosition::right);
     addKnob(
-      2.3f * interval + delayLeft, delayTop3, smallWidth, colorBlue, "Out Pan",
+      2.3f * interval + delayLeft, delayTop3, smallWidth, margin, uiTextSize, "Out Pan",
       ParameterID::outPan, LabelPosition::right);
     addKnob(
-      2.3f * interval + delayLeft, delayTop4, smallWidth, colorBlue, "DC Kill",
+      2.3f * interval + delayLeft, delayTop4, smallWidth, margin, uiTextSize, "DC Kill",
       ParameterID::dckill, LabelPosition::right);
 
     addKnob(
-      3.6f * interval + delayLeft, delayTop2, smallWidth, colorBlue, "Allpass Cut",
-      ParameterID::toneCutoff, LabelPosition::right);
+      3.6f * interval + delayLeft, delayTop2, smallWidth, margin, uiTextSize,
+      "Allpass Cut", ParameterID::toneCutoff, LabelPosition::right);
     addKnob(
-      3.6f * interval + delayLeft, delayTop3, smallWidth, colorBlue, "Allpass Q",
+      3.6f * interval + delayLeft, delayTop3, smallWidth, margin, uiTextSize, "Allpass Q",
       ParameterID::toneQ, LabelPosition::right);
     addKnob(
-      3.6f * interval + delayLeft, delayTop4, smallWidth, colorBlue, "Smooth",
+      3.6f * interval + delayLeft, delayTop4, smallWidth, margin, uiTextSize, "Smooth",
       ParameterID::smoothness, LabelPosition::right);
 
     // LFO.
     // 750 - 520 = 230 / 3 = 66 + 10
     const auto lfoLeft1 = 520.0f;
-    addGroupLabel(520.0f, 10.0f, 420.0f, "LFO");
-    addVSlider(lfoLeft1, 50.0f, colorBlue, "To Time", ParameterID::lfoTimeAmount);
+    addGroupLabel(520.0f, 10.0f, 420.0f, labelHeight, midTextSize, "LFO");
     addVSlider(
-      lfoLeft1 + 75.0f, 50.0f, colorBlue, "To Allpass", ParameterID::lfoToneAmount);
+      lfoLeft1, 50.0f, sliderWidth, sliderHeight, margin, labelHeight, uiTextSize,
+      "To Time", ParameterID::lfoTimeAmount);
     addVSlider(
-      lfoLeft1 + 150.0f, 50.0f, colorGreen, "Frequency", ParameterID::lfoFrequency);
+      lfoLeft1 + 75.0f, 50.0f, sliderWidth, sliderHeight, margin, labelHeight, uiTextSize,
+      "To Allpass", ParameterID::lfoToneAmount);
+    addVSlider<Style::accent>(
+      lfoLeft1 + 150.0f, 50.0f, sliderWidth, sliderHeight, margin, labelHeight,
+      uiTextSize, "Frequency", ParameterID::lfoFrequency);
     const auto lfoLeft2 = lfoLeft1 + 230.0f;
-    addKnob(lfoLeft2, 50.0f, normalWidth, colorBlue, "Shape", ParameterID::lfoShape);
     addKnob(
-      interval + lfoLeft2, 50.0f, normalWidth, colorBlue, "Phase",
+      lfoLeft2, 50.0f, normalWidth, margin, uiTextSize, "Shape", ParameterID::lfoShape);
+    addKnob(
+      interval + lfoLeft2, 50.0f, normalWidth, margin, uiTextSize, "Phase",
       ParameterID::lfoInitialPhase);
 
     const auto waveViewLeft = 760.0f;
     const auto waveViewTop = 170.0f;
     const auto waveViewWidth = 180.0f;
     const auto waveViewHeight = 110.0f;
-    addButton(
-      waveViewLeft, waveViewTop + waveViewHeight + 10.0f, waveViewWidth, "LFO Hold",
-      ParameterID::lfoHold);
+    addToggleButton(
+      waveViewLeft, waveViewTop + waveViewHeight + 10.0f, waveViewWidth, labelHeight,
+      midTextSize, "LFO Hold", ParameterID::lfoHold);
 
     waveView = std::make_shared<WaveView>(this);
     waveView->setSize(waveViewWidth, waveViewHeight);
@@ -187,250 +212,8 @@ public:
     const auto nameWidth = 180.0f;
     addSplashScreen(
       nameLeft, nameTop, nameWidth, 40.0f, 200.0f, 20.0f, defaultWidth - 400.0f,
-      defaultHeight - 40.0f, "SevenDelay");
+      defaultHeight - 40.0f, pluginNameTextSize, "SevenDelay");
   }
-
-protected:
-  void parameterChanged(uint32_t index, float value) override
-  {
-    updateUI(index, param.parameterChanged(index, value));
-  }
-
-  void updateUI(uint32_t id, float normalized)
-  {
-    auto vWidget = valueWidget.find(id);
-    if (vWidget != valueWidget.end()) {
-      vWidget->second->setValue(normalized);
-      updateWaveView();
-      repaint();
-    }
-  }
-
-  void updateWaveView()
-  {
-    waveView->shape = param.value[ParameterID::lfoShape]->getInt();
-    waveView->phase = param.value[ParameterID::lfoInitialPhase]->getInt();
-  }
-
-  void updateValue(uint32_t id, float normalized) override
-  {
-    setParameterValue(id, param.updateValue(id, normalized));
-    updateWaveView();
-    repaint();
-    // dumpParameter(); // Used to make preset. There may be better way to do this.
-  }
-
-  void updateState(std::string /* key */, std::string /* value */) {}
-
-  void programLoaded(uint32_t index) override
-  {
-    param.loadProgram(index);
-
-    for (auto &vPair : valueWidget) {
-      if (vPair.second->id >= ParameterID::ID_ENUM_LENGTH) continue;
-      vPair.second->setValue(param.value[vPair.second->id]->getNormalized());
-    }
-
-    repaint();
-  }
-
-  void onNanoDisplay() override
-  {
-    beginPath();
-    rect(0, 0, getWidth(), getHeight());
-    fillColor(colorBack);
-    fill();
-  }
-
-private:
-  GlobalParameter param;
-
-  Color colorBack{255, 255, 255};
-  Color colorFore{0, 0, 0};
-  Color colorInactive{237, 237, 237};
-  Color colorBlue{11, 164, 241};
-  Color colorGreen{19, 193, 54};
-  Color colorOrange{252, 192, 79};
-
-  FontId fontId = -1;
-
-  std::vector<std::shared_ptr<Widget>> widget;
-  std::unordered_map<int, std::shared_ptr<ValueWidget>> valueWidget;
-  std::shared_ptr<WaveView> waveView;
-
-  void dumpParameter()
-  {
-    std::cout << "{\n";
-    for (const auto &value : param.value) {
-      const auto val = dynamic_cast<IntValue *>(value.get());
-      if (val == nullptr) {
-        std::cout << "\"" << value->getName()
-                  << "\": " << std::to_string(value->getNormalized()) << ",\n";
-      } else {
-        std::cout << "\"" << value->getName()
-                  << "\": " << std::to_string(uint32_t(value->getInt())) << ",\n";
-      }
-    }
-    std::cout << "}" << std::endl;
-  }
-
-  void addButton(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto button = std::make_shared<ToggleButton>(this, this, title, fontId);
-    button->id = id;
-    button->setSize(width, labelHeight);
-    button->setAbsolutePos(left, top);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(midTextSize);
-    valueWidget.emplace(std::make_pair(id, button));
-  }
-
-  void addCheckbox(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
-    checkbox->id = id;
-    checkbox->setSize(width, labelHeight);
-    checkbox->setAbsolutePos(left, top);
-    checkbox->setForegroundColor(colorFore);
-    checkbox->setHighlightColor(colorBlue);
-    checkbox->setTextSize(uiTextSize);
-    valueWidget.emplace(std::make_pair(id, checkbox));
-  }
-
-  void addGroupLabel(int left, int top, float width, const char *name)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = true;
-    label->setBorderWidth(2.0f);
-    label->setTextSize(midTextSize);
-    widget.push_back(label);
-  }
-
-  enum class LabelPosition {
-    top,
-    left,
-    bottom,
-    right,
-  };
-
-  void addKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    const char *name,
-    uint32_t id,
-    LabelPosition labelPosition = LabelPosition::bottom)
-  {
-    auto height = width - 2.0f * margin;
-
-    auto knob = std::make_shared<Knob>(this, this);
-    knob->id = id;
-    knob->setSize(width - 2.0f * margin, height);
-    knob->setAbsolutePos(left + margin, top + margin);
-    knob->setHighlightColor(highlightColor);
-    if (id < param.value.size()) {
-      auto defaultValue = param.value[id]->getDefaultNormalized();
-      knob->setDefaultValue(defaultValue);
-      knob->setValue(defaultValue);
-    }
-    valueWidget.emplace(std::make_pair(id, knob));
-
-    if (name != nullptr) addKnobLabel(left, top, width, height, name, labelPosition);
-  }
-
-  void addKnobLabel(
-    float left,
-    float top,
-    float width,
-    float height,
-    const char *name,
-    LabelPosition labelPosition)
-  {
-    switch (labelPosition) {
-      default:
-      case LabelPosition::bottom:
-        top = top + height;
-        height = 30.0f;
-        break;
-
-      case LabelPosition::right:
-        height = width;
-        left = left + width + 10.0;
-        width *= 2.0f;
-        break;
-    }
-
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, height);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->setTextSize(uiTextSize);
-    if (labelPosition == LabelPosition::right)
-      label->setTextAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-    widget.push_back(label);
-  }
-
-  void addSplashScreen(
-    float buttonLeft,
-    float buttonTop,
-    float buttonWidth,
-    float buttonHeight,
-    float splashLeft,
-    float splashTop,
-    float splashWidth,
-    float splashHeight,
-    const char *name)
-  {
-    auto button = std::make_shared<SplashButton>(this, name, fontId);
-    button->setSize(buttonWidth, buttonHeight);
-    button->setAbsolutePos(buttonLeft, buttonTop);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(pluginNameTextSize);
-    widget.push_back(button);
-
-    auto credit = std::make_shared<CreditSplash>(this, name, fontId);
-    credit->setSize(splashWidth, splashHeight);
-    credit->setAbsolutePos(splashLeft, splashTop);
-    button->setSplashWidget(credit);
-    widget.push_back(credit);
-  }
-
-  void addVSlider(float left, float top, Color valueColor, const char *name, uint32_t id)
-  {
-    // width, height = 100, 270.
-
-    const auto width = 70.0f;
-    const auto sliderHeight = 230.0f;
-
-    auto slider = std::make_shared<VSlider>(this, this);
-    slider->id = id;
-    slider->setSize(width, sliderHeight);
-    slider->setAbsolutePos(left, top);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    slider->setDefaultValue(defaultValue);
-    slider->setValue(defaultValue);
-    slider->setHighlightColor(valueColor);
-    slider->setValueColor(valueColor);
-    slider->setBorderColor(colorFore);
-    valueWidget.emplace(std::make_pair(id, slider));
-
-    top += sliderHeight + 10.0;
-
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->setTextSize(uiTextSize);
-    widget.push_back(label);
-  }
-
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SevenDelayUI)
 };
 
 UI *createUI() { return new SevenDelayUI(); }
