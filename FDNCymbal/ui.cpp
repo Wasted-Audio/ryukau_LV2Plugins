@@ -24,16 +24,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../common/ui.hpp"
+#include "../common/uibase.hpp"
 #include "parameter.hpp"
-
-#include "../common/gui/TinosBoldItalic.hpp"
-#include "../common/gui/button.hpp"
-#include "../common/gui/checkbox.hpp"
-#include "../common/gui/knob.hpp"
-#include "../common/gui/label.hpp"
-#include "../common/gui/splash.hpp"
-#include "../common/gui/vslider.hpp"
 
 void CreditSplash::onNanoDisplay()
 {
@@ -48,14 +40,14 @@ void CreditSplash::onNanoDisplay()
   // Border.
   beginPath();
   rect(0, 0, width, height);
-  fillColor(backgroundColor);
+  fillColor(pal.background());
   fill();
-  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeColor(isMouseEntered ? pal.highlightMain() : pal.foreground());
   strokeWidth(borderWidth);
   stroke();
 
   // Text.
-  fillColor(foregroundColor);
+  fillColor(pal.foreground());
   fontFaceId(fontId);
   textAlign(align);
 
@@ -82,6 +74,7 @@ constexpr float labelHeight = 20.0f;
 constexpr float labelY = 30.0f;
 constexpr float knobWidth = 80.0f;
 constexpr float knobHeight = knobWidth - 2.0f * margin;
+constexpr float knobRightMargin = 0.0f;
 constexpr float knobX = knobWidth; // With margin.
 constexpr float knobY = knobHeight + labelY + 2.0f * margin;
 constexpr float sliderWidth = 70.0f;
@@ -93,10 +86,23 @@ constexpr uint32_t defaultWidth = uint32_t(40 + sliderX + 7 * knobX + 6 * margin
 constexpr uint32_t defaultHeight
   = uint32_t(20 + 3 * knobY + 3 * labelHeight + 3 * margin);
 
-class FDNCymbalUI : public PluginUI {
-public:
-  FDNCymbalUI() : PluginUI(defaultWidth, defaultHeight)
+class FDNCymbalUI : public PluginUIBase {
+protected:
+  void onNanoDisplay() override
   {
+    beginPath();
+    rect(0, 0, getWidth(), getHeight());
+    fillColor(palette.background());
+    fill();
+  }
+
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FDNCymbalUI)
+
+public:
+  FDNCymbalUI() : PluginUIBase(defaultWidth, defaultHeight)
+  {
+    param = std::make_unique<GlobalParameter>();
+
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
     fontId = createFontFromMemory(
@@ -110,119 +116,137 @@ public:
     const auto top0 = 20.0f;
     const auto smallKnobWidth = 50.0f;
 
-    addVSlider(left0, top0, colorBlue, "Gain", ID::gain);
+    addVSlider(
+      left0, top0, sliderWidth, sliderHeight, margin, labelHeight, uiTextSize, "Gain",
+      ID::gain);
 
     // Stick.
-    const auto leftStick = left0 + sliderX + 2.0f * margin;
-    addButton(leftStick, top0, 2.0f * knobX, "Stick", ID::stick);
+    const auto leftStick0 = left0 + sliderX + 2.0f * margin;
+    const auto leftStick1 = leftStick0 + smallKnobWidth;
+    const auto leftStick2 = leftStick0 + knobX + margin;
+    const auto leftStick3 = leftStick2 + smallKnobWidth;
+    addToggleButton(
+      leftStick0, top0, 2.0f * knobX, labelHeight, midTextSize, "Stick", ID::stick);
 
     const auto topStick = top0 + labelHeight + margin;
     addKnob(
-      leftStick, topStick, smallKnobWidth, colorBlue, " Pulse", ID::stickPulseMix,
-      LabelPosition::right);
+      leftStick0, topStick, smallKnobWidth, margin, uiTextSize, "Pulse",
+      ID::stickPulseMix, LabelPosition::right, knobRightMargin);
     addKnob(
-      leftStick, topStick + smallKnobWidth, smallKnobWidth, colorBlue, " Velvet",
-      ID::stickVelvetMix, LabelPosition::right);
+      leftStick0, topStick + smallKnobWidth, smallKnobWidth, margin, uiTextSize, "Velvet",
+      ID::stickVelvetMix, LabelPosition::right, knobRightMargin);
     addKnob(
-      leftStick + knobX + margin, topStick, smallKnobWidth, colorBlue, " Tone",
-      ID::stickToneMix, LabelPosition::right);
+      leftStick2, topStick, smallKnobWidth, margin, uiTextSize, "Tone", ID::stickToneMix,
+      LabelPosition::right, knobRightMargin);
     addKnob(
-      leftStick + knobX + margin, topStick + smallKnobWidth, smallKnobWidth, colorBlue,
-      " Decay", ID::stickDecay, LabelPosition::right);
+      leftStick2, topStick + smallKnobWidth, smallKnobWidth, margin, uiTextSize, "Decay",
+      ID::stickDecay, LabelPosition::right, knobRightMargin);
 
     // Random.
-    const auto leftRandom = leftStick + 2.0f * knobX + 2.0f * margin;
-    addGroupLabel(leftRandom, top0, 2.0f * knobX, "Random");
+    const auto leftRandom = leftStick0 + 2.0f * knobX + 2.0f * margin;
+    addGroupLabel(leftRandom, top0, 2.0f * knobX, labelHeight, midTextSize, "Random");
 
     const auto topRandom = top0 + labelHeight;
     addNumberKnob(
-      leftRandom, topRandom + margin, knobWidth, colorBlue, "Seed", ID::seed,
+      leftRandom, topRandom + margin, knobWidth, margin, uiTextSize, "Seed", ID::seed,
       Scales::seed);
-    addLabel(leftRandom + knobX, topRandom, knobWidth, "Retrigger");
+    addLabel(
+      leftRandom + knobX, topRandom, knobWidth, labelHeight, uiTextSize, "Retrigger");
     addCheckbox(
-      leftRandom + knobX + 2.0f * margin, topRandom + labelHeight, checkboxWidth, "Time",
-      ID::retriggerTime);
+      leftRandom + knobX + 2.0f * margin, topRandom + labelHeight, checkboxWidth,
+      labelHeight, uiTextSize, "Time", ID::retriggerTime);
     addCheckbox(
       leftRandom + knobX + 2.0f * margin, topRandom + 2.0f * labelHeight, checkboxWidth,
-      "Stick", ID::retriggerStick);
+      labelHeight, uiTextSize, "Stick", ID::retriggerStick);
     addCheckbox(
       leftRandom + knobX + 2.0f * margin, topRandom + 3.0f * labelHeight, checkboxWidth,
-      "Tremolo", ID::retriggerTremolo);
+      labelHeight, uiTextSize, "Tremolo", ID::retriggerTremolo);
 
     // FDN.
     const auto leftFDN = leftRandom + 2.0f * knobX + 2.0f * margin;
-    addButton(leftFDN, top0, 3.0f * knobX, "FDN", ID::fdn);
+    addToggleButton(
+      leftFDN, top0, 3.0f * knobX, labelHeight, midTextSize, "FDN", ID::fdn);
 
     const auto topFDN = top0 + labelHeight + margin;
-    addKnob(leftFDN, topFDN, knobWidth, colorBlue, "Time", ID::fdnTime);
-    addKnob(leftFDN + knobX, topFDN, knobWidth, colorRed, "Feedback", ID::fdnFeedback);
+    addKnob(leftFDN, topFDN, knobWidth, margin, uiTextSize, "Time", ID::fdnTime);
+    addKnob<Style::warning>(
+      leftFDN + knobX, topFDN, knobWidth, margin, uiTextSize, "Feedback",
+      ID::fdnFeedback);
     addKnob(
-      leftFDN + 2.0f * knobX, topFDN, knobWidth, colorBlue, "CascadeMix",
+      leftFDN + 2.0f * knobX, topFDN, knobWidth, margin, uiTextSize, "CascadeMix",
       ID::fdnCascadeMix);
 
     // Allpass.
     const auto top1 = top0 + knobY + labelHeight + margin;
     const auto leftAP = left0 + sliderX + 2.0f * margin;
-    addGroupLabel(leftAP, top1, knobX, "Allpass");
+    addGroupLabel(leftAP, top1, knobX, labelHeight, midTextSize, "Allpass");
 
     const auto topAP = top1 + labelHeight + margin;
-    addKnob(leftAP, topAP, knobWidth, colorBlue, "Mix", ID::allpassMix);
+    addKnob(leftAP, topAP, knobWidth, margin, uiTextSize, "Mix", ID::allpassMix);
 
     const auto leftAP1 = leftAP + knobX + 2.0f * margin;
-    addGroupLabel(leftAP1, top1, 3.0f * knobX, "Stage 1");
+    addGroupLabel(leftAP1, top1, 3.0f * knobX, labelHeight, midTextSize, "Stage 1");
     addCheckbox(
       leftAP1 + knobX + 3.5 * margin, topAP + knobHeight + labelHeight + 0.5f * margin,
-      checkboxWidth, "Tanh", ID::allpass1Saturation);
+      checkboxWidth, labelHeight, uiTextSize, "Tanh", ID::allpass1Saturation);
 
-    addKnob(leftAP1, topAP, knobWidth, colorBlue, "Time", ID::allpass1Time);
+    addKnob(leftAP1, topAP, knobWidth, margin, uiTextSize, "Time", ID::allpass1Time);
     addKnob(
-      leftAP1 + knobX, topAP, knobWidth, colorBlue, "Feedback", ID::allpass1Feedback);
-    addKnob(
-      leftAP1 + 2.0f * knobX, topAP, knobWidth, colorRed, "HP Cutoff",
+      leftAP1 + knobX, topAP, knobWidth, margin, uiTextSize, "Feedback",
+      ID::allpass1Feedback);
+    addKnob<Style::warning>(
+      leftAP1 + 2.0f * knobX, topAP, knobWidth, margin, uiTextSize, "HP Cutoff",
       ID::allpass1HighpassCutoff);
 
     const auto leftAP2 = leftAP1 + 3.0f * knobX + 2.0f * margin;
-    addGroupLabel(leftAP2, top1, 3.0f * knobX, "Stage 2");
+    addGroupLabel(leftAP2, top1, 3.0f * knobX, labelHeight, midTextSize, "Stage 2");
 
-    addKnob(leftAP2, topAP, knobWidth, colorBlue, "Time", ID::allpass2Time);
+    addKnob(leftAP2, topAP, knobWidth, margin, uiTextSize, "Time", ID::allpass2Time);
     addKnob(
-      leftAP2 + knobX, topAP, knobWidth, colorBlue, "Feedback", ID::allpass2Feedback);
-    addKnob(
-      leftAP2 + 2.0f * knobX, topAP, knobWidth, colorRed, "HP Cutoff",
+      leftAP2 + knobX, topAP, knobWidth, margin, uiTextSize, "Feedback",
+      ID::allpass2Feedback);
+    addKnob<Style::warning>(
+      leftAP2 + 2.0f * knobX, topAP, knobWidth, margin, uiTextSize, "HP Cutoff",
       ID::allpass2HighpassCutoff);
 
     // Smooth.
     const auto top2 = top1 + knobY + labelHeight + margin;
     addKnob(
-      left0 - margin, top2 + labelHeight + margin, sliderX, colorBlue, "Smooth",
+      left0 - margin, top2 + labelHeight + margin, sliderX, margin, uiTextSize, "Smooth",
       ID::smoothness);
 
     // Tremolo.
     const auto leftTremolo = left0 + sliderX + 2.0f * margin;
-    addGroupLabel(leftTremolo, top2, 4.0f * knobX, "Tremolo");
+    addGroupLabel(leftTremolo, top2, 4.0f * knobX, labelHeight, midTextSize, "Tremolo");
 
     const auto topTremolo = top2 + labelHeight + margin;
-    addKnob(leftTremolo, topTremolo, knobWidth, colorBlue, "Mix", ID::tremoloMix);
     addKnob(
-      leftTremolo + knobX, topTremolo, knobWidth, colorBlue, "Depth", ID::tremoloDepth);
+      leftTremolo, topTremolo, knobWidth, margin, uiTextSize, "Mix", ID::tremoloMix);
     addKnob(
-      leftTremolo + 2.0f * knobX, topTremolo, knobWidth, colorBlue, "Frequency",
+      leftTremolo + knobX, topTremolo, knobWidth, margin, uiTextSize, "Depth",
+      ID::tremoloDepth);
+    addKnob(
+      leftTremolo + 2.0f * knobX, topTremolo, knobWidth, margin, uiTextSize, "Frequency",
       ID::tremoloFrequency);
     addKnob(
-      leftTremolo + 3.0f * knobX, topTremolo, knobWidth, colorBlue, "DelayTime",
+      leftTremolo + 3.0f * knobX, topTremolo, knobWidth, margin, uiTextSize, "DelayTime",
       ID::tremoloDelayTime);
 
     const auto leftTremoloRandom = leftTremolo + 4.0f * knobX + 2.0f * margin;
-    addGroupLabel(leftTremoloRandom, top2, 3.0f * knobX + 2.0f * margin, "Random");
+    addGroupLabel(
+      leftTremoloRandom, top2, 3.0f * knobX + 2.0f * margin, labelHeight, midTextSize,
+      "Random");
     addKnob(
-      leftTremoloRandom, topTremolo - 1.5f * margin, 50.0f, colorBlue, "Depth",
-      ID::randomTremoloDepth, LabelPosition::right);
+      leftTremoloRandom, topTremolo - 1.5f * margin, 50.0f, margin, uiTextSize, "Depth",
+      ID::randomTremoloDepth, LabelPosition::right, knobRightMargin);
     addKnob(
       leftTremoloRandom + 1.0f * (knobX + margin), topTremolo - 1.5f * margin, 50.0f,
-      colorBlue, "Freq", ID::randomTremoloFrequency, LabelPosition::right);
+      margin, uiTextSize, "Freq", ID::randomTremoloFrequency, LabelPosition::right,
+      knobRightMargin);
     addKnob(
       leftTremoloRandom + 2.0f * (knobX + margin), topTremolo - 1.5f * margin, 50.0f,
-      colorBlue, "Time", ID::randomTremoloDelayTime, LabelPosition::right);
+      margin, uiTextSize, "Time", ID::randomTremoloDelayTime, LabelPosition::right,
+      knobRightMargin);
 
     // Plugin name.
     const auto splashWidth = 3.0f * knobX;
@@ -230,258 +254,8 @@ public:
     addSplashScreen(
       defaultWidth - 20.0f - splashWidth, defaultHeight - 20.0f - splashHeight,
       splashWidth, splashHeight, 20.0f, 20.0f, defaultWidth - 40.0f,
-      defaultHeight - 40.0f, "FDNCymbal");
+      defaultHeight - 40.0f, pluginNameTextSize, "FDNCymbal");
   }
-
-protected:
-  void parameterChanged(uint32_t index, float value) override
-  {
-    updateUI(index, param.parameterChanged(index, value));
-  }
-
-  void updateUI(uint32_t id, float normalized)
-  {
-    auto vWidget = valueWidget.find(id);
-    if (vWidget != valueWidget.end()) {
-      vWidget->second->setValue(normalized);
-      repaint();
-    }
-  }
-
-  void updateValue(uint32_t id, float normalized) override
-  {
-    setParameterValue(id, param.updateValue(id, normalized));
-    repaint();
-  }
-
-  void updateState(std::string /* key */, std::string /* value */) {}
-
-  void programLoaded(uint32_t index) override
-  {
-    param.loadProgram(index);
-
-    for (auto &vPair : valueWidget) {
-      if (vPair.second->id >= ParameterID::ID_ENUM_LENGTH) continue;
-      vPair.second->setValue(param.value[vPair.second->id]->getNormalized());
-    }
-
-    repaint();
-  }
-
-  void onNanoDisplay() override
-  {
-    beginPath();
-    rect(0, 0, getWidth(), getHeight());
-    fillColor(colorBack);
-    fill();
-  }
-
-private:
-  GlobalParameter param;
-
-  Color colorBack{255, 255, 255};
-  Color colorFore{0, 0, 0};
-  Color colorInactive{237, 237, 237};
-  Color colorBlue{11, 164, 241};
-  Color colorGreen{19, 193, 54};
-  Color colorOrange{252, 192, 79};
-  Color colorRed{252, 128, 128};
-
-  FontId fontId = -1;
-
-  std::vector<std::shared_ptr<Widget>> widget;
-  std::unordered_map<int, std::shared_ptr<ValueWidget>> valueWidget;
-
-  void addButton(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto button = std::make_shared<ToggleButton>(this, this, title, fontId);
-    button->id = id;
-    button->setSize(width, labelHeight);
-    button->setAbsolutePos(left, top);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(midTextSize);
-    valueWidget.emplace(std::make_pair(id, button));
-  }
-
-  void addCheckbox(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
-    checkbox->id = id;
-    checkbox->setSize(width, labelHeight);
-    checkbox->setAbsolutePos(left, top);
-    checkbox->setForegroundColor(colorFore);
-    checkbox->setHighlightColor(colorBlue);
-    checkbox->setTextSize(uiTextSize);
-    valueWidget.emplace(std::make_pair(id, checkbox));
-  }
-
-  void addGroupLabel(int left, int top, float width, const char *name)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = true;
-    label->setBorderWidth(2.0f);
-    label->setTextSize(midTextSize);
-    widget.push_back(label);
-  };
-
-  enum class LabelPosition {
-    top,
-    left,
-    bottom,
-    right,
-  };
-
-  void addKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    const char *name,
-    uint32_t id,
-    LabelPosition labelPosition = LabelPosition::bottom)
-  {
-    auto height = width - 2.0f * margin;
-
-    auto knob = std::make_shared<Knob>(this, this);
-    knob->id = id;
-    knob->setSize(width - 2.0f * margin, height);
-    knob->setAbsolutePos(left + margin, top + margin);
-    knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
-    valueWidget.emplace(std::make_pair(id, knob));
-
-    addKnobLabel(left, top, width, height, name, labelPosition);
-  }
-
-  template<typename Scale>
-  void addNumberKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    const char *name,
-    uint32_t id,
-    Scale &scale,
-    uint32_t offset = 0,
-    LabelPosition labelPosition = LabelPosition::bottom)
-  {
-    auto height = width - 2.0f * margin;
-
-    auto knob = std::make_shared<NumberKnob<Scale>>(this, this, fontId, scale, offset);
-    knob->id = id;
-    knob->setSize(width - 2.0f * margin, height);
-    knob->setAbsolutePos(left + margin, top + margin);
-    knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
-    valueWidget.emplace(std::make_pair(id, knob));
-
-    addKnobLabel(left, top, width, height, name, labelPosition);
-  }
-
-  void addKnobLabel(
-    float left,
-    float top,
-    float width,
-    float height,
-    const char *name,
-    LabelPosition labelPosition)
-  {
-    switch (labelPosition) {
-      default:
-      case LabelPosition::bottom:
-        top = top + height;
-        height = 30.0f;
-        break;
-
-      case LabelPosition::right:
-        height = width;
-        left = left + width;
-        width *= 2.0f;
-        break;
-    }
-
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, height);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->setTextSize(uiTextSize);
-    if (labelPosition == LabelPosition::right)
-      label->setTextAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-    widget.push_back(label);
-  }
-
-  void addLabel(int left, int top, float width, const char *name)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = false;
-    label->setTextSize(uiTextSize);
-    widget.push_back(label);
-  };
-
-  void addSplashScreen(
-    float buttonLeft,
-    float buttonTop,
-    float buttonWidth,
-    float buttonHeight,
-    float splashLeft,
-    float splashTop,
-    float splashWidth,
-    float splashHeight,
-    const char *name)
-  {
-    auto button = std::make_shared<SplashButton>(this, name, fontId);
-    button->setSize(buttonWidth, buttonHeight);
-    button->setAbsolutePos(buttonLeft, buttonTop);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(pluginNameTextSize);
-    widget.push_back(button);
-
-    auto credit = std::make_shared<CreditSplash>(this, name, fontId);
-    credit->setSize(splashWidth, splashHeight);
-    credit->setAbsolutePos(splashLeft, splashTop);
-    button->setSplashWidget(credit);
-    widget.push_back(credit);
-  }
-
-  void addVSlider(float left, float top, Color valueColor, const char *name, uint32_t id)
-  {
-    // width, height = 100, 270.
-
-    auto slider = std::make_shared<VSlider>(this, this);
-    slider->id = id;
-    slider->setSize(sliderWidth, sliderHeight);
-    slider->setAbsolutePos(left, top);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    slider->setDefaultValue(defaultValue);
-    slider->setValue(defaultValue);
-    slider->setHighlightColor(valueColor);
-    slider->setValueColor(valueColor);
-    slider->setBorderColor(colorFore);
-    valueWidget.emplace(std::make_pair(id, slider));
-
-    top += sliderHeight + margin;
-
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(sliderWidth, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->setTextSize(uiTextSize);
-    widget.push_back(label);
-  }
-
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FDNCymbalUI)
 };
 
 UI *createUI() { return new FDNCymbalUI(); }
