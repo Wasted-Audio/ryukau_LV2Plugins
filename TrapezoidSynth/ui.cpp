@@ -24,16 +24,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../common/ui.hpp"
+#include "../common/uibase.hpp"
 #include "parameter.hpp"
 
-#include "../common/gui/TinosBoldItalic.hpp"
-#include "../common/gui/button.hpp"
-#include "../common/gui/checkbox.hpp"
-#include "../common/gui/knob.hpp"
-#include "../common/gui/optionmenu.hpp"
-#include "../common/gui/splash.hpp"
-#include "../common/gui/vslider.hpp"
 #include "gui/label.hpp"
 
 void CreditSplash::onNanoDisplay()
@@ -49,14 +42,14 @@ void CreditSplash::onNanoDisplay()
   // Border.
   beginPath();
   rect(0, 0, width, height);
-  fillColor(backgroundColor);
+  fillColor(pal.background());
   fill();
-  strokeColor(isMouseEntered ? highlightColor : foregroundColor);
+  strokeColor(isMouseEntered ? pal.highlightMain() : pal.foreground());
   strokeWidth(borderWidth);
   stroke();
 
   // Text.
-  fillColor(foregroundColor);
+  fillColor(pal.foreground());
   fontFaceId(fontId);
   textAlign(align);
 
@@ -93,10 +86,43 @@ constexpr float checkboxWidth = 80.0f;
 constexpr uint32_t defaultWidth = uint32_t(40 + 13 * knobX);
 constexpr uint32_t defaultHeight = uint32_t(20 + 5 * (knobY + labelHeight));
 
-class TrapezoidSynthUI : public PluginUI {
-public:
-  TrapezoidSynthUI() : PluginUI(defaultWidth, defaultHeight)
+class TrapezoidSynthUI : public PluginUIBase {
+protected:
+  void onNanoDisplay() override
   {
+    beginPath();
+    rect(0, 0, getWidth(), getHeight());
+    fillColor(palette.background());
+    fill();
+  }
+
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrapezoidSynthUI)
+
+  auto addTpzLabel(
+    int left,
+    int top,
+    float width,
+    float height,
+    float textSize,
+    std::string name,
+    int textAlign = ALIGN_LEFT | ALIGN_MIDDLE)
+  {
+    auto label = std::make_shared<TpzLabel>(this, name, fontId, palette);
+    label->setSize(width, height);
+    label->setAbsolutePos(left, top);
+    label->drawBorder = true;
+    label->setBorderWidth(2.0f);
+    label->setTextSize(textSize);
+    label->setTextAlign(textAlign);
+    widget.push_back(label);
+    return label;
+  }
+
+public:
+  TrapezoidSynthUI() : PluginUIBase(defaultWidth, defaultHeight)
+  {
+    param = std::make_unique<GlobalParameter>();
+
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
     fontId = createFontFromMemory(
@@ -108,173 +134,237 @@ public:
     const auto left0 = 20.0f;
 
     const auto top0 = 20.0f;
-    addGroupLabel(left0, top0, 6.0f * knobWidth, "Oscillator 1");
+    addTpzLabel(left0, top0, 6.0f * knobWidth, labelHeight, midTextSize, "Oscillator 1");
     const auto top0knob = top0 + labelHeight;
     addNumberKnob(
-      left0 + 0.0f * knobX, top0knob, knobWidth, colorBlue, "Semi", ID::osc1Semi,
+      left0 + 0.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Semi", ID::osc1Semi,
       Scales::semi);
     addNumberKnob(
-      left0 + 1.0f * knobX, top0knob, knobWidth, colorBlue, "Cent", ID::osc1Cent,
+      left0 + 1.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Cent", ID::osc1Cent,
       Scales::cent);
     addKnob(
-      left0 + 2.0f * knobX, top0knob, knobWidth, colorBlue, "Drift", ID::osc1PitchDrift);
-    addKnob(left0 + 3.0f * knobX, top0knob, knobWidth, colorBlue, "Slope", ID::osc1Slope);
+      left0 + 2.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Drift",
+      ID::osc1PitchDrift);
     addKnob(
-      left0 + 4.0f * knobX, top0knob, knobWidth, colorBlue, "PW", ID::osc1PulseWidth);
+      left0 + 3.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Slope",
+      ID::osc1Slope);
     addKnob(
-      left0 + 5.0f * knobX, top0knob, knobWidth, colorBlue, "Feedback", ID::osc1Feedback);
+      left0 + 4.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "PW",
+      ID::osc1PulseWidth);
+    addKnob(
+      left0 + 5.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Feedback",
+      ID::osc1Feedback);
 
     const auto top1 = top0knob + knobY;
-    addGroupLabel(left0, top1, 6.0f * knobWidth, "Oscillator 2");
+    addTpzLabel(left0, top1, 6.0f * knobWidth, labelHeight, midTextSize, "Oscillator 2");
     const auto top1knob = top1 + labelHeight;
     addNumberKnob(
-      left0 + 0.0f * knobX, top1knob, knobWidth, colorBlue, "Semi", ID::osc2Semi,
+      left0 + 0.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "Semi", ID::osc2Semi,
       Scales::semi);
     addNumberKnob(
-      left0 + 1.0f * knobX, top1knob, knobWidth, colorBlue, "Cent", ID::osc2Cent,
+      left0 + 1.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "Cent", ID::osc2Cent,
       Scales::cent);
     addNumberKnob(
-      left0 + 2.0f * knobX, top1knob, knobWidth, colorBlue, "Overtone", ID::osc2Overtone,
-      Scales::overtone);
-    addKnob(left0 + 3.0f * knobX, top1knob, knobWidth, colorBlue, "Slope", ID::osc2Slope);
+      left0 + 2.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "Overtone",
+      ID::osc2Overtone, Scales::overtone);
     addKnob(
-      left0 + 4.0f * knobX, top1knob, knobWidth, colorBlue, "PW", ID::osc2PulseWidth);
-    addKnob(left0 + 5.0f * knobX, top1knob, knobWidth, colorBlue, "PM", ID::pmOsc2ToOsc1);
+      left0 + 3.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "Slope",
+      ID::osc2Slope);
+    addKnob(
+      left0 + 4.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "PW",
+      ID::osc2PulseWidth);
+    addKnob(
+      left0 + 5.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "PM",
+      ID::pmOsc2ToOsc1);
 
     const auto top2 = top1knob + knobY;
-    addGroupLabel(left0, top2, 6.0f * knobX, "Gain Envelope");
-    addCheckbox(
-      left0 + 1.95f * knobX, top2, checkboxWidth, "Retrigger", ID::gainEnvRetrigger);
+    addTpzLabel(left0, top2, 6.0f * knobX, labelHeight, midTextSize, "Gain Envelope");
+    auto checkBoxGainEnvRetrigger = addCheckbox(
+      left0 + 1.95f * knobX, top2, checkboxWidth, labelHeight, uiTextSize, "Retrigger",
+      ID::gainEnvRetrigger);
+    checkBoxGainEnvRetrigger->drawBackground = true;
     const auto top2knob = top2 + labelHeight;
-    addKnob(left0 + 0.0f * knobX, top2knob, knobWidth, colorBlue, "A", ID::gainA);
-    addKnob(left0 + 1.0f * knobX, top2knob, knobWidth, colorBlue, "D", ID::gainD);
-    addKnob(left0 + 2.0f * knobX, top2knob, knobWidth, colorBlue, "S", ID::gainS);
-    addKnob(left0 + 3.0f * knobX, top2knob, knobWidth, colorBlue, "R", ID::gainR);
-    addKnob(left0 + 4.0f * knobX, top2knob, knobWidth, colorBlue, "Curve", ID::gainCurve);
-    addKnob(left0 + 5.0f * knobX, top2knob, knobWidth, colorBlue, "Gain", ID::gain);
+    addKnob(
+      left0 + 0.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "A", ID::gainA);
+    addKnob(
+      left0 + 1.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "D", ID::gainD);
+    addKnob(
+      left0 + 2.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "S", ID::gainS);
+    addKnob(
+      left0 + 3.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "R", ID::gainR);
+    addKnob(
+      left0 + 4.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Curve",
+      ID::gainCurve);
+    addKnob(
+      left0 + 5.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Gain", ID::gain);
 
     const auto top3 = top2knob + knobY;
-    addGroupLabel(left0, top3, 6.0f * knobWidth, "Filter");
+    addTpzLabel(left0, top3, 6.0f * knobWidth, labelHeight, midTextSize, "Filter");
     const auto top3knob = top3 + labelHeight;
     std::vector<std::string> filterOrderItems{
       "Order 1", "Order 2", "Order 3", "Order 4",
       "Order 5", "Order 6", "Order 7", "Order 8",
     };
     addOptionMenu(
-      left0 + 0.9f * knobX, top3, knobWidth, ID::filterOrder, filterOrderItems);
+      left0 + 0.9f * knobX, top3, knobWidth, labelHeight, uiTextSize, ID::filterOrder,
+      filterOrderItems);
     addKnob(
-      left0 + 0.0f * knobX, top3knob, knobWidth, colorBlue, "Cut", ID::filterCutoff);
+      left0 + 0.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Cut",
+      ID::filterCutoff);
     addKnob(
-      left0 + 1.0f * knobX, top3knob, knobWidth, colorBlue, "Res.", ID::filterFeedback);
+      left0 + 1.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Res.",
+      ID::filterFeedback);
     addKnob(
-      left0 + 2.0f * knobX, top3knob, knobWidth, colorBlue, "Sat.", ID::filterSaturation);
+      left0 + 2.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Sat.",
+      ID::filterSaturation);
     addKnob(
-      left0 + 3.0f * knobX, top3knob, knobWidth, colorBlue, "Env>Cut",
+      left0 + 3.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Env>Cut",
       ID::filterEnvToCutoff);
     addKnob(
-      left0 + 4.0f * knobX, top3knob, knobWidth, colorBlue, "Key>Cut",
+      left0 + 4.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Key>Cut",
       ID::filterKeyToCutoff);
     addKnob(
-      left0 + 5.0f * knobX, top3knob, knobWidth, colorBlue, "+OscMix",
+      left0 + 5.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "+OscMix",
       ID::oscMixToFilterCutoff);
 
     const auto top4 = top3knob + knobY;
-    addGroupLabel(left0, top4, 6.0f * knobWidth, "Filter Envelope");
-    addCheckbox(
-      left0 + 2.0f * knobX, top4, checkboxWidth, "Retrigger", ID::filterEnvRetrigger);
+    addTpzLabel(
+      left0, top4, 6.0f * knobWidth, labelHeight, midTextSize, "Filter Envelope");
+    auto checkBoxFiltEnvRetrigger = addCheckbox(
+      left0 + 2.0f * knobX, top4, checkboxWidth, labelHeight, uiTextSize, "Retrigger",
+      ID::filterEnvRetrigger);
+    checkBoxFiltEnvRetrigger->drawBackground = true;
     const auto top4knob = top4 + labelHeight;
-    addKnob(left0 + 0.0f * knobX, top4knob, knobWidth, colorBlue, "A", ID::filterA);
-    addKnob(left0 + 1.0f * knobX, top4knob, knobWidth, colorBlue, "D", ID::filterD);
-    addKnob(left0 + 2.0f * knobX, top4knob, knobWidth, colorBlue, "S", ID::filterS);
-    addKnob(left0 + 3.0f * knobX, top4knob, knobWidth, colorBlue, "R", ID::filterR);
     addKnob(
-      left0 + 4.0f * knobX, top4knob, knobWidth, colorBlue, "Curve", ID::filterCurve);
+      left0 + 0.0f * knobX, top4knob, knobWidth, margin, uiTextSize, "A", ID::filterA);
+    addKnob(
+      left0 + 1.0f * knobX, top4knob, knobWidth, margin, uiTextSize, "D", ID::filterD);
+    addKnob(
+      left0 + 2.0f * knobX, top4knob, knobWidth, margin, uiTextSize, "S", ID::filterS);
+    addKnob(
+      left0 + 3.0f * knobX, top4knob, knobWidth, margin, uiTextSize, "R", ID::filterR);
+    addKnob(
+      left0 + 4.0f * knobX, top4knob, knobWidth, margin, uiTextSize, "Curve",
+      ID::filterCurve);
     addNumberKnob(
-      left0 + 5.0f * knobX, top4knob, knobWidth, colorBlue, ">Octave",
+      left0 + 5.0f * knobX, top4knob, knobWidth, margin, uiTextSize, ">Octave",
       ID::filterEnvToOctave, Scales::filterEnvToOctave);
 
     const auto left1 = left0 + 7.0f * knobX;
 
-    addGroupLabel(left1, top0, 3.0f * knobWidth, "Misc");
-    addKnob(left1 + 0.0f * knobX, top0knob, knobWidth, colorBlue, "OscMix", ID::oscMix);
+    addTpzLabel(left1, top0, 3.0f * knobWidth, labelHeight, midTextSize, "Misc");
+    addKnob(
+      left1 + 0.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "OscMix",
+      ID::oscMix);
     addNumberKnob(
-      left1 + 1.0f * knobX, top0knob, knobWidth, colorBlue, "Octave", ID::octave,
+      left1 + 1.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Octave", ID::octave,
       Scales::octave);
     addKnob(
-      left1 + 2.0f * knobX, top0knob, knobWidth, colorBlue, "Smooth", ID::smoothness);
+      left1 + 2.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Smooth",
+      ID::smoothness);
 
-    addGroupLabel(left1 + 3.0f * knobX, top0, 3.0f * knobWidth, "Mod 1");
-    addCheckbox(
-      left1 + 3.95f * knobX, top0, checkboxWidth, "Retrigger", ID::modEnv1Retrigger);
+    addTpzLabel(
+      left1 + 3.0f * knobX, top0, 3.0f * knobWidth, labelHeight, midTextSize, "Mod 1");
+    auto checkBoxMod1Retrigger = addCheckbox(
+      left1 + 3.95f * knobX, top0, checkboxWidth, labelHeight, uiTextSize, "Retrigger",
+      ID::modEnv1Retrigger);
+    checkBoxMod1Retrigger->drawBackground = true;
     addKnob(
-      left1 + 3.0f * knobX, top0knob, knobWidth, colorBlue, "Attack", ID::modEnv1Attack);
+      left1 + 3.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Attack",
+      ID::modEnv1Attack);
     addKnob(
-      left1 + 4.0f * knobX, top0knob, knobWidth, colorBlue, "Curve", ID::modEnv1Curve);
+      left1 + 4.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Curve",
+      ID::modEnv1Curve);
     addKnob(
-      left1 + 5.0f * knobX, top0knob, knobWidth, colorBlue, ">PM", ID::modEnv1ToPhaseMod);
+      left1 + 5.0f * knobX, top0knob, knobWidth, margin, uiTextSize, ">PM",
+      ID::modEnv1ToPhaseMod);
 
-    addGroupLabel(left1, top1, 6.0f * knobWidth, "Mod 2");
-    addCheckbox(
-      left1 + 0.95f * knobX, top1, checkboxWidth, "Retrigger", ID::modEnv2Retrigger);
+    addTpzLabel(left1, top1, 6.0f * knobWidth, labelHeight, midTextSize, "Mod 2");
+    auto checkBoxMod2Retrigger = addCheckbox(
+      left1 + 0.95f * knobX, top1, checkboxWidth, labelHeight, uiTextSize, "Retrigger",
+      ID::modEnv2Retrigger);
+    checkBoxMod2Retrigger->drawBackground = true;
     addKnob(
-      left1 + 0.0f * knobX, top1knob, knobWidth, colorBlue, "Attack", ID::modEnv2Attack);
+      left1 + 0.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "Attack",
+      ID::modEnv2Attack);
     addKnob(
-      left1 + 1.0f * knobX, top1knob, knobWidth, colorBlue, "Curve", ID::modEnv2Curve);
+      left1 + 1.0f * knobX, top1knob, knobWidth, margin, uiTextSize, "Curve",
+      ID::modEnv2Curve);
     addKnob(
-      left1 + 2.0f * knobX, top1knob, knobWidth, colorBlue, ">Feedback",
+      left1 + 2.0f * knobX, top1knob, knobWidth, margin, uiTextSize, ">Feedback",
       ID::modEnv2ToFeedback);
     addKnob(
-      left1 + 3.0f * knobX, top1knob, knobWidth, colorBlue, ">LFO",
+      left1 + 3.0f * knobX, top1knob, knobWidth, margin, uiTextSize, ">LFO",
       ID::modEnv2ToLFOFrequency);
     addKnob(
-      left1 + 4.0f * knobX, top1knob, knobWidth, colorBlue, ">Slope2",
+      left1 + 4.0f * knobX, top1knob, knobWidth, margin, uiTextSize, ">Slope2",
       ID::modEnv2ToOsc2Slope);
     addKnob(
-      left1 + 5.0f * knobX, top1knob, knobWidth, colorBlue, ">Shifter1",
+      left1 + 5.0f * knobX, top1knob, knobWidth, margin, uiTextSize, ">Shifter1",
       ID::modEnv2ToShifter1);
 
-    addGroupLabel(left1, top2, 3.0f * knobWidth, "Shifter 1");
+    addTpzLabel(left1, top2, 3.0f * knobWidth, labelHeight, midTextSize, "Shifter 1");
     addNumberKnob(
-      left1 + 0.0f * knobX, top2knob, knobWidth, colorBlue, "Semi", ID::shifter1Semi,
-      Scales::shifterSemi);
+      left1 + 0.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Semi",
+      ID::shifter1Semi, Scales::shifterSemi);
     addNumberKnob(
-      left1 + 1.0f * knobX, top2knob, knobWidth, colorBlue, "Cent", ID::shifter1Cent,
-      Scales::shifterCent);
+      left1 + 1.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Cent",
+      ID::shifter1Cent, Scales::shifterCent);
     addKnob(
-      left1 + 2.0f * knobX, top2knob, knobWidth, colorBlue, "Gain", ID::shifter1Gain);
+      left1 + 2.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Gain",
+      ID::shifter1Gain);
 
-    addGroupLabel(left1 + 3.0f * knobX, top2, 3.0f * knobWidth, "Shifter 2");
+    addTpzLabel(
+      left1 + 3.0f * knobX, top2, 3.0f * knobWidth, labelHeight, midTextSize,
+      "Shifter 2");
     addNumberKnob(
-      left1 + 3.0f * knobX, top2knob, knobWidth, colorBlue, "Semi", ID::shifter2Semi,
-      Scales::shifterSemi);
+      left1 + 3.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Semi",
+      ID::shifter2Semi, Scales::shifterSemi);
     addNumberKnob(
-      left1 + 4.0f * knobX, top2knob, knobWidth, colorBlue, "Cent", ID::shifter2Cent,
-      Scales::shifterCent);
+      left1 + 4.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Cent",
+      ID::shifter2Cent, Scales::shifterCent);
     addKnob(
-      left1 + 5.0f * knobX, top2knob, knobWidth, colorBlue, "Gain", ID::shifter2Gain);
+      left1 + 5.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Gain",
+      ID::shifter2Gain);
 
-    addGroupLabel(left1, top3, 6.0f * knobWidth, "LFO");
+    addTpzLabel(left1, top3, 6.0f * knobWidth, labelHeight, midTextSize, "LFO");
     std::vector<std::string> lfoTypeItems{"Sin", "Saw", "Pulse", "Noise"};
-    addOptionMenu(left1 + 0.8f * knobX, top3, knobWidth, ID::lfoType, lfoTypeItems);
-    addCheckbox(left1 + 2.2f * knobX, top3, 55.0f, "Tempo", ID::lfoTempoSync);
+    addOptionMenu(
+      left1 + 0.8f * knobX, top3, knobWidth, labelHeight, uiTextSize, ID::lfoType,
+      lfoTypeItems);
+    auto checkBoxTempo = addCheckbox(
+      left1 + 2.2f * knobX, top3, 65.0f, labelHeight, uiTextSize, "Tempo",
+      ID::lfoTempoSync);
+    checkBoxTempo->drawBackground = true;
     addKnob(
-      left1 + 0.0f * knobX, top3knob, knobWidth, colorBlue, "Freq", ID::lfoFrequency);
-    addKnob(left1 + 1.0f * knobX, top3knob, knobWidth, colorBlue, "Shape", ID::lfoShape);
+      left1 + 0.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Freq",
+      ID::lfoFrequency);
     addKnob(
-      left1 + 2.0f * knobX, top3knob, knobWidth, colorBlue, ">Pitch1", ID::lfoToPitch);
+      left1 + 1.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Shape",
+      ID::lfoShape);
     addKnob(
-      left1 + 3.0f * knobX, top3knob, knobWidth, colorBlue, ">Slope1", ID::lfoToSlope);
+      left1 + 2.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Pitch1",
+      ID::lfoToPitch);
     addKnob(
-      left1 + 4.0f * knobX, top3knob, knobWidth, colorBlue, ">PW1", ID::lfoToPulseWidth);
+      left1 + 3.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Slope1",
+      ID::lfoToSlope);
     addKnob(
-      left1 + 5.0f * knobX, top3knob, knobWidth, colorBlue, ">Cut", ID::lfoToCutoff);
+      left1 + 4.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">PW1",
+      ID::lfoToPulseWidth);
+    addKnob(
+      left1 + 5.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Cut",
+      ID::lfoToCutoff);
 
-    addGroupLabel(left1, top4, 6.0f * knobWidth, "Slide");
+    addTpzLabel(left1, top4, 6.0f * knobWidth, labelHeight, midTextSize, "Slide");
     std::vector<std::string> pitchSlideType{"Always", "Sustain", "Reset to 0"};
-    addOptionMenu(left1 + 0.75f * knobX, top4, 70.0f, ID::pitchSlideType, pitchSlideType);
-    addKnob(left1 + 0.0f * knobX, top4knob, knobWidth, colorBlue, "Time", ID::pitchSlide);
+    addOptionMenu(
+      left1 + 0.75f * knobX, top4, 70.0f, labelHeight, uiTextSize, ID::pitchSlideType,
+      pitchSlideType);
     addKnob(
-      left1 + 1.0f * knobX, top4knob, knobWidth, colorBlue, "Offset",
+      left1 + 0.0f * knobX, top4knob, knobWidth, margin, uiTextSize, "Time",
+      ID::pitchSlide);
+    addKnob(
+      left1 + 1.0f * knobX, top4knob, knobWidth, margin, uiTextSize, "Offset",
       ID::pitchSlideOffset);
 
     // Plugin name.
@@ -282,254 +372,9 @@ public:
     const auto splashHeight = 40.0f;
     addSplashScreen(
       left1 + 2.25f * knobX, top4 + 1.5f * labelHeight, splashWidth, splashHeight, 20.0f,
-      20.0f, defaultWidth - 40.0f, defaultHeight - 40.0f, "TrapezoidSynth");
+      20.0f, defaultWidth - 40.0f, defaultHeight - 40.0f, pluginNameTextSize,
+      "TrapezoidSynth");
   }
-
-protected:
-  void parameterChanged(uint32_t index, float value) override
-  {
-    updateUI(index, param.parameterChanged(index, value));
-  }
-
-  void updateUI(uint32_t id, float normalized)
-  {
-    auto vWidget = valueWidget.find(id);
-    if (vWidget != valueWidget.end()) {
-      vWidget->second->setValue(normalized);
-      repaint();
-    }
-  }
-
-  void updateValue(uint32_t id, float normalized) override
-  {
-    setParameterValue(id, param.updateValue(id, normalized));
-    repaint();
-  }
-
-  void updateState(std::string /* key */, std::string /* value */) {}
-
-  void programLoaded(uint32_t index) override
-  {
-    param.loadProgram(index);
-
-    for (auto &vPair : valueWidget) {
-      if (vPair.second->id >= ParameterID::ID_ENUM_LENGTH) continue;
-      vPair.second->setValue(param.value[vPair.second->id]->getNormalized());
-    }
-
-    repaint();
-  }
-
-  void onNanoDisplay() override
-  {
-    beginPath();
-    rect(0, 0, getWidth(), getHeight());
-    fillColor(colorBack);
-    fill();
-  }
-
-private:
-  GlobalParameter param;
-
-  Color colorBack{255, 255, 255};
-  Color colorFore{0, 0, 0};
-  Color colorInactive{237, 237, 237};
-  Color colorBlue{11, 164, 241};
-  Color colorGreen{19, 193, 54};
-  Color colorOrange{252, 192, 79};
-  Color colorRed{252, 128, 128};
-
-  FontId fontId = -1;
-
-  std::vector<std::shared_ptr<Widget>> widget;
-  std::unordered_map<int, std::shared_ptr<ValueWidget>> valueWidget;
-
-  void addButton(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto button = std::make_shared<ToggleButton>(this, this, title, fontId);
-    button->id = id;
-    button->setSize(width, labelHeight);
-    button->setAbsolutePos(left, top);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(midTextSize);
-    valueWidget.emplace(std::make_pair(id, button));
-  }
-
-  void addCheckbox(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
-    checkbox->id = id;
-    checkbox->setSize(width, labelHeight);
-    checkbox->setAbsolutePos(left, top);
-    checkbox->setForegroundColor(colorFore);
-    checkbox->setHighlightColor(colorBlue);
-    checkbox->setTextSize(uiTextSize);
-    checkbox->drawBackground = true;
-    valueWidget.emplace(std::make_pair(id, checkbox));
-  }
-
-  void addGroupLabel(int left, int top, float width, const char *name)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = true;
-    label->setBorderWidth(2.0f);
-    label->setTextSize(midTextSize);
-    label->setTextAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-    widget.push_back(label);
-  };
-
-  enum class LabelPosition {
-    top,
-    left,
-    bottom,
-    right,
-  };
-
-  void addKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    const char *name,
-    uint32_t id,
-    LabelPosition labelPosition = LabelPosition::bottom)
-  {
-    auto height = width - 2.0f * margin;
-
-    auto knob = std::make_shared<Knob>(this, this);
-    knob->id = id;
-    knob->setSize(width - 2.0f * margin, height);
-    knob->setAbsolutePos(left + margin, top + margin);
-    knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
-    valueWidget.emplace(std::make_pair(id, knob));
-
-    addKnobLabel(left, top, width, height, name, labelPosition);
-  }
-
-  template<typename Scale>
-  void addNumberKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    const char *name,
-    uint32_t id,
-    Scale &scale,
-    uint32_t offset = 0,
-    LabelPosition labelPosition = LabelPosition::bottom)
-  {
-    auto height = width - 2.0f * margin;
-
-    auto knob = std::make_shared<NumberKnob<Scale>>(this, this, fontId, scale, offset);
-    knob->id = id;
-    knob->setSize(width - 2.0f * margin, height);
-    knob->setAbsolutePos(left + margin, top + margin);
-    knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
-    valueWidget.emplace(std::make_pair(id, knob));
-
-    addKnobLabel(left, top, width, height, name, labelPosition);
-  }
-
-  void addKnobLabel(
-    float left,
-    float top,
-    float width,
-    float height,
-    const char *name,
-    LabelPosition labelPosition)
-  {
-    switch (labelPosition) {
-      default:
-      case LabelPosition::bottom:
-        top = top + height;
-        height = 30.0f;
-        break;
-
-      case LabelPosition::right:
-        height = width;
-        left = left + width;
-        width *= 2.0f;
-        break;
-    }
-
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, height);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->setTextSize(uiTextSize);
-    if (labelPosition == LabelPosition::right)
-      label->setTextAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-    widget.push_back(label);
-  }
-
-  void addLabel(int left, int top, float width, const char *name)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = false;
-    label->setTextSize(uiTextSize);
-    widget.push_back(label);
-  };
-
-  void addOptionMenu(
-    float left,
-    float top,
-    float width,
-    uint32_t id,
-    const std::vector<std::string> &items)
-  {
-    auto menu = std::make_shared<OptionMenu>(this, this, items, fontId);
-    menu->id = id;
-    menu->setSize(width, labelHeight);
-    menu->setAbsolutePos(left, top);
-    auto defaultValue = param.value[id]->getDefaultInt();
-    menu->setDefaultValue(defaultValue);
-    menu->setForegroundColor(colorFore);
-    menu->setHighlightColor(colorBlue);
-    menu->setTextSize(uiTextSize);
-    menu->drawBackground = true;
-    valueWidget.emplace(std::make_pair(id, menu));
-  }
-
-  void addSplashScreen(
-    float buttonLeft,
-    float buttonTop,
-    float buttonWidth,
-    float buttonHeight,
-    float splashLeft,
-    float splashTop,
-    float splashWidth,
-    float splashHeight,
-    const char *name)
-  {
-    auto button = std::make_shared<SplashButton>(this, name, fontId);
-    button->setSize(buttonWidth, buttonHeight);
-    button->setAbsolutePos(buttonLeft, buttonTop);
-    button->setForegroundColor(colorFore);
-    button->setHighlightColor(colorOrange);
-    button->setTextSize(pluginNameTextSize);
-    widget.push_back(button);
-
-    auto credit = std::make_shared<CreditSplash>(this, name, fontId);
-    credit->setSize(splashWidth, splashHeight);
-    credit->setAbsolutePos(splashLeft, splashTop);
-    button->setSplashWidget(credit);
-    widget.push_back(credit);
-  }
-
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrapezoidSynthUI)
 };
 
 UI *createUI() { return new TrapezoidSynthUI(); }

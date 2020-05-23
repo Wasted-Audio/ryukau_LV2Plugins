@@ -19,14 +19,19 @@
 
 #include "Widget.hpp"
 
-class Label : public NanoWidget {
+#include "../../common/gui/style.hpp"
+
+#include <string>
+
+class TpzLabel : public NanoWidget {
 public:
   bool drawBorder = false;
   bool drawUnderline = false;
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
 
-  explicit Label(NanoWidget *group, const char *labelText, FontId fontId)
-    : NanoWidget(group), labelText(labelText), fontId(fontId)
+  explicit TpzLabel(
+    NanoWidget *group, std::string labelText, FontId fontId, Palette &palette)
+    : NanoWidget(group), labelText(labelText), fontId(fontId), pal(palette)
   {
   }
 
@@ -39,7 +44,7 @@ public:
     const auto height = getHeight();
 
     // Text.
-    if (labelText == nullptr) return;
+    if (labelText.size() == 0) return;
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
@@ -50,37 +55,33 @@ public:
       beginPath();
       moveTo(0, height / 2);
       lineTo(width, height / 2);
-      strokeColor(colorFore);
+      strokeColor(pal.border());
       strokeWidth(borderWidth);
       stroke();
 
       auto textBackMargin = 10.0f;
       Rectangle<float> textBack;
-      textBounds(labelX, labelY, labelText, NULL, textBack);
+      textBounds(labelX, labelY, labelText.c_str(), NULL, textBack);
       beginPath();
       rect(
         textBack.getX() - textBackMargin, textBack.getY(),
         textBack.getWidth() + 2 * textBackMargin, textBack.getHeight());
-      fillColor(colorBack);
+      fillColor(pal.background());
       fill();
     }
 
-    fillColor(colorFore);
-    text(labelX, labelY, labelText, nullptr);
+    fillColor(pal.foreground());
+    text(labelX, labelY, labelText.c_str(), nullptr);
   }
 
-  void setForegroundColor(Color color) { colorFore = color; }
-  void setBackgroundColor(Color color) { colorBack = color; }
   void setBorderWidth(float width) { borderWidth = width < 0.0f ? 0.0f : width; }
   void setTextAlign(int align) { this->align = align; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  Color colorFore{0, 0, 0};
-  Color colorBack{0xff, 0xff, 0xff};
-
-  const char *labelText = nullptr;
+  std::string labelText = nullptr;
   FontId fontId = -1;
+  Palette &pal;
   float borderWidth = 1.0f;
   float textSize = 18.0f;
 };
