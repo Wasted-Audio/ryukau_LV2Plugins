@@ -333,6 +333,7 @@ GPLv3. See License directory for the complete license.
 - [VCL - Vector class library version2](https://github.com/vectorclass/version2)
 - [FFTW](http://fftw.org/)
 - [PocketFFT for C++](https://gitlab.mpcdf.mpg.de/mtr/pocketfft/-/tree/cpp)
+- [JSON for Modern C++](https://github.com/nlohmann/json)
 
 ## Font
 - [Tinos](https://fonts.google.com/specimen/Tinos)
