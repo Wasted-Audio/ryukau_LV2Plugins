@@ -109,7 +109,7 @@ protected:
 
     auto oscTop2 = top + knobY;
     auto knobLeft = margin + left;
-    addNumberKnob<SomeDSP::LinearScale<double>>(
+    addNumberKnob(
       knobLeft, oscTop2, knobWidth, margin, uiTextSize, "Semi", idSemi, Scales::semi);
     addKnob(knobLeft + knobX, oscTop2, knobWidth, margin, uiTextSize, "Cent", idCent);
 
