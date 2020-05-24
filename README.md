@@ -334,6 +334,7 @@ GPLv3. See License directory for the complete license.
 - [FFTW](http://fftw.org/)
 - [PocketFFT for C++](https://gitlab.mpcdf.mpg.de/mtr/pocketfft/-/tree/cpp)
 - [JSON for Modern C++](https://github.com/nlohmann/json)
+- [Filesystem](https://github.com/gulrak/filesystem)
 
 ## Font
 - [Tinos](https://fonts.google.com/specimen/Tinos)
