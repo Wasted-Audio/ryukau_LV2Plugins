@@ -19,6 +19,7 @@
 This source is splitted because nlohmann/json.hpp is slow to compile.
 */
 #include "style.hpp"
+#include "../../lib/ghc/fs_std.hpp"
 #include "../../lib/json.hpp"
 
 #include <algorithm>
@@ -31,16 +32,16 @@ This source is splitted because nlohmann/json.hpp is slow to compile.
 Specification of $XDG_CONFIG_HOME:
 https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
 */
-inline std::filesystem::path getXdgConfigHome()
+inline fs::path getXdgConfigHome()
 {
   const char *configDir = std::getenv("XDG_CONFIG_HOME");
-  if (configDir != nullptr) return std::filesystem::path(configDir);
+  if (configDir != nullptr) return fs::path(configDir);
 
   const char *home = std::getenv("HOME");
-  if (home != nullptr) return std::filesystem::path(home) / ".config";
+  if (home != nullptr) return fs::path(home) / ".config";
 
   std::cerr << "$XDG_CONFIG_HOME and $HOME is empty.\n";
-  return std::filesystem::path("");
+  return fs::path("");
 }
 
 /**
@@ -51,10 +52,9 @@ inline nlohmann::json loadStyleJson()
 {
   nlohmann::json data;
 
-  auto styleJsonPath
-    = getXdgConfigHome() / std::filesystem::path("UhhyouPlugins/style/style.json");
+  auto styleJsonPath = getXdgConfigHome() / fs::path("UhhyouPlugins/style/style.json");
 
-  if (!std::filesystem::is_regular_file(styleJsonPath)) {
+  if (!fs::is_regular_file(styleJsonPath)) {
     std::cerr << styleJsonPath << " is not regular file or doesn't exist.\n";
     return data;
   }
