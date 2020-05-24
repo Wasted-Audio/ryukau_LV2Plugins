@@ -104,11 +104,12 @@ WaveCymbal: common
 .PHONY: install
 install:
 	cp -r bin/*.lv2 ~/.lv2/
+	python3 install.py
 
 .PHONY: clean
 clean:
-	rm -r bin
-	rm -r build
+	rm -rf bin
+	rm -rf build
 
 .PHONY: cleanDPF
 cleanDPF:
