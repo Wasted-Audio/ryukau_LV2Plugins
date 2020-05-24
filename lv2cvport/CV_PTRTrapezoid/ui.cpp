@@ -20,26 +20,11 @@
 // You should have received a copy of the GNU General Public License
 // along with CV_PTRTrapezoid.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <tuple>
-#include <vector>
-
-#include "../../common/ui.hpp"
+#include "../../common/uibase.hpp"
 #include "parameter.hpp"
 
-#include "../../common/gui/TinosBoldItalic.hpp"
-#include "../../common/gui/barbox.hpp"
-#include "../../common/gui/button.hpp"
-#include "../../common/gui/checkbox.hpp"
-#include "../../common/gui/knob.hpp"
-#include "../../common/gui/label.hpp"
-#include "../../common/gui/optionmenu.hpp"
-#include "../../common/gui/rotaryknob.hpp"
-#include "../../common/gui/tabview.hpp"
-#include "../../common/gui/textview.hpp"
-#include "../../common/gui/vslider.hpp"
+#include <sstream>
+#include <tuple>
 
 START_NAMESPACE_DISTRHO
 
@@ -58,169 +43,23 @@ constexpr uint32_t defaultHeight = uint32_t(labelHeight + 7 * labelY + 40);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
-class CV_PTRTrapezoidUI : public PluginUI {
+class CV_PTRTrapezoidUI : public PluginUIBase {
 protected:
-  void parameterChanged(uint32_t index, float value) override
-  {
-    updateUI(index, param.parameterChanged(index, value));
-  }
-
-  void updateUI(uint32_t id, float normalized)
-  {
-    for (auto &vWidget : valueWidget) {
-      if (vWidget->id != id) continue;
-      vWidget->setValue(normalized);
-      repaint();
-      return;
-    }
-
-    for (auto &aWidget : arrayWidget) {
-      auto &idVec = aWidget->id;
-      auto iter = std::find(idVec.begin(), idVec.end(), id);
-      if (iter != idVec.end()) {
-        aWidget->setValueAt(std::distance(idVec.begin(), iter), normalized);
-        repaint();
-        return;
-      }
-    }
-  }
-
-  void updateValue(uint32_t id, float normalized) override
-  {
-    if (id >= ParameterID::ID_ENUM_LENGTH) return;
-    setParameterValue(id, param.updateValue(id, normalized));
-    repaint();
-    // dumpParameter(); // Used to make preset. There may be better way to do this.
-  }
-
-  void updateState(std::string /* key */, std::string /* value */)
-  {
-    // setState(key.c_str(), value.c_str());
-  }
-
-  void programLoaded(uint32_t index) override
-  {
-    param.loadProgram(index);
-
-    for (auto &vWidget : valueWidget) {
-      if (vWidget->id >= ParameterID::ID_ENUM_LENGTH) continue;
-      vWidget->setValue(param.value[vWidget->id]->getNormalized());
-    }
-
-    for (auto &aWidget : arrayWidget) {
-      for (size_t idx = 0; idx < aWidget->id.size(); ++idx) {
-        if (aWidget->id[idx] >= ParameterID::ID_ENUM_LENGTH) continue;
-        aWidget->setValueAt(idx, param.value[aWidget->id[idx]]->getNormalized());
-      }
-    }
-
-    repaint();
-  }
-
-  void stateChanged(const char * /* key */, const char * /* value */)
-  {
-    // This method is required by DPF.
-  }
-
   void onNanoDisplay() override
   {
     beginPath();
     rect(0, 0, getWidth(), getHeight());
-    fillColor(colorBack);
+    fillColor(palette.background());
     fill();
-  }
-
-private:
-  GlobalParameter param;
-
-  Color colorBack{255, 255, 255};
-  Color colorFore{0, 0, 0};
-  Color colorInactive{237, 237, 237};
-  Color colorBlue{11, 164, 241};
-  Color colorGreen{19, 193, 54};
-  Color colorOrange{252, 192, 79};
-  Color colorRed{252, 128, 128};
-
-  FontId fontId = -1;
-
-  std::vector<std::shared_ptr<Widget>> widget;
-  std::vector<std::shared_ptr<ValueWidget>> valueWidget;
-  std::vector<std::shared_ptr<ArrayWidget>> arrayWidget;
-  std::vector<std::shared_ptr<StateWidget>> stateWidget;
-
-  void dumpParameter()
-  {
-    std::cout << "{\n";
-    for (const auto &value : param.value)
-      std::cout << "\"" << value->getName()
-                << "\": " << std::to_string(value->getNormalized()) << ",\n";
-    std::cout << "}" << std::endl;
-  }
-
-  std::shared_ptr<Label> addLabel(
-    int left,
-    int top,
-    float width,
-    const char *name,
-    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = false;
-    label->setTextSize(uiTextSize);
-    label->setTextAlign(textAlign);
-    widget.push_back(label);
-    return label;
-  };
-
-  std::shared_ptr<Label> addGroupLabel(int left, int top, float width, const char *name)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = true;
-    label->setBorderWidth(2.0f);
-    label->setTextSize(midTextSize);
-    widget.push_back(label);
-    return label;
-  };
-
-  template<typename Scale>
-  std::shared_ptr<TextKnob<Scale>> addTextKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    uint32_t id,
-    Scale &scale,
-    bool isDecibel = false,
-    uint32_t precision = 0,
-    int32_t offset = 0)
-  {
-    auto knob = std::make_shared<TextKnob<Scale>>(this, this, fontId, scale, isDecibel);
-    knob->id = id;
-    knob->setSize(width, labelHeight);
-    knob->setAbsolutePos(left, top);
-    knob->setForegroundColor(colorFore);
-    knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
-    knob->setPrecision(precision);
-    knob->offset = offset;
-    knob->setTextSize(uiTextSize);
-    valueWidget.push_back(knob);
-    return knob;
   }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_PTRTrapezoidUI)
 
 public:
-  CV_PTRTrapezoidUI() : PluginUI(defaultWidth, defaultHeight)
+  CV_PTRTrapezoidUI() : PluginUIBase(defaultWidth, defaultHeight)
   {
+    param = std::make_unique<GlobalParameter>();
+
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
     fontId = createFontFromMemory(
@@ -233,40 +72,50 @@ public:
     const auto left0 = 20.0f;
     const auto left1 = 20.0f + knobX;
 
-    addGroupLabel(left0, top0, 2 * knobX, "CV_PTRTrapezoid");
+    addGroupLabel(left0, top0, 2 * knobX, labelHeight, midTextSize, "CV_PTRTrapezoid");
 
     const int labelAlign = ALIGN_LEFT | ALIGN_MIDDLE;
 
-    addLabel(left0, top0 + labelY, knobX, "Gain", labelAlign);
-    addTextKnob(left1, top0 + labelY, knobX, colorBlue, ID::gain, Scales::gain, false, 3);
-
-    addLabel(left0, top0 + 2 * labelY, knobX, "Boost", labelAlign);
+    addLabel(left0, top0 + labelY, knobX, labelHeight, uiTextSize, "Gain", labelAlign);
     addTextKnob(
-      left1, top0 + 2 * labelY, knobX, colorBlue, ID::boost, Scales::defaultScale, false,
+      left1, top0 + labelY, knobX, labelHeight, uiTextSize, ID::gain, Scales::gain, false,
       3);
 
-    addLabel(left0, top0 + 3 * labelY, knobX, "PulseWidth", labelAlign);
+    addLabel(
+      left0, top0 + 2 * labelY, knobX, labelHeight, uiTextSize, "Boost", labelAlign);
     addTextKnob(
-      left1, top0 + 3 * labelY, knobX, colorBlue, ID::pulseWidth, Scales::defaultScale,
-      false, 3);
+      left1, top0 + 2 * labelY, knobX, labelHeight, uiTextSize, ID::boost,
+      Scales::defaultScale, false, 3);
 
-    addLabel(left0, top0 + 4 * labelY, knobX, "Slope", labelAlign);
+    addLabel(
+      left0, top0 + 3 * labelY, knobX, labelHeight, uiTextSize, "PulseWidth", labelAlign);
     addTextKnob(
-      left1, top0 + 4 * labelY, knobX, colorBlue, ID::slope, Scales::oscSlope, false, 3);
+      left1, top0 + 3 * labelY, knobX, labelHeight, uiTextSize, ID::pulseWidth,
+      Scales::defaultScale, false, 3);
 
-    addLabel(left0, top0 + 5 * labelY, knobX, "SlopeCV", labelAlign);
+    addLabel(
+      left0, top0 + 4 * labelY, knobX, labelHeight, uiTextSize, "Slope", labelAlign);
     addTextKnob(
-      left1, top0 + 5 * labelY, knobX, colorBlue, ID::slopeMultiply,
+      left1, top0 + 4 * labelY, knobX, labelHeight, uiTextSize, ID::slope,
+      Scales::oscSlope, false, 3);
+
+    addLabel(
+      left0, top0 + 5 * labelY, knobX, labelHeight, uiTextSize, "SlopeCV", labelAlign);
+    addTextKnob(
+      left1, top0 + 5 * labelY, knobX, labelHeight, uiTextSize, ID::slopeMultiply,
       Scales::slopeMultiply, false, 3);
 
-    addLabel(left0, top0 + 6 * labelY, knobX, "Semi", labelAlign);
+    addLabel(
+      left0, top0 + 6 * labelY, knobX, labelHeight, uiTextSize, "Semi", labelAlign);
     addTextKnob(
-      left1, top0 + 6 * labelY, knobX, colorBlue, ID::oscSemi, Scales::oscSemi, false, 0,
-      -60);
+      left1, top0 + 6 * labelY, knobX, labelHeight, uiTextSize, ID::oscSemi,
+      Scales::oscSemi, false, 0, -60);
 
-    addLabel(left0, top0 + 7 * labelY, knobX, "Milli", labelAlign);
+    addLabel(
+      left0, top0 + 7 * labelY, knobX, labelHeight, uiTextSize, "Milli", labelAlign);
     addTextKnob(
-      left1, top0 + 7 * labelY, knobX, colorBlue, ID::oscMilli, Scales::oscMilli);
+      left1, top0 + 7 * labelY, knobX, labelHeight, uiTextSize, ID::oscMilli,
+      Scales::oscMilli);
   }
 };
 

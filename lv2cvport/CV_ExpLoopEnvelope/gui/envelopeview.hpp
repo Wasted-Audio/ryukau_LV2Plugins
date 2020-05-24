@@ -132,33 +132,33 @@ public:
     stroke();
   }
 
-  void update(GlobalParameter &param)
+  void update(std::unique_ptr<ParameterInterface> const &param)
   {
     using ID = ParameterID::ID;
 
-    auto loopEnd = param.value[ID::loopEnd]->getInt();
+    auto loopEnd = param->getInt(ID::loopEnd);
     // if (loopEnd >= 8) loopEnd = 7;
-    envelope.setLoop(param.value[ID::loopStart]->getInt(), loopEnd);
+    envelope.setLoop(param->getInt(ID::loopStart), loopEnd);
 
-    envelope.set(1.0f, param.value[ID::releaseTime]->getFloat());
+    envelope.set(1.0f, param->getFloat(ID::releaseTime));
 
     envelope.setDecayTime(
-      param.value[ID::s0DecayTime]->getFloat(), param.value[ID::s1DecayTime]->getFloat(),
-      param.value[ID::s2DecayTime]->getFloat(), param.value[ID::s3DecayTime]->getFloat(),
-      param.value[ID::s4DecayTime]->getFloat(), param.value[ID::s5DecayTime]->getFloat(),
-      param.value[ID::s6DecayTime]->getFloat(), param.value[ID::s7DecayTime]->getFloat());
+      param->getFloat(ID::s0DecayTime), param->getFloat(ID::s1DecayTime),
+      param->getFloat(ID::s2DecayTime), param->getFloat(ID::s3DecayTime),
+      param->getFloat(ID::s4DecayTime), param->getFloat(ID::s5DecayTime),
+      param->getFloat(ID::s6DecayTime), param->getFloat(ID::s7DecayTime));
     envelope.setHoldTime(
-      param.value[ID::s0HoldTime]->getFloat(), param.value[ID::s1HoldTime]->getFloat(),
-      param.value[ID::s2HoldTime]->getFloat(), param.value[ID::s3HoldTime]->getFloat(),
-      param.value[ID::s4HoldTime]->getFloat(), param.value[ID::s5HoldTime]->getFloat(),
-      param.value[ID::s6HoldTime]->getFloat(), param.value[ID::s7HoldTime]->getFloat());
+      param->getFloat(ID::s0HoldTime), param->getFloat(ID::s1HoldTime),
+      param->getFloat(ID::s2HoldTime), param->getFloat(ID::s3HoldTime),
+      param->getFloat(ID::s4HoldTime), param->getFloat(ID::s5HoldTime),
+      param->getFloat(ID::s6HoldTime), param->getFloat(ID::s7HoldTime));
     envelope.setLevel(
-      param.value[ID::s0Level]->getFloat(), param.value[ID::s1Level]->getFloat(),
-      param.value[ID::s2Level]->getFloat(), param.value[ID::s3Level]->getFloat(),
-      param.value[ID::s4Level]->getFloat(), param.value[ID::s5Level]->getFloat(),
-      param.value[ID::s6Level]->getFloat(), param.value[ID::s7Level]->getFloat());
+      param->getFloat(ID::s0Level), param->getFloat(ID::s1Level),
+      param->getFloat(ID::s2Level), param->getFloat(ID::s3Level),
+      param->getFloat(ID::s4Level), param->getFloat(ID::s5Level),
+      param->getFloat(ID::s6Level), param->getFloat(ID::s7Level));
 
-    gain = param.value[ID::gain]->getFloat();
+    gain = param->getFloat(ID::gain);
     isCvGainReady = gain == 0;
     if (isCvGainReady) gain = 1; // For convenience when using CV gain port.
 
@@ -166,7 +166,8 @@ public:
     loopTime = envelope.getLoopTime();
     totalTime = attackTime + loopTime + envelope.getReleaseTime();
 
-    auto sampleRate = getWidth() / (totalTime);
+    auto sampleRate = getWidth() / totalTime;
+    if (sampleRate > 1e6) sampleRate = 1e6;
 
     auto offset = 2 * marginX;
     data.resize(getWidth() >= offset ? (getWidth() - offset) : 0);
@@ -187,8 +188,10 @@ public:
     }
     envelope.terminate();
 
+    if (sectionTime.size() > envelope.nSections) sectionTime.resize(envelope.nSections);
+
     // Trim data.
-    auto rate = param.value[ID::rate]->getFloat();
+    auto rate = param->getFloat(ID::rate);
     attackTime *= rate;
     loopTime *= rate;
     totalTime *= rate;

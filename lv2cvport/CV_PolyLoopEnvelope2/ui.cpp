@@ -20,28 +20,13 @@
 // You should have received a copy of the GNU General Public License
 // along with CV_PolyLoopEnvelope2.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <tuple>
-#include <unordered_map>
-#include <vector>
-
-#include "../../common/ui.hpp"
+#include "../../common/uibase.hpp"
 #include "parameter.hpp"
 
-#include "../../common/gui/TinosBoldItalic.hpp"
-#include "../../common/gui/barbox.hpp"
-#include "../../common/gui/button.hpp"
-#include "../../common/gui/checkbox.hpp"
-#include "../../common/gui/knob.hpp"
-#include "../../common/gui/label.hpp"
-#include "../../common/gui/optionmenu.hpp"
-#include "../../common/gui/rotaryknob.hpp"
-#include "../../common/gui/tabview.hpp"
-#include "../../common/gui/textview.hpp"
-#include "../../common/gui/vslider.hpp"
 #include "gui/envelopeview.hpp"
+
+#include <sstream>
+#include <tuple>
 
 START_NAMESPACE_DISTRHO
 
@@ -60,51 +45,9 @@ constexpr uint32_t defaultHeight = uint32_t(13 * labelY + labelHeight + 30);
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
-class CV_PolyLoopEnvelope2UI : public PluginUI {
+class CV_PolyLoopEnvelope2UI : public PluginUIBase {
 protected:
-  void parameterChanged(uint32_t index, float value) override
-  {
-    updateUI(index, param.parameterChanged(index, value));
-  }
-
-  void updateUI(uint32_t id, float normalized)
-  {
-    auto vWidget = valueWidget.find(id);
-    if (vWidget != valueWidget.end()) {
-      vWidget->second->setValue(normalized);
-      repaint();
-    }
-  }
-
-  void updateValue(uint32_t id, float normalized) override
-  {
-    if (id >= ParameterID::ID_ENUM_LENGTH) return;
-    setParameterValue(id, param.updateValue(id, normalized));
-    repaint();
-    // dumpParameter(); // Used to make preset. There may be better way to do this.
-  }
-
-  void updateState(std::string /* key */, std::string /* value */)
-  {
-    // setState(key.c_str(), value.c_str());
-  }
-
-  void programLoaded(uint32_t index) override
-  {
-    param.loadProgram(index);
-
-    for (auto &vPair : valueWidget) {
-      if (vPair.second->id >= ParameterID::ID_ENUM_LENGTH) continue;
-      vPair.second->setValue(param.value[vPair.second->id]->getNormalized());
-    }
-
-    repaint();
-  }
-
-  void stateChanged(const char * /* key */, const char * /* value */)
-  {
-    // This method is required by DPF.
-  }
+  std::shared_ptr<EnvelopeView> envelopeView;
 
   void onNanoDisplay() override
   {
@@ -112,120 +55,17 @@ protected:
 
     beginPath();
     rect(0, 0, getWidth(), getHeight());
-    fillColor(colorBack);
+    fillColor(palette.background());
     fill();
-  }
-
-private:
-  GlobalParameter param;
-
-  Color colorBack{255, 255, 255};
-  Color colorFore{0, 0, 0};
-  Color colorInactive{237, 237, 237};
-  Color colorBlue{11, 164, 241};
-  Color colorGreen{19, 193, 54};
-  Color colorOrange{252, 192, 79};
-  Color colorRed{252, 128, 128};
-
-  FontId fontId = -1;
-
-  std::shared_ptr<EnvelopeView> envelopeView;
-  std::vector<std::shared_ptr<Widget>> widget;
-  std::unordered_map<int, std::shared_ptr<ValueWidget>> valueWidget;
-
-  void dumpParameter()
-  {
-    std::cout << "{\n";
-    for (const auto &value : param.value)
-      std::cout << "\"" << value->getName()
-                << "\": " << std::to_string(value->getNormalized()) << ",\n";
-    std::cout << "}" << std::endl;
-  }
-
-  std::shared_ptr<CheckBox>
-  addCheckbox(float left, float top, float width, const char *title, uint32_t id)
-  {
-    auto checkbox = std::make_shared<CheckBox>(this, this, title, fontId);
-    checkbox->id = id;
-    checkbox->setSize(width, labelHeight);
-    checkbox->setAbsolutePos(left, top);
-    checkbox->setForegroundColor(colorFore);
-    checkbox->setHighlightColor(colorBlue);
-    checkbox->setTextSize(uiTextSize);
-    valueWidget.emplace(std::make_pair(id, checkbox));
-    return checkbox;
-  }
-
-  std::shared_ptr<Label> addLabel(
-    int left,
-    int top,
-    float width,
-    std::string name,
-    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = false;
-    label->setTextSize(uiTextSize);
-    label->setTextAlign(textAlign);
-    widget.push_back(label);
-    return label;
-  };
-
-  std::shared_ptr<Label> addGroupLabel(
-    int left,
-    int top,
-    float width,
-    const char *name,
-    int textAlign = ALIGN_CENTER | ALIGN_MIDDLE)
-  {
-    auto label = std::make_shared<Label>(this, name, fontId);
-    label->setSize(width, labelHeight);
-    label->setAbsolutePos(left, top);
-    label->setForegroundColor(colorFore);
-    label->drawBorder = true;
-    label->setBorderWidth(2.0f);
-    label->setTextSize(midTextSize);
-    label->setTextAlign(textAlign);
-    widget.push_back(label);
-    return label;
-  };
-
-  template<typename Scale>
-  std::shared_ptr<TextKnob<Scale>> addTextKnob(
-    float left,
-    float top,
-    float width,
-    Color highlightColor,
-    uint32_t id,
-    Scale &scale,
-    bool isDecibel = false,
-    uint32_t precision = 0,
-    int32_t offset = 0)
-  {
-    auto knob = std::make_shared<TextKnob<Scale>>(this, this, fontId, scale, isDecibel);
-    knob->id = id;
-    knob->setSize(width, labelHeight);
-    knob->setAbsolutePos(left, top);
-    knob->setForegroundColor(colorFore);
-    knob->setHighlightColor(highlightColor);
-    auto defaultValue = param.value[id]->getDefaultNormalized();
-    knob->setDefaultValue(defaultValue);
-    knob->setValue(defaultValue);
-    knob->setPrecision(precision);
-    knob->offset = offset;
-    knob->setTextSize(uiTextSize);
-    valueWidget.emplace(std::make_pair(id, knob));
-    return knob;
   }
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_PolyLoopEnvelope2UI)
 
 public:
-  CV_PolyLoopEnvelope2UI() : PluginUI(defaultWidth, defaultHeight)
+  CV_PolyLoopEnvelope2UI() : PluginUIBase(defaultWidth, defaultHeight)
   {
+    param = std::make_unique<GlobalParameter>();
+
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
     fontId = createFontFromMemory(
@@ -237,7 +77,8 @@ public:
     const auto top0 = 15.0f;
     const auto left0 = 15.0f;
 
-    addGroupLabel(left0, top0, defaultWidth - 30, "CV_PolyLoopEnvelope2");
+    addGroupLabel(
+      left0, top0, defaultWidth - 30, labelHeight, midTextSize, "CV_PolyLoopEnvelope2");
 
     const auto top1 = top0 + labelY;
 
@@ -250,27 +91,37 @@ public:
 
     const int labelAlign = ALIGN_LEFT | ALIGN_MIDDLE;
 
-    addLabel(left0, top2, knobX, "Gain", labelAlign);
-    addTextKnob(left1, top2, knobX, colorBlue, ID::gain, Scales::level, false, 4);
-
-    addLabel(left0, top2 + 1 * labelY, knobX, "Loop Start", labelAlign);
+    addLabel(left0, top2, knobX, labelHeight, uiTextSize, "Gain", labelAlign);
     addTextKnob(
-      left1, top2 + 1 * labelY, knobX, colorBlue, ID::loopStart, Scales::section);
+      left1, top2, knobX, labelHeight, uiTextSize, ID::gain, Scales::level, false, 4);
 
-    addLabel(left0, top2 + 2 * labelY, knobX, "Loop End", labelAlign);
-    addTextKnob(left1, top2 + 2 * labelY, knobX, colorBlue, ID::loopEnd, Scales::section);
-
-    addLabel(left0, top2 + 3 * labelY, knobX, "Rate", labelAlign);
+    addLabel(
+      left0, top2 + 1 * labelY, knobX, labelHeight, uiTextSize, "Loop Start", labelAlign);
     addTextKnob(
-      left1, top2 + 3 * labelY, knobX, colorBlue, ID::rate, Scales::rate, false, 2);
+      left1, top2 + 1 * labelY, knobX, labelHeight, uiTextSize, ID::loopStart,
+      Scales::section);
 
-    addLabel(left0, top2 + 4 * labelY, knobX, "Slide [s]", labelAlign);
+    addLabel(
+      left0, top2 + 2 * labelY, knobX, labelHeight, uiTextSize, "Loop End", labelAlign);
     addTextKnob(
-      left1, top2 + 4 * labelY, knobX, colorBlue, ID::rateSlideTime,
+      left1, top2 + 2 * labelY, knobX, labelHeight, uiTextSize, ID::loopEnd,
+      Scales::section);
+
+    addLabel(
+      left0, top2 + 3 * labelY, knobX, labelHeight, uiTextSize, "Rate", labelAlign);
+    addTextKnob(
+      left1, top2 + 3 * labelY, knobX, labelHeight, uiTextSize, ID::rate, Scales::rate,
+      false, 2);
+
+    addLabel(
+      left0, top2 + 4 * labelY, knobX, labelHeight, uiTextSize, "Slide [s]", labelAlign);
+    addTextKnob(
+      left1, top2 + 4 * labelY, knobX, labelHeight, uiTextSize, ID::rateSlideTime,
       Scales::rateSlideTime, false, 5);
 
     addCheckbox(
-      left0, top2 + 5 * labelY, 2 * knobX, "Rate Key Follow", ID::rateKeyFollow);
+      left0, top2 + 5 * labelY, 2 * knobX, labelHeight, uiTextSize, "Rate Key Follow",
+      ID::rateKeyFollow);
 
     constexpr size_t nEnvelopeSection = 2;
 
@@ -285,36 +136,38 @@ public:
     const auto topMatrix3 = topMatrix2 + labelY;
     const auto topMatrix4 = topMatrix3 + labelY;
 
-    addLabel(leftMatrix0, topMatrix1, knobX, "Decay [s]");
-    addLabel(leftMatrix0, topMatrix2, knobX, "Hold [s]");
-    addLabel(leftMatrix0, topMatrix3, knobX, "Level");
-    addLabel(leftMatrix0, topMatrix4, knobX, "Curve");
+    addLabel(leftMatrix0, topMatrix1, knobX, labelHeight, uiTextSize, "Decay [s]");
+    addLabel(leftMatrix0, topMatrix2, knobX, labelHeight, uiTextSize, "Hold [s]");
+    addLabel(leftMatrix0, topMatrix3, knobX, labelHeight, uiTextSize, "Level");
+    addLabel(leftMatrix0, topMatrix4, knobX, labelHeight, uiTextSize, "Curve");
 
     std::string sectionLabel("Section ");
     for (size_t idx = 0; idx < nEnvelopeSection; ++idx) {
       auto indexStr = std::to_string(idx);
-      addLabel(leftMatrix[idx], topMatrix0, knobX, sectionLabel + indexStr);
+      addLabel(
+        leftMatrix[idx], topMatrix0, knobX, labelHeight, uiTextSize,
+        sectionLabel + indexStr);
       addTextKnob(
-        leftMatrix[idx], topMatrix1, knobX, colorBlue, ID::s0DecayTime + idx,
+        leftMatrix[idx], topMatrix1, knobX, labelHeight, uiTextSize,
+        ID::s0DecayTime + idx, Scales::decay, false, 4);
+      addTextKnob(
+        leftMatrix[idx], topMatrix2, knobX, labelHeight, uiTextSize, ID::s0HoldTime + idx,
         Scales::decay, false, 4);
       addTextKnob(
-        leftMatrix[idx], topMatrix2, knobX, colorBlue, ID::s0HoldTime + idx,
-        Scales::decay, false, 4);
+        leftMatrix[idx], topMatrix3, knobX, labelHeight, uiTextSize, ID::s0Level + idx,
+        Scales::level, false, 4);
       addTextKnob(
-        leftMatrix[idx], topMatrix3, knobX, colorBlue, ID::s0Level + idx, Scales::level,
-        false, 4);
-      addTextKnob(
-        leftMatrix[idx], topMatrix4, knobX, colorBlue, ID::s0Curve + idx, Scales::curve,
-        false, 4);
+        leftMatrix[idx], topMatrix4, knobX, labelHeight, uiTextSize, ID::s0Curve + idx,
+        Scales::curve, false, 4);
     }
 
-    addLabel(leftMatrixRelease, topMatrix0, knobX, "Release");
+    addLabel(leftMatrixRelease, topMatrix0, knobX, labelHeight, uiTextSize, "Release");
     addTextKnob(
-      leftMatrixRelease, topMatrix1, knobX, colorBlue, ID::releaseTime, Scales::decay,
-      false, 4);
+      leftMatrixRelease, topMatrix1, knobX, labelHeight, uiTextSize, ID::releaseTime,
+      Scales::decay, false, 4);
     auto knob = addTextKnob(
-      leftMatrixRelease, topMatrix4, knobX, colorBlue, ID::releaseCurve, Scales::curve,
-      false, 4);
+      leftMatrixRelease, topMatrix4, knobX, labelHeight, uiTextSize, ID::releaseCurve,
+      Scales::curve, false, 4);
   }
 };
 

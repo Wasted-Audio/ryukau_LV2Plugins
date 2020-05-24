@@ -20,6 +20,7 @@
 #include <memory>
 #include <vector>
 
+#include "../../common/parameterinterface.hpp"
 #include "../../common/value.hpp"
 
 #ifdef TEST_BUILD
@@ -54,7 +55,7 @@ struct Scales {
   static SomeDSP::LogScale<double> rampLimit;
 };
 
-struct GlobalParameter {
+struct GlobalParameter : public ParameterInterface {
   std::vector<std::unique_ptr<ValueInterface>> value;
 
   GlobalParameter()
@@ -94,15 +95,35 @@ struct GlobalParameter {
   }
 #endif
 
+  size_t idLength() override { return value.size(); }
+
   void resetParameter()
   {
     for (auto &val : value) val->setFromNormalized(val->getDefaultNormalized());
   }
 
-  double getParameterValue(uint32_t index) const
+  double getNormalized(uint32_t index) const override
+  {
+    if (index >= value.size()) return 0.0;
+    return value[index]->getNormalized();
+  }
+
+  double getDefaultNormalized(uint32_t index) const override
+  {
+    if (index >= value.size()) return 0.0;
+    return value[index]->getDefaultNormalized();
+  }
+
+  double getFloat(uint32_t index) const override
   {
     if (index >= value.size()) return 0.0;
     return value[index]->getFloat();
+  }
+
+  double getInt(uint32_t index) const override
+  {
+    if (index >= value.size()) return 0.0;
+    return value[index]->getInt();
   }
 
   void setParameterValue(uint32_t index, float raw)
@@ -111,14 +132,14 @@ struct GlobalParameter {
     value[index]->setFromFloat(raw);
   }
 
-  double parameterChanged(uint32_t index, float raw)
+  double parameterChanged(uint32_t index, float raw) override
   {
     if (index >= value.size()) return 0.0;
     value[index]->setFromFloat(raw);
     return value[index]->getNormalized();
   }
 
-  double updateValue(uint32_t index, float normalized)
+  double updateValue(uint32_t index, float normalized) override
   {
     if (index >= value.size()) return 0.0;
     value[index]->setFromNormalized(normalized);

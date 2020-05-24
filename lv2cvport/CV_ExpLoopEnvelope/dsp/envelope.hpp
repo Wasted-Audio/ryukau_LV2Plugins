@@ -55,6 +55,8 @@ public: // For UI.
   Sample getMin() { return *std::min_element(level.begin(), level.end()); }
 
 public: // DSP.
+  const uint8_t nSections = 8;
+
   void setup(Sample sampleRate)
   {
     this->sampleRate = sampleRate;
@@ -79,7 +81,7 @@ public: // DSP.
   {
     if (start > end) return;
     loopStart = static_cast<State>(start);
-    loopEnd = end <= nSections ? static_cast<State>(end) : State::release;
+    loopEnd = end < nSections ? static_cast<State>(end) : State::release;
   }
 
   // rate must be greater than 0.
@@ -260,7 +262,6 @@ private:
   }
 
   const Sample threshold = 1e-5;
-  const uint8_t nSections = 7;
 
   uint32_t tailLength = 32;
   uint32_t tailCounter = tailLength;

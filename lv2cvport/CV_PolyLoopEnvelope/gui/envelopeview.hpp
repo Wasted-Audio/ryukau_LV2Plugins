@@ -132,58 +132,57 @@ public:
     stroke();
   }
 
-  void update(GlobalParameter &param)
+  void update(std::unique_ptr<ParameterInterface> const &param)
   {
     using ID = ParameterID::ID;
 
-    auto loopEnd = param.value[ID::loopEnd]->getInt();
-    envelope.setLoop(param.value[ID::loopStart]->getInt(), loopEnd);
+    auto loopEnd = param->getInt(ID::loopEnd);
+    envelope.setLoop(param->getInt(ID::loopStart), loopEnd);
 
     envelope.set(
-      1.0f, param.value[ID::releaseTime]->getFloat(),
-      param.value[ID::releaseCurve]->getFloat(),
+      1.0f, param->getFloat(ID::releaseTime), param->getFloat(ID::releaseCurve),
       {
-        float(param.value[ID::s0DecayTime]->getFloat()),
-        float(param.value[ID::s1DecayTime]->getFloat()),
-        float(param.value[ID::s2DecayTime]->getFloat()),
-        float(param.value[ID::s3DecayTime]->getFloat()),
-        float(param.value[ID::s4DecayTime]->getFloat()),
-        float(param.value[ID::s5DecayTime]->getFloat()),
-        float(param.value[ID::s6DecayTime]->getFloat()),
-        float(param.value[ID::s7DecayTime]->getFloat()),
+        float(param->getFloat(ID::s0DecayTime)),
+        float(param->getFloat(ID::s1DecayTime)),
+        float(param->getFloat(ID::s2DecayTime)),
+        float(param->getFloat(ID::s3DecayTime)),
+        float(param->getFloat(ID::s4DecayTime)),
+        float(param->getFloat(ID::s5DecayTime)),
+        float(param->getFloat(ID::s6DecayTime)),
+        float(param->getFloat(ID::s7DecayTime)),
       },
       {
-        float(param.value[ID::s0HoldTime]->getFloat()),
-        float(param.value[ID::s1HoldTime]->getFloat()),
-        float(param.value[ID::s2HoldTime]->getFloat()),
-        float(param.value[ID::s3HoldTime]->getFloat()),
-        float(param.value[ID::s4HoldTime]->getFloat()),
-        float(param.value[ID::s5HoldTime]->getFloat()),
-        float(param.value[ID::s6HoldTime]->getFloat()),
-        float(param.value[ID::s7HoldTime]->getFloat()),
+        float(param->getFloat(ID::s0HoldTime)),
+        float(param->getFloat(ID::s1HoldTime)),
+        float(param->getFloat(ID::s2HoldTime)),
+        float(param->getFloat(ID::s3HoldTime)),
+        float(param->getFloat(ID::s4HoldTime)),
+        float(param->getFloat(ID::s5HoldTime)),
+        float(param->getFloat(ID::s6HoldTime)),
+        float(param->getFloat(ID::s7HoldTime)),
       },
       {
-        float(param.value[ID::s0Level]->getFloat()),
-        float(param.value[ID::s1Level]->getFloat()),
-        float(param.value[ID::s2Level]->getFloat()),
-        float(param.value[ID::s3Level]->getFloat()),
-        float(param.value[ID::s4Level]->getFloat()),
-        float(param.value[ID::s5Level]->getFloat()),
-        float(param.value[ID::s6Level]->getFloat()),
-        float(param.value[ID::s7Level]->getFloat()),
+        float(param->getFloat(ID::s0Level)),
+        float(param->getFloat(ID::s1Level)),
+        float(param->getFloat(ID::s2Level)),
+        float(param->getFloat(ID::s3Level)),
+        float(param->getFloat(ID::s4Level)),
+        float(param->getFloat(ID::s5Level)),
+        float(param->getFloat(ID::s6Level)),
+        float(param->getFloat(ID::s7Level)),
       },
       {
-        float(param.value[ID::s0Curve]->getFloat()),
-        float(param.value[ID::s1Curve]->getFloat()),
-        float(param.value[ID::s2Curve]->getFloat()),
-        float(param.value[ID::s3Curve]->getFloat()),
-        float(param.value[ID::s4Curve]->getFloat()),
-        float(param.value[ID::s5Curve]->getFloat()),
-        float(param.value[ID::s6Curve]->getFloat()),
-        float(param.value[ID::s7Curve]->getFloat()),
+        float(param->getFloat(ID::s0Curve)),
+        float(param->getFloat(ID::s1Curve)),
+        float(param->getFloat(ID::s2Curve)),
+        float(param->getFloat(ID::s3Curve)),
+        float(param->getFloat(ID::s4Curve)),
+        float(param->getFloat(ID::s5Curve)),
+        float(param->getFloat(ID::s6Curve)),
+        float(param->getFloat(ID::s7Curve)),
       });
 
-    gain = param.value[ID::gain]->getFloat();
+    gain = param->getFloat(ID::gain);
     isCvGainReady = gain == 0;
     if (isCvGainReady) gain = 1; // For convenience when using CV gain port.
 
@@ -191,7 +190,7 @@ public:
     loopTime = envelope.getLoopTime();
     totalTime = attackTime + loopTime + envelope.getReleaseTime();
 
-    float sampleRate = getWidth() / (totalTime);
+    float sampleRate = getWidth() / totalTime;
     if (sampleRate > 1e6) sampleRate = 1e6;
 
     auto offset = 2 * marginX;
@@ -216,7 +215,7 @@ public:
     if (sectionTime.size() > envelope.nSections) sectionTime.resize(envelope.nSections);
 
     // Trim data.
-    auto rate = param.value[ID::rate]->getFloat();
+    auto rate = param->getFloat(ID::rate);
     attackTime *= rate;
     loopTime *= rate;
     totalTime *= rate;

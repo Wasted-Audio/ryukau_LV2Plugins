@@ -94,7 +94,7 @@ protected:
 
   float getParameterValue(uint32_t index) const override
   {
-    return dsp.param.getParameterValue(index);
+    return dsp.param.getFloat(index);
   }
 
   void setParameterValue(uint32_t index, float value) override
