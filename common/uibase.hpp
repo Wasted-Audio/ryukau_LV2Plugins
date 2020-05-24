@@ -297,7 +297,7 @@ protected:
     return std::make_tuple(knob, label);
   }
 
-  template<typename Scale, Style style = Style::common>
+  template<Style style = Style::common, typename Scale>
   auto addNumberKnob(
     float left,
     float top,
@@ -390,8 +390,8 @@ protected:
     return label;
   }
 
-  template<typename Scale>
-  std::shared_ptr<TextKnob<Scale>> addTextKnob(
+  template<Style style = Style::common, typename Scale>
+  auto addTextKnob(
     float left,
     float top,
     float width,
@@ -403,8 +403,8 @@ protected:
     uint32_t precision = 0,
     int32_t offset = 0)
   {
-    auto knob
-      = std::make_shared<TextKnob<Scale>>(this, this, fontId, palette, scale, isDecibel);
+    auto knob = std::make_shared<TextKnob<Scale, style>>(
+      this, this, fontId, palette, scale, isDecibel);
     knob->id = id;
     knob->setSize(width, height);
     knob->setAbsolutePos(left, top);
@@ -482,6 +482,7 @@ protected:
     auto view = std::make_shared<TextView>(this, text, fontId, palette);
     view->setSize(width, height);
     view->setAbsolutePos(left, top);
+    widget.push_back(view);
     return view;
   }
 
@@ -491,6 +492,7 @@ protected:
     auto view = std::make_shared<TextTableView>(this, text, cellWidth, fontId, palette);
     view->setSize(width, height);
     view->setAbsolutePos(left, top);
+    widget.push_back(view);
     return view;
   }
 
