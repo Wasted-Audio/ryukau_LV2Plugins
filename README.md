@@ -8,7 +8,7 @@ For Arch user, package is available on AUR. Thanks to mxmilkb for packaging.
 
 - [AUR (en) - uhhyou.lv2-git](https://aur.archlinux.org/packages/uhhyou.lv2-git)
 
-For openSUSE user, package is available on openSUSE Build Service. Thanks to Konstantin Voinov for packageing.
+For openSUSE user, package is available on openSUSE Build Service. Thanks to Konstantin Voinov for packaging.
 
 - [Show home:kill_it / Uhhyou-Plugins - openSUSE Build Service](https://build.opensuse.org/package/show/home:kill_it/Uhhyou-Plugins)
 - [Show home:kill_it / vst3-Uhhyou-Plugins - openSUSE Build Service](https://build.opensuse.org/package/show/home:kill_it/vst3-Uhhyou-Plugins)
@@ -196,7 +196,7 @@ EsPhaser is a phaser with up to 4096 stages of order 2 Thiran all-pass filters. 
 
 EnvelopedSine is another additive synthesizer which computes 64 sine waves per note. There are individual controls of attack, decay and saturation for each sine oscillator.
 
-EnvelopedSine uses stable quadrature oscillator (QuadOsc) algorithm described by Martin Vicanek. QuadOsc is used because I have no idea how to set initial phase for faster algorithm.
+EnvelopedSine uses stable quadrature oscillator (QuadOsc) algorithm described by Martin Vicanek. QuadOsc is used because I couldn't figure out how to set initial phase for faster algorithm.
 
 - [QuadOsc.pdf](https://www.vicanek.de/articles/QuadOsc.pdf)
 
