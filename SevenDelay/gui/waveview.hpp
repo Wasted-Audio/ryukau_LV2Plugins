@@ -17,10 +17,12 @@
 
 #pragma once
 
-#include <cmath>
+#include "Widget.hpp"
 
 #include "../../common/dsp/constants.hpp"
-#include "Widget.hpp"
+#include "../../common/gui/style.hpp"
+
+#include <cmath>
 
 class WaveView : public NanoWidget {
 public:
@@ -28,7 +30,9 @@ public:
   float shape = 0.0;
   float phase = 0.0;
 
-  explicit WaveView(NanoWidget *group) : NanoWidget(group) {}
+  explicit WaveView(NanoWidget *group, Palette &palette) : NanoWidget(group), pal(palette)
+  {
+  }
 
   void onNanoDisplay() override
   {
@@ -38,26 +42,30 @@ public:
     const auto width = getWidth();
     const auto height = getHeight();
 
+    // Background.
+    fillColor(pal.boxBackground());
+    beginPath();
+    rect(0, 0, width, height);
+    fill();
+
     // Waveform.
+    strokeColor(pal.highlightAccent());
+    strokeWidth(2.0f);
     beginPath();
     moveTo(0.0f, height * lfo(0.0f / width));
     const size_t w = (size_t)(width + 1.0);
     for (size_t x = 1; x < w; ++x) lineTo(float(x), height *lfo(float(x) / width));
-    strokeColor(colorWave);
-    strokeWidth(2.0f);
     stroke();
 
     // Border.
-    beginPath();
     const auto halfBorderWidth = borderWidth / 2.0f;
-    rect(halfBorderWidth, halfBorderWidth, width - borderWidth, height - borderWidth);
-    strokeColor(colorFore);
+    strokeColor(pal.border());
     strokeWidth(borderWidth);
+    beginPath();
+    rect(halfBorderWidth, halfBorderWidth, width - borderWidth, height - borderWidth);
     stroke();
   }
 
-  void setForegroundColor(Color color) { colorFore = color; }
-  void setWaveformColor(Color color) { colorWave = color; }
   void setBorderWidth(float width) { borderWidth = width < 0.0f ? 0.0f : width; }
 
 protected:
@@ -71,10 +79,8 @@ protected:
     return (wave + 1.0f) * 0.5f;
   }
 
-  Color colorFore{0, 0, 0};
-  Color colorWave{19, 193, 54};
-
   float borderWidth = 1.0f;
   float textSize = 18.0f;
   FontId fontId = -1;
+  Palette &pal;
 };

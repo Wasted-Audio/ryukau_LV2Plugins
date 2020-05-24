@@ -40,7 +40,7 @@ public:
     // Background.
     beginPath();
     rect(0, 0, width, height);
-    fillColor(pal.background());
+    fillColor(pal.boxBackground());
     fill();
 
     // Value.

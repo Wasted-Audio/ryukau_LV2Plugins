@@ -202,7 +202,7 @@ public:
       waveViewLeft, waveViewTop + waveViewHeight + 10.0f, waveViewWidth, labelHeight,
       midTextSize, "LFO Hold", ParameterID::lfoHold);
 
-    waveView = std::make_shared<WaveView>(this);
+    waveView = std::make_shared<WaveView>(this, palette);
     waveView->setSize(waveViewWidth, waveViewHeight);
     waveView->setAbsolutePos(waveViewLeft, waveViewTop);
 
