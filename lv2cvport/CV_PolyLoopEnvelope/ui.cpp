@@ -116,7 +116,7 @@ public:
       left0, top1 + 5 * labelY, 2 * knobX, labelHeight, uiTextSize, "Rate Key Follow",
       ID::rateKeyFollow);
 
-    envelopeView = std::make_shared<EnvelopeView>(this, fontId);
+    envelopeView = std::make_shared<EnvelopeView>(this, fontId, palette);
     envelopeView->setSize(8 * knobX - 4 * margin, 7 * labelY - 2 * margin);
     envelopeView->setAbsolutePos(left1 + knobX + 4 * margin, top0);
 

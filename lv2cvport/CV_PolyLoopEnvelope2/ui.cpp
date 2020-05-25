@@ -82,7 +82,7 @@ public:
 
     const auto top1 = top0 + labelY;
 
-    envelopeView = std::make_shared<EnvelopeView>(this, fontId);
+    envelopeView = std::make_shared<EnvelopeView>(this, fontId, palette);
     envelopeView->setSize(defaultWidth - 30, 7 * labelY - 2 * margin);
     envelopeView->setAbsolutePos(left0, top1);
 

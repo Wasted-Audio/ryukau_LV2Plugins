@@ -30,8 +30,8 @@
 
 class EnvelopeView : public NanoWidget {
 public:
-  explicit EnvelopeView(NanoWidget *group, FontId fontId)
-    : NanoWidget(group), fontId(fontId)
+  explicit EnvelopeView(NanoWidget *group, FontId fontId, Palette &palette)
+    : NanoWidget(group), fontId(fontId), pal(palette)
   {
   }
 
@@ -43,20 +43,26 @@ public:
     const auto width = getWidth();
     const auto height = getHeight();
 
+    // Background.
+    beginPath();
+    rect(0, 0, width, height);
+    fillColor(pal.boxBackground());
+    fill();
+
     // Draw envelope.
     auto minDataInt = floorf(minData);
     auto maxDataInt = ceilf(maxData);
     auto range = maxDataInt - minDataInt;
     auto zeroHeight = maxDataInt / range;
 
-    strokeColor(colorZero);
+    strokeColor(pal.overlay());
     strokeWidth(1.0f);
     beginPath();
     moveTo(0, height * zeroHeight);
     lineTo(width, height * zeroHeight);
     stroke();
 
-    strokeColor(colorEnvelope);
+    strokeColor(pal.highlightMain());
     strokeWidth(2.0f);
     lineJoin(ROUND);
     beginPath();
@@ -66,9 +72,9 @@ public:
     stroke();
 
     size_t end = sectionTime.size() > 8 ? 8 : sectionTime.size();
-    strokeColor(colorSplitter);
+    strokeColor(pal.overlay());
     strokeWidth(1.0f);
-    fillColor(colorSplitter);
+    fillColor(pal.overlay());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(ALIGN_LEFT | ALIGN_MIDDLE);
@@ -88,7 +94,7 @@ public:
 
     auto releaseLeft = releaseAt + marginX;
     if (releaseLeft < width) {
-      strokeColor(colorSplitter);
+      strokeColor(pal.overlay());
       strokeWidth(1.0f);
       beginPath();
       moveTo(releaseLeft, 0);
@@ -99,7 +105,7 @@ public:
     }
 
     // Info text.
-    fillColor(colorSplitter);
+    fillColor(pal.overlay());
     fontSize(textSize);
     textAlign(ALIGN_RIGHT | ALIGN_TOP);
     const auto infoLeft = width - 4.0f;
@@ -120,12 +126,12 @@ public:
     text(infoLeft, 3 * textSize, textTotalTime.c_str(), nullptr);
 
     if (isCvGainReady) {
-      fillColor(colorCvMode);
+      fillColor(pal.highlightWarning());
       text(infoLeft, 4 * textSize, "CV Gain Ready", nullptr);
     }
 
     // Draw border.
-    strokeColor(colorFore);
+    strokeColor(pal.border());
     strokeWidth(2.0f);
     beginPath();
     rect(0, 0, width, height);
@@ -212,19 +218,11 @@ public:
     repaint();
   }
 
-  void setForegroundColor(Color color) { colorFore = color; }
-  void setBackgroundColor(Color color) { colorBack = color; }
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  Color colorFore{0, 0, 0};
-  Color colorBack{0xff, 0xff, 0xff};
-  Color colorEnvelope{0x10, 0x77, 0xcc};
-  Color colorSplitter{0x10, 0x77, 0xcc, 0x88};
-  Color colorCvMode{0xff, 0x00, 0x00, 0x88};
-  Color colorZero{0xdd, 0xdd, 0xdd};
-
   FontId fontId = -1;
+  Palette &pal;
   float textSize = 14.0f;
 
   SomeDSP::PolyLoopEnvelope<float> envelope;
