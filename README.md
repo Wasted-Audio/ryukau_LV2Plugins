@@ -55,6 +55,15 @@ make -j JACK=false VST2=false # Disable jack and vst2 build.
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 
+## Color Configuration
+Color configuration is placed at `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.json`. If `$XDG_CONFIG_HOME` is empty, it becomes `$HOME/.config`.
+
+- [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+
+If you are building from source, `make install` also installs color configuration files.
+
+For more details, please refer to [style/README.md](https://github.com/ryukau/LV2Plugins/tree/l4reverb/style). When you made a nice color theme, feel free to send a patch.
+
 ## Controls
 Knobs, sliders etc. has common functionalities listed on below.
 
