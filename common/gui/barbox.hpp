@@ -75,17 +75,6 @@ public:
       fill();
     }
 
-    // Splitter.
-    // strokeWidth(defaultBorderWidth);
-    // strokeColor(pal.boxBackground());
-    // for (size_t i = 0; i < value.size(); ++i) {
-    //   auto x = i * sliderWidth;
-    //   beginPath();
-    //   moveTo(x, 0);
-    //   lineTo(x, height);
-    //   stroke();
-    // }
-
     // Index text.
     if (sliderWidth >= 8.0f) {
       fillColor(pal.foreground());
