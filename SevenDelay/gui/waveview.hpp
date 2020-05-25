@@ -52,9 +52,10 @@ public:
     strokeColor(pal.highlightAccent());
     strokeWidth(2.0f);
     beginPath();
-    moveTo(0.0f, height * lfo(0.0f / width));
-    const size_t w = (size_t)(width + 1.0);
-    for (size_t x = 1; x < w; ++x) lineTo(float(x), height *lfo(float(x) / width));
+    moveTo(borderWidth, height * lfo(0.0f / width));
+    const size_t w = (size_t)(width - 2.0f * borderWidth);
+    for (size_t x = 1; x <= w; ++x)
+      lineTo(borderWidth + float(x), height *lfo(float(x) / w));
     stroke();
 
     // Border.
@@ -79,7 +80,7 @@ protected:
     return (wave + 1.0f) * 0.5f;
   }
 
-  float borderWidth = 1.0f;
+  float borderWidth = 2.0f;
   float textSize = 18.0f;
   FontId fontId = -1;
   Palette &pal;
