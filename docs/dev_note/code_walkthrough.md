@@ -38,7 +38,7 @@ Arguments for `LogScale` are `(minRawValue, maxRawValue, normalizedValueAtAnchor
 Finally, add parameter to `GlobalParameter.value` in `parameter.hpp`.
 
 ```cpp
-struct GlobalParameter {
+struct GlobalParameter  : public ParameterInterface {
   std::vector<std::unique_ptr<ValueInterface>> value;
 
   GlobalParameter()
@@ -71,9 +71,9 @@ GUI layout is defined in constructor of `PluginUI` in `ui.cpp`.
 Example to add `newParam` as a knob.
 
 ```cpp
-class TrapezoidSynthUI : public PluginUI {
+class TrapezoidSynthUI : public PluginUIBase {
 public:
-  TrapezoidSynthUI() : PluginUI(defaultWidth, defaultHeight)
+  TrapezoidSynthUI() : PluginUIBase(defaultWidth, defaultHeight)
   {
     // ...
 
