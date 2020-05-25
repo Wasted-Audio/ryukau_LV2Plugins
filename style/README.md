@@ -1,7 +1,14 @@
 # UhhyouPlugins Color
-`style.json` will be loaded when the plugin window opens. To change theme, overwrite `style.json` with one of the `theme/*.json`.
-
 If you made a nice color theme, feel free to send a patch to: https://github.com/ryukau/LV2Plugins .
+
+## File Location
+Color configuration is placed at `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.json`. If `$XDG_CONFIG_HOME` is empty, it becomes `$HOME/.config`.
+
+- [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+
+To change theme, overwrite `style.json` with one of the `theme/*.json`.
+
+`style.json` will be loaded for each time a plugin window opens.
 
 ## Colors
 Below is a example of `style.json`.
