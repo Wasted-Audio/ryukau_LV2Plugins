@@ -30,8 +30,9 @@ public:
   Palette() { load(); }
   void load();
 
-  const DGL::Color &background() { return _background; }
   const DGL::Color &foreground() { return _foreground; }
+  const DGL::Color &foregroundButtonOn() { return _foregroundButtonOn; }
+  const DGL::Color &background() { return _background; }
   const DGL::Color &boxBackground() { return _boxBackground; }
   const DGL::Color &border() { return _border; }
   const DGL::Color &unfocused() { return _unfocused; }
@@ -43,8 +44,9 @@ public:
   const DGL::Color &overlayHighlight() { return _overlayHighlight; }
 
 private:
-  DGL::Color _background{0xff, 0xff, 0xff};
   DGL::Color _foreground{0x00, 0x00, 0x00};
+  DGL::Color _foregroundButtonOn{0x00, 0x00, 0x00};
+  DGL::Color _background{0xff, 0xff, 0xff};
   DGL::Color _boxBackground{0xff, 0xff, 0xff};
   DGL::Color _border{0x00, 0x00, 0x00};
   DGL::Color _unfocused{0xdd, 0xdd, 0xdd};

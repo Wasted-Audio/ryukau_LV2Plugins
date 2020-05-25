@@ -99,8 +99,9 @@ void Palette::load()
   auto data = loadStyleJson();
   if (data.is_null()) return;
 
-  loadColor(data, "background", _background);
   loadColor(data, "foreground", _foreground);
+  loadColor(data, "foregroundButtonOn", _foregroundButtonOn);
+  loadColor(data, "background", _background);
   loadColor(data, "boxBackground", _boxBackground);
   loadColor(data, "border", _border);
   loadColor(data, "unfocused", _unfocused);

@@ -139,7 +139,7 @@ public:
     stroke();
 
     // Text.
-    fillColor(value ? pal.boxBackground() : pal.foreground());
+    fillColor(value ? pal.foregroundButtonOn() : pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
@@ -216,7 +216,7 @@ public:
     stroke();
 
     // Text.
-    fillColor(value ? pal.boxBackground() : pal.foreground());
+    fillColor(value ? pal.foregroundButtonOn() : pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
@@ -277,7 +277,7 @@ public:
     stroke();
 
     // Text.
-    fillColor(value ? pal.boxBackground() : pal.foreground());
+    fillColor(value ? pal.foregroundButtonOn() : pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
