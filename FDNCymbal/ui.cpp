@@ -122,9 +122,7 @@ public:
 
     // Stick.
     const auto leftStick0 = left0 + sliderX + 2.0f * margin;
-    const auto leftStick1 = leftStick0 + smallKnobWidth;
-    const auto leftStick2 = leftStick0 + knobX + margin;
-    const auto leftStick3 = leftStick2 + smallKnobWidth;
+    const auto leftStick1 = leftStick0 + knobX + margin;
     addToggleButton(
       leftStick0, top0, 2.0f * knobX, labelHeight, midTextSize, "Stick", ID::stick);
 
@@ -136,10 +134,10 @@ public:
       leftStick0, topStick + smallKnobWidth, smallKnobWidth, margin, uiTextSize, "Velvet",
       ID::stickVelvetMix, LabelPosition::right, knobRightMargin);
     addKnob(
-      leftStick2, topStick, smallKnobWidth, margin, uiTextSize, "Tone", ID::stickToneMix,
+      leftStick1, topStick, smallKnobWidth, margin, uiTextSize, "Tone", ID::stickToneMix,
       LabelPosition::right, knobRightMargin);
     addKnob(
-      leftStick2, topStick + smallKnobWidth, smallKnobWidth, margin, uiTextSize, "Decay",
+      leftStick1, topStick + smallKnobWidth, smallKnobWidth, margin, uiTextSize, "Decay",
       ID::stickDecay, LabelPosition::right, knobRightMargin);
 
     // Random.
