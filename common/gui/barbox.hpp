@@ -56,6 +56,12 @@ public:
     const auto width = getWidth();
     const auto height = getHeight();
 
+    // Background.
+    beginPath();
+    rect(0, 0, width, height);
+    fillColor(pal.boxBackground());
+    fill();
+
     // Value bar.
     fillColor(pal.highlightMain());
 
@@ -70,19 +76,19 @@ public:
     }
 
     // Splitter.
-    strokeWidth(defaultBorderWidth);
-    strokeColor(pal.boxBackground());
-    for (size_t i = 0; i < value.size(); ++i) {
-      auto x = i * sliderWidth;
-      beginPath();
-      moveTo(x, 0);
-      lineTo(x, height);
-      stroke();
-    }
+    // strokeWidth(defaultBorderWidth);
+    // strokeColor(pal.boxBackground());
+    // for (size_t i = 0; i < value.size(); ++i) {
+    //   auto x = i * sliderWidth;
+    //   beginPath();
+    //   moveTo(x, 0);
+    //   lineTo(x, height);
+    //   stroke();
+    // }
 
     // Index text.
     if (sliderWidth >= 8.0f) {
-      fillColor(pal.border());
+      fillColor(pal.foreground());
       fontFaceId(fontId);
       fontSize(textSize);
       textAlign(ALIGN_CENTER | ALIGN_MIDDLE);

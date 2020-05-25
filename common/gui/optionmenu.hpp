@@ -52,10 +52,10 @@ public:
     } else {
       strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
     }
-    strokeWidth(borderWidth);
-    stroke();
     fillColor(pal.boxBackground());
     fill();
+    strokeWidth(borderWidth);
+    stroke();
 
     // Text.
     if (item.size() == 0 || item.size() <= index) return;

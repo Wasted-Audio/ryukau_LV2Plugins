@@ -56,15 +56,15 @@ public:
     rect(2, centerY - boxSize / 2, boxSize, boxSize);
     strokeWidth(2.0f);
     if constexpr (style == Style::accent) {
-      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.foreground());
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
     } else if (style == Style::warning) {
-      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.foreground());
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
     } else {
-      strokeColor(isMouseEntered ? pal.highlightMain() : pal.foreground());
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
     }
     fillColor(pal.boxBackground());
-    stroke();
     fill();
+    stroke();
 
     if (value) {
       const auto innerBoxSize = boxSize - 4;

@@ -84,11 +84,11 @@ public:
     // Rect.
     beginPath();
     rect(0, 0, width, height);
+    fillColor(pal.boxBackground());
+    fill();
     strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
     strokeWidth(borderWidth);
     stroke();
-    fillColor(pal.boxBackground());
-    fill();
 
     // Text.
     if (labelText.size() == 0) return;

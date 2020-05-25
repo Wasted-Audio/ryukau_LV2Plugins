@@ -58,7 +58,7 @@ public:
     // Border.
     beginPath();
     rect(0, 0, width, height);
-    strokeWidth(isMouseEntered ? highlightBorderWidth : defaultBorderWidth);
+    strokeWidth(borderWidth);
     if constexpr (style == Style::accent) {
       strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
     } else if (style == Style::warning) {
@@ -128,14 +128,12 @@ public:
     this->value = value < 0.0 ? 0.0 : value > 1.0 ? 1.0 : value;
   }
 
-  void setDefaultBorderWidth(float width) { defaultBorderWidth = width; }
-  void setHighlightBorderWidth(float width) { highlightBorderWidth = width; }
+  void setBorderWidth(float width) { borderWidth = width; }
 
 private:
   double defaultValue = 0.5;
 
-  float defaultBorderWidth = 2.0f;
-  float highlightBorderWidth = 4.0f;
+  float borderWidth = 2.0f;
 
   const float sensitivity = 0.004f; // MovedPixel * sensitivity = valueChanged.
   const float lowSensitivity = sensitivity / 5.0f;

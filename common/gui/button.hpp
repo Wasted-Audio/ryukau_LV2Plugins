@@ -103,7 +103,7 @@ protected:
 
   std::string labelText{""};
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
-  float borderWidth = 1.0f;
+  float borderWidth = 2.0f;
   float textSize = 18.0f;
   FontId fontId = -1;
   Palette &pal;
@@ -172,7 +172,7 @@ protected:
 
   std::string labelText{""};
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
-  float borderWidth = 1.0f;
+  float borderWidth = 2.0f;
   float textSize = 18.0f;
   FontId fontId = -1;
   Palette &pal;

@@ -209,10 +209,10 @@ public:
     } else {
       strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
     }
-    strokeWidth(borderWidth);
-    stroke();
     fillColor(pal.boxBackground());
     fill();
+    strokeWidth(borderWidth);
+    stroke();
 
     // Text.
     fillColor(pal.foreground());
