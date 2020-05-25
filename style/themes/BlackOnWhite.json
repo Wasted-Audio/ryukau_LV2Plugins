@@ -1,0 +1,14 @@
+{
+  "foreground": "#000000",
+  "foregroundButtonOn": "#000000",
+  "background": "#ffffff",
+  "boxBackground": "#ffffff",
+  "border": "#000000",
+  "unfocused": "#dddddd",
+  "highlightMain": "#0ba4f1",
+  "highlightAccent": "#13c136",
+  "highlightButton": "#fcc04f",
+  "highlightWarning": "#fc8080",
+  "overlay": "#00000088",
+  "overlayHighlight": "#00ff0033"
+}
