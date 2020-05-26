@@ -95,7 +95,7 @@ public:
     std::stringstream ssPluginName;
     ssPluginName << "CV_Gate16  " << std::to_string(MAJOR_VERSION) << "."
                  << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
-    addTextView(left0, top2, barboxWidth, labelY, ssPluginName.str());
+    addTextView(left0, top2, barboxWidth, labelY, midTextSize, ssPluginName.str());
 
     const auto left1 = left0 + barboxWidth + 4 * margin;
     const auto left2 = left1 + 6 * margin;

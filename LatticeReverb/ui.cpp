@@ -250,8 +250,8 @@ public:
     const auto tabViewLeft = left0 + leftPanelWidth + labelY;
 
     std::vector<std::string> tabs{"Base", "Offset", "Modulation"};
-    auto tabview
-      = addTabView(tabViewLeft, top0, tabViewWidth, tabViewHeight, labelY, tabs);
+    auto tabview = addTabView(
+      tabViewLeft, top0, tabViewWidth, tabViewHeight, uiTextSize, labelY, tabs);
 
     const auto tabInsideTop0 = top0 + labelY + uiMargin;
     const auto tabInsideTop1 = tabInsideTop0 + barboxHeight + labelHeight;

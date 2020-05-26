@@ -443,11 +443,13 @@ protected:
     float top,
     float width,
     float hegiht,
+    float textSize,
     float tabHeight,
     std::vector<std::string> tabs)
   {
     auto tabview = std::make_shared<TabView>(
       this, tabs, fontId, palette, tabHeight, left, top, width, hegiht);
+    tabview->setTextSize(textSize);
     widget.push_back(tabview);
     return tabview;
   }
@@ -477,21 +479,30 @@ protected:
     widget.push_back(credit);
   }
 
-  auto addTextView(float left, float top, float width, float height, std::string text)
+  auto addTextView(
+    float left, float top, float width, float height, float textSize, std::string text)
   {
     auto view = std::make_shared<TextView>(this, text, fontId, palette);
     view->setSize(width, height);
     view->setAbsolutePos(left, top);
+    view->textSize = textSize;
     widget.push_back(view);
     return view;
   }
 
   auto addTextTableView(
-    float left, float top, float width, float height, std::string text, float cellWidth)
+    float left,
+    float top,
+    float width,
+    float height,
+    float textSize,
+    std::string text,
+    float cellWidth)
   {
     auto view = std::make_shared<TextTableView>(this, text, cellWidth, fontId, palette);
     view->setSize(width, height);
     view->setAbsolutePos(left, top);
+    view->textSize = textSize;
     widget.push_back(view);
     return view;
   }

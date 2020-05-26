@@ -27,6 +27,7 @@ START_NAMESPACE_DISTRHO
 
 constexpr float uiTextSize = 14.0f;
 constexpr float midTextSize = 16.0f;
+constexpr float infoTextSize = 18.0f;
 constexpr float pluginNameTextSize = 22.0f;
 constexpr float margin = 5.0f;
 constexpr float labelHeight = 20.0f;
@@ -82,7 +83,8 @@ public:
     std::vector<std::string> tabs = {"Main", "Wavetable", "Information"};
     const auto tabWidth = defaultWidth - 40.0f;
     const auto tabHeight = labelY + 4.0f * barboxY + 9.0f * margin;
-    auto tabview = addTabView(tabLeft0, tabTop0, tabWidth, tabHeight, labelY, tabs);
+    auto tabview
+      = addTabView(tabLeft0, tabTop0, tabWidth, tabHeight, uiTextSize, labelY, tabs);
 
     const auto tabInsideTop0 = tabTop0 + labelY + 4.0f * margin;
     const auto tabInsideLeft0 = tabLeft0 + 4.0f * margin;
@@ -705,7 +707,8 @@ Ctrl + Left Click|Reset to Default)";
     tabview->addWidget(
       tabInfo,
       addTextTableView(
-        tabInsideLeft0, tabInsideTop0, 400.0f, 400.0f, textKnobControl, 150.0f));
+        tabInsideLeft0, tabInsideTop0, 400.0f, 400.0f, infoTextSize, textKnobControl,
+        150.0f));
 
     auto textNumberControl = R"(- Number -
 Shares same controls with knob, and:
@@ -713,8 +716,8 @@ Right Click|Flip Minimum and Maximum)";
     tabview->addWidget(
       tabInfo,
       addTextTableView(
-        tabInsideLeft0, tabInsideTop0 + 80.0f, 400.0f, 400.0f, textNumberControl,
-        150.0f));
+        tabInsideLeft0, tabInsideTop0 + 80.0f, 400.0f, 400.0f, infoTextSize,
+        textNumberControl, 150.0f));
 
     auto textOvertoneControl = R"(- Overtone & LFO Wave -
 Ctrl + Left Click|Reset to Default
@@ -742,8 +745,8 @@ T|Subtle Randomize
     tabview->addWidget(
       tabInfo,
       addTextTableView(
-        tabInsideLeft0, tabInsideTop0 + 160.0f, 400.0f, 400.0f, textOvertoneControl,
-        150.0f));
+        tabInsideLeft0, tabInsideTop0 + 160.0f, 400.0f, 400.0f, infoTextSize,
+        textOvertoneControl, 150.0f));
 
     const auto tabInfoLeft1 = tabInsideLeft0 + tabWidth / 2.0f;
 
@@ -753,21 +756,21 @@ Press following button to apply changes.
 - `Refresh Table` at bottom-left in Wavetable tab.)";
     tabview->addWidget(
       tabInfo,
-      addTextView(tabInfoLeft1, tabInsideTop0, 400.0f, 400.0f, textRefreshNotice));
+      addTextView(
+        tabInfoLeft1, tabInsideTop0, 400.0f, 400.0f, infoTextSize, textRefreshNotice));
 
     const auto tabInfoBottom = tabInsideTop0 + tabHeight - labelY;
     std::stringstream ssPluginName;
     ssPluginName << "CubicPadSynth " << std::to_string(MAJOR_VERSION) << "."
                  << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
     auto pluginNameTextView = addTextView(
-      tabInfoLeft1, tabInfoBottom - 140.0f, 400.0f, 400.0f, ssPluginName.str());
-    pluginNameTextView->textSize = 36.0f;
+      tabInfoLeft1, tabInfoBottom - 140.0f, 400.0f, 400.0f, 36.0f, ssPluginName.str());
     tabview->addWidget(tabInfo, pluginNameTextView);
 
     tabview->addWidget(
       tabInfo,
       addTextView(
-        tabInfoLeft1, tabInfoBottom - 100.0f, 400.0f, 400.0f,
+        tabInfoLeft1, tabInfoBottom - 100.0f, 400.0f, 400.0f, infoTextSize,
         "© 2020 Takamitsu Endo (ryukau@gmail.com)\n\nHave a nice day!"));
 
     tabview->refreshTab();
