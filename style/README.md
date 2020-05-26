@@ -6,9 +6,17 @@ Color configuration is placed at `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.jso
 
 - [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 
-To change theme, overwrite `style.json` with one of the `theme/*.json`.
+To change theme, overwrite `style.json` with one of the `themes/*.json`.
+
+```bash
+# Example to use Orbit theme.
+cd ~/.config/UhhyouPlugins/style/
+cp themes/Orbit.json style.json
+```
 
 `style.json` will be loaded for each time a plugin window opens.
+
+Default `style.json` is same as `LightOnDark.json`.
 
 ## Colors
 Below is a example of `style.json`.
@@ -128,7 +136,5 @@ public:
 ```
 
 Note that `addKnob<Style::warning>`. `addKnob` and other methods to add components has a template argument for a style. If the style template argument is not set, it defaults to `Style::common`.
-
-Now you can apply the style to individual component.
 
 To read implementation of `add*()` methods, see `common/uibase.hpp`.
