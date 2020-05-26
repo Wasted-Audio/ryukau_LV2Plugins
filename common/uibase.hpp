@@ -191,7 +191,7 @@ protected:
     float width,
     float height,
     float textSize,
-    const char *title,
+    std::string title,
     uint32_t id)
   {
     auto checkbox = std::make_shared<CheckBox<style>>(this, this, title, fontId, palette);

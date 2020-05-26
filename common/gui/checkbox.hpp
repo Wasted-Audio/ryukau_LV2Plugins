@@ -27,7 +27,7 @@ public:
   explicit CheckBox(
     NanoWidget *group,
     PluginUI *ui,
-    const char *labelText,
+    std::string labelText,
     FontId fontId,
     Palette &palette)
     : ValueWidget(group, ui, 0.0f), labelText(labelText), fontId(fontId), pal(palette)
@@ -83,12 +83,12 @@ public:
     }
 
     // Text.
-    if (labelText == nullptr) return;
+    if (labelText.size() == 0) return;
     fillColor(pal.foreground());
     fontFaceId(fontId);
     fontSize(textSize);
     textAlign(align);
-    text(boxSize + textSize / 2.0f, height / 2, labelText, nullptr);
+    text(boxSize + textSize / 2.0f, centerY, labelText.c_str(), nullptr);
   }
 
   bool onMouse(const MouseEvent &ev) override
@@ -124,7 +124,7 @@ public:
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
-  const char *labelText = nullptr;
+  std::string labelText;
   int align = ALIGN_LEFT | ALIGN_MIDDLE;
   int32_t boxSize = 10;
   float textSize = 14.0f;
