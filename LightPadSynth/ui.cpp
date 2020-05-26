@@ -91,7 +91,6 @@ public:
     const auto tabHeight = labelY + 4.0f * barboxY + 9.0f * margin;
     auto tabview
       = addTabView(tabLeft0, tabTop0, tabWidth, tabHeight, uiTextSize, labelY, tabs);
-    widget.push_back(tabview);
 
     const auto tabInsideTop0 = tabTop0 + labelY + 4.0f * margin;
     const auto tabInsideLeft0 = tabLeft0 + 4.0f * margin;
