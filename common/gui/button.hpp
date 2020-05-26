@@ -109,7 +109,7 @@ protected:
   Palette &pal;
 };
 
-class ButtonBase : public ValueWidget {
+template<Style style = Style::common> class ButtonBase : public ValueWidget {
 public:
   explicit ButtonBase(
     NanoWidget *group,
@@ -121,7 +121,7 @@ public:
   {
   }
 
-  void onNanoDisplay() override
+  virtual void onNanoDisplay() override
   {
     resetTransform();
     translate(getAbsoluteX(), getAbsoluteY());
@@ -132,9 +132,17 @@ public:
     // Rect.
     beginPath();
     rect(0, 0, width, height);
-    strokeColor(isMouseEntered ? pal.highlightButton() : pal.border());
+    if constexpr (style == Style::accent) {
+      fillColor(value ? pal.highlightAccent() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+    } else if (style == Style::warning) {
+      fillColor(value ? pal.highlightWarning() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+    } else {
+      fillColor(value ? pal.highlightButton() : pal.boxBackground());
+      strokeColor(isMouseEntered ? pal.highlightButton() : pal.border());
+    }
     strokeWidth(borderWidth);
-    fillColor(value ? pal.highlightButton() : pal.boxBackground());
     fill();
     stroke();
 
@@ -174,122 +182,60 @@ protected:
   int align = ALIGN_CENTER | ALIGN_MIDDLE;
   float borderWidth = 2.0f;
   float textSize = 18.0f;
-  FontId fontId = -1;
+  NanoVG::FontId fontId = -1;
   Palette &pal;
 };
 
-template<Style style = Style::common> class KickButton : public ButtonBase {
+template<Style style = Style::common> class KickButton : public ButtonBase<style> {
 public:
+  using Btn = ButtonBase<style>;
+
   explicit KickButton(
     NanoWidget *group,
     PluginUI *ui,
     std::string labelText,
-    FontId fontId,
+    NanoVG::FontId fontId,
     Palette &palette)
-    : ButtonBase(group, ui, labelText, fontId, palette)
+    : ButtonBase<style>(group, ui, labelText, fontId, palette)
   {
   }
 
-  void onNanoDisplay() override
+  bool onMouse(const Widget::MouseEvent &ev) override
   {
-    resetTransform();
-    translate(getAbsoluteX(), getAbsoluteY());
-
-    const auto width = getWidth();
-    const auto height = getHeight();
-
-    // Rect.
-    beginPath();
-    rect(0, 0, width, height);
-    if constexpr (style == Style::accent) {
-      fillColor(value ? pal.highlightAccent() : pal.boxBackground());
-      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
-    } else if (style == Style::warning) {
-      fillColor(value ? pal.highlightWarning() : pal.boxBackground());
-      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
-    } else {
-      fillColor(value ? pal.highlightButton() : pal.boxBackground());
-      strokeColor(isMouseEntered ? pal.highlightButton() : pal.border());
-    }
-    strokeWidth(borderWidth);
-    fill();
-    stroke();
-
-    // Text.
-    fillColor(value ? pal.foregroundButtonOn() : pal.foreground());
-    fontFaceId(fontId);
-    fontSize(textSize);
-    textAlign(align);
-    text(width / 2, height / 2, labelText.c_str(), nullptr);
-  }
-
-  bool onMouse(const MouseEvent &ev) override
-  {
-    if (contains(ev.pos)) {
-      value = ev.press;
-      updateValue();
-      repaint();
+    if (Btn::contains(ev.pos)) {
+      Btn::value = ev.press;
+      Btn::updateValue();
+      Btn::repaint();
       return true;
     } else if (!ev.press) {
-      value = false;
-      updateValue();
-      repaint();
+      Btn::value = false;
+      Btn::updateValue();
+      Btn::repaint();
     }
     return false;
   }
 };
 
-template<Style style = Style::common> class ToggleButton : public ButtonBase {
+template<Style style = Style::common> class ToggleButton : public ButtonBase<style> {
 public:
+  using Btn = ButtonBase<style>;
+
   explicit ToggleButton(
     NanoWidget *group,
     PluginUI *ui,
     std::string labelText,
-    FontId fontId,
+    NanoVG::FontId fontId,
     Palette &palette)
-    : ButtonBase(group, ui, labelText, fontId, palette)
+    : ButtonBase<style>(group, ui, labelText, fontId, palette)
   {
   }
 
-  void onNanoDisplay() override
+  bool onMouse(const Widget::MouseEvent &ev) override
   {
-    resetTransform();
-    translate(getAbsoluteX(), getAbsoluteY());
-
-    const auto width = getWidth();
-    const auto height = getHeight();
-
-    // Rect.
-    beginPath();
-    rect(0, 0, width, height);
-    if constexpr (style == Style::accent) {
-      fillColor(value ? pal.highlightAccent() : pal.boxBackground());
-      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
-    } else if (style == Style::warning) {
-      fillColor(value ? pal.highlightWarning() : pal.boxBackground());
-      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
-    } else {
-      fillColor(value ? pal.highlightButton() : pal.boxBackground());
-      strokeColor(isMouseEntered ? pal.highlightButton() : pal.border());
-    }
-    strokeWidth(borderWidth);
-    fill();
-    stroke();
-
-    // Text.
-    fillColor(value ? pal.foregroundButtonOn() : pal.foreground());
-    fontFaceId(fontId);
-    fontSize(textSize);
-    textAlign(align);
-    text(width / 2, height / 2, labelText.c_str(), nullptr);
-  }
-
-  bool onMouse(const MouseEvent &ev) override
-  {
-    if (contains(ev.pos) && ev.press) {
-      value = !value;
-      updateValue();
-      repaint();
+    if (Btn::contains(ev.pos) && ev.press) {
+      Btn::value = !Btn::value;
+      Btn::updateValue();
+      Btn::repaint();
       return true;
     }
     return false;
