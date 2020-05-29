@@ -8,7 +8,6 @@ build: common \
 	FDNCymbal \
 	FoldShaper \
 	IterativeSinCluster \
-	L4Reverb \
 	LatticeReverb \
 	LightPadSynth \
 	ModuloShaper \
