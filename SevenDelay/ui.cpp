@@ -134,7 +134,7 @@ public:
     addKnob(
       3.0f * interval + delayLeft, delayTop1, normalWidth, margin, uiTextSize, "Wet",
       ParameterID::wetMix);
-    addKnob<Style::accent>(
+    addKnob(
       4.0f * interval + delayLeft, delayTop1, normalWidth, margin, uiTextSize, "Dry",
       ParameterID::dryMix);
 
