@@ -1,5 +1,5 @@
 import os
-import shutil
+import subprocess
 from pathlib import Path
 
 def get_xdg_config_home():
@@ -13,10 +13,13 @@ def get_xdg_config_home():
 
     return None
 
-def copy_dir(src, dest):
+def copy_dir(src: Path, dest: Path):
+    """
+    subprocess is used because dirs_exist_ok option for shutil.copytree()
+    doesn't available on Python 3.7 or earlier.
+    """
     print(f"Copying {src} to {dest}")
-    shutil.copytree(src, dest, dirs_exist_ok=True)
-
+    subprocess.run(["cp", "-r", str(src), str(dest)])
 
 config_home = get_xdg_config_home()
 if config_home is None:
