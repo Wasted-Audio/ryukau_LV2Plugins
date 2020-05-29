@@ -8,6 +8,7 @@ build: common \
 	FDNCymbal \
 	FoldShaper \
 	IterativeSinCluster \
+	L4Reverb \
 	LatticeReverb \
 	LightPadSynth \
 	ModuloShaper \
@@ -65,6 +66,10 @@ FoldShaper: common
 IterativeSinCluster: common
 	$(MAKE) -C IterativeSinCluster LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
+.PHONY: L4Reverb
+L4Reverb: common
+	$(MAKE) -C L4Reverb LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
+
 .PHONY: LatticeReverb
 LatticeReverb: common
 	$(MAKE) -C LatticeReverb LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
@@ -103,6 +108,7 @@ WaveCymbal: common
 
 .PHONY: install
 install:
+	mkdir -p ~/.lv2
 	cp -r bin/*.lv2 ~/.lv2/
 	python3 install.py
 
