@@ -32,7 +32,6 @@ class DSPInterface {
 public:
   virtual ~DSPInterface(){};
 
-  static const size_t maxVoice = 32;
   GlobalParameter param;
 
   virtual void setup(double sampleRate) = 0;

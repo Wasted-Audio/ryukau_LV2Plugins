@@ -52,8 +52,6 @@ constexpr uint32_t defaultWidth
   = uint32_t(leftPanelWidth + labelY + barboxSectionWidth + 2 * uiMargin);
 constexpr uint32_t defaultHeight = uint32_t(barboxSectionHeight + 2 * uiMargin);
 
-enum tabIndex { tabBase, tabOffset, tabModulation };
-
 void CreditSplash::onNanoDisplay()
 {
   if (!isVisible()) return;
@@ -147,8 +145,6 @@ protected:
 public:
   L4ReverbUI() : PluginUIBase(defaultWidth, defaultHeight)
   {
-    param = std::make_unique<GlobalParameter>();
-
     param = std::make_unique<GlobalParameter>();
 
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);

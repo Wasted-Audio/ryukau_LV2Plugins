@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include "../../lib/vcl/vectorclass.h"
-
 #include "../../common/dsp/constants.hpp"
 #include "../../common/dsp/smoother.hpp"
 
