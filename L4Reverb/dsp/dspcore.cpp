@@ -45,7 +45,7 @@ void DSPCORE_NAME::setup(double sampleRate)
 
 inline std::array<float, 2> calcOffset(float offset, float mul)
 {
-  if (offset >= 0) return {mul, (1.0f + offset) * mul};
+  if (offset >= 0) return {mul, (1.0f - offset) * mul};
   return {(1.0f + offset) * mul, mul};
 }
 
@@ -56,10 +56,26 @@ inline std::array<float, 2> calcOffset(float offset, float mul)
   auto d2FeedMul = param.value[ID::d2FeedMultiply]->getFloat();                          \
   auto d3FeedMul = param.value[ID::d3FeedMultiply]->getFloat();                          \
   auto d4FeedMul = param.value[ID::d4FeedMultiply]->getFloat();                          \
+                                                                                         \
+  auto timeOfs = param.value[ID::timeOffsetRange]->getFloat();                           \
+  auto innerOfs = param.value[ID::innerFeedOffsetRange]->getFloat();                     \
+  auto d1FeedOfs = param.value[ID::d1FeedOffsetRange]->getFloat();                       \
+  auto d2FeedOfs = param.value[ID::d2FeedOffsetRange]->getFloat();                       \
+  auto d3FeedOfs = param.value[ID::d3FeedOffsetRange]->getFloat();                       \
+  auto d4FeedOfs = param.value[ID::d4FeedOffsetRange]->getFloat();                       \
+                                                                                         \
+  std::uniform_real_distribution<float> timeOffsetDist(-timeOfs, timeOfs);               \
+  std::uniform_real_distribution<float> innerOffsetDist(-innerOfs, innerOfs);            \
+  std::uniform_real_distribution<float> d1FeedOffsetDist(-d1FeedOfs, d1FeedOfs);         \
+  std::uniform_real_distribution<float> d2FeedOffsetDist(-d2FeedOfs, d2FeedOfs);         \
+  std::uniform_real_distribution<float> d3FeedOffsetDist(-d3FeedOfs, d3FeedOfs);         \
+  std::uniform_real_distribution<float> d4FeedOffsetDist(-d4FeedOfs, d4FeedOfs);         \
+                                                                                         \
   uint16_t i1 = 0;                                                                       \
   uint16_t i2 = 0;                                                                       \
   uint16_t i3 = 0;                                                                       \
   uint16_t i4 = 0;                                                                       \
+                                                                                         \
   auto &ap4L = delay[0];                                                                 \
   auto &ap4R = delay[1];                                                                 \
   for (uint8_t d4 = 0; d4 < nDepth; ++d4) {                                              \
@@ -72,41 +88,47 @@ inline std::array<float, 2> calcOffset(float offset, float mul)
         auto &ap1L = ap2L.allpass[d2];                                                   \
         auto &ap1R = ap2R.allpass[d2];                                                   \
         for (uint8_t d1 = 0; d1 < nDepth; ++d1) {                                        \
-          auto offsetD1Time = calcOffset(offsetDist(rng), timeMul);                      \
-          /* auto offsetInnerFeed = calcOffset(offsetDist(rng), innerMul); */            \
-          /* auto offsetD1Feed = calcOffset(offsetDist(rng), d1FeedMul); */              \
+          auto d1TimeOffset = calcOffset(timeOffsetDist(timeRng), timeMul);              \
+          auto innerFeedOffset = calcOffset(innerOffsetDist(innerRng), innerMul);        \
+          auto d1FeedOffset = calcOffset(d1FeedOffsetDist(d1FeedRng), d1FeedMul);        \
                                                                                          \
           ap1L.seconds[d1].METHOD(                                                       \
-            param.value[ID::time0 + i1]->getFloat() * offsetD1Time[0]);                  \
-          ap1L.innerFeed[d1].METHOD(param.value[ID::innerFeed0 + i1]->getFloat());       \
-          ap1L.outerFeed[d1].METHOD(param.value[ID::d1Feed0 + i1]->getFloat());          \
+            param.value[ID::time0 + i1]->getFloat() * d1TimeOffset[0]);                  \
+          ap1L.innerFeed[d1].METHOD(                                                     \
+            param.value[ID::innerFeed0 + i1]->getFloat() * innerFeedOffset[0]);          \
+          ap1L.outerFeed[d1].METHOD(                                                     \
+            param.value[ID::d1Feed0 + i1]->getFloat() * d1FeedOffset[0]);                \
                                                                                          \
           ap1R.seconds[d1].METHOD(                                                       \
-            param.value[ID::time0 + i1]->getFloat() * offsetD1Time[1]);                  \
-          ap1R.innerFeed[d1].METHOD(param.value[ID::innerFeed0 + i1]->getFloat());       \
-          ap1R.outerFeed[d1].METHOD(param.value[ID::d1Feed0 + i1]->getFloat());          \
+            param.value[ID::time0 + i1]->getFloat() * d1TimeOffset[1]);                  \
+          ap1R.innerFeed[d1].METHOD(                                                     \
+            param.value[ID::innerFeed0 + i1]->getFloat() * innerFeedOffset[1]);          \
+          ap1R.outerFeed[d1].METHOD(                                                     \
+            param.value[ID::d1Feed0 + i1]->getFloat() * d1FeedOffset[1]);                \
                                                                                          \
           ++i1;                                                                          \
         }                                                                                \
                                                                                          \
-        /* auto offsetD2Feed = calcOffset(offsetDist(rng), d2FeedMul); */                \
+        auto offsetD2Feed = calcOffset(d2FeedOffsetDist(d2FeedRng), d2FeedMul);          \
                                                                                          \
-        ap2L.feed[d2].METHOD(param.value[ID::d2Feed0 + i2]->getFloat());                 \
-        ap2R.feed[d2].METHOD(param.value[ID::d2Feed0 + i2]->getFloat());                 \
+        ap2L.feed[d2].METHOD(                                                            \
+          param.value[ID::d2Feed0 + i2]->getFloat() * offsetD2Feed[0]);                  \
+        ap2R.feed[d2].METHOD(                                                            \
+          param.value[ID::d2Feed0 + i2]->getFloat() * offsetD2Feed[1]);                  \
         ++i2;                                                                            \
       }                                                                                  \
                                                                                          \
-      /* auto offsetD3Feed = calcOffset(offsetDist(rng), d3FeedMul); */                  \
+      auto offsetD3Feed = calcOffset(d3FeedOffsetDist(d3FeedRng), d3FeedMul);            \
                                                                                          \
-      ap3L.feed[d3].METHOD(param.value[ID::d3Feed0 + i3]->getFloat());                   \
-      ap3R.feed[d3].METHOD(param.value[ID::d3Feed0 + i3]->getFloat());                   \
+      ap3L.feed[d3].METHOD(param.value[ID::d3Feed0 + i3]->getFloat() * offsetD3Feed[0]); \
+      ap3R.feed[d3].METHOD(param.value[ID::d3Feed0 + i3]->getFloat() * offsetD3Feed[1]); \
       ++i3;                                                                              \
     }                                                                                    \
                                                                                          \
-    /* auto offsetD4Feed = calcOffset(offsetDist(rng), d4FeedMul); */                    \
+    auto offsetD4Feed = calcOffset(d4FeedOffsetDist(d4FeedRng), d4FeedMul);              \
                                                                                          \
-    ap4L.feed[d4].METHOD(param.value[ID::d4Feed0 + i4]->getFloat());                     \
-    ap4R.feed[d4].METHOD(param.value[ID::d4Feed0 + i4]->getFloat());                     \
+    ap4L.feed[d4].METHOD(param.value[ID::d4Feed0 + i4]->getFloat() * offsetD4Feed[0]);   \
+    ap4R.feed[d4].METHOD(param.value[ID::d4Feed0 + i4]->getFloat() * offsetD4Feed[1]);   \
     ++i4;                                                                                \
   }
 
@@ -114,10 +136,9 @@ void DSPCORE_NAME::reset()
 {
   using ID = ParameterID::ID;
 
-  for (auto &dly : delay) dly.reset();
+  startup();
 
-  std::minstd_rand rng{0};
-  std::uniform_real_distribution<float> offsetDist(-0.05f, 0.05f);
+  for (auto &dly : delay) dly.reset();
 
   ASSIGN_ALLPASS_PARAMETER(reset);
 
@@ -126,7 +147,17 @@ void DSPCORE_NAME::reset()
   interpWet.reset(param.value[ID::wet]->getFloat());
 }
 
-void DSPCORE_NAME::startup() { rng.seed(0); }
+void DSPCORE_NAME::startup()
+{
+  refreshSeed();
+
+  timeRng.seed(timeSeed);
+  innerRng.seed(innerSeed);
+  d1FeedRng.seed(d1FeedSeed);
+  d2FeedRng.seed(d2FeedSeed);
+  d3FeedRng.seed(d3FeedSeed);
+  d4FeedRng.seed(d4FeedSeed);
+}
 
 void DSPCORE_NAME::setParameters(float tempo)
 {
@@ -134,8 +165,14 @@ void DSPCORE_NAME::setParameters(float tempo)
 
   SmootherCommon<float>::setTime(param.value[ID::smoothness]->getFloat());
 
-  std::minstd_rand rng{0};
-  std::uniform_real_distribution<float> offsetDist(-0.05f, 0.05f);
+  refreshSeed();
+
+  if (!param.value[ID::timeModulation]->getInt()) timeRng.seed(timeSeed);
+  if (!param.value[ID::innerFeedModulation]->getInt()) innerRng.seed(innerSeed);
+  if (!param.value[ID::d1FeedModulation]->getInt()) d1FeedRng.seed(d1FeedSeed);
+  if (!param.value[ID::d2FeedModulation]->getInt()) d2FeedRng.seed(d2FeedSeed);
+  if (!param.value[ID::d3FeedModulation]->getInt()) d3FeedRng.seed(d3FeedSeed);
+  if (!param.value[ID::d4FeedModulation]->getInt()) d4FeedRng.seed(d4FeedSeed);
 
   ASSIGN_ALLPASS_PARAMETER(push);
 
@@ -164,4 +201,17 @@ void DSPCORE_NAME::process(
     out0[i] = dry * in0[i] + wet * delayOutL;
     out1[i] = dry * in1[i] + wet * delayOutR;
   }
+}
+
+void DSPCORE_NAME::refreshSeed()
+{
+  std::minstd_rand rng{param.value[ParameterID::seed]->getInt()};
+  std::uniform_int_distribution<uint_fast32_t> dist(0, UINT32_MAX);
+
+  timeSeed = dist(rng);
+  innerSeed = dist(rng);
+  d1FeedSeed = dist(rng);
+  d2FeedSeed = dist(rng);
+  d3FeedSeed = dist(rng);
+  d4FeedSeed = dist(rng);
 }

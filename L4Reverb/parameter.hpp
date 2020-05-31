@@ -53,6 +53,22 @@ enum ID {
   d3FeedMultiply,
   d4FeedMultiply,
 
+  timeOffsetRange,
+  innerFeedOffsetRange,
+  d1FeedOffsetRange,
+  d2FeedOffsetRange,
+  d3FeedOffsetRange,
+  d4FeedOffsetRange,
+
+  timeModulation,
+  innerFeedModulation,
+  d1FeedModulation,
+  d2FeedModulation,
+  d3FeedModulation,
+  d4FeedModulation,
+
+  seed,
+
   stereoCross,
   stereoSpread,
 
@@ -72,6 +88,7 @@ struct Scales {
   static SomeDSP::LogScale<double> time;
   static SomeDSP::LinearScale<double> feed;
   static SomeDSP::LogScale<double> timeMultiply;
+  static SomeDSP::IntScale<double> seed;
   static SomeDSP::LinearScale<double> stereoCross;
   static SomeDSP::LogScale<double> gain;
   static SomeDSP::LogScale<double> smoothness;
@@ -123,8 +140,8 @@ struct GlobalParameter : public ParameterInterface {
         0.5, Scales::feed, (d4FeedLabel + indexStr).c_str(), kParameterIsAutomable);
     }
 
-    value[ID::timeMultiply] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "timeMultiply", kParameterIsAutomable);
+    value[ID::timeMultiply] = std::make_unique<LogValue>(
+      1.0, Scales::timeMultiply, "timeMultiply", kParameterIsAutomable);
     value[ID::innerFeedMultiply] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "innerFeedMultiply", kParameterIsAutomable);
     value[ID::d1FeedMultiply] = std::make_unique<LinearValue>(
@@ -135,6 +152,35 @@ struct GlobalParameter : public ParameterInterface {
       1.0, Scales::defaultScale, "d3FeedMultiply", kParameterIsAutomable);
     value[ID::d4FeedMultiply] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "d4FeedMultiply", kParameterIsAutomable);
+
+    value[ID::timeOffsetRange] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "timeOffsetRange", kParameterIsAutomable);
+    value[ID::innerFeedOffsetRange] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "innerFeedOffsetRange", kParameterIsAutomable);
+    value[ID::d1FeedOffsetRange] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "d1FeedOffsetRange", kParameterIsAutomable);
+    value[ID::d2FeedOffsetRange] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "d2FeedOffsetRange", kParameterIsAutomable);
+    value[ID::d3FeedOffsetRange] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "d3FeedOffsetRange", kParameterIsAutomable);
+    value[ID::d4FeedOffsetRange] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "d4FeedOffsetRange", kParameterIsAutomable);
+
+    value[ID::timeModulation] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "timeModulation", kParameterIsAutomable);
+    value[ID::innerFeedModulation] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "innerFeedModulation", kParameterIsAutomable);
+    value[ID::d1FeedModulation] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "d1FeedModulation", kParameterIsAutomable);
+    value[ID::d2FeedModulation] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "d2FeedModulation", kParameterIsAutomable);
+    value[ID::d3FeedModulation] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "d3FeedModulation", kParameterIsAutomable);
+    value[ID::d4FeedModulation] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "d4FeedModulation", kParameterIsAutomable);
+
+    value[ID::seed]
+      = std::make_unique<IntValue>(0, Scales::seed, "seed", kParameterIsAutomable);
 
     value[ID::stereoCross] = std::make_unique<LinearValue>(
       0.0, Scales::stereoCross, "stereoCross", kParameterIsAutomable);

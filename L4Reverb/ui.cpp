@@ -40,18 +40,17 @@ constexpr float knobY = knobHeight + labelY;
 constexpr float textKnobX = 80.0f;
 constexpr float splashHeight = 40.0f;
 constexpr float barboxWidth = 2 * nDepth1;
-constexpr float barboxHeight = 2 * knobY;
+constexpr float barboxHeight = 2 * knobY + labelY + labelHeight;
 constexpr float barboxWidthSmall = 4 * nDepth2;
 
-constexpr float tabViewWidth = barboxWidth + barboxWidthSmall + 3 * labelY + 2 * uiMargin;
-constexpr float tabViewHeight
-  = labelY + 4 * barboxHeight + 3 * labelHeight + 2 * uiMargin;
+constexpr float barboxSectionWidth = barboxWidth + barboxWidthSmall + 3 * labelY;
+constexpr float barboxSectionHeight = 3 * barboxHeight + 2 * labelHeight;
 
-constexpr float leftPanelWidth = 4 * knobX + 6 * margin + labelHeight;
+constexpr float leftPanelWidth = 4 * textKnobX + 6 * margin;
 
 constexpr uint32_t defaultWidth
-  = uint32_t(leftPanelWidth + labelY + tabViewWidth + 2 * uiMargin);
-constexpr uint32_t defaultHeight = uint32_t(tabViewHeight + 2 * uiMargin);
+  = uint32_t(leftPanelWidth + labelY + barboxSectionWidth + 2 * uiMargin);
+constexpr uint32_t defaultHeight = uint32_t(barboxSectionHeight + 2 * uiMargin);
 
 enum tabIndex { tabBase, tabOffset, tabModulation };
 
@@ -172,15 +171,18 @@ public:
     const auto mulTop5 = mulTop4 + labelY;
     const auto mulTop6 = mulTop5 + labelY;
     const auto mulTop7 = mulTop6 + labelY;
+    const auto mulTop8 = mulTop7 + 2 * labelY;
     const auto mulLeft0 = left0;
     const auto mulLeft1 = mulLeft0 + textKnobX + 2 * margin;
     const auto mulLeft2 = mulLeft1 + textKnobX + 2 * margin;
+    const auto mulLeft3 = mulLeft2 + textKnobX + 2 * margin;
 
     addGroupLabel(
       mulLeft0, mulTop0, leftPanelWidth, labelHeight, midTextSize, "Multiplier");
 
     addLabel(mulLeft1, mulTop1, textKnobX, labelHeight, uiTextSize, "Base");
     addLabel(mulLeft2, mulTop1, textKnobX, labelHeight, uiTextSize, "Offset");
+    addLabel(mulLeft3, mulTop1, textKnobX, labelHeight, uiTextSize, "Modulation");
 
     addLabel(
       mulLeft0, mulTop2, textKnobX, labelHeight, uiTextSize, "Time",
@@ -220,133 +222,152 @@ public:
       mulLeft1, mulTop7, textKnobX, labelHeight, uiTextSize, ID::d4FeedMultiply,
       Scales::defaultScale, false, 4);
 
+    addTextKnob(
+      mulLeft2, mulTop2, textKnobX, labelHeight, uiTextSize, ID::timeOffsetRange,
+      Scales::defaultScale, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop3, textKnobX, labelHeight, uiTextSize, ID::innerFeedOffsetRange,
+      Scales::defaultScale, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop4, textKnobX, labelHeight, uiTextSize, ID::d1FeedOffsetRange,
+      Scales::defaultScale, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop5, textKnobX, labelHeight, uiTextSize, ID::d2FeedOffsetRange,
+      Scales::defaultScale, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop6, textKnobX, labelHeight, uiTextSize, ID::d3FeedOffsetRange,
+      Scales::defaultScale, false, 4);
+    addTextKnob(
+      mulLeft2, mulTop7, textKnobX, labelHeight, uiTextSize, ID::d4FeedOffsetRange,
+      Scales::defaultScale, false, 4);
+
+    const auto mulLeft3Mid = mulLeft3 + floorf(textKnobX / 2) - 5;
+    addCheckbox(
+      mulLeft3Mid, mulTop2, textKnobX, labelHeight, uiTextSize, "", ID::timeModulation);
+    addCheckbox(
+      mulLeft3Mid, mulTop3, textKnobX, labelHeight, uiTextSize, "",
+      ID::innerFeedModulation);
+    addCheckbox(
+      mulLeft3Mid, mulTop4, textKnobX, labelHeight, uiTextSize, "", ID::d1FeedModulation);
+    addCheckbox(
+      mulLeft3Mid, mulTop5, textKnobX, labelHeight, uiTextSize, "", ID::d2FeedModulation);
+    addCheckbox(
+      mulLeft3Mid, mulTop6, textKnobX, labelHeight, uiTextSize, "", ID::d3FeedModulation);
+    addCheckbox(
+      mulLeft3Mid, mulTop7, textKnobX, labelHeight, uiTextSize, "", ID::d4FeedModulation);
+
     // Panic button.
     auto panicButton
       = std::make_shared<PanicButton>(this, this, "Panic!", fontId, palette);
-    panicButton->setSize(leftPanelWidth - 3.0f * knobX, 2 * labelHeight);
-    panicButton->setAbsolutePos(left0 + 1.5f * knobX, mulTop7 + 2 * labelY);
+    panicButton->setSize(2 * textKnobX + 2 * margin, 2 * labelHeight);
+    panicButton->setAbsolutePos(mulLeft1, mulTop8 - labelHeight / 2);
     panicButton->setTextSize(midTextSize);
     widget.push_back(panicButton);
 
     // Mix.
-    const auto miscTop0 = mulTop0 + 11 * labelY + 3 * margin;
-    const auto miscTop1 = miscTop0 + labelY;
+    const auto offsetKnobX = floorf((textKnobX - knobX) / 2);
 
-    const auto mixLeft0 = left0;
+    const auto mixTop0 = mulTop0 + 11 * labelY;
+    const auto mixTop1 = mixTop0 + labelY;
+
+    const auto mixLeft0 = left0 + 2 * offsetKnobX;
     const auto mixLeft1 = mixLeft0 + knobX + 2 * margin;
 
     addGroupLabel(
-      mixLeft0, miscTop0, 2 * knobX + 2 * margin, labelHeight, midTextSize, "Mix");
-    addKnob(mixLeft0, miscTop1, knobX, margin, uiTextSize, "Dry", ID::dry);
-    addKnob(mixLeft1, miscTop1, knobX, margin, uiTextSize, "Wet", ID::wet);
+      mixLeft0, mixTop0, 2 * knobX + 2 * margin, labelHeight, midTextSize, "Mix");
+    addKnob(mixLeft0, mixTop1, knobX, margin, uiTextSize, "Dry", ID::dry);
+    addKnob(mixLeft1, mixTop1, knobX, margin, uiTextSize, "Wet", ID::wet);
 
-    // Misc.
-    const auto miscLeft0 = left0 + 2 * knobX + 2 * margin + labelHeight;
-    const auto miscLeft1 = miscLeft0 + knobX + 2 * margin;
+    // Stereo.
+    const auto stereoLeft0 = left0 + 2 * textKnobX + 4 * margin + 2 * offsetKnobX;
+    const auto stereoLeft1 = stereoLeft0 + knobX + 2 * margin;
 
     addGroupLabel(
-      miscLeft0, miscTop0, 2 * knobX + 2 * margin, labelHeight, midTextSize, "Stereo");
-    addKnob(miscLeft0, miscTop1, knobX, margin, uiTextSize, "Cross", ID::stereoCross);
-    addKnob(miscLeft1, miscTop1, knobX, margin, uiTextSize, "Spread", ID::stereoSpread);
+      stereoLeft0, mixTop0, 2 * knobX + 2 * margin, labelHeight, midTextSize, "Stereo");
+    addKnob(stereoLeft0, mixTop1, knobX, margin, uiTextSize, "Cross", ID::stereoCross);
+    addKnob(stereoLeft1, mixTop1, knobX, margin, uiTextSize, "Spread", ID::stereoSpread);
 
-    // Smooth.
-    const auto leftSmooth = left0 + 1.5f * knobX + 3 * margin + 0.5f * labelHeight;
+    // Misc.
+    const auto miscTop0 = mixTop0 + labelY + knobY;
+    const auto miscTop1 = miscTop0 + labelY;
+
+    const auto miscLeft0 = mulLeft1;
+    const auto miscLeft1 = miscLeft0 + textKnobX + 2 * margin;
+
+    addLabel(
+      miscLeft0, miscTop1, textKnobX, labelHeight, uiTextSize, "Seed",
+      ALIGN_CENTER | ALIGN_MIDDLE);
+    addTextKnob(
+      miscLeft0, miscTop1 + labelY, textKnobX, labelHeight, uiTextSize, ID::seed,
+      Scales::seed);
+
     addKnob(
-      leftSmooth, miscTop1 + knobY + labelY, knobX, margin, uiTextSize, "Smooth",
+      miscLeft1 + offsetKnobX, miscTop1, knobX, margin, uiTextSize, "Smooth",
       ID::smoothness);
 
     // Right side.
     const auto tabViewLeft = left0 + leftPanelWidth + labelY;
 
-    std::vector<std::string> tabs{"Base", "Offset", "Modulation"};
-    auto tabview = addTabView(
-      tabViewLeft, top0, tabViewWidth, tabViewHeight, uiTextSize, labelY, tabs);
-
-    const auto tabInsideTop0 = top0 + labelY + uiMargin;
+    const auto tabInsideTop0 = top0;
     const auto tabInsideTop1 = tabInsideTop0 + barboxHeight + labelHeight;
     const auto tabInsideTop2 = tabInsideTop1 + barboxHeight + labelHeight;
-    const auto tabInsideLeft0 = tabViewLeft + uiMargin;
+    const auto tabInsideLeft0 = tabViewLeft;
     const auto tabInsideLeft1 = tabInsideLeft0 + labelY;
 
     // Base tab.
-    tabview->addWidget(
-      tabBase,
-      addGroupVerticalLabel(
-        tabInsideLeft0, tabInsideTop0, barboxHeight, labelHeight, midTextSize, "Time"));
+    addGroupVerticalLabel(
+      tabInsideLeft0, tabInsideTop0, barboxHeight, labelHeight, midTextSize, "Time");
     auto barboxTime = addBarBox(
       tabInsideLeft1, tabInsideTop0, 2 * nDepth1, barboxHeight, ID::time0, nDepth1,
       Scales::time);
     barboxTime->liveUpdateLineEdit = false;
-    tabview->addWidget(tabBase, barboxTime);
 
-    tabview->addWidget(
-      tabBase,
-      addGroupVerticalLabel(
-        tabInsideLeft0, tabInsideTop1, barboxHeight, labelHeight, midTextSize,
-        "InnerFeed"));
+    addGroupVerticalLabel(
+      tabInsideLeft0, tabInsideTop1, barboxHeight, labelHeight, midTextSize, "InnerFeed");
     auto barboxInnerFeed = addBarBox(
       tabInsideLeft1, tabInsideTop1, 2 * nDepth1, barboxHeight, ID::innerFeed0, nDepth1,
       Scales::feed);
     barboxInnerFeed->sliderZero = 0.5f;
     barboxInnerFeed->liveUpdateLineEdit = false;
-    tabview->addWidget(tabBase, barboxInnerFeed);
 
-    tabview->addWidget(
-      tabBase,
-      addGroupVerticalLabel(
-        tabInsideLeft0, tabInsideTop2, barboxHeight, labelHeight, midTextSize,
-        "D1 Feed"));
+    addGroupVerticalLabel(
+      tabInsideLeft0, tabInsideTop2, barboxHeight, labelHeight, midTextSize, "D1 Feed");
     auto barboxD1Feed = addBarBox(
       tabInsideLeft1, tabInsideTop2, 2 * nDepth1, barboxHeight, ID::d1Feed0, nDepth1,
       Scales::feed);
     barboxD1Feed->sliderZero = 0.5f;
     barboxD1Feed->liveUpdateLineEdit = false;
-    tabview->addWidget(tabBase, barboxD1Feed);
 
     const auto tabInsideLeft2 = tabInsideLeft1 + barboxWidth + labelY;
     const auto tabInsideLeft3 = tabInsideLeft2 + labelY;
 
-    tabview->addWidget(
-      tabBase,
-      addGroupVerticalLabel(
-        tabInsideLeft2, tabInsideTop0, barboxHeight, labelHeight, midTextSize,
-        "D2 Feed"));
+    addGroupVerticalLabel(
+      tabInsideLeft2, tabInsideTop0, barboxHeight, labelHeight, midTextSize, "D2 Feed");
     auto barboxD2Feed = addBarBox(
       tabInsideLeft3, tabInsideTop0, barboxWidthSmall, barboxHeight, ID::d2Feed0, nDepth2,
       Scales::feed);
     barboxD2Feed->sliderZero = 0.5f;
     barboxD2Feed->liveUpdateLineEdit = false;
-    tabview->addWidget(tabBase, barboxD2Feed);
 
-    tabview->addWidget(
-      tabBase,
-      addGroupVerticalLabel(
-        tabInsideLeft2, tabInsideTop1, barboxHeight, labelHeight, midTextSize,
-        "D3 Feed"));
+    addGroupVerticalLabel(
+      tabInsideLeft2, tabInsideTop1, barboxHeight, labelHeight, midTextSize, "D3 Feed");
     auto barboxD3Feed = addBarBox(
       tabInsideLeft3, tabInsideTop1, barboxWidthSmall, barboxHeight, ID::d3Feed0, nDepth3,
       Scales::feed);
     barboxD3Feed->sliderZero = 0.5f;
-    tabview->addWidget(tabBase, barboxD3Feed);
 
-    tabview->addWidget(
-      tabBase,
-      addGroupVerticalLabel(
-        tabInsideLeft2, tabInsideTop2, barboxHeight, labelHeight, midTextSize,
-        "D4 Feed"));
+    addGroupVerticalLabel(
+      tabInsideLeft2, tabInsideTop2, barboxHeight, labelHeight, midTextSize, "D4 Feed");
     auto barboxD4Feed = addBarBox(
       tabInsideLeft3, tabInsideTop2, barboxWidthSmall, barboxHeight, ID::d4Feed0, nDepth4,
       Scales::feed);
     barboxD4Feed->sliderZero = 0.5f;
-    tabview->addWidget(tabBase, barboxD4Feed);
-
-    tabview->refreshTab();
 
     // Plugin name.
     const auto splashTop = defaultHeight - splashHeight - uiMargin;
-    const auto splashLeft = left0 + knobX;
+    const auto splashLeft = mulLeft1;
     addSplashScreen(
-      splashLeft, splashTop, leftPanelWidth - 2 * knobX, splashHeight, uiMargin, uiMargin,
+      splashLeft, splashTop, 2 * textKnobX + 2 * margin, splashHeight, uiMargin, uiMargin,
       defaultWidth - splashHeight, defaultHeight - splashHeight, pluginNameTextSize,
       "L4Reverb");
   }

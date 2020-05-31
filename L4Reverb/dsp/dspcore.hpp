@@ -59,9 +59,22 @@ public:
       float *out1) override;                                                             \
                                                                                          \
   private:                                                                               \
+    void refreshSeed();                                                                  \
+                                                                                         \
     float sampleRate = 44100.0f;                                                         \
                                                                                          \
-    std::minstd_rand rng{0};                                                             \
+    std::minstd_rand timeRng{0};                                                         \
+    std::minstd_rand innerRng{0};                                                        \
+    std::minstd_rand d1FeedRng{0};                                                       \
+    std::minstd_rand d2FeedRng{0};                                                       \
+    std::minstd_rand d3FeedRng{0};                                                       \
+    std::minstd_rand d4FeedRng{0};                                                       \
+    uint_fast32_t timeSeed = 0;                                                          \
+    uint_fast32_t innerSeed = 0;                                                         \
+    uint_fast32_t d1FeedSeed = 0;                                                        \
+    uint_fast32_t d2FeedSeed = 0;                                                        \
+    uint_fast32_t d3FeedSeed = 0;                                                        \
+    uint_fast32_t d4FeedSeed = 0;                                                        \
                                                                                          \
     std::array<NestD4<float, 4>, 2> delay;                                               \
     std::array<ExpSmoother16, 2> interpTime;                                             \

@@ -25,6 +25,7 @@ IntScale<double> Scales::boolScale(1);
 LogScale<double> Scales::time(0.0, 1.0, 0.5, 0.05);
 LinearScale<double> Scales::feed(-1.0, 1.0);
 LogScale<double> Scales::timeMultiply(0.0, 1.0, 0.5, 0.1);
+IntScale<double> Scales::seed(16777215); // 2^24 - 1
 LinearScale<double> Scales::stereoCross(0.0, 0.5);
 LogScale<double> Scales::gain(0.0, 4.0, 0.5, 1.0);
 LogScale<double> Scales::smoothness(0.0, 8.0, 0.5, 1.0);
