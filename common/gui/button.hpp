@@ -206,7 +206,7 @@ public:
       Btn::value = ev.press;
       Btn::updateValue();
       Btn::repaint();
-      return true;
+      if (ev.press == true) return true;
     } else if (!ev.press) {
       Btn::value = false;
       Btn::updateValue();
