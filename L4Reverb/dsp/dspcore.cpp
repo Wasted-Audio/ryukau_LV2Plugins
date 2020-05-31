@@ -130,7 +130,12 @@ inline std::array<float, 2> calcOffset(float offset, float mul)
     ap4L.feed[d4].METHOD(param.value[ID::d4Feed0 + i4]->getFloat() * offsetD4Feed[0]);   \
     ap4R.feed[d4].METHOD(param.value[ID::d4Feed0 + i4]->getFloat() * offsetD4Feed[1]);   \
     ++i4;                                                                                \
-  }
+  }                                                                                      \
+                                                                                         \
+  interpStereoCross.METHOD(param.value[ID::stereoCross]->getFloat());                    \
+  interpStereoSpread.METHOD(param.value[ID::stereoSpread]->getFloat());                  \
+  interpDry.METHOD(param.value[ID::dry]->getFloat());                                    \
+  interpWet.METHOD(param.value[ID::wet]->getFloat());
 
 void DSPCORE_NAME::reset()
 {
@@ -141,10 +146,6 @@ void DSPCORE_NAME::reset()
   for (auto &dly : delay) dly.reset();
 
   ASSIGN_ALLPASS_PARAMETER(reset);
-
-  interpStereoSpread.reset(param.value[ID::stereoSpread]->getFloat());
-  interpDry.reset(param.value[ID::dry]->getFloat());
-  interpWet.reset(param.value[ID::wet]->getFloat());
 }
 
 void DSPCORE_NAME::startup()
@@ -175,10 +176,6 @@ void DSPCORE_NAME::setParameters(float tempo)
   if (!param.value[ID::d4FeedModulation]->getInt()) d4FeedRng.seed(d4FeedSeed);
 
   ASSIGN_ALLPASS_PARAMETER(push);
-
-  interpStereoSpread.push(param.value[ID::stereoSpread]->getFloat());
-  interpDry.push(param.value[ID::dry]->getFloat());
-  interpWet.push(param.value[ID::wet]->getFloat());
 }
 
 void DSPCORE_NAME::process(
@@ -187,19 +184,20 @@ void DSPCORE_NAME::process(
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    float delayOutL = delay[0].process(in0[i], sampleRate);
-    float delayOutR = delay[1].process(in1[i], sampleRate);
-    const auto mid = delayOutL + delayOutR;
-    const auto side = delayOutL - delayOutR;
+    const auto cross = interpStereoCross.process();
+    delayOut[0] = delay[0].process(in0[i] + cross * delayOut[1], sampleRate);
+    delayOut[1] = delay[1].process(in1[i] + cross * delayOut[0], sampleRate);
+    const auto mid = delayOut[0] + delayOut[1];
+    const auto side = delayOut[0] - delayOut[1];
 
     const auto spread = interpStereoSpread.process();
-    delayOutL = mid - spread * (mid - side);
-    delayOutR = mid - spread * (mid + side);
+    delayOut[0] = mid - spread * (mid - side);
+    delayOut[1] = mid - spread * (mid + side);
 
     const auto dry = interpDry.process();
     const auto wet = interpWet.process();
-    out0[i] = dry * in0[i] + wet * delayOutL;
-    out1[i] = dry * in1[i] + wet * delayOutR;
+    out0[i] = dry * in0[i] + wet * delayOut[0];
+    out1[i] = dry * in1[i] + wet * delayOut[1];
   }
 }
 

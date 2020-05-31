@@ -88,6 +88,7 @@ struct Scales {
   static SomeDSP::LogScale<double> time;
   static SomeDSP::LinearScale<double> feed;
   static SomeDSP::LogScale<double> timeMultiply;
+  static SomeDSP::LogScale<double> timeOffsetRange;
   static SomeDSP::IntScale<double> seed;
   static SomeDSP::LinearScale<double> stereoCross;
   static SomeDSP::LogScale<double> gain;
@@ -153,18 +154,19 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::d4FeedMultiply] = std::make_unique<LinearValue>(
       1.0, Scales::defaultScale, "d4FeedMultiply", kParameterIsAutomable);
 
-    value[ID::timeOffsetRange] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "timeOffsetRange", kParameterIsAutomable);
+    value[ID::timeOffsetRange] = std::make_unique<LogValue>(
+      Scales::timeOffsetRange.invmap(0.05), Scales::timeOffsetRange, "timeOffsetRange",
+      kParameterIsAutomable);
     value[ID::innerFeedOffsetRange] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "innerFeedOffsetRange", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "innerFeedOffsetRange", kParameterIsAutomable);
     value[ID::d1FeedOffsetRange] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "d1FeedOffsetRange", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "d1FeedOffsetRange", kParameterIsAutomable);
     value[ID::d2FeedOffsetRange] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "d2FeedOffsetRange", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "d2FeedOffsetRange", kParameterIsAutomable);
     value[ID::d3FeedOffsetRange] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "d3FeedOffsetRange", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "d3FeedOffsetRange", kParameterIsAutomable);
     value[ID::d4FeedOffsetRange] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "d4FeedOffsetRange", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "d4FeedOffsetRange", kParameterIsAutomable);
 
     value[ID::timeModulation] = std::make_unique<IntValue>(
       0, Scales::boolScale, "timeModulation", kParameterIsAutomable);
@@ -183,7 +185,8 @@ struct GlobalParameter : public ParameterInterface {
       = std::make_unique<IntValue>(0, Scales::seed, "seed", kParameterIsAutomable);
 
     value[ID::stereoCross] = std::make_unique<LinearValue>(
-      0.0, Scales::stereoCross, "stereoCross", kParameterIsAutomable);
+      Scales::stereoCross.invmap(0.0), Scales::stereoCross, "stereoCross",
+      kParameterIsAutomable);
     value[ID::stereoSpread] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "stereoSpread", kParameterIsAutomable);
 

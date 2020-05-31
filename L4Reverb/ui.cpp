@@ -224,7 +224,7 @@ public:
 
     addTextKnob(
       mulLeft2, mulTop2, textKnobX, labelHeight, uiTextSize, ID::timeOffsetRange,
-      Scales::defaultScale, false, 4);
+      Scales::timeOffsetRange, false, 8);
     addTextKnob(
       mulLeft2, mulTop3, textKnobX, labelHeight, uiTextSize, ID::innerFeedOffsetRange,
       Scales::defaultScale, false, 4);
@@ -284,7 +284,8 @@ public:
 
     addGroupLabel(
       stereoLeft0, mixTop0, 2 * knobX + 2 * margin, labelHeight, midTextSize, "Stereo");
-    addKnob(stereoLeft0, mixTop1, knobX, margin, uiTextSize, "Cross", ID::stereoCross);
+    addKnob<Style::warning>(
+      stereoLeft0, mixTop1, knobX, margin, uiTextSize, "Cross", ID::stereoCross);
     addKnob(stereoLeft1, mixTop1, knobX, margin, uiTextSize, "Spread", ID::stereoSpread);
 
     // Misc.

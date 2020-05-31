@@ -77,9 +77,8 @@ public:
     uint_fast32_t d4FeedSeed = 0;                                                        \
                                                                                          \
     std::array<NestD4<float, 4>, 2> delay;                                               \
-    std::array<ExpSmoother16, 2> interpTime;                                             \
-    std::array<ExpSmoother16, 2> interpOuterFeed;                                        \
-    std::array<ExpSmoother16, 2> interpInnerFeed;                                        \
+    std::array<float, 2> delayOut{};                                                     \
+    ExpSmoother<float> interpStereoCross;                                                \
     ExpSmoother<float> interpStereoSpread;                                               \
     ExpSmoother<float> interpDry;                                                        \
     ExpSmoother<float> interpWet;                                                        \
