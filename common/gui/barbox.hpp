@@ -22,8 +22,153 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <sstream>
 #include <string>
+
+template<typename Scrollable> class ScrollBar : public NanoWidget {
+public:
+  explicit ScrollBar(
+    NanoWidget *group, std::shared_ptr<Scrollable> parent, Palette &palette)
+    : NanoWidget(group), parent(parent), pal(palette)
+  {
+  }
+
+  void onNanoDisplay() override
+  {
+    resetTransform();
+    translate(getAbsoluteX(), getAbsoluteY());
+
+    const auto width = getWidth();
+    const auto height = getHeight();
+
+    strokeWidth(2.0f);
+    strokeColor(pal.border());
+
+    // Bar.
+    auto rightHandleL = rightPos * width - handleWidth;
+    auto barL = leftPos * width + handleWidth;
+    beginPath();
+    rect(barL, 0, rightHandleL - barL, height);
+    fillColor(pointed == Part::bar ? pal.highlightButton() : pal.highlightMain());
+    fill();
+    stroke();
+
+    // Left handle.
+    beginPath();
+    rect(leftPos * width, 0, handleWidth, height);
+    fillColor(pointed == Part::leftHandle ? pal.highlightButton() : pal.unfocused());
+    fill();
+    stroke();
+
+    // Right handle.
+    beginPath();
+    rect(rightHandleL, 0, handleWidth, height);
+    fillColor(pointed == Part::rightHandle ? pal.highlightButton() : pal.unfocused());
+    fill();
+    stroke();
+  }
+
+  bool onMouse(const MouseEvent &ev) override
+  {
+    if (contains(ev.pos) && ev.press) {
+      grabbed = pointed = hitTest(ev.pos);
+
+      if (grabbed == Part::leftHandle)
+        grabOffset = int(leftPos * getWidth()) - ev.pos.getX();
+      else if (grabbed == Part::rightHandle)
+        grabOffset = int(rightPos * getWidth()) - ev.pos.getX();
+      else if (grabbed == Part::bar)
+        grabOffset = int(leftPos * getWidth()) - ev.pos.getX();
+
+      return true;
+    }
+
+    grabbed = Part::background;
+    return false;
+  }
+
+  bool onMotion(const MotionEvent &ev) override
+  {
+    auto posX
+      = std::clamp<int>(ev.pos.getX() + grabOffset, 0, getWidth()) / float(getWidth());
+    auto handleW = handleWidth / getWidth();
+    switch (grabbed) {
+      case Part::bar: {
+        auto barWidth = rightPos - leftPos;
+        leftPos = posX;
+        rightPos = leftPos + barWidth;
+        if (leftPos < 0.0f) {
+          rightPos = barWidth;
+          leftPos = 0.0f;
+        } else if (rightPos > 1.0f) {
+          leftPos = 1.0f - barWidth;
+          rightPos = 1.0f;
+        }
+
+        // Just in case.
+        leftPos = std::clamp(leftPos, 0.0f, 1.0f);
+        rightPos = std::clamp(rightPos, 0.0f, 1.0f);
+      } break;
+
+      case Part::leftHandle: {
+        auto rightMost = std::max(rightPos - 3 * handleW, 0.0f);
+        leftPos = std::clamp(posX, 0.0f, rightMost);
+      } break;
+
+      case Part::rightHandle: {
+        auto leftMost = std::min(leftPos + 3 * handleW, 1.0f);
+        rightPos = std::clamp(posX, leftMost, 1.0f);
+      } break;
+
+      default:
+        pointed = hitTest(ev.pos);
+        repaint();
+        return false;
+    }
+
+    parent->setViewRange(leftPos, rightPos);
+
+    repaint();
+    return true;
+  }
+
+  void setHandleWidth(float width) { handleWidth = std::max(width, 0.0f); }
+
+protected:
+  enum class Part : uint8_t { background = 0, bar, leftHandle, rightHandle };
+
+  inline Part hitTest(Point<int> pt)
+  {
+    if (pt.getY() < 0 || pt.getY() > int(getHeight())) return Part::background;
+
+    auto left = leftPos * getWidth();
+    auto right = rightPos * getWidth();
+    auto width = handleWidth;
+    auto pX = pt.getX();
+
+    auto leftHandleR = left + width;
+    if (pX >= left && pX <= leftHandleR) return Part::leftHandle;
+
+    auto rightHandleL = right - width;
+    if (pX >= rightHandleL && pX <= right) return Part::rightHandle;
+
+    if (pX > leftHandleR && pX < rightHandleL) return Part::bar;
+
+    return Part::background;
+  }
+
+  float handleWidth = 10;
+  float leftPos = 0;
+  float rightPos = 1;
+  int grabOffset = 0;
+
+  Part pointed = Part::background;
+  Part grabbed = Part::background;
+
+  std::shared_ptr<Scrollable> parent;
+  Palette &pal;
+};
 
 template<typename Scale> class BarBox : public ArrayWidget {
 public:
@@ -71,7 +216,7 @@ public:
                                            : (sliderZero - value[i]) * height;
       float rectY = value[i] >= sliderZero ? sliderZeroHeight - rectH : sliderZeroHeight;
       beginPath();
-      rect(i * sliderWidth, rectY, sliderWidth - defaultBorderWidth, rectH);
+      rect(i * sliderWidth, rectY, sliderWidth - barWidth, rectH);
       fill();
     }
 
@@ -90,7 +235,7 @@ public:
     // Border.
     beginPath();
     rect(0, 0, width, height);
-    strokeWidth(defaultBorderWidth);
+    strokeWidth(borderWidth);
     strokeColor(pal.border());
     stroke();
 
@@ -127,7 +272,9 @@ public:
   void handleKey(const KeyboardEvent &ev)
   {
     size_t index = calcIndex(mousePosition);
-    if (ev.key == 'd') { // reset to Default.
+    if (ev.key == 'a') {
+      alternateSign(index);
+    } else if (ev.key == 'd') { // reset to Default.
       value = defaultValue;
       updateValue();
     } else if (ev.key == 'D') { // Alternative default. (toggle min/mid/max)
@@ -154,7 +301,7 @@ public:
     } else if (ev.key == 'p') { // Permute.
       permute(index);
     } else if (ev.key == 'r') {
-      randomize(index, 1.0);
+      totalRandomize(index);
     } else if (ev.key == 'R') {
       sparseRandomize(index);
     } else if (ev.key == 's') { // Sort descending order.
@@ -163,8 +310,10 @@ public:
     } else if (ev.key == 'S') { // Sort ascending order.
       std::sort(value.begin() + index, value.end());
       updateValue();
-    } else if (ev.key == 't') { // subTle randomize.
+    } else if (ev.key == 't') { // subTle randomize. Random walk.
       randomize(index, 0.02);
+    } else if (ev.key == 'T') { // subTle randomize. Converge to sliderZero.
+      mixRandomize(index, 0.02);
     } else if (ev.key == ',') { // Rotate back.
       if (index == value.size() - 1) index = 0;
       std::rotate(value.begin() + index, value.begin() + index + 1, value.end());
@@ -173,7 +322,7 @@ public:
       size_t rIndex = index == 0 ? 0 : value.size() - 1 - index;
       std::rotate(value.rbegin() + rIndex, value.rbegin() + rIndex + 1, value.rend());
       updateValue();
-    } else if (ev.key == '1') { // Decrease odd.
+    } else if (ev.key == '1') { // Decrease.
       multiplySkip(index, 1);
     } else if (ev.key == '2') { // Decrease even.
       multiplySkip(index, 2);
@@ -198,6 +347,12 @@ public:
     repaint();
   }
 
+  void alternateSign(size_t start)
+  {
+    for (size_t i = start; i < value.size(); i += 2)
+      setValueAt(i, 2 * sliderZero - value[i]);
+  }
+
   void averageLowpass(size_t start)
   {
     const int32_t range = 1;
@@ -208,34 +363,57 @@ public:
       for (int32_t j = -range; j <= range; ++j) {
         size_t index = i + j; // Note that index is unsigned.
         if (index >= value.size()) continue;
-        result[i] += value[index];
+        result[i] += value[index] - sliderZero;
       }
-      setValueAt(i, result[i] / double(2 * range + 1));
+      setValueAt(i, sliderZero + result[i] / double(2 * range + 1));
     }
   }
 
+  /**
+  Highpass equation is:
+    `value[i] = sum((-0.5, 1.0, -0.5) * value[(i - 1, i, i + 1)])`
+  Value of index outside of array is assumed to be same as closest element.
+  */
   void highpass(size_t start)
   {
-    // value[i] = sum((-0.5, 1.0, -0.5) * value[(i - 1, i, i + 1)])
-    // Value of index outside of array is assumed to be same as closest element.
     std::vector<double> result(value);
     size_t last = value.size() - 1;
     for (size_t i = start; i < value.size(); ++i) {
+      auto val = value[i] - sliderZero;
       result[i] = 0.0;
-      result[i] -= (i >= 1) ? value[i - 1] : value[i];
-      result[i] -= (i < last) ? value[i + 1] : value[i];
-      result[i] = value[i] + 0.5f * result[i];
-      setValueAt(i, result[i]);
+      result[i] -= (i >= 1) ? value[i - 1] - sliderZero : val;
+      result[i] -= (i < last) ? value[i + 1] - sliderZero : val;
+      result[i] = val + 0.5f * result[i];
+      setValueAt(i, sliderZero + result[i]);
     }
   }
 
-  void randomize(size_t start, double mix)
+  void totalRandomize(size_t start)
   {
     std::random_device dev;
     std::mt19937_64 rng(dev());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
+    for (size_t i = start; i < value.size(); ++i) value[i] = dist(rng);
+  }
+
+  void randomize(size_t start, double amount)
+  {
+    std::random_device dev;
+    std::mt19937_64 rng(dev());
+    amount /= 2;
+    for (size_t i = start; i < value.size(); ++i) {
+      std::uniform_real_distribution<double> dist(value[i] - amount, value[i] + amount);
+      setValueAt(i, dist(rng));
+    }
+  }
+
+  void mixRandomize(size_t start, double mix)
+  {
+    std::random_device dev;
+    std::mt19937_64 rng(dev());
+    std::uniform_real_distribution<double> dist(sliderZero - 0.5, sliderZero + 0.5);
     for (size_t i = start; i < value.size(); ++i)
-      value[i] += mix * (dist(rng) - value[i]);
+      setValueAt(i, value[i] + mix * (dist(rng) - value[i]));
   }
 
   void sparseRandomize(size_t start)
@@ -256,39 +434,101 @@ public:
 
   void invert(size_t start, bool preserveMin)
   {
-    auto min = preserveMin ? *(std::min_element(value.begin(), value.end())) : 0.0;
-    for (size_t i = start; i < value.size(); ++i) setValueAt(i, 1.0f - value[i] + min);
+    if (!preserveMin) {
+      for (size_t i = start; i < value.size(); ++i) {
+        double val
+          = value[i] >= sliderZero ? 1.0 - value[i] + sliderZero : sliderZero - value[i];
+        setValueAt(i, val);
+      }
+    } else {
+      auto [minIter, maxIter] = std::minmax_element(
+        value.begin(), value.end(), [&](const double &lhs, const double &rhs) {
+          return fabs(lhs - sliderZero) < fabs(rhs - sliderZero);
+        });
+      double min = fabs(*minIter);
+      double max = fabs(*maxIter);
+      for (size_t i = start; i < value.size(); ++i)
+        setValueAt(i, copysign(max - fabs(value[i] - sliderZero) + min, value[i]));
+    }
   }
 
   void normalize(size_t start, bool preserveMin) noexcept
   {
-    auto min = preserveMin ? 0.0 : *(std::min_element(value.begin(), value.end()));
-    auto mul = 1.0 / (*(std::max_element(value.begin(), value.end())) - min);
-    if (!std::isfinite(mul)) return;
-    for (size_t i = start; i < value.size(); ++i) setValueAt(i, (value[i] - min) * mul);
+    double minNeg = 2;
+    double minPos = 2;
+    double maxNeg = -1;
+    double maxPos = -1;
+    for (size_t i = start; i < value.size(); ++i) {
+      auto val = fabs(value[i] - sliderZero);
+      if (value[i] < sliderZero) {
+        if (val > maxNeg)
+          maxNeg = val;
+        else if (val < minNeg)
+          minNeg = val;
+      } else {
+        if (val > maxPos)
+          maxPos = val;
+        else if (val < minPos)
+          minPos = val;
+      }
+    }
+    if (minNeg > 1.0) minNeg = 0.0;
+    if (minPos > 1.0) minPos = 0.0;
+    if (maxNeg < 0.0) maxNeg = 0.0;
+    if (maxPos < 0.0) maxPos = 0.0;
+
+    if (preserveMin) {
+      auto mulNeg = (sliderZero - minNeg) / (maxNeg - minNeg);
+      auto mulPos = (1.0 - sliderZero - minPos) / (maxPos - minPos);
+      if (mulNeg > 1e15 || mulNeg < 0.0) mulNeg = minNeg = 0.0;
+      if (mulPos > 1e15 || mulPos < 0.0) mulPos = minPos = 0.0;
+      for (size_t i = start; i < value.size(); ++i) {
+        auto val = value[i] < sliderZero
+          ? (value[i] - sliderZero + minNeg) * mulNeg + sliderZero - minNeg
+          : (value[i] - sliderZero - minPos) * mulPos + sliderZero + minPos;
+        setValueAt(i, val);
+      }
+    } else {
+      auto mulNeg = sliderZero / (maxNeg - minNeg);
+      auto mulPos = (1.0 - sliderZero) / (maxPos - minPos);
+      if (mulNeg > 1e15 || mulNeg < 0.0) mulNeg = minNeg = 0.0;
+      if (mulPos > 1e15 || mulPos < 0.0) mulPos = minPos = 0.0;
+      for (size_t i = start; i < value.size(); ++i) {
+        auto val = value[i] < sliderZero
+          ? (value[i] - sliderZero + minNeg) * mulNeg + sliderZero
+          : (value[i] - sliderZero - minPos) * mulPos + sliderZero;
+        setValueAt(i, val);
+      }
+      return;
+    }
   }
 
   void multiplySkip(size_t start, size_t interval) noexcept
   {
-    for (size_t i = start; i < value.size(); i += interval) value[i] *= 0.9;
+    for (size_t i = start; i < value.size(); i += interval) {
+      setValueAt(i, (value[i] - sliderZero) * 0.9 + sliderZero);
+    }
   }
 
   void emphasizeLow(size_t start)
   {
     for (size_t i = start; i < value.size(); ++i)
-      setValueAt(i, value[i] / pow(i + 1, 0.0625));
+      setValueAt(i, (value[i] - sliderZero) / pow(i + 1, 0.0625) + sliderZero);
   }
 
   void emphasizeHigh(size_t start)
   {
     for (size_t i = start; i < value.size(); ++i)
-      setValueAt(i, value[i] * (0.9 + 0.1 * double(i + 1) / value.size()));
+      setValueAt(
+        i,
+        (value[i] - sliderZero) * (0.9 + 0.1 * double(i + 1) / value.size())
+          + sliderZero);
   }
 
   bool onMouse(const MouseEvent &ev) override
   {
     // Note: Specific to this plugin.
-    if (!ev.press && ev.button == 3) {
+    if (!ev.press && (ev.button == 1 || ev.button == 3)) {
       updateValue();
     }
 
@@ -298,12 +538,12 @@ public:
       return false;
     }
 
-    if (ev.button == 1) {
+    if (ev.button == 1)
       isMouseLeftDown = true;
-    } else if (ev.button == 3) {
+    else if (ev.button == 3)
       isMouseRightDown = true;
-      anchor = ev.pos;
-    }
+
+    anchor = ev.pos;
 
     setValueFromPosition(ev.pos, ev.mod);
     return true;
@@ -314,11 +554,11 @@ public:
     isMouseEntered = contains(ev.pos);
     mousePosition = ev.pos;
     if (isMouseLeftDown) {
-      setValueFromPosition(ev.pos, ev.mod);
+      setValueFromLine(anchor, ev.pos, ev.mod);
+      anchor = ev.pos;
       return true;
     } else if (isMouseRightDown) {
-      setValueFromLine(anchor, ev.pos);
-      if (liveUpdateLineEdit) updateValue();
+      setValueFromLine(anchor, ev.pos, ev.mod);
       return true;
     }
     return false;
@@ -344,11 +584,19 @@ public:
   void onResize(const ResizeEvent &ev)
   {
     sliderWidth = float(ev.size.getWidth()) / value.size();
-    defaultBorderWidth = sliderWidth <= 4.0f ? 1.0f : 2.0f;
+    barWidth = sliderWidth <= 4.0f ? 1.0f : 2.0f;
   }
 
-  void setDefaultBorderWidth(float width) { defaultBorderWidth = width; }
+  void setBarWidth(float width) { barWidth = width; }
+  void setBorderWidth(float width) { borderWidth = width; }
   void setHighlightBorderWidth(float width) { highlightBorderWidth = width; }
+
+  void setViewRange(float left, float right)
+  {
+    viewL = left;
+    viewR = right;
+    repaint();
+  }
 
 private:
   inline size_t calcIndex(Point<int> position)
@@ -368,22 +616,36 @@ private:
     repaint();
   }
 
-  void setValueFromLine(Point<int> p0, Point<int> p1)
+  void setValueFromLine(Point<int> p0, Point<int> p1, uint modifier)
   {
     if (p0.getX() > p1.getX()) std::swap(p0, p1);
 
-    size_t left = size_t(p0.getX() / sliderWidth);
-    size_t right = size_t(p1.getX() / sliderWidth);
-    if (left >= value.size() || right >= value.size()) return;
+    int last = int(value.size()) - 1;
+    if (last < 0) last = 0; // std::clamp is undefined if low is greater than high.
+
+    int left = int(p0.getX() / sliderWidth);
+    int right = int(p1.getX() / sliderWidth);
+
+    if ((left < 0 && right < 0) || (left > last && right > last)) return;
+
+    left = std::clamp(left, 0, last);
+    right = std::clamp(right, 0, last);
 
     const float p0y = p0.getY();
     const float p1y = p1.getY();
 
-    if (left == right) {
-      // p0 and p1 are in a same bar.
-      setValueAt(left, 1.0f - (p0y + p1y) * 0.5f / getHeight());
+    if (left == right) { // p0 and p1 are in a same bar.
+      if (modifier & kModifierControl)
+        setValueAt(left, defaultValue[left]);
+      else
+        setValueAt(left, 1.0f - (p0y + p1y) * 0.5f / getHeight());
       updateValueAt(left);
       repaint();
+      return;
+    } else if (modifier & kModifierControl) {
+      for (int idx = left; idx >= 0 && idx <= right; ++idx)
+        setValueAt(idx, defaultValue[idx]);
+      if (liveUpdateLineEdit) updateValue();
       return;
     }
 
@@ -404,18 +666,20 @@ private:
     const float slope = (p1y - p0y) / (p1x - p0x);
     const float yInc = slope * sliderWidth;
     float y = slope * (sliderWidth * (left + 1) - p0x) + p0y;
-    for (size_t idx = left + 1; idx < right; ++idx) {
+    for (int idx = left + 1; idx >= 0 && idx < right; ++idx) {
       setValueAt(idx, 1.0f - (y + 0.5f * yInc) / getHeight());
       y += yInc;
     }
 
-    // updateValue(); // Disable frequent update for this plugin.
+    if (liveUpdateLineEdit) updateValue();
     repaint();
   }
 
   std::vector<double> defaultValue;
-  float defaultBorderWidth = 2.0f;
+  float barWidth = 2.0f;
+  float borderWidth = 2.0f;
   float highlightBorderWidth = 4.0f;
+  float scrollBarheight = 8.0f;
 
   float textSize = 9.0f;
   FontId fontId = -1;
@@ -423,11 +687,13 @@ private:
 
   Scale &scale;
 
+  Point<int> mousePosition{-1, -1};
   Point<int> anchor{0, 0};
+  float viewL = 0.0f;
+  float viewR = 1.0f;
   bool isMouseLeftDown = false;
   bool isMouseRightDown = false;
   bool isMouseEntered = false;
 
-  Point<int> mousePosition{-1, -1};
   float sliderWidth = 0;
 };
