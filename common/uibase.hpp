@@ -145,6 +145,17 @@ protected:
     return barBox;
   }
 
+  template<typename Parent>
+  auto addScrollBar(
+    float left, float top, float width, float height, std::shared_ptr<Parent> parent)
+  {
+    auto scrollBar = std::make_shared<ScrollBar<Parent>>(this, parent, palette);
+    scrollBar->setSize(width, height);
+    scrollBar->setAbsolutePos(left, top);
+    widget.push_back(scrollBar);
+    return scrollBar;
+  }
+
   template<Style style = Style::common>
   auto addKickButton(
     float left,
