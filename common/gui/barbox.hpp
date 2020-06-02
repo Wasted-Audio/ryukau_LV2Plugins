@@ -361,10 +361,8 @@ public:
       sparseRandomize(index);
     } else if (ev.key == 's') { // Sort descending order.
       std::sort(value.begin() + index, value.end(), std::greater<>());
-      updateValue();
     } else if (ev.key == 'S') { // Sort ascending order.
       std::sort(value.begin() + index, value.end());
-      updateValue();
     } else if (ev.key == 't') { // subTle randomize. Random walk.
       randomize(index, 0.02);
     } else if (ev.key == 'T') { // subTle randomize. Converge to sliderZero.
@@ -382,11 +380,9 @@ public:
     } else if (ev.key == ',') { // Rotate back.
       if (index == value.size() - 1) index = 0;
       std::rotate(value.begin() + index, value.begin() + index + 1, value.end());
-      updateValue();
     } else if (ev.key == '.') { // Rotate forward.
       size_t rIndex = index == 0 ? 0 : value.size() - 1 - index;
       std::rotate(value.rbegin() + rIndex, value.rbegin() + rIndex + 1, value.rend());
-      updateValue();
     } else if (ev.key == '1') { // Decrease.
       multiplySkip(index, 1);
     } else if (ev.key == '2') { // Decrease even.
