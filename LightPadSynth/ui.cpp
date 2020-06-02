@@ -43,9 +43,10 @@ constexpr float knobWidth = 50.0f;
 constexpr float knobHeight = 40.0f;
 constexpr float knobX = 60.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
+constexpr float scrollBarHeight = 10.0f;
 constexpr float barboxWidth = 12.0f * knobX;
-constexpr float barboxHeight = 2.0f * knobY;
-constexpr float barboxY = barboxHeight + 2.0f * margin;
+constexpr float barboxHeight = 2.0f * knobY - scrollBarHeight + margin;
+constexpr float barboxY = barboxHeight + scrollBarHeight + margin;
 constexpr float checkboxWidth = 60.0f;
 constexpr float splashHeight = 40.0f;
 constexpr uint32_t defaultWidth
@@ -694,6 +695,12 @@ public:
     barboxOtGain->liveUpdateLineEdit = false;
     tabview->addWidget(tabPadSynth, barboxOtGain);
 
+    tabview->addWidget(
+      tabPadSynth,
+      addScrollBar(
+        otGainLeft0, otGainTop + barboxHeight, barboxWidth, scrollBarHeight,
+        barboxOtGain));
+
     // Overtone Width.
     const auto otWidthTop = otGainTop + barboxY + margin;
     const auto otWidthLeft = otGainLeft;
@@ -708,6 +715,12 @@ public:
       Scales::overtoneWidth);
     barboxOtWidth->liveUpdateLineEdit = false;
     tabview->addWidget(tabPadSynth, barboxOtWidth);
+
+    tabview->addWidget(
+      tabPadSynth,
+      addScrollBar(
+        otGainLeft0, otWidthTop + barboxHeight, barboxWidth, scrollBarHeight,
+        barboxOtWidth));
 
     // Overtone Pitch.
     const auto otPitchTop = otWidthTop + barboxY + margin;
@@ -724,6 +737,12 @@ public:
     barboxOtPitch->liveUpdateLineEdit = false;
     tabview->addWidget(tabPadSynth, barboxOtPitch);
 
+    tabview->addWidget(
+      tabPadSynth,
+      addScrollBar(
+        otGainLeft0, otPitchTop + barboxHeight, barboxWidth, scrollBarHeight,
+        barboxOtPitch));
+
     // Overtone Phase.
     const auto otPhaseTop = otPitchTop + barboxY + margin;
     const auto otPhaseLeft = otGainLeft;
@@ -738,6 +757,12 @@ public:
       Scales::overtonePhase);
     barboxOtPhase->liveUpdateLineEdit = false;
     tabview->addWidget(tabPadSynth, barboxOtPhase);
+
+    tabview->addWidget(
+      tabPadSynth,
+      addScrollBar(
+        otGainLeft0, otPhaseTop + barboxHeight, barboxWidth, scrollBarHeight,
+        barboxOtPhase));
 
     auto textKnobControl = R"(- Knob -
 Shift + Left Drag|Fine Adjustment
