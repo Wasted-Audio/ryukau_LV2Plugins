@@ -72,14 +72,21 @@ public:
   bool onMouse(const MouseEvent &ev) override
   {
     if (contains(ev.pos) && ev.press) {
-      grabbed = pointed = hitTest(ev.pos);
+      if (ev.button == 1) { // Left down. Grab scroll bar.
+        grabbed = pointed = hitTest(ev.pos);
 
-      if (grabbed == Part::leftHandle)
-        grabOffset = int(leftPos * getWidth()) - ev.pos.getX();
-      else if (grabbed == Part::rightHandle)
-        grabOffset = int(rightPos * getWidth()) - ev.pos.getX();
-      else if (grabbed == Part::bar)
-        grabOffset = int(leftPos * getWidth()) - ev.pos.getX();
+        if (grabbed == Part::leftHandle)
+          grabOffset = int(leftPos * getWidth()) - ev.pos.getX();
+        else if (grabbed == Part::rightHandle)
+          grabOffset = int(rightPos * getWidth()) - ev.pos.getX();
+        else if (grabbed == Part::bar)
+          grabOffset = int(leftPos * getWidth()) - ev.pos.getX();
+      } else if (ev.button == 3) { // Right down. Reset zoom.
+        leftPos = 0;
+        rightPos = 1;
+        parent->setViewRange(leftPos, rightPos);
+        repaint();
+      }
 
       return true;
     }
@@ -92,7 +99,6 @@ public:
   {
     auto posX
       = std::clamp<int>(ev.pos.getX() + grabOffset, 0, getWidth()) / float(getWidth());
-    auto handleW = handleWidth / getWidth();
     switch (grabbed) {
       case Part::bar: {
         auto barWidth = rightPos - leftPos;
@@ -112,13 +118,11 @@ public:
       } break;
 
       case Part::leftHandle: {
-        auto rightMost = std::max(rightPos - 3 * handleW, 0.0f);
-        leftPos = std::clamp(posX, 0.0f, rightMost);
+        setLeftPos(posX);
       } break;
 
       case Part::rightHandle: {
-        auto leftMost = std::min(leftPos + 3 * handleW, 1.0f);
-        rightPos = std::clamp(posX, leftMost, 1.0f);
+        setRightPos(posX);
       } break;
 
       default:
@@ -128,8 +132,34 @@ public:
     }
 
     parent->setViewRange(leftPos, rightPos);
-
     repaint();
+
+    return true;
+  }
+
+  bool onScroll(const ScrollEvent &ev) override
+  {
+    if (!contains(ev.pos)) return false;
+
+    const auto mouseX = float(ev.pos.getX()) / getWidth();
+    const auto delta = ev.delta.getY();
+
+    float amountL, amountR;
+    if (delta > 0) {
+      amountL = 0.5f * zoomSensi;
+      amountR = 0.5f * zoomSensi;
+    } else {
+      const auto bias = (mouseX - leftPos) / (rightPos - leftPos);
+      amountL = zoomSensi * std::clamp(bias, 0.0f, 1.0f);
+      amountR = zoomSensi * std::clamp((1.0f - bias), 0.0f, 1.0f);
+      if (bias < 0.0f || 1.0f < bias) std::swap(amountL, amountR);
+    }
+    setLeftPos(leftPos - amountL * delta);
+    setRightPos(rightPos + amountR * delta);
+
+    parent->setViewRange(leftPos, rightPos);
+    repaint();
+
     return true;
   }
 
@@ -138,26 +168,39 @@ public:
 protected:
   enum class Part : uint8_t { background = 0, bar, leftHandle, rightHandle };
 
-  inline Part hitTest(Point<int> pt)
+  inline void setLeftPos(float x)
   {
-    if (pt.getY() < 0 || pt.getY() > int(getHeight())) return Part::background;
+    auto rightMost = std::max(rightPos - 3 * handleWidth / getWidth(), 0.0f);
+    leftPos = std::clamp(x, 0.0f, rightMost);
+  }
+
+  inline void setRightPos(float x)
+  {
+    auto leftMost = std::min(leftPos + 3 * handleWidth / getWidth(), 1.0f);
+    rightPos = std::clamp(x, leftMost, 1.0f);
+  }
+
+  Part hitTest(Point<int> point)
+  {
+    if (point.getY() < 0 || point.getY() > int(getHeight())) return Part::background;
 
     auto left = leftPos * getWidth();
     auto right = rightPos * getWidth();
     auto width = handleWidth;
-    auto pX = pt.getX();
+    auto px = point.getX();
 
     auto leftHandleR = left + width;
-    if (pX >= left && pX <= leftHandleR) return Part::leftHandle;
+    if (px >= left && px <= leftHandleR) return Part::leftHandle;
 
     auto rightHandleL = right - width;
-    if (pX >= rightHandleL && pX <= right) return Part::rightHandle;
+    if (px >= rightHandleL && px <= right) return Part::rightHandle;
 
-    if (pX > leftHandleR && pX < rightHandleL) return Part::bar;
+    if (px > leftHandleR && px < rightHandleL) return Part::bar;
 
     return Part::background;
   }
 
+  float zoomSensi = 0.05f;
   float handleWidth = 10;
   float leftPos = 0;
   float rightPos = 1;
@@ -232,7 +275,10 @@ public:
         text(
           (i + 0.5f) * sliderWidth, height - 4,
           std::to_string(i + indexL + indexOffset).c_str(), nullptr);
-    } else if (value.size() != size_t(indexRange)) {
+    }
+
+    // Additional index text for zoom in.
+    if (value.size() != size_t(indexRange)) {
       fillColor(pal.overlay());
       fontSize(textSize * 2.0f);
       textAlign(ALIGN_LEFT | ALIGN_TOP);
