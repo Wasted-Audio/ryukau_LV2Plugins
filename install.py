@@ -34,4 +34,4 @@ if not style_dir.exists():
     print("style directory doesn't exists.\nInstallation failed.")
     exit()
 
-copy_dir(style_dir, config_home / style_dir)
+copy_dir(style_dir, config_home)
