@@ -190,6 +190,8 @@ public:
     , fontId(fontId)
     , pal(palette)
     , scale(scale)
+    , indexR(value.size())
+    , indexRange(value.size() - indexL)
   {
   }
 
@@ -211,25 +213,31 @@ public:
     fillColor(pal.highlightMain());
 
     float sliderZeroHeight = height * (1.0f - sliderZero);
-    for (size_t i = 0; i < value.size(); ++i) {
+    for (int i = indexL; i < indexR; ++i) {
       float rectH = value[i] >= sliderZero ? (value[i] - sliderZero) * height
                                            : (sliderZero - value[i]) * height;
       float rectY = value[i] >= sliderZero ? sliderZeroHeight - rectH : sliderZeroHeight;
       beginPath();
-      rect(i * sliderWidth, rectY, sliderWidth - barWidth, rectH);
+      rect((i - indexL) * sliderWidth, rectY, sliderWidth - barWidth, rectH);
       fill();
     }
 
     // Index text.
+    fontFaceId(fontId);
     if (sliderWidth >= 8.0f) {
       fillColor(pal.foreground());
-      fontFaceId(fontId);
       fontSize(textSize);
       textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
-      for (size_t i = 0; i < value.size(); ++i)
+      for (int i = 0; i < indexRange; ++i)
         text(
-          (i + 0.5f) * sliderWidth, height - 4, std::to_string(i + indexOffset).c_str(),
-          nullptr);
+          (i + 0.5f) * sliderWidth, height - 4,
+          std::to_string(i + indexL + indexOffset).c_str(), nullptr);
+    } else if (value.size() != size_t(indexRange)) {
+      fillColor(pal.overlay());
+      fontSize(textSize * 2.0f);
+      textAlign(ALIGN_LEFT | ALIGN_TOP);
+      std::string str = "<- #" + std::to_string(indexL);
+      text(0, 0, str.c_str(), nullptr);
     }
 
     // Border.
@@ -241,10 +249,10 @@ public:
 
     // Highlight.
     if (uint(mousePosition.getY()) <= height && uint(mousePosition.getX()) <= width) {
-      size_t index = size_t(value.size() * mousePosition.getX() / width);
-      if (index < value.size()) {
+      int index = int(indexL + indexRange * mousePosition.getX() / width);
+      if (indexL <= index && index < indexR) {
         beginPath();
-        rect(index * sliderWidth, 0, sliderWidth, height);
+        rect((index - indexL) * sliderWidth, 0, sliderWidth, height);
         fillColor(pal.overlayHighlight());
         fill();
 
@@ -254,7 +262,7 @@ public:
         fontSize(textSize * 4.0f);
         textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
         std::ostringstream os;
-        os << "#" << std::to_string(int32_t(index) + indexOffset) << ": "
+        os << "#" << std::to_string(index + indexOffset) << ": "
            << std::to_string(scale.map(value[index]));
         std::string indexText(os.str());
         text(width / 2, height / 2, indexText.c_str(), nullptr);
@@ -554,7 +562,10 @@ public:
     isMouseEntered = contains(ev.pos);
     mousePosition = ev.pos;
     if (isMouseLeftDown) {
-      setValueFromLine(anchor, ev.pos, ev.mod);
+      if (ev.mod & kModifierShift)
+        setValueFromPosition(ev.pos, ev.mod);
+      else
+        setValueFromLine(anchor, ev.pos, ev.mod);
       anchor = ev.pos;
       return true;
     } else if (isMouseRightDown) {
@@ -581,27 +592,30 @@ public:
     return true;
   }
 
-  void onResize(const ResizeEvent &ev)
-  {
-    sliderWidth = float(ev.size.getWidth()) / value.size();
-    barWidth = sliderWidth <= 4.0f ? 1.0f : 2.0f;
-  }
+  void onResize(const ResizeEvent &ev) { refreshSliderWidth(ev.size.getWidth()); }
 
-  void setBarWidth(float width) { barWidth = width; }
   void setBorderWidth(float width) { borderWidth = width; }
   void setHighlightBorderWidth(float width) { highlightBorderWidth = width; }
 
   void setViewRange(float left, float right)
   {
-    viewL = left;
-    viewR = right;
+    indexL = int(std::clamp(left, 0.0f, 1.0f) * value.size());
+    indexR = int(std::clamp(right, 0.0f, 1.0f) * value.size());
+    indexRange = indexR >= indexL ? indexR - indexL : 0;
+    refreshSliderWidth(getWidth());
     repaint();
   }
 
 private:
   inline size_t calcIndex(Point<int> position)
   {
-    return size_t(position.getX() / sliderWidth);
+    return size_t(indexL + position.getX() / sliderWidth);
+  }
+
+  void refreshSliderWidth(float width)
+  {
+    sliderWidth = indexRange >= 1 ? float(width) / indexRange : float(width);
+    barWidth = sliderWidth <= 4.0f ? 1.0f : 2.0f;
   }
 
   void setValueFromPosition(Point<int> position, uint modifier)
@@ -623,8 +637,8 @@ private:
     int last = int(value.size()) - 1;
     if (last < 0) last = 0; // std::clamp is undefined if low is greater than high.
 
-    int left = int(p0.getX() / sliderWidth);
-    int right = int(p1.getX() / sliderWidth);
+    int left = int(calcIndex(p0));
+    int right = int(calcIndex(p1));
 
     if ((left < 0 && right < 0) || (left > last && right > last)) return;
 
@@ -689,8 +703,9 @@ private:
 
   Point<int> mousePosition{-1, -1};
   Point<int> anchor{0, 0};
-  float viewL = 0.0f;
-  float viewR = 1.0f;
+  int indexL = 0;
+  int indexR = 0;
+  int indexRange = 0;
   bool isMouseLeftDown = false;
   bool isMouseRightDown = false;
   bool isMouseEntered = false;
