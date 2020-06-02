@@ -346,13 +346,13 @@ public:
     } else if (ev.key == 'F') {
       highpass(index);
     } else if (ev.key == 'i') {
-      invert(index, true);
+      invertInRange(index);
     } else if (ev.key == 'I') {
-      invert(index, false);
+      invertFull(index);
     } else if (ev.key == 'n') {
-      normalize(index, true);
+      normalizeInRange(index);
     } else if (ev.key == 'N') {
-      normalize(index, false);
+      normalizeFull(index);
     } else if (ev.key == 'p') { // Permute.
       permute(index);
     } else if (ev.key == 'r') {
@@ -513,74 +513,123 @@ public:
     std::shuffle(value.begin() + start, value.end(), rng);
   }
 
-  void invert(size_t start, bool preserveMin)
-  {
-    if (!preserveMin) {
-      for (size_t i = start; i < value.size(); ++i) {
-        double val
-          = value[i] >= sliderZero ? 1.0 - value[i] + sliderZero : sliderZero - value[i];
-        setValueAt(i, val);
-      }
-    } else {
-      auto [minIter, maxIter] = std::minmax_element(
-        value.begin(), value.end(), [&](const double &lhs, const double &rhs) {
-          return fabs(lhs - sliderZero) < fabs(rhs - sliderZero);
-        });
-      double min = fabs(*minIter);
-      double max = fabs(*maxIter);
-      for (size_t i = start; i < value.size(); ++i)
-        setValueAt(i, copysign(max - fabs(value[i] - sliderZero) + min, value[i]));
-    }
-  }
-
-  void normalize(size_t start, bool preserveMin) noexcept
-  {
+  struct ValuePeak {
     double minNeg = 2;
     double minPos = 2;
     double maxNeg = -1;
     double maxPos = -1;
+  };
+
+  ValuePeak getValuePeak(size_t start, bool skipZero)
+  {
+    ValuePeak pk;
     for (size_t i = start; i < value.size(); ++i) {
-      auto val = fabs(value[i] - sliderZero);
-      if (value[i] < sliderZero) {
-        if (val > maxNeg)
-          maxNeg = val;
-        else if (val < minNeg)
-          minNeg = val;
+      double val = fabs(value[i] - sliderZero);
+      if (value[i] == sliderZero) {
+        if (skipZero) continue;
+        pk.minNeg = 0;
+        pk.minPos = 0;
+      } else if (value[i] < sliderZero) {
+        if (val > pk.maxNeg)
+          pk.maxNeg = val;
+        else if (val < pk.minNeg)
+          pk.minNeg = val;
       } else {
-        if (val > maxPos)
-          maxPos = val;
-        else if (val < minPos)
-          minPos = val;
+        if (val > pk.maxPos)
+          pk.maxPos = val;
+        else if (val < pk.minPos)
+          pk.minPos = val;
       }
     }
-    if (minNeg > 1.0) minNeg = 0.0;
-    if (minPos > 1.0) minPos = 0.0;
-    if (maxNeg < 0.0) maxNeg = 0.0;
-    if (maxPos < 0.0) maxPos = 0.0;
+    if (pk.minNeg > 1.0) pk.minNeg = 0.0;
+    if (pk.minPos > 1.0) pk.minPos = 0.0;
+    if (pk.maxNeg < 0.0) pk.maxNeg = 0.0;
+    if (pk.maxPos < 0.0) pk.maxPos = 0.0;
+    return pk;
+  }
 
-    if (preserveMin) {
-      auto mulNeg = (sliderZero - minNeg) / (maxNeg - minNeg);
-      auto mulPos = (1.0 - sliderZero - minPos) / (maxPos - minPos);
-      if (mulNeg > 1e15 || mulNeg < 0.0) mulNeg = minNeg = 0.0;
-      if (mulPos > 1e15 || mulPos < 0.0) mulPos = minPos = 0.0;
-      for (size_t i = start; i < value.size(); ++i) {
-        auto val = value[i] < sliderZero
-          ? (value[i] - sliderZero + minNeg) * mulNeg + sliderZero - minNeg
-          : (value[i] - sliderZero - minPos) * mulPos + sliderZero + minPos;
-        setValueAt(i, val);
-      }
-    } else {
-      auto mulNeg = sliderZero / (maxNeg - minNeg);
-      auto mulPos = (1.0 - sliderZero) / (maxPos - minPos);
-      if (mulNeg > 1e15 || mulNeg < 0.0) mulNeg = minNeg = 0.0;
-      if (mulPos > 1e15 || mulPos < 0.0) mulPos = minPos = 0.0;
-      for (size_t i = start; i < value.size(); ++i) {
-        auto val = value[i] < sliderZero
-          ? (value[i] - sliderZero + minNeg) * mulNeg + sliderZero
-          : (value[i] - sliderZero - minPos) * mulPos + sliderZero;
-        setValueAt(i, val);
-      }
-      return;
+  void invertFull(size_t start)
+  {
+    for (size_t i = start; i < value.size(); ++i) {
+      double val
+        = value[i] >= sliderZero ? 1.0 - value[i] + sliderZero : sliderZero - value[i];
+      setValueAt(i, val);
+    }
+  }
+
+  void invertInRange(size_t start)
+  {
+    auto pk = getValuePeak(start, false);
+    for (size_t i = start; i < value.size(); ++i) {
+      double val = value[i] < sliderZero
+        ? std::clamp<double>(
+          2.0 * sliderZero - pk.maxNeg - value[i] - pk.minNeg, sliderZero - pk.maxNeg,
+          sliderZero)
+        : std::clamp<double>(
+          2.0 * sliderZero + pk.maxPos - value[i] + pk.minPos, sliderZero,
+          pk.maxPos + sliderZero);
+      setValueAt(i, val);
+    }
+  }
+
+  void normalizeFull(size_t start)
+  {
+    auto pk = getValuePeak(start, true);
+
+    double diffNeg = pk.maxNeg - pk.minNeg;
+    double diffPos = pk.maxPos - pk.minPos;
+
+    double mulNeg = sliderZero / diffNeg;
+    double mulPos = (1.0 - sliderZero) / diffPos;
+
+    double fixNeg = sliderZero;
+    double fixPos = sliderZero;
+
+    if (diffNeg == 0.0) {
+      mulNeg = 0.0;
+      if (pk.maxNeg != 0.0) fixNeg = 0.0;
+    }
+    if (diffPos == 0.0) {
+      mulPos = 0.0;
+      if (pk.maxPos != 0.0) fixPos = 1.0;
+    }
+
+    for (size_t i = start; i < value.size(); ++i) {
+      if (value[i] == sliderZero) continue;
+      double val = value[i] < sliderZero
+        ? std::min<double>(
+          (value[i] - sliderZero + pk.minNeg) * mulNeg + fixNeg, sliderZero)
+        : std::max<double>(
+          (value[i] - sliderZero - pk.minPos) * mulPos + fixPos, sliderZero);
+      setValueAt(i, val);
+    }
+  }
+
+  void normalizeInRange(size_t start) noexcept
+  {
+    auto pk = getValuePeak(start, true);
+
+    double diffNeg = pk.maxNeg - pk.minNeg;
+    double diffPos = pk.maxPos - pk.minPos;
+
+    double mulNeg = (sliderZero - pk.minNeg) / diffNeg;
+    double mulPos = (1.0 - sliderZero - pk.minPos) / diffPos;
+
+    if (diffNeg == 0.0) {
+      mulNeg = 0.0;
+      pk.minNeg = pk.maxNeg == 0.0 ? 0.0 : 1.0;
+    }
+    if (diffPos == 0.0) {
+      mulPos = 0.0;
+      pk.minPos = pk.maxPos == 0.0 ? 0.0 : 1.0;
+    }
+
+    for (size_t i = start; i < value.size(); ++i) {
+      if (value[i] == sliderZero) continue;
+      auto val = value[i] < sliderZero
+        ? (value[i] - sliderZero + pk.minNeg) * mulNeg + sliderZero - pk.minNeg
+        : (value[i] - sliderZero - pk.minPos) * mulPos + sliderZero + pk.minPos;
+      setValueAt(i, val);
     }
   }
 
