@@ -109,16 +109,40 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 | <kbd>1</kbd>                            | Decrease                                |
 | <kbd>2</kbd>-<kbd>9</kbd>               | Decrease 2n-9n                          |
 
+Some dense BarBoxes has scroll bar to zoom in. Scroll bar has handles on left and right end. To control zoom, use <kbd>Left Drag</kbd> on one of the handle, or roll <kbd>Mouse Wheel</kbd> on scroll bar region. <kbd>Right Click</kbd> can be used to reset the zoom. When plugin window is closed, zoom will be reset. Following image shows a scroll bar under a BarBox.
+
+<figure>
+<img src="docs/img/barbox_dense.png" alt="Image of scroll bar under BarBox." style="padding-bottom: 12px;"/>
+</figure>
+
+## L4Reverb
+<figure>
+<img src="docs/img/lv2_l4reverb.png" alt="Image of L4Reverb GUI."/>
+</figure>
+
+L4Reverb is an extended version of LatticeReverb. This time, lattice structure has 4 * 4 * 4 * 4 = 256 sections per channel. All internal parameters are exposed.
+
+Note that L4Reverb is heavy weight. DSP load is around 4 times higher than [Dragonfly Room Reverb](https://michaelwillis.github.io/dragonfly-reverb/) on my environment.
+
+**Caution**:
+
+- Output may change with different sample rate or buffer size.
+- Output may become loud when offset of `*Feed` is not 0, and modulation is enabled.
+- Output may become loud when following steps are performed.
+  1. Set some of the OuterFeed or InnerFeed to close to minimum or maximum.
+  2. Input signals.
+  3. Change the value of OuterFeed or InnerFeed which was set at step 1.
+
 ## LatticeReverb
 <figure>
 <img src="docs/img/lv2_latticereverb.png" alt="Image of LatticeReverb GUI."/>
 </figure>
 
-LatticeReverb is a reverb using lattice structure. Equipped with 16 delays per channel.
+LatticeReverb is a stereo reverb using lattice structure. Equipped with 16 delays per channel. All internal parameters are exposed.
 
 **Caution**:
 
-- Output may change with different sample rate.
+- Output may change with different sample rate or buffer size.
 - Output may become loud when following steps are performed.
   1. Set some of the OuterFeed or InnerFeed to close to minimum or maximum.
   2. Input signals.
