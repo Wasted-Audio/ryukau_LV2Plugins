@@ -236,6 +236,7 @@ public:
     , indexR(value.size())
     , indexRange(value.size() - indexL)
   {
+    for (size_t i = 0; i < 4; ++i) undoValue.emplace_back(defaultValue);
   }
 
   void onNanoDisplay() override
@@ -368,6 +369,16 @@ public:
       randomize(index, 0.02);
     } else if (ev.key == 'T') { // subTle randomize. Converge to sliderZero.
       mixRandomize(index, 0.02);
+    } else if (ev.key == 'z') { // Undo
+      undo();
+      ArrayWidget::updateValue();
+      repaint();
+      return;
+    } else if (ev.key == 'Z') { // Redo
+      redo();
+      ArrayWidget::updateValue();
+      repaint();
+      return;
     } else if (ev.key == ',') { // Rotate back.
       if (index == value.size() - 1) index = 0;
       std::rotate(value.begin() + index, value.begin() + index + 1, value.end());
@@ -399,6 +410,26 @@ public:
     }
     updateValue();
     repaint();
+  }
+
+  void updateValue() override
+  {
+    ArrayWidget::updateValue();
+
+    std::rotate(undoValue.begin(), undoValue.begin() + 1, undoValue.end());
+    undoValue.back() = value;
+  }
+
+  void undo()
+  {
+    std::rotate(undoValue.rbegin(), undoValue.rbegin() + 1, undoValue.rend());
+    value = undoValue.back();
+  }
+
+  void redo()
+  {
+    std::rotate(undoValue.begin(), undoValue.begin() + 1, undoValue.end());
+    value = undoValue.back();
   }
 
   void alternateSign(size_t start)
@@ -736,6 +767,7 @@ private:
   }
 
   std::vector<double> defaultValue;
+  std::vector<std::vector<double>> undoValue;
   float barWidth = 2.0f;
   float borderWidth = 2.0f;
   float highlightBorderWidth = 4.0f;
