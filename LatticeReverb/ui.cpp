@@ -20,13 +20,6 @@
 // You should have received a copy of the GNU General Public License
 // along with LatticeReverb.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <tuple>
-#include <unordered_map>
-#include <vector>
-
 #include "../common/uibase.hpp"
 #include "parameter.hpp"
 
@@ -93,47 +86,47 @@ void CreditSplash::onNanoDisplay()
   fontSize(textSize);
   text(20.0f, 90.0f, "© 2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
 
-  text(20.0f, 140.0f, "- Knob -", nullptr);
-  text(20.0f, 160.0f, "Shift + Left Drag", nullptr);
-  text(180.0f, 160.0f, "Fine Adjustment", nullptr);
-  text(20.0f, 180.0f, "Ctrl + Left Click", nullptr);
-  text(180.0f, 180.0f, "Reset to Default", nullptr);
+  std::string leftText = R"(- BarBox -
+Ctrl + Left Drag|Reset to Default
+Right Drag|Draw Line
+Shift + D|Toggle Min/Mid/Max
+I|Invert Value
+P|Permute
+R|Randomize
+S|Sort Decending Order
+T|Random Walk
+Shift + T|Random Walk to 0
+Z|Undo
+Shift + Z|Redo
+, (Comma)|Rotate Back
+. (Period)|Rotate Forward
+1|Decrease
+2-9|Decrease 2n-9n
 
-  text(20.0f, 220.0f, "- Number -", nullptr);
-  text(20.0f, 240.0f, "Shares same controls with knob, and:", nullptr);
-  text(20.0f, 260.0f, "Right Click", nullptr);
-  text(180.0f, 260.0f, "Flip Min/Max", nullptr);
+And more! Refer to the manual for full list
+of shortcuts.)";
 
-  text(20.0f, 300.0f, "- BarBox -", nullptr);
-  text(20.0f, 320.0f, "Ctrl + Left Click", nullptr);
-  text(180.0f, 320.0f, "Reset to Default", nullptr);
-  text(20.0f, 340.0f, "Right Drag", nullptr);
-  text(180.0f, 340.0f, "Draw Line", nullptr);
-  text(20.0f, 360.0f, "Shift + D", nullptr);
-  text(180.0f, 360.0f, "Toggle Min/Mid/Max", nullptr);
-  text(20.0f, 380.0f, "I", nullptr);
-  text(180.0f, 380.0f, "Invert Value", nullptr);
-  text(20.0f, 400.0f, "R", nullptr);
-  text(180.0f, 400.0f, "Randomize", nullptr);
-  text(20.0f, 420.0f, "T", nullptr);
-  text(180.0f, 420.0f, "Subtle Randomize", nullptr);
-  text(20.0f, 440.0f, ", (Comma)", nullptr);
-  text(180.0f, 440.0f, "Rotate Back", nullptr);
-  text(20.0f, 460.0f, ". (Period)", nullptr);
-  text(180.0f, 460.0f, "Rotate Forward", nullptr);
-  text(20.0f, 480.0f, "1", nullptr);
-  text(180.0f, 480.0f, "Decrease", nullptr);
-  text(20.0f, 500.0f, "2-9", nullptr);
-  text(180.0f, 500.0f, "Decrease 2n-9n", nullptr);
+  std::string rightText = R"(- Knob -
+Shift + Left Drag|Fine Adjustment
+Ctrl + Left Click|Reset to Default
 
+- Number -
+Shares same controls with knob, and:
+Right Click|Flip Min/Mid/Max
+
+Changing InnerFeed or OuterFeed may
+outputs loud signal.
+
+Use Panic! button in case of blow up.
+
+Have a nice day!)";
+
+  const float top0 = 140.0f;
   const float mid = (defaultWidth - 2 * uiMargin) / 2;
-
-  text(mid, 140.0f, "Changing InnerFeed or OuterFeed may outputs", nullptr);
-  text(mid, 160.0f, "loud signal.", nullptr);
-
-  text(mid, 200.0f, "Use Panic! button in case of blow up.", nullptr);
-
-  text(mid, 240.0f, "Have a nice day!", nullptr);
+  const float lineHeight = 20.0f;
+  const float blockWidth = 160.0f;
+  drawTextBlock(20.0f, top0, lineHeight, blockWidth, leftText);
+  drawTextBlock(mid, top0, lineHeight, blockWidth, rightText);
 }
 
 START_NAMESPACE_DISTRHO

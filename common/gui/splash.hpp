@@ -54,6 +54,30 @@ public:
   void setTextSize(float size) { textSize = size < 0.0f ? 0.0f : size; }
 
 protected:
+  void drawTextBlock(
+    float left,
+    float top,
+    float lineHeight,
+    float blockWidth,
+    std::string str,
+    char colDelimiter = '|',
+    char rowDelimiter = '\n')
+  {
+    std::stringstream ssText(str);
+    std::string line;
+    std::string cell;
+    float leftStart = left;
+    while (std::getline(ssText, line, rowDelimiter)) {
+      std::stringstream ssLine(line);
+      left = leftStart;
+      while (std::getline(ssLine, cell, colDelimiter)) {
+        if (cell.size() > 0) text(left, top, cell.c_str(), nullptr);
+        left += blockWidth;
+      }
+      top += lineHeight;
+    }
+  }
+
   bool isMouseEntered = false;
 
   std::string name = nullptr;

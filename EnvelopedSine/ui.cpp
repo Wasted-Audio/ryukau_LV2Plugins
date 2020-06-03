@@ -23,6 +23,26 @@
 #include "../common/uibase.hpp"
 #include "parameter.hpp"
 
+constexpr float uiTextSize = 14.0f;
+constexpr float midTextSize = 16.0f;
+constexpr float pluginNameTextSize = 22.0f;
+constexpr float margin = 5.0f;
+constexpr float labelHeight = 20.0f;
+constexpr float labelY = 30.0f;
+constexpr float knobWidth = 50.0f;
+constexpr float knobHeight = 40.0f;
+constexpr float knobX = 60.0f; // With margin.
+constexpr float knobY = knobHeight + labelY;
+constexpr float barboxWidth = 12.0f * knobX;
+constexpr float barboxHeight = 2.0f * knobY;
+constexpr float barboxY = barboxHeight + 2.0f * margin;
+constexpr float checkboxWidth = 60.0f;
+constexpr float splashHeight = 40.0f;
+constexpr uint32_t defaultWidth
+  = uint32_t(barboxWidth + 2 * knobX + labelY + 4 * margin + 40);
+constexpr uint32_t defaultHeight
+  = uint32_t(40 + 2 * labelY + knobY + 4 * barboxY + 2 * margin);
+
 void CreditSplash::onNanoDisplay()
 {
   if (!isVisible()) return;
@@ -56,89 +76,53 @@ void CreditSplash::onNanoDisplay()
   fontSize(textSize);
   text(20.0f, 90.0f, "© 2019-2020 Takamitsu Endo (ryukau@gmail.com)", nullptr);
 
-  text(20.0f, 150.0f, "- Knob -", nullptr);
-  text(20.0f, 180.0f, "Shift + Left Drag", nullptr);
-  text(180.0f, 180.0f, "Fine Adjustment", nullptr);
-  text(20.0f, 210.0f, "Ctrl + Left Click", nullptr);
-  text(180.0f, 210.0f, "Reset to Default", nullptr);
+  std::string leftText = R"(- Overtone -
+Ctrl + Left Drag|Reset to Default
+Shift + Left Drag|Skip Between Frames
+Right Drag|Draw Line
+D|Reset to Default
+Shift + D|Toggle Min/Mid/Max
+E|Emphasize Low
+Shift + E|Emphasize High
+F|Low-pass Filter
+Shift + F|High-pass Filter
+I|Invert
+Shift + I|Full Invert
+N|Normalize (Preserve Min)
+Shift + N|Normalize
+P|Permute
+R|Randomize
+Shift + R|Sparse Randomize
+S|Sort Decending Order
+Shift + S|Sort Ascending Order
+T|Random Walk
+Shift + T|Random Walk to 0
+Z|Undo
+Shift + Z|Redo
+, (Comma)|Rotate Back
+. (Period)|Rotate Forward
+1|Decrease
+2-9|Decrease 2n-9n)";
 
-  text(20.0f, 270.0f, "- Number -", nullptr);
-  text(20.0f, 300.0f, "Shares same controls with knob, and:", nullptr);
-  text(20.0f, 330.0f, "Right Click", nullptr);
-  text(180.0f, 330.0f, "Flip Min/Max", nullptr);
+  std::string rightText = R"(- Knob -
+Shift + Left Drag|Fine Adjustment
+Ctrl + Left Click|Reset to Default
 
-  text(320.0f, 150.0f, "- Overtone -", nullptr);
+- Number -
+Shares same controls with knob, and:
+Right Click|Toggle Min/Mid/Max
 
-  text(320.0f, 180.0f, "Ctrl + Left Click", nullptr);
-  text(480.0f, 180.0f, "Reset to Default", nullptr);
-  text(320.0f, 210.0f, "Right Drag", nullptr);
-  text(480.0f, 210.0f, "Draw Line", nullptr);
-  text(320.0f, 240.0f, "D", nullptr);
-  text(480.0f, 240.0f, "Reset to Default", nullptr);
-  text(320.0f, 270.0f, "Shift + D", nullptr);
-  text(480.0f, 270.0f, "Toggle Min/Mid/Max", nullptr);
-  text(320.0f, 300.0f, "E", nullptr);
-  text(480.0f, 300.0f, "Emphasize Low", nullptr);
-  text(320.0f, 330.0f, "Shift + E", nullptr);
-  text(480.0f, 330.0f, "Emphasize High", nullptr);
-  text(320.0f, 360.0f, "F", nullptr);
-  text(480.0f, 360.0f, "Low-pass Filter", nullptr);
-  text(320.0f, 390.0f, "Shift + F", nullptr);
-  text(480.0f, 390.0f, "High-pass Filter", nullptr);
-  text(320.0f, 420.0f, "I", nullptr);
-  text(480.0f, 420.0f, "Invert Value", nullptr);
-  text(320.0f, 450.0f, "Shift + I", nullptr);
-  text(480.0f, 450.0f, "Invert Value (Minimum to 0)", nullptr);
-  text(320.0f, 480.0f, "N", nullptr);
-  text(480.0f, 480.0f, "Normalize", nullptr);
-  text(320.0f, 510.0f, "Shift + N", nullptr);
-  text(480.0f, 510.0f, "Normalize (Minimum to 0)", nullptr);
+Have a nice day!)";
 
-  text(630.0f, 180.0f, "P", nullptr);
-  text(750.0f, 180.0f, "Permute", nullptr);
-  text(630.0f, 210.0f, "R", nullptr);
-  text(750.0f, 210.0f, "Randomize", nullptr);
-  text(630.0f, 240.0f, "Shift + R", nullptr);
-  text(750.0f, 240.0f, "Sparse Randomize", nullptr);
-  text(630.0f, 270.0f, "S", nullptr);
-  text(750.0f, 270.0f, "Sort Decending Order", nullptr);
-  text(630.0f, 300.0f, "Shift + S", nullptr);
-  text(750.0f, 300.0f, "Sort Ascending Order", nullptr);
-  text(630.0f, 330.0f, "T", nullptr);
-  text(750.0f, 330.0f, "Subtle Randomize", nullptr);
-  text(630.0f, 360.0f, ", (Comma)", nullptr);
-  text(750.0f, 360.0f, "Rotate Back", nullptr);
-  text(630.0f, 390.0f, ". (Period)", nullptr);
-  text(750.0f, 390.0f, "Rotate Forward", nullptr);
-  text(630.0f, 420.0f, "1", nullptr);
-  text(750.0f, 420.0f, "Decrease", nullptr);
-  text(630.0f, 450.0f, "2-9", nullptr);
-  text(750.0f, 450.0f, "Decrease 2n-9n", nullptr);
-
-  text(740.0f, 510.0f, "Have a nice day!", nullptr);
+  const float top0 = 140.0f;
+  const float mid = (defaultWidth - 2 * 20) / 2;
+  const float lineHeight = 20.0f;
+  const float blockWidth = 160.0f;
+  drawTextBlock(20.0f, top0, lineHeight, blockWidth, leftText);
+  drawTextBlock(mid, top0, lineHeight, blockWidth, rightText);
 }
 
 START_NAMESPACE_DISTRHO
-
-constexpr float uiTextSize = 14.0f;
-constexpr float midTextSize = 16.0f;
-constexpr float pluginNameTextSize = 22.0f;
-constexpr float margin = 5.0f;
-constexpr float labelHeight = 20.0f;
-constexpr float labelY = 30.0f;
-constexpr float knobWidth = 50.0f;
-constexpr float knobHeight = 40.0f;
-constexpr float knobX = 60.0f; // With margin.
-constexpr float knobY = knobHeight + labelY;
-constexpr float barboxWidth = 12.0f * knobX;
-constexpr float barboxHeight = 2.0f * knobY;
-constexpr float barboxY = barboxHeight + 2.0f * margin;
-constexpr float checkboxWidth = 60.0f;
-constexpr float splashHeight = 40.0f;
-constexpr uint32_t defaultWidth
-  = uint32_t(barboxWidth + 2 * knobX + labelY + 4 * margin + 40);
-constexpr uint32_t defaultHeight
-  = uint32_t(40 + 2 * labelY + knobY + 4 * barboxY + 2 * margin);
 
 class EnvelopedSineUI : public PluginUIBase {
 protected:
