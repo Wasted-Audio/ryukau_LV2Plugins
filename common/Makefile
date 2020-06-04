@@ -8,4 +8,4 @@ build: $(OBJ)
 
 $(BUILD_DIR)/%.o : %.cpp
 	@mkdir -p $(dir $@)
-	g++ -std=c++17 -O3 -fPIC -c -o $@ $<
+	g++ -Wall -std=c++17 -O3 -fPIC -c -o $@ $< -lstdc++fs
