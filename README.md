@@ -124,7 +124,7 @@ Some dense BarBoxes has scroll bar to zoom in. Scroll bar has handles on left an
 <img src="docs/img/lv2_l4reverb.png" alt="Image of L4Reverb GUI."/>
 </figure>
 
-L4Reverb is an extended version of LatticeReverb. This time, lattice structure has 4 * 4 * 4 * 4 = 256 sections per channel. All internal parameters are exposed.
+L4Reverb is an extended version of LatticeReverb. This time, lattice structure has 4 * 4 * 4 * 4 = 256 sections per channel.
 
 Note that L4Reverb is heavy weight. DSP load is around 4 times higher than [Dragonfly Room Reverb](https://michaelwillis.github.io/dragonfly-reverb/) on my environment.
 
