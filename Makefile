@@ -1,25 +1,23 @@
 all: build generate_ttl
 
-# build: common \
-# 	lv2cvport \
-# 	CubicPadSynth \
-# 	EnvelopedSine \
-# 	EsPhaser \
-# 	FDNCymbal \
-# 	FoldShaper \
-# 	IterativeSinCluster \
-# 	L4Reverb \
-# 	LatticeReverb \
-# 	LightPadSynth \
-# 	ModuloShaper \
-# 	OddPowShaper \
-# 	SevenDelay \
-# 	SoftClipper \
-# 	SyncSawSynth \
-# 	TrapezoidSynth \
-# 	WaveCymbal \
-
-build: common L4Reverb
+build: common \
+	lv2cvport \
+	CubicPadSynth \
+	EnvelopedSine \
+	EsPhaser \
+	FDNCymbal \
+	FoldShaper \
+	IterativeSinCluster \
+	L4Reverb \
+	LatticeReverb \
+	LightPadSynth \
+	ModuloShaper \
+	OddPowShaper \
+	SevenDelay \
+	SoftClipper \
+	SyncSawSynth \
+	TrapezoidSynth \
+	WaveCymbal \
 
 .PHONY: generate_ttl
 generate_ttl: build
