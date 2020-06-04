@@ -40,13 +40,13 @@ constexpr uint16_t nDepth = 4;
 namespace ParameterID {
 enum ID {
   time0 = 0,
-  innerFeed0 = nDepth1,
-  d1Feed0 = 2 * nDepth1,
-  d2Feed0 = 3 * nDepth1,
-  d3Feed0 = 3 * nDepth1 + nDepth2,
-  d4Feed0 = 3 * nDepth1 + nDepth2 + nDepth3,
+  innerFeed0 = nDepth1,                      // 256
+  d1Feed0 = 2 * nDepth1,                     // 512
+  d2Feed0 = 3 * nDepth1,                     // 768
+  d3Feed0 = 3 * nDepth1 + nDepth2,           // 832
+  d4Feed0 = 3 * nDepth1 + nDepth2 + nDepth3, // 848
 
-  timeMultiply = 3 * nDepth1 + nDepth2 + nDepth3 + nDepth4,
+  timeMultiply = 3 * nDepth1 + nDepth2 + nDepth3 + nDepth4, // 852
   innerFeedMultiply,
   d1FeedMultiply,
   d2FeedMultiply,
@@ -259,52 +259,48 @@ struct GlobalParameter : public ParameterInterface {
     value[index]->setFromNormalized(normalized);
     return value[index]->getFloat();
   }
+
   enum Preset {
     presetDefault,
-    presetBadPhase,
-    presetBarrel,
-    presetBoing,
-    presetColdPlace,
-    presetDamped,
-    presetHappyLittleTrees,
-    presetInterleave,
-    presetLateToParty,
-    presetLongLongReverb,
-    presetMessingUp,
-    presetModulateTimeBaseMultiplier,
-    presetNoisyModulation,
-    presetPerhapsHall,
-    presetPipe,
-    presetR2L,
-    presetRightBehind,
-    presetSadMic,
-    presetSober,
-    presetWindy,
+    presetAbility,
+    presetAdaptability,
+    presetAptness,
+    presetCapability,
+    presetColdHardReverb,
+    presetCompetency,
+    presetCost,
+    presetCreativity,
+    presetEfficiency,
+    presetExpertise,
+    presetLatePeak,
+    presetLiability,
+    presetMerit,
+    presetNarrowTube,
+    presetPotential,
+    presetProductivity,
+    presetProficiency,
+    presetProfitability,
+    presetResonance,
+    presetResponsibility,
+    presetSkill,
+    presetSusceptibility,
+    presetSustainability,
+    presetTalent,
+    presetTinCan,
+    presetViability,
+    presetWobblyShort,
+    presetYamabiko,
 
     Preset_ENUM_LENGTH,
   };
 
-  std::array<const char *, 20> programName{
-    "Default",
-    "BadPhase",
-    "Barrel",
-    "Boing",
-    "ColdPlace",
-    "Damped",
-    "HappyLittleTrees",
-    "Interleave",
-    "LateToParty",
-    "LongLongReverb",
-    "MessingUp",
-    "ModulateTimeBaseMultiplier",
-    "NoisyModulation",
-    "PerhapsHall",
-    "Pipe",
-    "R2L",
-    "RightBehind",
-    "SadMic",
-    "Sober",
-    "Windy",
+  std::array<const char *, 29> programName{
+    "Default",        "Ability",      "Adaptability",   "Aptness",        "Capability",
+    "ColdHardReverb", "Competency",   "Cost",           "Creativity",     "Efficiency",
+    "Expertise",      "LatePeak",     "Liability",      "Merit",          "NarrowTube",
+    "Potential",      "Productivity", "Proficiency",    "Profitability",  "Resonance",
+    "Responsibility", "Skill",        "Susceptibility", "Sustainability", "Talent",
+    "TinCan",         "Viability",    "WobblyShort",    "Yamabiko",
   };
 
 #ifndef TEST_BUILD
