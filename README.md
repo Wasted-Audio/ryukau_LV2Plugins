@@ -131,7 +131,8 @@ Note that L4Reverb is heavy weight. DSP load is around 4 times higher than [Drag
 **Caution**:
 
 - Output may change with different sample rate or buffer size.
-- Output may become loud when offset of `*Feed` is not 0, and modulation is enabled.
+- Output may blow up when both `Cross` and `Spread` are not 0.
+- Output may become loud when offset of `*Feed` is not 0 and modulation is enabled.
 - Output may become loud when following steps are performed.
   1. Set some of the OuterFeed or InnerFeed to close to minimum or maximum.
   2. Input signals.
