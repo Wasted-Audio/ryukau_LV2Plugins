@@ -29,6 +29,7 @@ endif
 
 BUILD_C_FLAGS   += -I.
 BUILD_CXX_FLAGS += -I. -I$(DPF_PATH)/distrho -I$(DPF_PATH)/dgl $(INCLUDE_LIB)
+LINK_FLAGS      += -lstdc++fs
 
 ifeq ($(HAVE_CAIRO),true)
 DGL_FLAGS += -DHAVE_CAIRO
