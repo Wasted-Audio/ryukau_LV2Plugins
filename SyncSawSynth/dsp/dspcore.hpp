@@ -125,7 +125,7 @@ public:
   void free();    // Release memory.
   void reset();   // Stop sounds.
   void startup(); // Reset phase, random seed etc.
-  void setParameters();
+  void setParameters(float tempo);
   void process(const size_t length, float *out0, float *out1);
   void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);
   void noteOff(int32_t noteId);

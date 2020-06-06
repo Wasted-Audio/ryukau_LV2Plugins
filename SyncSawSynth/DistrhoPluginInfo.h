@@ -25,7 +25,8 @@
 
 #define DISTRHO_PLUGIN_BRAND "Uhhyou"
 #define DISTRHO_PLUGIN_NAME "SyncSawSynth"
-#define DISTRHO_PLUGIN_URI "https://github.com/ryukau/LV2Plugins/tree/master/SyncSawSynth"
+#define DISTRHO_PLUGIN_URI                                                               \
+  "https://github.com/ryukau/LV2Plugins/tree/master/SyncSawSynth0.2"
 
 #define DISTRHO_PLUGIN_HAS_UI 1
 #define DISTRHO_PLUGIN_IS_RT_SAFE 1
@@ -39,7 +40,7 @@
 #define DISTRHO_UI_USE_NANOVG 1
 
 #define MAJOR_VERSION 0
-#define MINOR_VERSION 1
-#define PATCH_VERSION 11
+#define MINOR_VERSION 2
+#define PATCH_VERSION 0
 
 #endif // DISTRHO_PLUGIN_INFO_H_INCLUDED

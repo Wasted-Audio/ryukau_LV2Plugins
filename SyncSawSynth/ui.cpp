@@ -74,7 +74,8 @@ constexpr float knobX = 60.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
 constexpr float checkboxWidth = 60.0f;
 constexpr uint32_t defaultWidth = uint32_t(10.0 * knobX + 50.0);
-constexpr uint32_t defaultHeight = uint32_t(20.0 + 3.0 * labelY + 6.0 * knobY);
+constexpr uint32_t defaultHeight
+  = uint32_t(20.0 + 3.0 * labelY + labelHeight + 6.0 * knobY);
 
 class SyncSawSynthUI : public PluginUIBase {
 protected:
@@ -185,7 +186,7 @@ public:
       labelHeight, uiTextSize, "Invert", ParameterID::osc2Invert);
 
     // Cross modulation.
-    const auto crossTop = oscTop2 + knobY;
+    const auto crossTop = oscTop2 + knobY + labelHeight;
     const auto crossLeft = oscLeft1;
     addGroupLabel(
       crossLeft, crossTop, 2.0 * oscWidth + 10.0, labelHeight, midTextSize, "Modulation");
@@ -247,8 +248,25 @@ public:
       modLeft + 5.0 * knobX, modTop2, knobWidth, margin, uiTextSize, "To Sync2",
       ParameterID::modLFOToSync2);
 
+    const auto modTop3 = modTop2 + knobY;
+    addCheckbox(
+      modLeft, modTop3, knobX, labelHeight, uiTextSize, "Sync",
+      ParameterID::lfoTempoSync);
+
+    auto knobLfoTempoNumerator = addTextKnob(
+      modLeft + knobX, modTop3, knobX, labelHeight, uiTextSize,
+      ParameterID::lfoTempoNumerator, Scales::lfoTempoNumerator, false, 0, 1);
+    knobLfoTempoNumerator->sensitivity = 0.001;
+    knobLfoTempoNumerator->lowSensitivity = 0.00025;
+
+    auto knobLfoTempoDenominator = addTextKnob(
+      modLeft + 2.0 * knobX, modTop3, knobX, labelHeight, uiTextSize,
+      ParameterID::lfoTempoDenominator, Scales::lfoTempoDenominator, false, 0, 1);
+    knobLfoTempoDenominator->sensitivity = 0.001;
+    knobLfoTempoNumerator->lowSensitivity = 0.00025;
+
     // Gain.
-    const auto gainTop = modTop2 + knobY + margin;
+    const auto gainTop = modTop2 + knobY + labelHeight + margin;
     const auto gainLeft = modLeft;
     addGroupLabel(gainLeft, gainTop, 6.0 * knobX, labelHeight, midTextSize, "Gain");
 

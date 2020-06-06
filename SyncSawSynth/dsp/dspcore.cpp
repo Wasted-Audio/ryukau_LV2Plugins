@@ -274,7 +274,7 @@ void DSPCore::reset()
 
 void DSPCore::startup() { lfoPhase = 0.0f; }
 
-void DSPCore::setParameters()
+void DSPCore::setParameters(float tempo)
 {
   interpMasterGain.push(param.value[ParameterID::gain]->getFloat());
 
@@ -302,7 +302,15 @@ void DSPCore::setParameters()
   interpModEnvelopeToSync1.push(param.value[ParameterID::modEnvelopeToSync1]->getFloat());
   interpModEnvelopeToFreq2.push(param.value[ParameterID::modEnvelopeToFreq2]->getFloat());
   interpModEnvelopeToSync2.push(param.value[ParameterID::modEnvelopeToSync2]->getFloat());
-  interpModLFOFrequency.push(param.value[ParameterID::modLFOFrequency]->getFloat());
+  if (param.value[ParameterID::lfoTempoSync]->getInt()) {
+    const float beat = float(param.value[ParameterID::lfoTempoNumerator]->getInt() + 1)
+      / float(param.value[ParameterID::lfoTempoDenominator]->getInt() + 1);
+    const float multiplier = Scales::lfoFrequencyMultiplier.map(
+      param.value[ParameterID::modLFOFrequency]->getNormalized());
+    interpModLFOFrequency.push(multiplier * tempo / 480.0f / beat);
+  } else {
+    interpModLFOFrequency.push(param.value[ParameterID::modLFOFrequency]->getFloat());
+  }
   interpModLFONoiseMix.push(param.value[ParameterID::modLFONoiseMix]->getFloat());
   interpModLFOToFreq1.push(param.value[ParameterID::modLFOToFreq1]->getFloat());
   interpModLFOToSync1.push(param.value[ParameterID::modLFOToSync1]->getFloat());

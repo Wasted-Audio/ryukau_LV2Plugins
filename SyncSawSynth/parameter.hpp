@@ -95,6 +95,9 @@ enum ID {
   modLFOToSync1,
   modLFOToFreq2,
   modLFOToSync2,
+  lfoTempoSync,
+  lfoTempoNumerator,
+  lfoTempoDenominator,
 
   pitchBend,
   nVoice,
@@ -138,6 +141,9 @@ struct Scales {
   static SomeDSP::LogScale<double> modLFOFrequency;
   static SomeDSP::LogScale<double> modToFreq;
   static SomeDSP::LogScale<double> modToSync;
+  static SomeDSP::IntScale<double> lfoTempoNumerator;
+  static SomeDSP::IntScale<double> lfoTempoDenominator;
+  static SomeDSP::LogScale<double> lfoFrequencyMultiplier; // internal
 
   static SomeDSP::IntScale<double> nVoice;
 };
@@ -279,6 +285,14 @@ struct GlobalParameter : public ParameterInterface {
       0.0, Scales::modToFreq, "LFO_to_Freq2", kParameterIsAutomable);
     value[ID::modLFOToSync2] = std::make_unique<LogValue>(
       0.0, Scales::modToSync, "LFO_to_Sync2", kParameterIsAutomable);
+    value[ID::lfoTempoSync] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "tempoSync", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::lfoTempoNumerator] = std::make_unique<IntValue>(
+      0, Scales::lfoTempoNumerator, "lfoTempoNumerator",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::lfoTempoDenominator] = std::make_unique<IntValue>(
+      0, Scales::lfoTempoDenominator, "lfoTempoDenominator",
+      kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::pitchBend] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "PitchBend", kParameterIsAutomable);
