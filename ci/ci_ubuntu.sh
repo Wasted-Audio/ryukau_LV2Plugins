@@ -13,4 +13,8 @@ sudo apt-get install git pkg-config libjack-jackd2-dev libgl-dev liblo-dev
 cp patch/NanoVG.cpp lib/DPF/dgl/src/NanoVG.cpp
 
 make
-make install
+
+mkdir test
+make install DESTDIR=test
+make installHome
+make installHomeVST2
