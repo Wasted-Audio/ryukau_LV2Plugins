@@ -51,21 +51,33 @@ cd LV2Plugins
 make -j LV2=false             # Disable LV2 build.
 make -j JACK=false VST2=false # Disable jack and vst2 build.
 ```
-
-To install plugins, following rules can be used.
+## Setting Install Path
+To change install path for LV2 plugins, set `LV2_PATH`. If `LV2_PATH` is not set, it defaults to `~/.lv2`.
 
 ```bash
-make install               # Copy *.lv2    to ~/.lv2
-make installVST2           # Copy *-vst.so to ~/.lxvst
-make installLV2SystemWide  # Copy *.lv2    to /usr/local/lib/lv2
-make installVST2SystemWide # Copy *-vst.so to /usr/local/lib/lxvst/UhhyouPlugins/
+make install                             # Copy *.lv2 to ~/.lv2
+make install LV2_PATH=/usr/local/lib/lv2 # Copy *.lv2 to /usr/local/lib/lv2
+```
+
+`installVST2` rule can be used to install VST2 plugins. To change install path for LV2 plugins, set `VST2_PATH`. If `VST2_PATH` is not set, it defaults to `~/.lxvst`. Note that `UhhyouPlugins` directory will be appended after `VST2_PATH`.
+
+```bash
+make installVST2                                # Copy *-vst.so to ~/.lxvst/UhhyouPlugins
+make installVST2 VST2_PATH=/usr/local/lib/lxvst # Copy *-vst.so to /usr/local/lib/lxvst/UhhyouPlugins
+```
+
+To change install path of config files, set `CONFIG_PATH`. If `CONFIG_PATH` is not set, it defaults to `$XDG_CONFIG_HOME`. If `$XDG_CONFIG_HOME` is empty, it defaults to `$HOME/.config`.
+
+```bash
+make install CONFIG_PATH="$HOME/myconfig"
+make installVST2 CONFIG_PATH="$HOME/anotherconfig"
 ```
 
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 
 ## Color Configuration
-Color configuration is placed at `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.json`. If `$XDG_CONFIG_HOME` is empty, it becomes `$HOME/.config`.
+Color configuration is placed at `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.json`. If `$XDG_CONFIG_HOME` is empty, it defaults to `$HOME/.config`.
 
 - [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 

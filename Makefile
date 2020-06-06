@@ -31,6 +31,9 @@ LV2 ?= true
 VST2 ?= true
 JACK ?= true
 
+LV2_PATH ?= $(HOME)/.lv2
+VST2_PATH ?= $(HOME)/.lxvst
+
 .PHONY: dpf
 dpf:
 	$(MAKE) -C lib/DPF dgl utils/lv2_ttl_generator
@@ -113,25 +116,15 @@ WaveCymbal: common
 
 .PHONY: install
 install:
-	mkdir -p ~/.lv2
-	cp -r bin/*.lv2 ~/.lv2/
-	python3 install.py
-
-.PHONY: installLV2SystemWide
-installLV2SystemWide:
-	mkdir -p /usr/local/lib/lv2
-	cp -r bin/*.lv2 /usr/local/lib/lv2/
+	mkdir -p $(LV2_PATH)
+	cp -r bin/*.lv2 $(LV2_PATH)/
+	python3 install.py $(CONFIG_PATH)
 
 .PHONY: installVST2
 installVST2:
-	mkdir -p ~/.lxvst/UhhyouPlugins
-	cp -r bin/*-vst.so ~/.lxvst/UhhyouPlugins/
-	python3 install.py
-
-.PHONY: installVST2SystemWide
-installVST2SystemWide:
-	mkdir -p /usr/local/lib/lxvst/UhhyouPlugins
-	cp -r bin/*-vst.so /usr/local/lib/lxvst/UhhyouPlugins/
+	mkdir -p $(VST2_PATH)/UhhyouPlugins
+	cp -r bin/*-vst.so $(VST2_PATH)/UhhyouPlugins/
+	python3 install.py $(CONFIG_PATH)
 
 .PHONY: clean
 clean:
