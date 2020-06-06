@@ -27,7 +27,6 @@
 class Label : public NanoWidget {
 public:
   bool drawBorder = false;
-  bool drawUnderline = false;
 
   explicit Label(
     NanoWidget *group, std::string labelText, FontId fontId, Palette &palette)
