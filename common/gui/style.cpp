@@ -44,20 +44,34 @@ inline fs::path getXdgConfigHome()
   return fs::path("");
 }
 
+inline fs::path getConfigPath()
+{
+  auto styleJsonPath = getXdgConfigHome() / fs::path("UhhyouPlugins/style/style.json");
+  if (fs::is_regular_file(styleJsonPath)) return styleJsonPath;
+  std::cerr << styleJsonPath << " is not regular file or doesn't exist.\n";
+
+  styleJsonPath = fs::path("/etc/UhhyouPlugins/style/style.json");
+  if (fs::is_regular_file(styleJsonPath)) return styleJsonPath;
+  std::cerr << styleJsonPath << " is not regular file or doesn't exist.\n";
+
+  return fs::path("UhhyouPlugins/style/style.json");
+}
+
 /**
-Load style config from `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.json`.
+Load style config from `$CONFIG_PATH/UhhyouPlugins/style/style.json`.
+
+$CONFIG_PATH will be set as following order:
+
+1. $XDG_CONFIG_HOME
+2. /etc
+
 Returns empty json on failure.
 */
 inline nlohmann::json loadStyleJson()
 {
   nlohmann::json data;
 
-  auto styleJsonPath = getXdgConfigHome() / fs::path("UhhyouPlugins/style/style.json");
-
-  if (!fs::is_regular_file(styleJsonPath)) {
-    std::cerr << styleJsonPath << " is not regular file or doesn't exist.\n";
-    return data;
-  }
+  auto styleJsonPath = getConfigPath();
 
   std::ifstream ifs(styleJsonPath);
   if (!ifs.is_open()) {
