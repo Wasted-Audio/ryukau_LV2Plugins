@@ -52,8 +52,11 @@ LogScale<double> Scales::modEnvToShifter(0.0, 4000.0, 0.5, 500.0);
 LinearScale<double> Scales::shifterSemi(0.0, 24.0);
 LinearScale<double> Scales::shifterCent(0.0, 100.0);
 
+IntScale<double> Scales::lfoTempoNumerator(255);
+IntScale<double> Scales::lfoTempoDenominator(255);
 IntScale<double> Scales::lfoType(3);
 LogScale<double> Scales::lfoFrequency(0.1, 20.0, 0.5, 4.0);
+LogScale<double> Scales::lfoFrequencyMultiplier(0.0, 16.0, 0.5, 1.0);
 LogScale<double> Scales::lfoSlope(0.0, 32.0, 0.5, 8.0);
 
 LinearScale<double> Scales::octave(-4.0, 4.0);

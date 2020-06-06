@@ -333,9 +333,15 @@ public:
       left1 + 0.8f * knobX, top3, knobWidth, labelHeight, uiTextSize, ID::lfoType,
       lfoTypeItems);
     auto checkBoxTempo = addCheckbox(
-      left1 + 2.2f * knobX, top3, 65.0f, labelHeight, uiTextSize, "Tempo",
+      left1 + floorf(2.5f * knobX), top3, 65.0f, labelHeight, uiTextSize, "Sync",
       ID::lfoTempoSync);
     checkBoxTempo->drawBackground = true;
+    addTextKnob(
+      left1 + floorf(3.5f * knobX), top3, knobX, labelHeight, uiTextSize,
+      ID::lfoTempoNumerator, Scales::lfoTempoNumerator, false, 0, 1);
+    addTextKnob(
+      left1 + floorf(4.5f * knobX), top3, knobX, labelHeight, uiTextSize,
+      ID::lfoTempoDenominator, Scales::lfoTempoDenominator, false, 0, 1);
     addKnob(
       left1 + 0.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Freq",
       ID::lfoFrequency);

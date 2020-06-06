@@ -127,7 +127,11 @@ void TpzMono<Sample>::setParameters(Sample tempo, GlobalParameter &param)
   float lfoFreq = param.value[ParameterID::lfoFrequency]->getFloat();
   // tempo / 60 is Hz for a 1/4 beat.
   if (param.value[ParameterID::lfoTempoSync]->getInt()) {
-    lfoFreq = lfoFreq * tempo / 240.0f;
+    const float beat = float(param.value[ParameterID::lfoTempoNumerator]->getInt() + 1)
+      / float(param.value[ParameterID::lfoTempoDenominator]->getInt() + 1);
+    const float multiplier = Scales::lfoFrequencyMultiplier.map(
+      param.value[ParameterID::lfoFrequency]->getNormalized());
+    lfoFreq = multiplier * tempo / 480.0f / beat;
   }
   interpLFOFrequency.push(lfoFreq);
 
