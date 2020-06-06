@@ -1,7 +1,9 @@
-# LV2Plugins
+# Uhhyou Plugins LV2
 Audio plugins for Linux.
 
 VST3 version is available at https://github.com/ryukau/VSTPlugins .
+
+- [Plugin Manuals](https://ryukau.github.io/VSTPlugins/)
 
 # Package
 For Arch user, package is available on AUR. Thanks to mxmilkb for packaging.
@@ -30,8 +32,10 @@ cd LV2Plugins
 # Temporary patch to DPF. See: https://github.com/DISTRHO/DPF/issues/216
 cp patch/NanoVG.cpp lib/DPF/dgl/src/NanoVG.cpp
 
-make -j8     # If build process goes out of memory, try removing the -j option.
-make install # Copy *.lv2 to ~/.lv2
+make -j8 # If build process goes out of memory, try removing the -j option.
+
+make installHome     # Copy *.lv2 to ~/.lv2
+make installHomeVST2 # Copy *-vst.so to ~/.lxvst
 ```
 
 Binaries are built into `LV2Plugins/bin`.
@@ -51,27 +55,36 @@ cd LV2Plugins
 make -j LV2=false             # Disable LV2 build.
 make -j JACK=false VST2=false # Disable jack and vst2 build.
 ```
-## Setting Install Path
-To change install path for LV2 plugins, set `LV2_PATH`. If `LV2_PATH` is not set, it defaults to `~/.lv2`.
+
+## System Wide Installation
+Run `make install` to install plugins on system wide.
+
+Following variables can be set to specify install path:
+
+| Variable        | Default                         | Usage                                                              |
+| --------------- | ------------------------------- | ------------------------------------------------------------------ |
+| `PREFIX`        | `/usr/local`                    | Prefix of install path.                                            |
+| `LV2_PATH`      | `$(DESTDIR)$(PREFIX)/lib/lv2`   | LV2 plugin directory path.                                         |
+| `VST2_PATH`     | `$(DESTDIR)$(PREFIX)/lib/lxvst` | VST 2 plugin directory path.                                       |
+| `JACK_PATH`     | `$(DESTDIR)$(PREFIX)/bin`       | Jack binary directory path.                                        |
+| `CONFIG_PATH`   | `/etc`                          | Plugin config directory path.                                      |
+| `DOC_PATH`      | `$(DESTDIR)$(PREFIX)/doc`       | Plugin documentation directory path.                               |
+| `RESOURCE_PATH` | `$(DESTDIR)$(PREFIX)/share`     | Plugin resource directory path. Used for `style/theme`.            |
+| `DESTDIR`       |                                 | Optional. Used for staging installations to temporary directories. |
+
+Currently, plugins only supports `/etc` or `$XDG_CONFIG_HOME` as `CONFIG_PATH`. If you have a problem with this behavior, feel free to open issue.
+
+Examples:
 
 ```bash
-make install                             # Copy *.lv2 to ~/.lv2
-make install LV2_PATH=/usr/local/lib/lv2 # Copy *.lv2 to /usr/local/lib/lv2
+make install PREFIX="/usr" # install everything but config to `/usr`
+
+# Test directory structure.
+mkdir test
+make install DESTDIR="test"
 ```
 
-`installVST2` rule can be used to install VST2 plugins. To change install path for LV2 plugins, set `VST2_PATH`. If `VST2_PATH` is not set, it defaults to `~/.lxvst`. Note that `UhhyouPlugins` directory will be appended after `VST2_PATH`.
-
-```bash
-make installVST2                                # Copy *-vst.so to ~/.lxvst/UhhyouPlugins
-make installVST2 VST2_PATH=/usr/local/lib/lxvst # Copy *-vst.so to /usr/local/lib/lxvst/UhhyouPlugins
-```
-
-To change install path of config files, set `CONFIG_PATH`. If `CONFIG_PATH` is not set, it defaults to `$XDG_CONFIG_HOME`. If `$XDG_CONFIG_HOME` is empty, it defaults to `$HOME/.config`.
-
-```bash
-make install CONFIG_PATH="$HOME/myconfig"
-make installVST2 CONFIG_PATH="$HOME/anotherconfig"
-```
+- [Practical Makefiles, by example](http://nuclear.mutantstargoat.com/articles/make/#going-the-extra-mile-for-release)
 
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
@@ -83,7 +96,7 @@ Color configuration is placed at `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.jso
 
 If you are building from source, `make install` also installs color configuration files.
 
-For more details, please refer to [style/README.md](https://github.com/ryukau/LV2Plugins/tree/l4reverb/style). When you made a nice color theme, feel free to send a patch.
+For more details, please refer to [style/ColorConfig.md](https://github.com/ryukau/LV2Plugins/tree/l4reverb/style/ColorConfig.md). When you made a nice color theme, feel free to send a patch.
 
 ## Controls
 Knobs, sliders etc. has common functionalities listed on below.
