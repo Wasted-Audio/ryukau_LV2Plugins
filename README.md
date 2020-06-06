@@ -52,6 +52,15 @@ make -j LV2=false             # Disable LV2 build.
 make -j JACK=false VST2=false # Disable jack and vst2 build.
 ```
 
+To install plugins, following rules can be used.
+
+```bash
+make install               # Copy *.lv2    to ~/.lv2
+make installVST2           # Copy *-vst.so to ~/.lxvst
+make installLV2SystemWide  # Copy *.lv2    to /usr/local/lib/lv2
+make installVST2SystemWide # Copy *-vst.so to /usr/local/lib/lxvst/UhhyouPlugins/
+```
+
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
 

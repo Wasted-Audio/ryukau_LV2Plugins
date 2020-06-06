@@ -112,6 +112,22 @@ install:
 	cp -r bin/*.lv2 ~/.lv2/
 	python3 install.py
 
+.PHONY: installLV2SystemWide
+installLV2SystemWide:
+	mkdir -p /usr/local/lib/lv2
+	cp -r bin/*.lv2 /usr/local/lib/lv2/
+
+.PHONY: installVST2
+installVST2:
+	mkdir -p ~/.lxvst/UhhyouPlugins
+	cp -r bin/*-vst.so ~/.lxvst/UhhyouPlugins/
+	python3 install.py
+
+.PHONY: installVST2SystemWide
+installVST2SystemWide:
+	mkdir -p /usr/local/lib/lxvst/UhhyouPlugins
+	cp -r bin/*-vst.so /usr/local/lib/lxvst/UhhyouPlugins/
+
 .PHONY: clean
 clean:
 	rm -rf bin
