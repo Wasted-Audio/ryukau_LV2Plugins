@@ -16,6 +16,7 @@
 // along with SevenDelay.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "dspcore.hpp"
+#include "../../common/dsp/constants.hpp"
 
 constexpr size_t channel = 2;
 
@@ -35,12 +36,10 @@ void DSPCore::setup(double sampleRate)
 
   for (size_t i = 0; i < dcKiller.size(); ++i) dcKiller[i].setup(sampleRate, 0.1);
 
-  lfoPhaseTick = 2.0 * pi / sampleRate;
+  lfoPhaseTick = twopi / sampleRate;
 
   startup();
 }
-
-void DSPCore::free() {}
 
 void DSPCore::reset()
 {
@@ -99,7 +98,15 @@ void DSPCore::setParameters(double tempo)
       : param.value[ParameterID::feedback]->getFloat());
   interpLfoTimeAmount.push(param.value[ParameterID::lfoTimeAmount]->getFloat());
   interpLfoToneAmount.push(param.value[ParameterID::lfoToneAmount]->getFloat());
-  interpLfoFrequency.push(param.value[ParameterID::lfoFrequency]->getFloat());
+  if (param.value[ParameterID::lfoTempoSync]->getInt()) {
+    const float beat = float(param.value[ParameterID::lfoTempoNumerator]->getInt() + 1)
+      / float(param.value[ParameterID::lfoTempoDenominator]->getInt() + 1);
+    const float multiplier = Scales::lfoFrequencyMultiplier.map(
+      param.value[ParameterID::lfoFrequency]->getNormalized());
+    interpLfoFrequency.push(multiplier * tempo / 480.0f / beat);
+  } else {
+    interpLfoFrequency.push(param.value[ParameterID::lfoFrequency]->getFloat());
+  }
   interpLfoShape.push(param.value[ParameterID::lfoShape]->getFloat());
 
   float inPan = 2 * param.value[ParameterID::inPan]->getFloat();
@@ -177,7 +184,7 @@ void DSPCore::process(
 
     if (!(param.value[ParameterID::lfoHold]->getInt())) {
       lfoPhase += interpLfoFrequency.process() * lfoPhaseTick;
-      if (lfoPhase > 2.0 * pi) lfoPhase -= pi;
+      if (lfoPhase > twopi) lfoPhase -= pi;
     }
   }
 }

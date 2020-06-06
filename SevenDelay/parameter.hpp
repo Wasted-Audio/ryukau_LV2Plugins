@@ -47,6 +47,9 @@ enum ID {
   negativeFeedback,
   lfoTimeAmount,
   lfoToneAmount,
+  lfoTempoSync,
+  lfoTempoNumerator,
+  lfoTempoDenominator,
   lfoFrequency,
   lfoShape,
   lfoInitialPhase,
@@ -59,6 +62,7 @@ enum ID {
   toneCutoff,
   toneQ,
   dckill,
+
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
@@ -70,6 +74,9 @@ struct Scales {
   static SomeDSP::SPolyScale<double> offset;
   static SomeDSP::LogScale<double> lfoTimeAmount;
   static SomeDSP::LogScale<double> lfoToneAmount;
+  static SomeDSP::IntScale<double> lfoTempoNumerator;
+  static SomeDSP::IntScale<double> lfoTempoDenominator;
+  static SomeDSP::LogScale<double> lfoFrequencyMultiplier; // internal
   static SomeDSP::LogScale<double> lfoFrequency;
   static SomeDSP::LogScale<double> lfoShape;
   static SomeDSP::LinearScale<double> lfoInitialPhase;
@@ -115,6 +122,14 @@ struct GlobalParameter : public ParameterInterface {
       0.0, Scales::lfoTimeAmount, "lfoTimeAmount", kParameterIsAutomable);
     value[ID::lfoToneAmount] = std::make_unique<LogValue>(
       0.0, Scales::lfoToneAmount, "lfoToneAmount", kParameterIsAutomable);
+    value[ID::lfoTempoSync] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "tempoSync", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::lfoTempoNumerator] = std::make_unique<IntValue>(
+      0, Scales::lfoTempoNumerator, "lfoTempoNumerator",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::lfoTempoDenominator] = std::make_unique<IntValue>(
+      0, Scales::lfoTempoDenominator, "lfoTempoDenominator",
+      kParameterIsAutomable | kParameterIsInteger);
     value[ID::lfoFrequency] = std::make_unique<LogValue>(
       0.5, Scales::lfoFrequency, "lfoFrequency", kParameterIsAutomable);
     value[ID::lfoShape] = std::make_unique<LogValue>(
