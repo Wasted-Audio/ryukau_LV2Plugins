@@ -58,7 +58,7 @@ public:
     // Set delay time.
     Sample timeInSample = std::clamp<Sample>(Sample(2) * sampleRate * seconds, 0, size);
 
-    int timeInt = int(timeInSample);
+    auto timeInt = int(timeInSample);
     rFraction = timeInSample - Sample(timeInt);
 
     rptr = wptr - timeInt;
@@ -76,11 +76,11 @@ public:
     w1 = input;
 
     // Read from buffer.
-    const size_t i1 = rptr;
+    const unsigned int i1 = rptr;
     ++rptr;
     if (rptr >= size) rptr -= size;
 
-    const size_t i0 = rptr;
+    const unsigned int i0 = rptr;
     ++rptr;
     if (rptr >= size) rptr -= size;
 
