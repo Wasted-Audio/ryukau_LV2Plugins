@@ -31,8 +31,23 @@ LV2 ?= true
 VST2 ?= true
 JACK ?= true
 
-LV2_PATH ?= $(HOME)/.lv2
-VST2_PATH ?= $(HOME)/.lxvst
+ifeq ($(LV2),true)
+INSTALL_TARGET += installLV2
+endif
+ifeq ($(VST2),true)
+INSTALL_TARGET += installVST2
+endif
+ifeq ($(JACK),true)
+INSTALL_TARGET += installJACK
+endif
+
+PREFIX ?= /usr/local
+JACK_PATH ?= $(DESTDIR)$(PREFIX)/bin
+LV2_PATH ?= $(DESTDIR)$(PREFIX)/lib/lv2
+VST2_PATH ?= $(DESTDIR)$(PREFIX)/lib/lxvst
+CONFIG_PATH ?= $(DESTDIR)/etc
+DOC_PATH ?= $(DESTDIR)$(PREFIX)/doc
+RESOURCE_PATH ?= $(DESTDIR)$(PREFIX)/share
 
 .PHONY: dpf
 dpf:
@@ -115,16 +130,51 @@ WaveCymbal: common
 	$(MAKE) -C WaveCymbal LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: install
-install:
+install: $(INSTALL_TARGET) installConfig installResource installDoc
+
+.PHONY: installConfig
+installConfig:
+	mkdir -p $(CONFIG_PATH)/UhhyouPlugins/style
+	cp -r style/style.json $(CONFIG_PATH)/UhhyouPlugins/style
+
+.PHONY: installResource
+installResource:
+	mkdir -p $(RESOURCE_PATH)/UhhyouPlugins/themes
+	cp -r style/themes $(RESOURCE_PATH)/UhhyouPlugins
+
+.PHONY: installDoc
+installDoc:
+	mkdir -p $(DOC_PATH)/UhhyouPlugins
+	cp -r License $(DOC_PATH)/UhhyouPlugins
+	cp README.md $(DOC_PATH)/UhhyouPlugins
+	cp style/ColorConfig.md $(DOC_PATH)/UhhyouPlugins
+
+.PHONY: installLV2
+installLV2:
 	mkdir -p $(LV2_PATH)
-	cp -r bin/*.lv2 $(LV2_PATH)/
-	python3 install.py $(CONFIG_PATH)
+	cp -r bin/*.lv2 $(LV2_PATH)
 
 .PHONY: installVST2
 installVST2:
 	mkdir -p $(VST2_PATH)/UhhyouPlugins
-	cp -r bin/*-vst.so $(VST2_PATH)/UhhyouPlugins/
-	python3 install.py $(CONFIG_PATH)
+	cp -r bin/*-vst.so $(VST2_PATH)/UhhyouPlugins
+
+.PHONY: installJACK
+installJACK:
+	mkdir -p $(JACK_PATH)
+	cp -r `find bin -maxdepth 1 -type f ! -name "*.*"` $(JACK_PATH)
+
+.PHONY: installHome
+installHome:
+	mkdir -p ~/.lv2
+	cp -r bin/*.lv2 ~/.lv2
+	python3 install.py
+
+.PHONY: installHomeVST2
+installHomeVST2:
+	mkdir -p ~/.lxvst
+	cp -r bin/*-vst.so ~/.lxvst
+	python3 install.py
 
 .PHONY: clean
 clean:
