@@ -93,6 +93,7 @@ enum ID {
   shifter2Gain,
 
   lfoType,
+  lfoRetrigger,
   lfoTempoSync,
   lfoTempoNumerator,
   lfoTempoDenominator,
@@ -300,6 +301,9 @@ struct GlobalParameter : public ParameterInterface {
 
     value[ID::lfoType] = std::make_unique<IntValue>(
       0, Scales::lfoType, "lfoType", kParameterIsAutomable | kParameterIsInteger);
+    value[ID::lfoRetrigger] = std::make_unique<IntValue>(
+      false, Scales::boolScale, "lfoRetrigger",
+      kParameterIsAutomable | kParameterIsBoolean);
     value[ID::lfoTempoSync] = std::make_unique<IntValue>(
       0, Scales::boolScale, "lfoTempoSync", kParameterIsAutomable | kParameterIsBoolean);
     value[ID::lfoTempoNumerator] = std::make_unique<IntValue>(

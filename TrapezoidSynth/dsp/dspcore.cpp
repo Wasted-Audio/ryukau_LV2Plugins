@@ -399,6 +399,11 @@ void DSPCore::noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity
 
   tpz1.noteOn(
     noteStack.size() == 1, noteStack.back().frequency, float(pitch) / 127.0f, param);
+
+  if (param.value[ParameterID::lfoRetrigger]->getInt() && noteStack.size() == 1) {
+    tpz1.lfo.phaseNorm = 0;
+    tpz1.lfo.phaseRad = 0;
+  }
 }
 
 void DSPCore::noteOff(int32_t noteId)
