@@ -1,4 +1,5 @@
 // (c) 2019-2020 Takamitsu Endo
+// (c) 2020 Konstantin Voinov
 //
 // This file is part of Uhhyou Plugins.
 //
@@ -56,11 +57,11 @@ public:
     rect(2, centerY - boxSize / 2, boxSize, boxSize);
     strokeWidth(2.0f);
     if constexpr (style == Style::accent) {
-      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.border());
+      strokeColor(isMouseEntered ? pal.highlightAccent() : pal.borderCheckbox());
     } else if (style == Style::warning) {
-      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.border());
+      strokeColor(isMouseEntered ? pal.highlightWarning() : pal.borderCheckbox());
     } else {
-      strokeColor(isMouseEntered ? pal.highlightMain() : pal.border());
+      strokeColor(isMouseEntered ? pal.highlightMain() : pal.borderCheckbox());
     }
     fillColor(pal.boxBackground());
     fill();

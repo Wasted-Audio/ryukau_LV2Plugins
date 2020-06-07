@@ -1,4 +1,5 @@
 // (c) 2020 Takamitsu Endo
+// (c) 2020 Konstantin Voinov
 //
 // This file is part of Uhhyou Plugins.
 //
@@ -42,6 +43,8 @@ public:
   const DGL::Color &highlightWarning() { return _highlightWarning; }
   const DGL::Color &overlay() { return _overlay; }
   const DGL::Color &overlayHighlight() { return _overlayHighlight; }
+  const DGL::Color &borderCheckbox() { return _borderCheckbox; }
+  const DGL::Color &foregroundInactive() { return _foregroundInactive; }
 
 private:
   DGL::Color _foreground{0x00, 0x00, 0x00};
@@ -56,4 +59,6 @@ private:
   DGL::Color _highlightWarning{0xfc, 0x80, 0x80};
   DGL::Color _overlay{0x00, 0x00, 0x00, 0x88};
   DGL::Color _overlayHighlight{0x00, 0xff, 0x00, 0x33};
+  DGL::Color _borderCheckbox{0x00, 0x00, 0x00};
+  DGL::Color _foregroundInactive{0x00, 0x00, 0x00};
 };

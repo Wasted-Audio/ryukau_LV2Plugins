@@ -10,5 +10,7 @@
   "highlightButton": "#ff8800",
   "highlightWarning": "#ffee00",
   "overlay": "#00ffff88",
-  "overlayHighlight": "#00ff4433"
+  "overlayHighlight": "#00ff4433",
+  "borderCheckbox": "#008888",
+  "foregroundInactive": "#8a8a8a"
 }

@@ -1,0 +1,16 @@
+{
+  "foreground": "#d3dae3",
+  "foregroundButtonOn": "#d3dae3",
+  "background": "#2f343f",
+  "boxBackground": "#444a58",
+  "border": "#2d323c",
+  "unfocused": "#5c69b4",
+  "highlightMain": "#5294e2",
+  "highlightAccent": "#2c8a58",
+  "highlightButton": "#505666",
+  "highlightWarning": "#aaaaff",
+  "overlay": "#d3dae3bb",
+  "overlayHighlight": "#5294e232",
+  "borderCheckbox": "#2d323c",
+  "foregroundInactive": "#979da7"
+}

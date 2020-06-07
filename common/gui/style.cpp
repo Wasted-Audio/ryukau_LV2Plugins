@@ -1,4 +1,5 @@
 // (c) 2020 Takamitsu Endo
+// (c) 2020 Konstantin Voinov
 //
 // This file is part of Uhhyou Plugins.
 //
@@ -134,4 +135,6 @@ void Palette::load()
   loadColor(data, "highlightWarning", _highlightWarning);
   loadColor(data, "overlay", _overlay);
   loadColor(data, "overlayHighlight", _overlayHighlight);
+  loadColor(data, "borderCheckbox", _borderCheckbox);
+  loadColor(data, "foregroundInactive", _foregroundInactive);
 }
