@@ -42,12 +42,12 @@ INSTALL_TARGET += installJACK
 endif
 
 pkgname ?= UhhyouPlugins
-prefix ?= /usr/local
-lv2dir ?= $(DESTDIR)$(prefix)/lib/lv2
-vst2dir ?= $(DESTDIR)$(prefix)/lib/lxvst
-bindir ?= $(DESTDIR)$(prefix)/bin
-sysconfdir ?= $(DESTDIR)$(prefix)/etc
-datarootdir ?= $(DESTDIR)$(prefix)/share
+PREFIX ?= /usr/local
+lv2dir ?= $(DESTDIR)$(PREFIX)/lib/lv2
+vst2dir ?= $(DESTDIR)$(PREFIX)/lib/lxvst
+bindir ?= $(DESTDIR)$(PREFIX)/bin
+sysconfdir ?= $(DESTDIR)$(PREFIX)/etc
+datarootdir ?= $(DESTDIR)$(PREFIX)/share
 datadir ?= $(datarootdir)
 docdir ?= $(datarootdir)/doc
 

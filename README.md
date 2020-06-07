@@ -63,12 +63,12 @@ Following variables can be set to specify install path:
 
 | Variable      | Default                         | Usage                                                              |
 | ------------- | ------------------------------- | ------------------------------------------------------------------ |
-| `prefix`      | `/usr/local`                    | Prefix of install path.                                            |
-| `lv2dir`      | `$(DESTDIR)$(prefix)/lib/lv2`   | LV2 plugin directory path.                                         |
-| `vst2dir`     | `$(DESTDIR)$(prefix)/lib/lxvst` | VST 2 plugin directory path.                                       |
-| `bindir`      | `$(DESTDIR)$(prefix)/bin`       | Binary directory path. Used to install JACK binaries.              |
-| `sysconfdir`  | `$(DESTDIR)$(prefix)/etc`       | Plugin config directory path.                                      |
-| `datarootdir` | `$(DESTDIR)$(prefix)/share`     | Root directory for data and documentation.                         |
+| `PREFIX`      | `/usr/local`                    | Prefix of install path.                                            |
+| `lv2dir`      | `$(DESTDIR)$(PREFIX)/lib/lv2`   | LV2 plugin directory path.                                         |
+| `vst2dir`     | `$(DESTDIR)$(PREFIX)/lib/lxvst` | VST 2 plugin directory path.                                       |
+| `bindir`      | `$(DESTDIR)$(PREFIX)/bin`       | Binary directory path. Used to install JACK binaries.              |
+| `sysconfdir`  | `$(DESTDIR)$(PREFIX)/etc`       | Plugin config directory path.                                      |
+| `datarootdir` | `$(DESTDIR)$(PREFIX)/share`     | Root directory for data and documentation.                         |
 | `datadir`     | `$(datarootdir)`                | Plugin resource directory path. Used for `style/theme`.            |
 | `docdir`      | `$(datarootdir)/doc`            | Plugin documentation directory path.                               |
 | `DESTDIR`     |                                 | Optional. Used for staging installations to temporary directories. |
