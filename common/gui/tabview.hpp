@@ -128,12 +128,12 @@ public:
       rect(tab.left, tab.top, tab.width, tab.height);
       fillColor(tab.isMouseEntered ? pal.overlayHighlight() : pal.boxBackground());
       fill();
-      strokeColor(pal.foreground());
+      strokeColor(pal.border());
       stroke();
 
       float labelX = tab.left + tab.width / 2.0f;
       float labelY = tab.top + tab.height / 2.0f;
-      fillColor(pal.foreground());
+      fillColor(pal.foregroundInactive());
       text(labelX, labelY, tab.name.c_str(), nullptr);
     }
 
@@ -155,7 +155,7 @@ public:
     lineTo(width, height);
     lineTo(0, height);
     closePath();
-    strokeColor(pal.foreground());
+    strokeColor(pal.border());
     strokeWidth(2.0f);
     stroke();
 
