@@ -2,7 +2,13 @@
 If you made a nice color theme, feel free to send a patch to: https://github.com/ryukau/LV2Plugins .
 
 ## File Location
-Color configuration is placed at `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.json`. If `$XDG_CONFIG_HOME` is empty, it becomes `$HOME/.config`.
+Color configuration is placed at least one of the following path. The number shows precedence:
+
+1. `$XDG_CONFIG_HOME/UhhyouPlugins/style/style.json`
+2. `/usr/local/etc/UhhyouPlugins/style/style.json`
+3. `/usr/UhhyouPlugins/style/style.json`
+
+If `$XDG_CONFIG_HOME` is empty, it becomes `$HOME/.config`.
 
 - [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 

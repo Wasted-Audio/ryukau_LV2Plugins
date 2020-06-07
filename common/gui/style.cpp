@@ -44,15 +44,24 @@ inline fs::path getXdgConfigHome()
   return fs::path("");
 }
 
+inline void logNotExist(fs::path path)
+{
+  std::cerr << path << " is not regular file or doesn't exist.\n";
+}
+
 inline fs::path getConfigPath()
 {
   auto styleJsonPath = getXdgConfigHome() / fs::path("UhhyouPlugins/style/style.json");
   if (fs::is_regular_file(styleJsonPath)) return styleJsonPath;
-  std::cerr << styleJsonPath << " is not regular file or doesn't exist.\n";
+  logNotExist(styleJsonPath);
+
+  styleJsonPath = fs::path("/usr/local/etc/UhhyouPlugins/style/style.json");
+  if (fs::is_regular_file(styleJsonPath)) return styleJsonPath;
+  logNotExist(styleJsonPath);
 
   styleJsonPath = fs::path("/etc/UhhyouPlugins/style/style.json");
   if (fs::is_regular_file(styleJsonPath)) return styleJsonPath;
-  std::cerr << styleJsonPath << " is not regular file or doesn't exist.\n";
+  logNotExist(styleJsonPath);
 
   return fs::path("UhhyouPlugins/style/style.json");
 }

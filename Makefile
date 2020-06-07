@@ -41,13 +41,15 @@ ifeq ($(JACK),true)
 INSTALL_TARGET += installJACK
 endif
 
-PREFIX ?= /usr/local
-JACK_PATH ?= $(DESTDIR)$(PREFIX)/bin
-LV2_PATH ?= $(DESTDIR)$(PREFIX)/lib/lv2
-VST2_PATH ?= $(DESTDIR)$(PREFIX)/lib/lxvst
-CONFIG_PATH ?= $(DESTDIR)/etc
-DOC_PATH ?= $(DESTDIR)$(PREFIX)/doc
-RESOURCE_PATH ?= $(DESTDIR)$(PREFIX)/share
+pkgname ?= UhhyouPlugins
+prefix ?= /usr/local
+lv2dir ?= $(DESTDIR)$(prefix)/lib/lv2
+vst2dir ?= $(DESTDIR)$(prefix)/lib/lxvst
+bindir ?= $(DESTDIR)$(prefix)/bin
+sysconfdir ?= $(DESTDIR)$(prefix)/etc
+datarootdir ?= $(DESTDIR)$(prefix)/share
+datadir ?= $(datarootdir)
+docdir ?= $(datarootdir)/doc
 
 .PHONY: dpf
 dpf:
@@ -134,35 +136,35 @@ install: $(INSTALL_TARGET) installConfig installResource installDoc
 
 .PHONY: installConfig
 installConfig:
-	mkdir -p $(CONFIG_PATH)/UhhyouPlugins/style
-	cp -r style/style.json $(CONFIG_PATH)/UhhyouPlugins/style
+	mkdir -p $(sysconfdir)/$(pkgname)/style
+	cp -r style/style.json $(sysconfdir)/$(pkgname)/style
 
 .PHONY: installResource
 installResource:
-	mkdir -p $(RESOURCE_PATH)/UhhyouPlugins/themes
-	cp -r style/themes $(RESOURCE_PATH)/UhhyouPlugins
+	mkdir -p $(datadir)/$(pkgname)/themes
+	cp -r style/themes $(datadir)/$(pkgname)
 
 .PHONY: installDoc
 installDoc:
-	mkdir -p $(DOC_PATH)/UhhyouPlugins
-	cp -r License $(DOC_PATH)/UhhyouPlugins
-	cp README.md $(DOC_PATH)/UhhyouPlugins
-	cp style/ColorConfig.md $(DOC_PATH)/UhhyouPlugins
+	mkdir -p $(docdir)/$(pkgname)
+	cp -r License $(docdir)/$(pkgname)
+	cp README.md $(docdir)/$(pkgname)
+	cp style/ColorConfig.md $(docdir)/$(pkgname)
 
 .PHONY: installLV2
 installLV2:
-	mkdir -p $(LV2_PATH)
-	cp -r bin/*.lv2 $(LV2_PATH)
+	mkdir -p $(lv2dir)
+	cp -r bin/*.lv2 $(lv2dir)
 
 .PHONY: installVST2
 installVST2:
-	mkdir -p $(VST2_PATH)/UhhyouPlugins
-	cp -r bin/*-vst.so $(VST2_PATH)/UhhyouPlugins
+	mkdir -p $(vst2dir)/$(pkgname)
+	cp -r bin/*-vst.so $(vst2dir)/$(pkgname)
 
 .PHONY: installJACK
 installJACK:
-	mkdir -p $(JACK_PATH)
-	cp -r `find bin -maxdepth 1 -type f ! -name "*.*"` $(JACK_PATH)
+	mkdir -p $(bindir)
+	cp -r `find bin -maxdepth 1 -type f ! -name "*.*"` $(bindir)
 
 .PHONY: installHome
 installHome:

@@ -61,18 +61,25 @@ Run `make install` to install plugins on system wide.
 
 Following variables can be set to specify install path:
 
-| Variable        | Default                         | Usage                                                              |
-| --------------- | ------------------------------- | ------------------------------------------------------------------ |
-| `PREFIX`        | `/usr/local`                    | Prefix of install path.                                            |
-| `LV2_PATH`      | `$(DESTDIR)$(PREFIX)/lib/lv2`   | LV2 plugin directory path.                                         |
-| `VST2_PATH`     | `$(DESTDIR)$(PREFIX)/lib/lxvst` | VST 2 plugin directory path.                                       |
-| `JACK_PATH`     | `$(DESTDIR)$(PREFIX)/bin`       | Jack binary directory path.                                        |
-| `CONFIG_PATH`   | `/etc`                          | Plugin config directory path.                                      |
-| `DOC_PATH`      | `$(DESTDIR)$(PREFIX)/doc`       | Plugin documentation directory path.                               |
-| `RESOURCE_PATH` | `$(DESTDIR)$(PREFIX)/share`     | Plugin resource directory path. Used for `style/theme`.            |
-| `DESTDIR`       |                                 | Optional. Used for staging installations to temporary directories. |
+| Variable      | Default                         | Usage                                                              |
+| ------------- | ------------------------------- | ------------------------------------------------------------------ |
+| `prefix`      | `/usr/local`                    | Prefix of install path.                                            |
+| `lv2dir`      | `$(DESTDIR)$(prefix)/lib/lv2`   | LV2 plugin directory path.                                         |
+| `vst2dir`     | `$(DESTDIR)$(prefix)/lib/lxvst` | VST 2 plugin directory path.                                       |
+| `bindir`      | `$(DESTDIR)$(prefix)/bin`       | Binary directory path. Used to install JACK binaries.              |
+| `sysconfdir`  | `$(DESTDIR)$(prefix)/etc`       | Plugin config directory path.                                      |
+| `datarootdir` | `$(DESTDIR)$(prefix)/share`     | Root directory for data and documentation.                         |
+| `datadir`     | `$(datarootdir)`                | Plugin resource directory path. Used for `style/theme`.            |
+| `docdir`      | `$(datarootdir)/doc`            | Plugin documentation directory path.                               |
+| `DESTDIR`     |                                 | Optional. Used for staging installations to temporary directories. |
 
-Currently, plugins only supports `/etc` or `$XDG_CONFIG_HOME` as `CONFIG_PATH`. If you have a problem with this behavior, feel free to open issue.
+Currently, plugins only reads config in following directories. The number shows precedence:
+
+1. `$XDG_CONFIG_HOME`
+2. `/usr/local/etc`
+3. `/etc`
+
+If you are planning to use other directory for `sysconfdir`, feel free to open issue.
 
 Examples:
 
@@ -84,6 +91,7 @@ mkdir test
 make install DESTDIR="test"
 ```
 
+- [Directory Variables (GNU Coding Standards)](https://www.gnu.org/prep/standards/html_node/Directory-Variables.html)
 - [Practical Makefiles, by example](http://nuclear.mutantstargoat.com/articles/make/#going-the-extra-mile-for-release)
 
 # Plugins
