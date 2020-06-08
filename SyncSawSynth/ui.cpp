@@ -151,9 +151,14 @@ public:
 
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
+    if (palette.fontPath().size() > 0)
+      fontId = createFontFromFile("main", palette.fontPath().c_str());
+
+    if (fontId < 0) {
+      fontId = createFontFromMemory(
+        "main", (unsigned char *)(FontData::TinosBoldItalicData),
+        FontData::TinosBoldItalicDataSize, false);
+    }
 
     // Oscillators.
     const auto oscWidth = 2.0 * knobWidth + 4.0 * margin;

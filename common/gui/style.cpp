@@ -118,11 +118,19 @@ inline void loadColor(nlohmann::json &data, std::string key, DGL::Color &color)
     hex.size() != 9 ? 255 : strHexToUint8(hex.substr(7, 2)));
 }
 
+inline void loadString(nlohmann::json &data, std::string key, std::string &dest)
+{
+  if (!data.contains(key)) return;
+  if (!data[key].is_string()) return;
+  dest = data[key];
+}
+
 void Palette::load()
 {
   auto data = loadStyleJson();
   if (data.is_null()) return;
 
+  loadString(data, "fontPath", _fontPath);
   loadColor(data, "foreground", _foreground);
   loadColor(data, "foregroundButtonOn", _foregroundButtonOn);
   loadColor(data, "background", _background);

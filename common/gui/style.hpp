@@ -31,6 +31,7 @@ public:
   Palette() { load(); }
   void load();
 
+  const std::string &fontPath() { return _fontPath; }
   const DGL::Color &foreground() { return _foreground; }
   const DGL::Color &foregroundButtonOn() { return _foregroundButtonOn; }
   const DGL::Color &background() { return _background; }
@@ -47,6 +48,7 @@ public:
   const DGL::Color &foregroundInactive() { return _foregroundInactive; }
 
 private:
+  std::string _fontPath;
   DGL::Color _foreground{0x00, 0x00, 0x00};
   DGL::Color _foregroundButtonOn{0x00, 0x00, 0x00};
   DGL::Color _background{0xff, 0xff, 0xff};

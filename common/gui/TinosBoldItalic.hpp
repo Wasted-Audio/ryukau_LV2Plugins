@@ -25,10 +25,9 @@
 #ifndef BINARY_TINOSBOLDITALIC_HPP
 #define BINARY_TINOSBOLDITALIC_HPP
 
-namespace TinosBoldItalic
-{
-    extern const char* TinosBoldItalicData;
-    const unsigned int TinosBoldItalicDataSize = 436000;
-}
+namespace FontData {
+extern const char *TinosBoldItalicData;
+const unsigned int TinosBoldItalicDataSize = 436000;
+} // namespace FontData
 
 #endif // BINARY_TINOSBOLDITALIC_HPP

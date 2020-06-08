@@ -110,9 +110,14 @@ public:
 
     setGeometryConstraints(defaultWidth, defaultHeight, true, true);
 
-    fontId = createFontFromMemory(
-      "sans", (unsigned char *)(TinosBoldItalic::TinosBoldItalicData),
-      TinosBoldItalic::TinosBoldItalicDataSize, false);
+    if (palette.fontPath().size() > 0)
+      fontId = createFontFromFile("main", palette.fontPath().c_str());
+
+    if (fontId < 0) {
+      fontId = createFontFromMemory(
+        "main", (unsigned char *)(FontData::TinosBoldItalicData),
+        FontData::TinosBoldItalicDataSize, false);
+    }
 
     const auto normalWidth = 80.0f;
     const auto normalHeight = normalWidth + 40.0f;
