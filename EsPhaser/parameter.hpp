@@ -51,6 +51,10 @@ enum ID {
 
   smoothness,
 
+  tempoSync,
+  tempoNumerator,
+  tempoDenominator,
+
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
@@ -65,6 +69,9 @@ struct Scales {
   static SomeDSP::LinearScale<double> phase;
   static SomeDSP::LinearScale<double> cascadeOffset;
   static SomeDSP::IntScale<double> stage;
+  static SomeDSP::IntScale<double> tempoNumerator;
+  static SomeDSP::IntScale<double> tempoDenominator;
+  static SomeDSP::LogScale<double> frequencyMultiplier; // internal
 
   static SomeDSP::LogScale<double> smoothness;
 };
@@ -110,6 +117,15 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::smoothness] = std::make_unique<LogValue>(
       Scales::smoothness.invmap(0.35), Scales::smoothness, "smoothness",
       kParameterIsAutomable);
+
+    value[ID::tempoSync] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "tempoSync", kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::tempoNumerator] = std::make_unique<IntValue>(
+      0, Scales::tempoNumerator, "tempoNumerator",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::tempoDenominator] = std::make_unique<IntValue>(
+      0, Scales::tempoDenominator, "tempoDenominator",
+      kParameterIsAutomable | kParameterIsInteger);
   }
 
 #ifndef TEST_BUILD

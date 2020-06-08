@@ -66,7 +66,7 @@ public:
     std::array<Thiran2Phaser, 2> phaser;                                                 \
                                                                                          \
     LinearSmoother<float> interpMix;                                                     \
-    LinearSmoother<float> interpFrequency;                                               \
+    LinearSmoother<float> interpTick;                                                    \
     LinearSmoother<float> interpFreqSpread;                                              \
     LinearSmoother<float> interpFeedback;                                                \
     LinearSmoother<float> interpRange;                                                   \

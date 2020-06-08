@@ -63,7 +63,7 @@ void CreditSplash::onNanoDisplay()
   text(20.0f, 50.0f, "Shift + Left Drag: Fine Adjustment", nullptr);
   text(20.0f, 70.0f, "Ctrl + Left Click: Reset to Default", nullptr);
 
-  text(450.0f, 70.0f, "Have a nice day!", nullptr);
+  text(20.0f, 100.0f, "Have a nice day!", nullptr);
 }
 
 START_NAMESPACE_DISTRHO
@@ -83,8 +83,8 @@ constexpr float barboxHeight = 2.0f * knobY;
 constexpr float barboxY = barboxHeight + 2.0f * margin;
 constexpr float checkboxWidth = 60.0f;
 constexpr float splashHeight = labelHeight;
-constexpr uint32_t defaultWidth = uint32_t(40 + 9.0f * knobX + labelY);
-constexpr uint32_t defaultHeight = uint32_t(40 + labelHeight + knobY);
+constexpr uint32_t defaultWidth = uint32_t(40 + 9 * knobX + labelHeight);
+constexpr uint32_t defaultHeight = uint32_t(40 + 2 * labelHeight + knobY);
 
 class EsPhaserUI : public PluginUIBase {
 protected:
@@ -149,25 +149,42 @@ public:
       phaserLeft + 8.0f * knobX, phaserTop, knobWidth + labelY, margin, uiTextSize,
       "Phase", ID::phase);
 
-    const auto phaserTop1 = phaserTop + knobY + margin;
-    const auto phaserLeft1 = left0 + 2.25f * knobX - margin;
-    addLabel(phaserLeft1, phaserTop1, knobX * 1.2, labelHeight, uiTextSize, "Stage");
+    const auto phaserTop1 = phaserTop + knobY + margin + labelHeight / 2;
+    addLabel(left0, phaserTop1, floorf(0.8f * knobX), labelHeight, uiTextSize, "Stage");
     addTextKnob(
-      phaserLeft1 + knobX, phaserTop1, knobX, labelHeight, uiTextSize, ID::stage,
+      left0 + floorf(0.8f * knobX), phaserTop1, knobX, labelHeight, uiTextSize, ID::stage,
       Scales::stage, false, 0, 1);
 
-    const auto phaserLeft2 = phaserLeft1 + 2.25f * knobX;
-    addLabel(phaserLeft2, phaserTop1, knobX, labelHeight, uiTextSize, "Smooth");
+    const auto phaserLeft1 = left0 + 2.0f * knobX - margin;
+    addLabel(phaserLeft1, phaserTop1, knobX, labelHeight, uiTextSize, "Smooth");
     addTextKnob(
-      phaserLeft2 + knobX, phaserTop1, knobX, labelHeight, uiTextSize, ID::smoothness,
+      phaserLeft1 + knobX, phaserTop1, knobX, labelHeight, uiTextSize, ID::smoothness,
       Scales::smoothness, false, 3, 0);
 
+    const auto phaserTop2 = phaserTop + knobY + margin - 1;
+    const auto phaserTop3 = phaserTop2 + labelHeight;
+    const auto phaserLeft2 = phaserLeft1 + floorf(2.25f * knobX);
+    const auto phaserLeft3 = phaserLeft2 + floorf(1.5f * knobX);
+    addCheckbox(
+      phaserLeft2, phaserTop1, floorf(1.5f * knobX), labelHeight, uiTextSize,
+      "Tempo Sync", ID::tempoSync);
+    auto knobTempoNumerator = addTextKnob(
+      phaserLeft3, phaserTop2, knobX - 1, labelHeight, uiTextSize, ID::tempoNumerator,
+      Scales::tempoNumerator, false, 0, 1);
+    knobTempoNumerator->sensitivity = 0.001;
+    knobTempoNumerator->lowSensitivity = 0.00025;
+    auto knobTempoDenominator = addTextKnob(
+      phaserLeft3, phaserTop3, knobX - 1, labelHeight, uiTextSize, ID::tempoDenominator,
+      Scales::tempoDenominator, false, 0, 1);
+    knobTempoDenominator->sensitivity = 0.001;
+    knobTempoNumerator->lowSensitivity = 0.00025;
+
     // Plugin name.
-    const auto splashTop = phaserTop1;
-    const auto splashLeft = left0;
+    const auto splashTop = defaultHeight - 10.0f - splashHeight;
+    const auto splashLeft = defaultWidth - 20.0f - 2.0f * knobX;
     addSplashScreen(
       splashLeft, splashTop, 2.0f * knobX, splashHeight, 20.0f, 20.0f,
-      defaultWidth - 40.0f, defaultHeight - 40.0f, pluginNameTextSize, "EsPhaser");
+      defaultWidth - 40.0f, defaultHeight - 30.0f, pluginNameTextSize, "EsPhaser");
   }
 };
 

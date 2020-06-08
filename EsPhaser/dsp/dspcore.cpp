@@ -84,8 +84,21 @@ void DSPCORE_NAME::setParameters(float tempo)
 
   SmootherCommon<float>::setTime(param.value[ID::smoothness]->getFloat());
 
+  float lfoFreq;
+  if (param.value[ParameterID::tempoSync]->getInt()) {
+    // tempo / 60 is Hz for a 1/4 beat.
+    // 128 * 500 / 240
+    const float beat = float(param.value[ParameterID::tempoNumerator]->getInt() + 1)
+      / float(param.value[ParameterID::tempoDenominator]->getInt() + 1);
+    const float multiplier = Scales::frequencyMultiplier.map(
+      param.value[ParameterID::frequency]->getNormalized());
+    lfoFreq = std::min<float>(multiplier * tempo / 240.0f / beat, 256.0f);
+  } else {
+    lfoFreq = param.value[ID::frequency]->getFloat();
+  }
+  interpTick.push(lfoFreq * twopi / sampleRate);
+
   interpMix.push(param.value[ID::mix]->getFloat());
-  interpFrequency.push(param.value[ID::frequency]->getFloat() * twopi / sampleRate);
   interpFreqSpread.push(param.value[ID::freqSpread]->getFloat());
   interpFeedback.push(param.value[ID::feedback]->getFloat());
 
@@ -110,7 +123,7 @@ void DSPCORE_NAME::process(
   phaser[1].interpStage.setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
-    const auto freq = interpFrequency.process();
+    const auto freq = interpTick.process();
     const auto spread = interpFreqSpread.process();
     const auto feedback = interpFeedback.process();
     const auto range = interpRange.process();

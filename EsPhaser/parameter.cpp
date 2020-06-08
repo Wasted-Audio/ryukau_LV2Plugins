@@ -32,6 +32,10 @@ IntScale<double> Scales::stage(4095);
 
 LogScale<double> Scales::smoothness(0.04, 1.0, 0.5, 0.4);
 
+IntScale<double> Scales::tempoNumerator(255);
+IntScale<double> Scales::tempoDenominator(255);
+LogScale<double> Scales::frequencyMultiplier(0.0, 16.0, 0.5, 1.0);
+
 // Generated from preset dump. This works, but hard coding preset data is seriously bad.
 #ifndef TEST_BUILD
 void GlobalParameter::loadProgram(uint32_t index)
