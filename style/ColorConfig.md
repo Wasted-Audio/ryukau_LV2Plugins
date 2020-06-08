@@ -24,16 +24,19 @@ cp themes/Orbit.json style.json
 
 Default `style.json` is same as `LightOnDark.json`.
 
-## Colors
+## Style.json Format
 Below is a example of `style.json`.
 
 ```json
 {
+  "fontPath": "",
   "foreground": "#ffffff",
   "foregroundButtonOn": "#000000",
+  "foregroundInactive": "#8a8a8a",
   "background": "#353d3e",
   "boxBackground": "#000000",
   "border": "#808080",
+  "borderCheckbox": "#808080",
   "unfocused": "#b8a65c",
   "highlightMain": "#368a94",
   "highlightAccent": "#2c8a58",
@@ -44,6 +47,30 @@ Below is a example of `style.json`.
 }
 ```
 
+### Font
+To use custom font, set absolute path to `*.ttf` file as `fontPath`. If `fontPath` is empty string, default font ([Tinos Bold Italic](https://fonts.google.com/specimen/Tinos)) is used.
+
+Example:
+
+```json
+{
+  "fontPath": "/home/user/.fonts/Roboto-Regular.ttf",
+  // ...
+}
+```
+
+**Caution**: NanoVG fails to load some fonts. See the list below. If you tested fonts not on the list, please open a issue and report it.
+
+Fonts confirmed to work:
+
+- [Go fonts](https://blog.golang.org/go-fonts)
+- [Roboto](https://fonts.google.com/specimen/Roboto)
+
+Fonts crashed plugin GUI:
+
+- [Metal Mania](https://fonts.google.com/specimen/Metal+Mania)
+
+### Color
 Hex color codes are used.
 
 - 6 digit color is RGB.
@@ -55,9 +82,11 @@ Do not use characters outside of `0-9a-f` for color value.
 
 - `foreground`: Text color.
 - `foregroundButtonOn`: Text color of active toggle button. Recommend to use the same value of `foreground` or `boxBackground`.
+- `foregroundInactive`: Text color of inactive components. Currently, only used for TabView.
 - `background`: Background color.
 - `boxBackground`: Background color of inside of box shaped components (Barbox, Button, Checkbox, OptionMenu, TextKnob, VSlider).
 - `border`: Border color of box shaped components.
+- `borderCheckbox`: Border color of CheckBox.
 - `unfocused`: Color to fill unfocused components. Currently, only used for knobs.
 - `highlightMain`: Color to indicate focus is on a component. Highlight colors are also used for value of slider components (BarBox and VSlider).
 - `highlightAccent`: Same as `highlightMain`. Used for cosmetics.
