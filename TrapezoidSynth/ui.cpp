@@ -334,21 +334,21 @@ public:
 
     addTpzLabel(left1, top3, 7.0f * knobWidth, labelHeight, midTextSize, "LFO");
     auto checkBoxLfoRetrigger = addCheckbox(
-      left1 + floorf(0.8f * knobX), top3, checkboxWidth, labelHeight, uiTextSize,
+      left1 + floorf(0.8f * knobX), top3, floorf(1.2f * knobX), labelHeight, uiTextSize,
       "Retrig.", ID::lfoRetrigger);
     checkBoxLfoRetrigger->drawBackground = true;
     auto checkBoxTempo = addCheckbox(
-      left1 + 2.0f * knobX, top3, 65.0f, labelHeight, uiTextSize, "Sync",
+      left1 + 2.0f * knobX, top3, knobX, labelHeight, uiTextSize, "Sync",
       ID::lfoTempoSync);
     checkBoxTempo->drawBackground = true;
     auto knobLfoTempoNumerator = addTextKnob(
-      left1 + 3.0f * knobX, top3, knobX, labelHeight, uiTextSize, ID::lfoTempoNumerator,
-      Scales::lfoTempoNumerator, false, 0, 1);
+      left1 + 3.0f * knobX, top3, knobX - 1, labelHeight, uiTextSize,
+      ID::lfoTempoNumerator, Scales::lfoTempoNumerator, false, 0, 1);
     knobLfoTempoNumerator->sensitivity = 0.001;
     knobLfoTempoNumerator->lowSensitivity = 0.00025;
     auto knobLfoTempoDenominator = addTextKnob(
-      left1 + 4.0f * knobX, top3, knobX, labelHeight, uiTextSize, ID::lfoTempoDenominator,
-      Scales::lfoTempoDenominator, false, 0, 1);
+      left1 + 4.0f * knobX, top3, knobX - 1, labelHeight, uiTextSize,
+      ID::lfoTempoDenominator, Scales::lfoTempoDenominator, false, 0, 1);
     knobLfoTempoDenominator->sensitivity = 0.001;
     knobLfoTempoNumerator->lowSensitivity = 0.00025;
     std::vector<std::string> lfoTypeItems{"Sin", "Saw", "Pulse", "Noise"};

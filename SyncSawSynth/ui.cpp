@@ -259,13 +259,13 @@ public:
       ParameterID::lfoTempoSync);
 
     auto knobLfoTempoNumerator = addTextKnob(
-      modLeft + knobX, modTop3, knobX, labelHeight, uiTextSize,
+      modLeft + knobX, modTop3, knobX - 1, labelHeight, uiTextSize,
       ParameterID::lfoTempoNumerator, Scales::lfoTempoNumerator, false, 0, 1);
     knobLfoTempoNumerator->sensitivity = 0.001;
     knobLfoTempoNumerator->lowSensitivity = 0.00025;
 
     auto knobLfoTempoDenominator = addTextKnob(
-      modLeft + 2.0 * knobX, modTop3, knobX, labelHeight, uiTextSize,
+      modLeft + 2.0 * knobX, modTop3, knobX - 1, labelHeight, uiTextSize,
       ParameterID::lfoTempoDenominator, Scales::lfoTempoDenominator, false, 0, 1);
     knobLfoTempoDenominator->sensitivity = 0.001;
     knobLfoTempoNumerator->lowSensitivity = 0.00025;
