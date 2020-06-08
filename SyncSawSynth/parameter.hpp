@@ -235,7 +235,7 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::filterFeedback] = std::make_unique<LogValue>(
       0.0, Scales::filterFeedback, "Feedback", kParameterIsAutomable);
     value[ID::filterSaturation] = std::make_unique<LogValue>(
-      0.3, Scales::filterSaturation, "Saturation", kParameterIsAutomable);
+      0.5, Scales::filterSaturation, "Saturation", kParameterIsAutomable);
     value[ID::filterDirty] = std::make_unique<IntValue>(
       false, Scales::boolScale, "DirtyBuffer",
       kParameterIsAutomable | kParameterIsBoolean);

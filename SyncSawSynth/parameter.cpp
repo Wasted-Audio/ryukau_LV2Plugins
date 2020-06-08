@@ -43,7 +43,7 @@ LogScale<double> Scales::envelopeR(0.001, 16.0, 0.5, 2.0);
 LogScale<double> Scales::filterCutoff(20.0, 20000.0, 0.5, 800.0);
 LogScale<double> Scales::filterResonance(0.001, 1.0, 0.5, 0.3);
 LogScale<double> Scales::filterFeedback(0.0, 1.0, 0.5, 0.3);
-LogScale<double> Scales::filterSaturation(0.01, 8.0, 0.3, 0.5);
+LogScale<double> Scales::filterSaturation(0.01, 8.0, 0.5, 1.0);
 IntScale<double> Scales::filterType(4);
 IntScale<double> Scales::filterShaper(3);
 LinearScale<double> Scales::filterCutoffAmount(-1.0, 1.0);
