@@ -76,6 +76,9 @@ enum ID {
 
   phaserMix,
   phaserFrequency,
+  phaserTempoSync,
+  phaserTempoNumerator,
+  phaserTempoDenominator,
   phaserFeedback,
   phaserRange,
   phaserMin,
@@ -125,6 +128,9 @@ struct Scales {
   static SomeDSP::LinearScale<double> gainPower;
 
   static SomeDSP::LogScale<double> phaserFrequency;
+  static SomeDSP::IntScale<double> phaserTempoNumerator;
+  static SomeDSP::IntScale<double> phaserTempoDenominator;
+  static SomeDSP::LogScale<double> phaserFrequencyMultiplier; // internal
   static SomeDSP::LinearScale<double> phaserFeedback;
   static SomeDSP::LogScale<double> phaserRange;
   static SomeDSP::LinearScale<double> phaserPhase;
@@ -226,6 +232,15 @@ struct GlobalParameter : public ParameterInterface {
       0.0, Scales::defaultScale, "phaserMix", kParameterIsAutomable);
     value[ID::phaserFrequency] = std::make_unique<LogValue>(
       0.5, Scales::phaserFrequency, "phaserFrequency", kParameterIsAutomable);
+    value[ID::phaserTempoSync] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "phaserTempoSync",
+      kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::phaserTempoNumerator] = std::make_unique<IntValue>(
+      0, Scales::phaserTempoNumerator, "phaserTempoNumerator",
+      kParameterIsAutomable | kParameterIsInteger);
+    value[ID::phaserTempoDenominator] = std::make_unique<IntValue>(
+      0, Scales::phaserTempoDenominator, "phaserTempoDenominator",
+      kParameterIsAutomable | kParameterIsInteger);
     value[ID::phaserFeedback] = std::make_unique<LinearValue>(
       0.5, Scales::phaserFeedback, "phaserFeedback", kParameterIsAutomable);
     value[ID::phaserRange] = std::make_unique<LogValue>(

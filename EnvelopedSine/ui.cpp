@@ -322,13 +322,30 @@ public:
       "Phase", ID::phaserPhase);
 
     const auto phaserTop1 = phaserTop0 + knobY;
+    const auto phaserOptionLeft = phaserLeft - margin;
     std::vector<std::string> phaserStageItems{
       "Stage 1",  "Stage 2",  "Stage 3",  "Stage 4",  "Stage 5",  "Stage 6",
       "Stage 7",  "Stage 8",  "Stage 9",  "Stage 10", "Stage 11", "Stage 12",
       "Stage 13", "Stage 14", "Stage 15", "Stage 16"};
     addOptionMenu(
-      phaserLeft - margin, phaserTop1, knobX, labelHeight, uiTextSize, ID::phaserStage,
+      phaserOptionLeft, phaserTop1, knobX, labelHeight, uiTextSize, ID::phaserStage,
       phaserStageItems);
+
+    addCheckbox(
+      phaserOptionLeft + floorf(1.5f * knobX), phaserTop1, floorf(1.5f * knobX),
+      labelHeight, uiTextSize, "Tempo Sync", ID::phaserTempoSync);
+
+    auto knobPhaserTempoNumerator = addTextKnob(
+      phaserOptionLeft + 3.0f * knobX, phaserTop1, knobX - 1, labelHeight, uiTextSize,
+      ID::phaserTempoNumerator, Scales::phaserTempoNumerator, false, 0, 1);
+    knobPhaserTempoNumerator->sensitivity = 0.001;
+    knobPhaserTempoNumerator->lowSensitivity = 0.00025;
+
+    auto knobPhaserTempoDenominator = addTextKnob(
+      phaserOptionLeft + 4.0f * knobX, phaserTop1, knobX - 1, labelHeight, uiTextSize,
+      ID::phaserTempoDenominator, Scales::phaserTempoDenominator, false, 0, 1);
+    knobPhaserTempoDenominator->sensitivity = 0.001;
+    knobPhaserTempoNumerator->lowSensitivity = 0.00025;
 
     // Attack.
     const auto attackTop = top0;

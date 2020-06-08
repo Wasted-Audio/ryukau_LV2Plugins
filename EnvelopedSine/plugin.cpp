@@ -169,7 +169,7 @@ protected:
     for (size_t i = 0; i < midiEventCount; ++i) handleMidi(midiEvents[i]);
     alreadyRecievedNote.resize(0);
 
-    dsp->setParameters();
+    dsp->setParameters(timePos.bbt.beatsPerMinute);
     dsp->process(frames, outputs[0], outputs[1]);
   }
 

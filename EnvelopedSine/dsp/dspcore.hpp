@@ -85,7 +85,7 @@ public:
   virtual void setup(double sampleRate) = 0;
   virtual void reset() = 0;   // Stop sounds.
   virtual void startup() = 0; // Reset phase, random seed etc.
-  virtual void setParameters() = 0;
+  virtual void setParameters(float tempo) = 0;
   virtual void process(const size_t length, float *out0, float *out1) = 0;
   virtual void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity) = 0;
   virtual void noteOff(int32_t noteId) = 0;
@@ -123,7 +123,7 @@ transitionBuffer is used to store a release of a note to reduce pop noise.
     void setup(double sampleRate) override;                                              \
     void reset() override;                                                               \
     void startup() override;                                                             \
-    void setParameters() override;                                                       \
+    void setParameters(float tempo) override;                                            \
     void process(const size_t length, float *out0, float *out1) override;                \
     void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity) override;   \
     void fillTransitionBuffer(size_t noteIndex);                                         \
@@ -175,7 +175,7 @@ transitionBuffer is used to store a release of a note to reduce pop noise.
                                                                                          \
     LinearSmoother<float> interpMasterGain;                                              \
     LinearSmoother<float> interpPhaserMix;                                               \
-    LinearSmoother<float> interpPhaserFrequency;                                         \
+    LinearSmoother<float> interpPhaserTick;                                              \
     LinearSmoother<float> interpPhaserFeedback;                                          \
     LinearSmoother<float> interpPhaserRange;                                             \
     LinearSmoother<float> interpPhaserMin;                                               \

@@ -257,7 +257,7 @@ void DSPCORE_NAME::startup()
   }
 }
 
-void DSPCORE_NAME::setParameters()
+void DSPCORE_NAME::setParameters(float tempo)
 {
   using ID = ParameterID::ID;
 
@@ -267,9 +267,22 @@ void DSPCORE_NAME::setParameters()
     param.value[ID::gain]->getFloat() * param.value[ID::gainBoost]->getFloat());
 
   interpPhaserMix.push(param.value[ID::phaserMix]->getFloat());
-  interpPhaserFrequency.push(
-    param.value[ID::phaserFrequency]->getFloat() * twopi / sampleRate);
   interpPhaserFeedback.push(param.value[ID::phaserFeedback]->getFloat());
+
+  float lfoFreq;
+  if (param.value[ParameterID::phaserTempoSync]->getInt()) {
+    // tempo / 60 is Hz for a 1/4 beat.
+    const float beat = float(param.value[ParameterID::phaserTempoNumerator]->getInt() + 1)
+      / float(param.value[ParameterID::phaserTempoDenominator]->getInt() + 1);
+    const float multiplier = Scales::phaserFrequencyMultiplier.map(
+      param.value[ParameterID::phaserFrequency]->getNormalized());
+
+    // Phaser diverges
+    lfoFreq = std::min<float>(multiplier * tempo / 240.0f / beat, 256.0f);
+  } else {
+    lfoFreq = param.value[ID::phaserFrequency]->getFloat();
+  }
+  interpPhaserTick.push(lfoFreq * twopi / sampleRate);
 
   const float phaserRange = param.value[ID::phaserRange]->getFloat();
   interpPhaserRange.push(phaserRange);
@@ -312,7 +325,7 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
       if (trIndex == trStop) isTransitioning = false;
     }
 
-    const auto phaserFreq = interpPhaserFrequency.process();
+    const auto phaserFreq = interpPhaserTick.process();
     const auto phaserFeedback = interpPhaserFeedback.process();
     const auto phaserRange = interpPhaserRange.process();
     const auto phaserMin = interpPhaserMin.process();
