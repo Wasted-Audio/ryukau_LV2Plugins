@@ -98,6 +98,7 @@ enum ID {
   lfoTempoNumerator,
   lfoTempoDenominator,
   lfoFrequency,
+  lfoPhase,
   lfoShape,
   lfoToPitch,
   lfoToSlope,
@@ -314,6 +315,8 @@ struct GlobalParameter : public ParameterInterface {
       kParameterIsAutomable | kParameterIsInteger);
     value[ID::lfoFrequency] = std::make_unique<LogValue>(
       0.5, Scales::lfoFrequency, "lfoFrequency", kParameterIsAutomable);
+    value[ID::lfoPhase] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "lfoPhase", kParameterIsAutomable);
     value[ID::lfoShape] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "lfoShape", kParameterIsAutomable);
     value[ID::lfoToPitch] = std::make_unique<LinearValue>(
