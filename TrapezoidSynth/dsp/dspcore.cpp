@@ -241,13 +241,9 @@ template<typename Sample> void TpzMono<Sample>::release(bool resetPitch)
   filterEnvelope.release();
 }
 
-template<typename Sample> Sample TpzMono<Sample>::process(const size_t bufferSize)
+template<typename Sample> Sample TpzMono<Sample>::process()
 {
   if (gainEnvelope.isTerminated()) return 0;
-
-  interpOctave.setBufferSize(bufferSize);
-  interpOsc1Pitch.setBufferSize(bufferSize);
-  interpOsc2Pitch.setBufferSize(bufferSize);
 
   const auto modEnv2Sig = modEnvelope2.process();
   lfo.setFreq(
@@ -381,7 +377,7 @@ void DSPCore::process(const size_t length, float *out0, float *out1)
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
 
-    sample = tpz1.process(length);
+    sample = tpz1.process();
     const float masterGain = interpMasterGain.process();
     out0[i] = masterGain * sample;
     out1[i] = masterGain * sample;

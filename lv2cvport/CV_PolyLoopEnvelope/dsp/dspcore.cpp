@@ -79,7 +79,6 @@ void DSPCore::process(const size_t length, const float **inputs, float *out0)
   constexpr float gateThreshold = 1e-5f;
 
   SmootherCommon<float>::setBufferSize(length);
-  interpRate.setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
