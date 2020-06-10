@@ -43,13 +43,13 @@ constexpr uint16_t nDepth1 = nSection1 * nDepth2;
 namespace ParameterID {
 enum ID {
   time0 = 0,
-  innerFeed0 = nDepth1,
-  d1Feed0 = 2 * nDepth1,
-  d2Feed0 = 3 * nDepth1,
-  d3Feed0 = 3 * nDepth1 + nDepth2,
-  d4Feed0 = 3 * nDepth1 + nDepth2 + nDepth3,
+  innerFeed0 = nDepth1,                      // 135
+  d1Feed0 = 2 * nDepth1,                     // 270
+  d2Feed0 = 3 * nDepth1,                     // 405
+  d3Feed0 = 3 * nDepth1 + nDepth2,           // 432
+  d4Feed0 = 3 * nDepth1 + nDepth2 + nDepth3, // 441
 
-  timeMultiply = 3 * nDepth1 + nDepth2 + nDepth3 + nDepth4,
+  timeMultiply = 3 * nDepth1 + nDepth2 + nDepth3 + nDepth4, // 444
   innerFeedMultiply,
   d1FeedMultiply,
   d2FeedMultiply,
@@ -265,11 +265,38 @@ struct GlobalParameter : public ParameterInterface {
 
   enum Preset {
     presetDefault,
+    presetBamberga,
+    presetCamilla,
+    presetCeres,
+    presetCybele,
+    presetDavida,
+    presetDoris,
+    presetEugenia,
+    presetEunomia,
+    presetEuphrosyne,
+    presetEuropa,
+    presetHektor,
+    presetHerculina,
+    presetHygiea,
+    presetIntermnia,
+    presetIris,
+    presetJuno,
+    presetPallas,
+    presetPatientia,
+    presetSylvia,
+    presetThisbe,
+    presetUrsula,
+    presetVesta,
 
     Preset_ENUM_LENGTH,
   };
 
-  std::array<const char *, 29> programName{"Default"};
+  std::array<const char *, 23> programName{
+    "Default",   "Bamberga", "Camilla",   "Ceres",      "Cybele", "Davida",
+    "Doris",     "Eugenia",  "Eunomia",   "Euphrosyne", "Europa", "Hektor",
+    "Herculina", "Hygiea",   "Intermnia", "Iris",       "Juno",   "Pallas",
+    "Patientia", "Sylvia",   "Thisbe",    "Ursula",     "Vesta",
+  };
 
 #ifndef TEST_BUILD
   void initProgramName(uint32_t index, String &programName)
