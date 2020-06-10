@@ -100,6 +100,7 @@ public:
   LinearSmoother<Sample> interpModEnv2ToOsc2Slope;
   LinearSmoother<Sample> interpMod2EnvToShifter1;
   LinearSmoother<Sample> interpLFOFrequency;
+  LinearSmoother<Sample> interpLFOPhase;
   LinearSmoother<Sample> interpLFOShape;
   LinearSmoother<Sample> interpLFOToPitch;
   LinearSmoother<Sample> interpLFOToSlope;
@@ -113,12 +114,12 @@ public:
   void setup(Sample sampleRate);
   void reset();
   void startup();
-  void setParameters(Sample tempo, GlobalParameter &param);
+  void setParameters(Sample tempo, Sample timeSigUpper, GlobalParameter &param);
   void
   noteOn(bool wasResting, Sample frequency, Sample normalizedKey, GlobalParameter &param);
   void noteOff(Sample frequency);
   void release(bool resetPitch);
-  Sample process();
+  Sample process(const uint64_t hostFrame);
 
 private:
   Sample getOctave(GlobalParameter &param);
@@ -137,8 +138,8 @@ public:
   void free();    // Release memory.
   void reset();   // Stop sounds.
   void startup(); // Reset phase, random seed etc.
-  void setParameters(double tempo);
-  void process(const size_t length, float *out0, float *out1);
+  void setParameters(double tempo, float timeSigUpper);
+  void process(const uint64_t hostFrame, const size_t length, float *out0, float *out1);
   void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);
   void noteOff(int32_t noteId);
 

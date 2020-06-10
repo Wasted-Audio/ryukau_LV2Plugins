@@ -153,6 +153,7 @@ struct Scales {
   static SomeDSP::LinearScale<double> shifterSemi;
   static SomeDSP::LinearScale<double> shifterCent;
 
+  static SomeDSP::IntScale<double> lfoTempoSync;
   static SomeDSP::IntScale<double> lfoTempoNumerator;
   static SomeDSP::IntScale<double> lfoTempoDenominator;
   static SomeDSP::IntScale<double> lfoType;
@@ -306,7 +307,8 @@ struct GlobalParameter : public ParameterInterface {
       false, Scales::boolScale, "lfoRetrigger",
       kParameterIsAutomable | kParameterIsBoolean);
     value[ID::lfoTempoSync] = std::make_unique<IntValue>(
-      0, Scales::boolScale, "lfoTempoSync", kParameterIsAutomable | kParameterIsBoolean);
+      0, Scales::lfoTempoSync, "lfoTempoSync",
+      kParameterIsAutomable | kParameterIsInteger);
     value[ID::lfoTempoNumerator] = std::make_unique<IntValue>(
       0, Scales::lfoTempoNumerator, "lfoTempoNumerator",
       kParameterIsAutomable | kParameterIsInteger);
@@ -316,7 +318,7 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::lfoFrequency] = std::make_unique<LogValue>(
       0.5, Scales::lfoFrequency, "lfoFrequency", kParameterIsAutomable);
     value[ID::lfoPhase] = std::make_unique<LinearValue>(
-      0.5, Scales::defaultScale, "lfoPhase", kParameterIsAutomable);
+      0.0, Scales::defaultScale, "lfoPhase", kParameterIsAutomable);
     value[ID::lfoShape] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "lfoShape", kParameterIsAutomable);
     value[ID::lfoToPitch] = std::make_unique<LinearValue>(

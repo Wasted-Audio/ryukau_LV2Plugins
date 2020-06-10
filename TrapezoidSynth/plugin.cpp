@@ -29,7 +29,6 @@ START_NAMESPACE_DISTRHO
 
 class TrapezoidSynth : public Plugin {
 public:
-  // Plugin(nParameters, nPrograms, nStates).
   TrapezoidSynth()
     : Plugin(ParameterID::ID_ENUM_LENGTH, GlobalParameter::Preset::Preset_ENUM_LENGTH, 0)
   {
@@ -41,7 +40,6 @@ public:
   }
 
 protected:
-  /* Information */
   const char *getLabel() const override { return "TrapezoidSynth"; }
   const char *getDescription() const override
   {
@@ -152,8 +150,8 @@ protected:
     for (size_t i = 0; i < midiEventCount; ++i) handleMidi(midiEvents[i]);
     alreadyRecievedNote.resize(0);
 
-    dsp.setParameters(timePos.bbt.beatsPerMinute);
-    dsp.process(frames, outputs[0], outputs[1]);
+    dsp.setParameters(timePos.bbt.beatsPerMinute, timePos.bbt.beatsPerBar);
+    dsp.process(timePos.frame, frames, outputs[0], outputs[1]);
   }
 
 private:

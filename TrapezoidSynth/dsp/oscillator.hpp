@@ -26,22 +26,56 @@
 
 namespace SomeDSP {
 
-enum class LFOType { sin, saw, pulse, noise };
+enum class LFOType : uint8_t { sin, saw, pulse, noise };
+enum class LFOSyncType : uint8_t { free, sync, beat };
+
+template<typename Sample> class CrossFader {
+public:
+  uint32_t counter = 1;
+  uint32_t mixTime = 1;
+
+  void setTime(Sample sampleRate, Sample time)
+  {
+    mixTime = std::max<uint32_t>(uint32_t(sampleRate * time), 1);
+    counter = mixTime;
+  }
+
+  void reset() { counter = mixTime; }
+
+  void trigger() { counter = 0; }
+  bool isProcessing() { return counter < mixTime; }
+
+  Sample process()
+  {
+    if (counter >= mixTime) return Sample(1);
+    Sample out = Sample(counter) / mixTime;
+    ++counter;
+    return out;
+  }
+};
 
 template<typename Sample> class LFO {
 public:
   const static int32_t brownSeed = 871341;
 
   LFOType type = LFOType::sin;
+  LFOSyncType syncType = LFOSyncType::free;
   Sample sampleRate = 44100;
   Sample phaseRad = 0;
   Sample tickRad = 0;
   Sample phaseNorm = 0;
   Sample tickNorm = 0;
   Sample pw = 0; // [0.0, 1.0]
+  uint32_t prevSyncPeriod = 1;
+  uint32_t syncPeriod = 1;
   Brown<Sample> brown{brownSeed};
+  CrossFader<Sample> fader;
 
-  void setup(Sample sampleRate) { this->sampleRate = sampleRate; }
+  void setup(Sample sampleRate)
+  {
+    this->sampleRate = sampleRate;
+    fader.setTime(sampleRate, Sample(0.1));
+  }
 
   void setFreq(Sample hz)
   {
@@ -49,47 +83,100 @@ public:
     tickRad = Sample(twopi) * tickNorm;
   }
 
+  void setTempo(Sample multiplier, Sample tempo, Sample timeSigUpper, Sample syncBeat)
+  {
+    if (fader.isProcessing()) return;
+
+    prevSyncPeriod = syncPeriod;
+    syncPeriod = std::max(
+      uint32_t(sampleRate * syncBeat * timeSigUpper * 60 / tempo / multiplier),
+      uint32_t(1));
+
+    if (prevSyncPeriod != syncPeriod) fader.trigger();
+  }
+
   void reset()
   {
     phaseRad = 0;
     phaseNorm = 0;
     brown.seed = brownSeed;
+    fader.reset();
   }
 
-  inline Sample sin()
+  inline Sample sin(float phase)
   {
-    phaseRad += tickRad;
-    if (phaseRad > Sample(pi)) phaseRad -= Sample(twopi);
+    phase = Sample(twopi) * phase + phaseRad;
+    if (phase > Sample(pi)) phase -= Sample(twopi);
 
-    auto sign = (Sample(pi) < phaseRad) - (phaseRad < Sample(pi));
-    auto sinSig = somefabs<Sample>(juce::dsp::FastMathApproximations::sin(phaseRad));
+    auto sign = (Sample(pi) < phase) - (phase < Sample(pi));
+    auto sinSig = somefabs<Sample>(somesin<Sample>(phase));
     return Sample(0.5) + Sample(0.5) * sign * somepow<Sample>(sinSig, Sample(2) * pw);
   }
 
-  inline Sample saw()
+  inline Sample saw(float phase)
+  {
+    phase += phaseNorm;
+    if (phase >= pw) phase -= Sample(1);
+
+    return phase < 0 ? -phase / (Sample(1) - pw) : phase / pw;
+  }
+
+  inline Sample pulse(float phase)
+  {
+    phase += phaseNorm;
+    if (phase >= pw) phase -= Sample(1);
+
+    return phase < 0 ? Sample(1) : Sample(0);
+  }
+
+  inline void processPhaseRad()
+  {
+    phaseRad += tickRad;
+    if (phaseRad > Sample(pi)) phaseRad -= Sample(twopi);
+  }
+
+  inline void processPhaseNorm()
   {
     phaseNorm += tickNorm;
     if (phaseNorm >= pw) phaseNorm -= Sample(1);
-
-    return phaseNorm < 0 ? -phaseNorm / (Sample(1) - pw) : phaseNorm / pw;
   }
 
-  inline Sample pulse()
+  inline void processPhaseBeat(uint64_t frame)
   {
-    phaseNorm += tickNorm;
-    if (phaseNorm >= pw) phaseNorm -= Sample(1);
+    Sample currPhase = Sample(frame % syncPeriod) / Sample(syncPeriod);
+    Sample prevPhase = Sample(frame % prevSyncPeriod) / Sample(prevSyncPeriod);
 
-    return phaseNorm < 0 ? Sample(1) : Sample(0);
+    phaseNorm = std::clamp<Sample>(
+      prevPhase + fader.process() * (currPhase - prevPhase), Sample(0), Sample(1));
+    phaseRad = Sample(twopi) * Sample(0.5) * phaseNorm - Sample(pi);
   }
 
-  Sample process()
+  /**
+  frame is a number of frames from the start of a song.
+  */
+  Sample process(uint64_t hostFrame, float phase)
   {
+    switch (syncType) {
+      default:
+      case LFOSyncType::free:
+      case LFOSyncType::sync:
+        if (type == LFOType::sin)
+          processPhaseRad();
+        else if (type != LFOType::noise)
+          processPhaseNorm();
+        break;
+
+      case LFOSyncType::beat:
+        processPhaseBeat(hostFrame);
+        break;
+    }
+
     switch (type) {
       case LFOType::saw:
-        return saw();
+        return saw(phase);
 
       case LFOType::pulse:
-        return pulse();
+        return pulse(phase);
 
       case LFOType::noise:
         brown.drift = pw;
@@ -99,7 +186,7 @@ public:
       case LFOType::sin:
         break;
     }
-    return sin();
+    return sin(phase);
   }
 };
 

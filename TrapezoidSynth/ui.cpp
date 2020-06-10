@@ -83,7 +83,7 @@ constexpr float sliderHeight = 2.0f * (knobHeight + labelY) + 67.5f;
 constexpr float sliderX = 80.0f;
 constexpr float sliderY = sliderHeight + labelY;
 constexpr float checkboxWidth = 80.0f;
-constexpr uint32_t defaultWidth = uint32_t(40 + 14 * knobX);
+constexpr uint32_t defaultWidth = uint32_t(40 + 13 * knobX);
 constexpr uint32_t defaultHeight = uint32_t(20 + 5 * (knobY + labelHeight));
 
 class TrapezoidSynthUI : public PluginUIBase {
@@ -269,22 +269,22 @@ public:
       ID::smoothness);
 
     addTpzLabel(
-      left1 + 4.0f * knobX, top0, 3.0f * knobWidth, labelHeight, midTextSize, "Mod 1");
+      left1 + 3.0f * knobX, top0, 3.0f * knobWidth, labelHeight, midTextSize, "Mod 1");
     auto checkBoxMod1Retrigger = addCheckbox(
-      left1 + 4.95f * knobX, top0, checkboxWidth, labelHeight, uiTextSize, "Retrigger",
+      left1 + 3.95f * knobX, top0, checkboxWidth, labelHeight, uiTextSize, "Retrigger",
       ID::modEnv1Retrigger);
     checkBoxMod1Retrigger->drawBackground = true;
     addKnob(
-      left1 + 4.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Attack",
+      left1 + 3.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Attack",
       ID::modEnv1Attack);
     addKnob(
-      left1 + 5.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Curve",
+      left1 + 4.0f * knobX, top0knob, knobWidth, margin, uiTextSize, "Curve",
       ID::modEnv1Curve);
     addKnob(
-      left1 + 6.0f * knobX, top0knob, knobWidth, margin, uiTextSize, ">PM",
+      left1 + 5.0f * knobX, top0knob, knobWidth, margin, uiTextSize, ">PM",
       ID::modEnv1ToPhaseMod);
 
-    addTpzLabel(left1, top1, 7.0f * knobWidth, labelHeight, midTextSize, "Mod 2");
+    addTpzLabel(left1, top1, 6.0f * knobWidth, labelHeight, midTextSize, "Mod 2");
     auto checkBoxMod2Retrigger = addCheckbox(
       left1 + 0.95f * knobX, top1, checkboxWidth, labelHeight, uiTextSize, "Retrigger",
       ID::modEnv2Retrigger);
@@ -320,27 +320,29 @@ public:
       ID::shifter1Gain);
 
     addTpzLabel(
-      left1 + 4.0f * knobX, top2, 3.0f * knobWidth, labelHeight, midTextSize,
+      left1 + 3.0f * knobX, top2, 3.0f * knobWidth, labelHeight, midTextSize,
       "Shifter 2");
     addNumberKnob(
-      left1 + 4.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Semi",
+      left1 + 3.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Semi",
       ID::shifter2Semi, Scales::shifterSemi);
     addNumberKnob(
-      left1 + 5.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Cent",
+      left1 + 4.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Cent",
       ID::shifter2Cent, Scales::shifterCent);
     addKnob(
-      left1 + 6.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Gain",
+      left1 + 5.0f * knobX, top2knob, knobWidth, margin, uiTextSize, "Gain",
       ID::shifter2Gain);
 
-    addTpzLabel(left1, top3, 7.0f * knobWidth, labelHeight, midTextSize, "LFO");
+    auto labelLFO
+      = addTpzLabel(left1, top3, 6.0f * knobWidth, labelHeight, midTextSize, "LFO");
+    labelLFO->drawBorder = false;
     auto checkBoxLfoRetrigger = addCheckbox(
       left1 + floorf(0.8f * knobX), top3, floorf(1.2f * knobX), labelHeight, uiTextSize,
       "Retrig.", ID::lfoRetrigger);
     checkBoxLfoRetrigger->drawBackground = true;
-    auto checkBoxTempo = addCheckbox(
-      left1 + 2.0f * knobX, top3, knobX, labelHeight, uiTextSize, "Sync",
-      ID::lfoTempoSync);
-    checkBoxTempo->drawBackground = true;
+    std::vector<std::string> lfoSyncItems{"Free", "Sync", "Beat"};
+    addOptionMenu(
+      left1 + 2.0f * knobX, top3, knobX - 1, labelHeight, uiTextSize, ID::lfoTempoSync,
+      lfoSyncItems);
     auto knobLfoTempoNumerator = addTextKnob(
       left1 + 3.0f * knobX, top3, knobX - 1, labelHeight, uiTextSize,
       ID::lfoTempoNumerator, Scales::lfoTempoNumerator, false, 0, 1);
@@ -358,26 +360,32 @@ public:
     addKnob(
       left1 + 0.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Freq",
       ID::lfoFrequency);
-    addKnob(
+    addRotaryKnob(
       left1 + 1.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Phase",
       ID::lfoPhase);
     addKnob(
-      left1 + 2.0f * knobX, top3knob, knobWidth, margin, uiTextSize, "Shape",
-      ID::lfoShape);
-    addKnob(
-      left1 + 3.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Pitch1",
+      left1 + 2.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Pitch1",
       ID::lfoToPitch);
     addKnob(
-      left1 + 4.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Slope1",
+      left1 + 3.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Slope1",
       ID::lfoToSlope);
     addKnob(
-      left1 + 5.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">PW1",
+      left1 + 4.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">PW1",
       ID::lfoToPulseWidth);
     addKnob(
-      left1 + 6.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Cut",
+      left1 + 5.0f * knobX, top3knob, knobWidth, margin, uiTextSize, ">Cut",
       ID::lfoToCutoff);
 
-    addTpzLabel(left1, top4, 7.0f * knobWidth, labelHeight, midTextSize, "Slide");
+    addLabel(
+      left1 + 3.0f * knobX, top4, 1.5f * knobWidth, labelHeight, uiTextSize, "LFO Shape",
+      ALIGN_CENTER | ALIGN_MIDDLE);
+    addTextKnob(
+      left1 + floorf(4.5f * knobX), top4, floorf(1.5f * knobWidth), labelHeight,
+      uiTextSize, ID::lfoShape, Scales::defaultScale, false, 4);
+
+    auto labelSlide
+      = addTpzLabel(left1, top4, 7.0f * knobWidth, labelHeight, midTextSize, "Slide");
+    labelSlide->drawBorder = false;
     std::vector<std::string> pitchSlideType{"Always", "Sustain", "Reset to 0"};
     addOptionMenu(
       left1 + 0.75f * knobX, top4, 70.0f, labelHeight, uiTextSize, ID::pitchSlideType,

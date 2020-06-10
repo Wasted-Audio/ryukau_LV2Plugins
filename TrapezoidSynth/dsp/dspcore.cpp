@@ -18,6 +18,8 @@
 #include "dspcore.hpp"
 #include "../../lib/juce_FastMathApproximations.h"
 
+#include <iostream> // debug
+
 inline float clamp(float value, float min, float max)
 {
   return (value < min) ? min : (value > max) ? max : value;
@@ -73,7 +75,8 @@ template<typename Sample> void TpzMono<Sample>::startup()
 }
 
 template<typename Sample>
-void TpzMono<Sample>::setParameters(Sample tempo, GlobalParameter &param)
+void TpzMono<Sample>::setParameters(
+  Sample tempo, Sample timeSigUpper, GlobalParameter &param)
 {
   interpOctave.push(getOctave(param));
   interpOsc1Pitch.setTime(param.value[ParameterID::pitchSlide]->getFloat());
@@ -104,6 +107,7 @@ void TpzMono<Sample>::setParameters(Sample tempo, GlobalParameter &param)
     param.value[ParameterID::modEnv2ToLFOFrequency]->getFloat());
   interpModEnv2ToOsc2Slope.push(param.value[ParameterID::modEnv2ToOsc2Slope]->getFloat());
   interpMod2EnvToShifter1.push(param.value[ParameterID::modEnv2ToShifter1]->getFloat());
+  interpLFOPhase.push(param.value[ParameterID::lfoPhase]->getFloat());
   interpLFOShape.push(param.value[ParameterID::lfoShape]->getFloat());
   interpLFOToPitch.push(param.value[ParameterID::lfoToPitch]->getFloat());
   interpLFOToSlope.push(param.value[ParameterID::lfoToSlope]->getFloat());
@@ -124,16 +128,32 @@ void TpzMono<Sample>::setParameters(Sample tempo, GlobalParameter &param)
     - Sample(1));
   interpShifter2Gain.push(param.value[ParameterID::shifter2Gain]->getFloat());
 
-  float lfoFreq = param.value[ParameterID::lfoFrequency]->getFloat();
-  // tempo / 60 is Hz for a 1/4 beat.
-  if (param.value[ParameterID::lfoTempoSync]->getInt()) {
-    const float beat = float(param.value[ParameterID::lfoTempoNumerator]->getInt() + 1)
-      / float(param.value[ParameterID::lfoTempoDenominator]->getInt() + 1);
-    const float multiplier = Scales::lfoFrequencyMultiplier.map(
-      param.value[ParameterID::lfoFrequency]->getNormalized());
-    lfoFreq = multiplier * tempo / 480.0f / beat;
+  lfo.syncType
+    = static_cast<LFOSyncType>(param.value[ParameterID::lfoTempoSync]->getInt());
+
+  switch (param.value[ParameterID::lfoTempoSync]->getInt()) {
+    default:
+    case 0: // Free
+      interpLFOFrequency.push(param.value[ParameterID::lfoFrequency]->getFloat());
+      break;
+
+    case 2: { // Beat
+      const float multiplier = Scales::lfoFrequencyMultiplier.map(
+        param.value[ParameterID::lfoFrequency]->getNormalized());
+
+      const float beat = float(param.value[ParameterID::lfoTempoNumerator]->getInt() + 1)
+        / float(param.value[ParameterID::lfoTempoDenominator]->getInt() + 1);
+      lfo.setTempo(multiplier, tempo, timeSigUpper, beat);
+    } break;
+
+    case 1: { // Sync
+      const float beat = float(param.value[ParameterID::lfoTempoNumerator]->getInt() + 1)
+        / float(param.value[ParameterID::lfoTempoDenominator]->getInt() + 1);
+      const float multiplier = Scales::lfoFrequencyMultiplier.map(
+        param.value[ParameterID::lfoFrequency]->getNormalized());
+      interpLFOFrequency.push(multiplier * tempo / 480.0f / beat);
+    } break;
   }
-  interpLFOFrequency.push(lfoFreq);
 
   filter.setOrder(param.value[ParameterID::filterOrder]->getInt());
 
@@ -241,7 +261,7 @@ template<typename Sample> void TpzMono<Sample>::release(bool resetPitch)
   filterEnvelope.release();
 }
 
-template<typename Sample> Sample TpzMono<Sample>::process()
+template<typename Sample> Sample TpzMono<Sample>::process(const uint64_t hostFrame)
 {
   if (gainEnvelope.isTerminated()) return 0;
 
@@ -249,7 +269,7 @@ template<typename Sample> Sample TpzMono<Sample>::process()
   lfo.setFreq(
     interpLFOFrequency.process() + modEnv2Sig * interpMod2EnvToLFOFrequency.process());
   lfo.pw = interpLFOShape.process();
-  const auto lfoSig = lfo.process();
+  const auto lfoSig = lfo.process(hostFrame, interpLFOPhase.process());
 
   const auto filterEnv = filterEnvelope.process()
     + interpOscMixToFilterCutoff.process() * (1.0f + feedbackBuffer);
@@ -360,16 +380,17 @@ void DSPCore::reset()
 
 void DSPCore::startup() { tpz1.startup(); }
 
-void DSPCore::setParameters(double tempo)
+void DSPCore::setParameters(double tempo, float timeSigUpper)
 {
   SmootherCommon<float>::setTime(param.value[ParameterID::smoothness]->getFloat());
 
   interpMasterGain.push(velocity * param.value[ParameterID::gain]->getFloat());
 
-  tpz1.setParameters(tempo, param);
+  tpz1.setParameters(tempo, timeSigUpper, param);
 }
 
-void DSPCore::process(const size_t length, float *out0, float *out1)
+void DSPCore::process(
+  const uint64_t hostFrame, const size_t length, float *out0, float *out1)
 {
   SmootherCommon<float>::setBufferSize(length);
 
@@ -377,7 +398,7 @@ void DSPCore::process(const size_t length, float *out0, float *out1)
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
 
-    sample = tpz1.process();
+    sample = tpz1.process(hostFrame + i);
     const float masterGain = interpMasterGain.process();
     out0[i] = masterGain * sample;
     out1[i] = masterGain * sample;
