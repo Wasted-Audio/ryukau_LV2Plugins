@@ -119,9 +119,9 @@ public:
   void setCutoff(Sample sampleRate, Sample cutoffHz)
   {
     setP(PController<double>::cutoffToP(sampleRate, cutoffHz));
-  };
+  }
 
-  void setP(Sample p) { kp = std::clamp<Sample>(p, Sample(0), Sample(1)); };
+  void setP(Sample p) { kp = std::clamp<Sample>(p, Sample(0), Sample(1)); }
   inline Sample getValue() { return value; }
   void reset(Sample value = 0) { this->value = value; }
   void push(Sample newTarget) { target = newTarget; }
