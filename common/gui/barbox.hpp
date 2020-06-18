@@ -214,6 +214,9 @@ protected:
 };
 
 template<typename Scale> class BarBox : public ArrayWidget {
+private:
+  enum class BarState : uint8_t { active, lock };
+
 public:
   float sliderZero = 0.0f;
   int32_t indexOffset = 0;
@@ -237,6 +240,8 @@ public:
     , indexRange(value.size() - indexL)
   {
     for (size_t i = 0; i < 4; ++i) undoValue.emplace_back(defaultValue);
+
+    barState.resize(defaultValue.size(), BarState::active);
   }
 
   void onNanoDisplay() override
@@ -254,10 +259,11 @@ public:
     fill();
 
     // Value bar.
-    fillColor(pal.highlightMain());
 
     float sliderZeroHeight = height * (1.0f - sliderZero);
     for (int i = indexL; i < indexR; ++i) {
+      fillColor(
+        barState[i] == BarState::active ? pal.highlightMain() : pal.foregroundInactive());
       float rectH = value[i] >= sliderZero ? (value[i] - sliderZero) * height
                                            : (sliderZero - value[i]) * height;
       float rectY = value[i] >= sliderZero ? sliderZeroHeight - rectH : sliderZeroHeight;
@@ -668,14 +674,17 @@ public:
       return false;
     }
 
+    anchor = ev.pos;
+
     if (ev.button == 1)
       isMouseLeftDown = true;
     else if (ev.button == 3)
       isMouseRightDown = true;
 
-    anchor = ev.pos;
-
-    setValueFromPosition(ev.pos, ev.mod);
+    if (ev.button == 3 && ev.mod & kModifierShift)
+      anchorState = setStateFromPosition(ev.pos, BarState::lock);
+    else
+      setValueFromPosition(ev.pos, ev.mod);
     return true;
   }
 
@@ -691,7 +700,10 @@ public:
       anchor = ev.pos;
       return true;
     } else if (isMouseRightDown) {
-      setValueFromLine(anchor, ev.pos, ev.mod);
+      if (ev.mod & kModifierShift)
+        setStateFromLine(anchor, ev.pos, anchorState);
+      else
+        setValueFromLine(anchor, ev.pos, ev.mod);
       return true;
     }
     return false;
@@ -703,6 +715,7 @@ public:
 
     size_t index = calcIndex(ev.pos);
     if (index >= value.size()) return false;
+    if (barState[index] != BarState::active) return true;
 
     if (ev.mod & kModifierShift)
       setValueAt(index, value[index] + 0.003 * ev.delta.getY());
@@ -740,10 +753,40 @@ private:
     barWidth = sliderWidth <= 4.0f ? 1.0f : 2.0f;
   }
 
+  BarState setStateFromPosition(Point<int> position, BarState state)
+  {
+    size_t index = calcIndex(position);
+    if (index >= value.size()) return BarState::active;
+
+    barState[index] = barState[index] != state ? state : BarState::active;
+    return barState[index];
+  }
+
+  void setStateFromLine(Point<int> p0, Point<int> p1, BarState state)
+  {
+    if (p0.getX() > p1.getX()) std::swap(p0, p1);
+
+    int last = int(value.size()) - 1;
+    if (last < 0) last = 0; // std::clamp is undefined if low is greater than high.
+
+    int left = int(calcIndex(p0));
+    int right = int(calcIndex(p1));
+
+    if ((left < 0 && right < 0) || (left > last && right > last)) return;
+
+    left = std::clamp(left, 0, last);
+    right = std::clamp(right, 0, last);
+
+    for (int idx = left + 1; idx >= 0 && idx < right; ++idx) barState[idx] = state;
+
+    repaint();
+  }
+
   void setValueFromPosition(Point<int> position, uint modifier)
   {
     size_t index = calcIndex(position);
     if (index >= value.size()) return;
+    if (barState[index] != BarState::active) return;
     if (modifier & kModifierControl)
       setValueAt(index, defaultValue[index]);
     else
@@ -771,6 +814,7 @@ private:
     const float p1y = p1.getY();
 
     if (left == right) { // p0 and p1 are in a same bar.
+      if (barState[left] != BarState::active) return;
       if (modifier & kModifierControl)
         setValueAt(left, defaultValue[left]);
       else
@@ -779,8 +823,10 @@ private:
       repaint();
       return;
     } else if (modifier & kModifierControl) {
-      for (int idx = left; idx >= 0 && idx <= right; ++idx)
+      for (int idx = left; idx >= 0 && idx <= right; ++idx) {
+        if (barState[idx] != BarState::active) continue;
         setValueAt(idx, defaultValue[idx]);
+      }
       if (liveUpdateLineEdit) updateValue();
       return;
     }
@@ -793,8 +839,8 @@ private:
       p1.setX(xR);
     }
 
-    setValueAt(left, 1.0f - p0y / getHeight());
-    setValueAt(right, 1.0f - p1y / getHeight());
+    if (barState[left] == BarState::active) setValueAt(left, 1.0f - p0y / getHeight());
+    if (barState[right] == BarState::active) setValueAt(right, 1.0f - p1y / getHeight());
 
     // In between.
     const float p0x = p0.getX();
@@ -803,6 +849,7 @@ private:
     const float yInc = slope * sliderWidth;
     float y = slope * (sliderWidth * (left + 1) - p0x) + p0y;
     for (int idx = left + 1; idx >= 0 && idx < right; ++idx) {
+      if (barState[idx] != BarState::active) continue;
       setValueAt(idx, 1.0f - (y + 0.5f * yInc) / getHeight());
       y += yInc;
     }
@@ -813,6 +860,7 @@ private:
 
   std::vector<double> defaultValue;
   std::vector<std::vector<double>> undoValue;
+  std::vector<BarState> barState;
   float barWidth = 2.0f;
   float borderWidth = 2.0f;
   float highlightBorderWidth = 4.0f;
@@ -826,6 +874,7 @@ private:
 
   Point<int> mousePosition{-1, -1};
   Point<int> anchor{0, 0};
+  BarState anchorState = BarState::active;
   int indexL = 0;
   int indexR = 0;
   int indexRange = 0;
