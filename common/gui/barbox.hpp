@@ -152,7 +152,6 @@ public:
       const auto bias = (mouseX - leftPos) / (rightPos - leftPos);
       amountL = zoomSensi * std::clamp(bias, 0.0f, 1.0f);
       amountR = zoomSensi * std::clamp((1.0f - bias), 0.0f, 1.0f);
-      if (bias < 0.0f || 1.0f < bias) std::swap(amountL, amountR);
     }
     setLeftPos(leftPos - amountL * delta);
     setRightPos(rightPos + amountR * delta);
