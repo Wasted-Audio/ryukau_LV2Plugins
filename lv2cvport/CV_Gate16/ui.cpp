@@ -104,16 +104,16 @@ public:
 
     const auto left1 = left0 + barboxWidth + 4 * margin;
     const auto left2 = left1 + 6 * margin;
+    const auto typeTop1 = top0 + labelY;
     std::string typeLabel("Type");
     addGroupLabel(left1, top0, labelY + knobX, labelHeight, midTextSize, "Type");
     std::vector<std::string> typeItems{"Trigger", "Gate", "DC"};
     for (size_t idx = 0; idx < nGate; ++idx) {
-      size_t fixed = idx + 1;
       addLabel(
-        left1, top0 + fixed * labelY, 4 * margin, labelHeight, uiTextSize,
-        std::to_string(fixed), ALIGN_RIGHT | ALIGN_MIDDLE);
+        left1, typeTop1 + idx * labelY, 4 * margin, labelHeight, uiTextSize,
+        std::to_string(idx), ALIGN_RIGHT | ALIGN_MIDDLE);
       addOptionMenu(
-        left2, top0 + fixed * labelY, knobX, labelHeight, uiTextSize, ID::type1 + idx,
+        left2, typeTop1 + idx * labelY, knobX, labelHeight, uiTextSize, ID::type1 + idx,
         typeItems);
     }
   }
