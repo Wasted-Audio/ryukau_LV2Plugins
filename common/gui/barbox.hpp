@@ -258,16 +258,15 @@ public:
     fill();
 
     // Value bar.
-
     float sliderZeroHeight = height * (1.0f - sliderZero);
     for (int i = indexL; i < indexR; ++i) {
-      fillColor(
-        barState[i] == BarState::active ? pal.highlightMain() : pal.foregroundInactive());
       float rectH = value[i] >= sliderZero ? (value[i] - sliderZero) * height
                                            : (sliderZero - value[i]) * height;
       float rectY = value[i] >= sliderZero ? sliderZeroHeight - rectH : sliderZeroHeight;
+      fillColor(
+        barState[i] == BarState::active ? pal.highlightMain() : pal.foregroundInactive());
       beginPath();
-      rect((i - indexL) * sliderWidth, rectY, sliderWidth - barWidth, rectH);
+      rect((i - indexL) * sliderWidth, rectY, sliderWidth - sliderMargin, rectH);
       fill();
     }
 
@@ -277,10 +276,14 @@ public:
       fillColor(pal.foreground());
       fontSize(textSize);
       textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
-      for (int i = 0; i < indexRange; ++i)
+      for (int i = 0; i < indexRange; ++i) {
         text(
           (i + 0.5f) * sliderWidth, height - 4,
           std::to_string(i + indexL + indexOffset).c_str(), nullptr);
+        if (barState[i] != BarState::active) {
+          text((i + 0.5f) * sliderWidth, textSize + 4, "L", nullptr);
+        }
+      }
     }
 
     // Additional index text for zoom in.
@@ -318,6 +321,11 @@ public:
            << std::to_string(scale.map(value[index]));
         std::string indexText(os.str());
         text(width / 2, height / 2, indexText.c_str(), nullptr);
+
+        if (barState[index] != BarState::active) {
+          fontSize(textSize * 2.0f);
+          text(width / 2, height / 2 + textSize * 4.0f, "Locked", nullptr);
+        }
       }
     }
   }
@@ -749,7 +757,7 @@ private:
   void refreshSliderWidth(float width)
   {
     sliderWidth = indexRange >= 1 ? float(width) / indexRange : float(width);
-    barWidth = sliderWidth <= 4.0f ? 1.0f : 2.0f;
+    sliderMargin = sliderWidth <= 4.0f ? 1.0f : 2.0f;
   }
 
   BarState setStateFromPosition(Point<int> position, BarState state)
@@ -860,7 +868,8 @@ private:
   std::vector<double> defaultValue;
   std::vector<std::vector<double>> undoValue;
   std::vector<BarState> barState;
-  float barWidth = 2.0f;
+  float sliderWidth = 0;
+  float sliderMargin = 2.0f;
   float borderWidth = 2.0f;
   float highlightBorderWidth = 4.0f;
   float scrollBarheight = 8.0f;
@@ -880,6 +889,4 @@ private:
   bool isMouseLeftDown = false;
   bool isMouseRightDown = false;
   bool isMouseEntered = false;
-
-  float sliderWidth = 0;
 };
