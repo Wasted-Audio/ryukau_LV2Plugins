@@ -45,6 +45,7 @@ public:
   const DGL::Color &overlay() { return _overlay; }
   const DGL::Color &overlayHighlight() { return _overlayHighlight; }
   const DGL::Color &borderCheckbox() { return _borderCheckbox; }
+  const DGL::Color &borderLabel() { return _borderLabel; }
   const DGL::Color &foregroundInactive() { return _foregroundInactive; }
 
 private:

@@ -54,7 +54,7 @@ public:
       beginPath();
       moveTo(0, height / 2);
       lineTo(width, height / 2);
-      strokeColor(pal.border());
+      strokeColor(pal.borderLabel());
       strokeWidth(borderWidth);
       stroke();
 
