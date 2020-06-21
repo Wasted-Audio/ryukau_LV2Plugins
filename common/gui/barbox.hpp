@@ -443,8 +443,10 @@ public:
 
   void alternateSign(size_t start)
   {
-    for (size_t i = start; i < value.size(); i += 2)
+    for (size_t i = start; i < value.size(); i += 2) {
+      if (barState[i] != BarState::active) continue;
       setValueAt(i, 2 * sliderZero - value[i]);
+    }
   }
 
   void averageLowpass(size_t start)
@@ -453,6 +455,7 @@ public:
 
     std::vector<double> result(value);
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       result[i] = 0.0;
       for (int32_t j = -range; j <= range; ++j) {
         size_t index = i + j; // Note that index is unsigned.
@@ -473,6 +476,7 @@ public:
     std::vector<double> result(value);
     size_t last = value.size() - 1;
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       auto val = value[i] - sliderZero;
       result[i] = 0.0;
       result[i] -= (i >= 1) ? value[i - 1] - sliderZero : val;
@@ -487,7 +491,10 @@ public:
     std::random_device dev;
     std::mt19937_64 rng(dev());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    for (size_t i = start; i < value.size(); ++i) value[i] = dist(rng);
+    for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
+      value[i] = dist(rng);
+    }
   }
 
   void randomize(size_t start, double amount)
@@ -496,6 +503,7 @@ public:
     std::mt19937_64 rng(dev());
     amount /= 2;
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       std::uniform_real_distribution<double> dist(value[i] - amount, value[i] + amount);
       setValueAt(i, dist(rng));
     }
@@ -506,8 +514,10 @@ public:
     std::random_device dev;
     std::mt19937_64 rng(dev());
     std::uniform_real_distribution<double> dist(sliderZero - 0.5, sliderZero + 0.5);
-    for (size_t i = start; i < value.size(); ++i)
+    for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       setValueAt(i, value[i] + mix * (dist(rng) - value[i]));
+    }
   }
 
   void sparseRandomize(size_t start)
@@ -515,8 +525,10 @@ public:
     std::random_device device;
     std::mt19937_64 rng(device());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    for (size_t i = start; i < value.size(); ++i)
+    for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       if (dist(rng) < 0.1f) value[i] = dist(rng);
+    }
   }
 
   void permute(size_t start)
@@ -537,6 +549,7 @@ public:
   {
     ValuePeak pk;
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       double val = fabs(value[i] - sliderZero);
       if (value[i] == sliderZero) {
         if (skipZero) continue;
@@ -564,6 +577,7 @@ public:
   void invertFull(size_t start)
   {
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       double val
         = value[i] >= sliderZero ? 1.0 - value[i] + sliderZero : sliderZero - value[i];
       setValueAt(i, val);
@@ -574,6 +588,7 @@ public:
   {
     auto pk = getValuePeak(start, false);
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       double val = value[i] < sliderZero
         ? std::clamp<double>(
           2.0 * sliderZero - pk.maxNeg - value[i] - pk.minNeg, sliderZero - pk.maxNeg,
@@ -608,6 +623,7 @@ public:
     }
 
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       if (value[i] == sliderZero) continue;
       double val = value[i] < sliderZero
         ? std::min<double>(
@@ -638,6 +654,7 @@ public:
     }
 
     for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       if (value[i] == sliderZero) continue;
       auto val = value[i] < sliderZero
         ? (value[i] - sliderZero + pk.minNeg) * mulNeg + sliderZero - pk.minNeg
@@ -649,23 +666,28 @@ public:
   void multiplySkip(size_t start, size_t interval) noexcept
   {
     for (size_t i = start; i < value.size(); i += interval) {
+      if (barState[i] != BarState::active) continue;
       setValueAt(i, (value[i] - sliderZero) * 0.9 + sliderZero);
     }
   }
 
   void emphasizeLow(size_t start)
   {
-    for (size_t i = start; i < value.size(); ++i)
+    for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       setValueAt(i, (value[i] - sliderZero) / pow(i + 1, 0.0625) + sliderZero);
+    }
   }
 
   void emphasizeHigh(size_t start)
   {
-    for (size_t i = start; i < value.size(); ++i)
+    for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
       setValueAt(
         i,
         (value[i] - sliderZero) * (0.9 + 0.1 * double(i + 1) / value.size())
           + sliderZero);
+    }
   }
 
   bool onMouse(const MouseEvent &ev) override
