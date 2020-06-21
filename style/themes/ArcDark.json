@@ -7,6 +7,7 @@
   "boxBackground": "#444a58",
   "border": "#2d323c",
   "borderCheckbox": "#2d323c",
+  "borderLabel": "#85a8b5",
   "unfocused": "#5c69b4",
   "highlightMain": "#5294e2",
   "highlightAccent": "#2c8a58",

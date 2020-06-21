@@ -7,6 +7,7 @@
   "boxBackground": "#ffffff",
   "border": "#000000",
   "borderCheckbox": "#000000",
+  "borderLabel": "#000000",
   "unfocused": "#dddddd",
   "highlightMain": "#0ba4f1",
   "highlightAccent": "#13c136",

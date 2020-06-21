@@ -1,4 +1,5 @@
 // (c) 2019-2020 Takamitsu Endo
+// (c) 2020 Konstantin Voinov
 //
 // This file is part of Uhhyou Plugins.
 //
@@ -54,7 +55,7 @@ public:
       beginPath();
       moveTo(0, height / 2);
       lineTo(width, height / 2);
-      strokeColor(pal.border());
+      strokeColor(pal.borderLabel());
       strokeWidth(borderWidth);
       stroke();
 

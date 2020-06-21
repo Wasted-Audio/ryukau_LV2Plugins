@@ -144,5 +144,6 @@ void Palette::load()
   loadColor(data, "overlay", _overlay);
   loadColor(data, "overlayHighlight", _overlayHighlight);
   loadColor(data, "borderCheckbox", _borderCheckbox);
+  loadColor(data, "borderLabel", _borderLabel);
   loadColor(data, "foregroundInactive", _foregroundInactive);
 }
