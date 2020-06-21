@@ -337,19 +337,41 @@ public:
     return true;
   }
 
+#define APPLY_ALGORITHM(START, FUNC)                                                     \
+  std::vector<double> active, locked;                                                    \
+  active.reserve(value.size());                                                          \
+  locked.reserve(value.size());                                                          \
+                                                                                         \
+  for (size_t i = START; i < value.size(); ++i) {                                        \
+    if (barState[i] == BarState::active)                                                 \
+      active.push_back(value[i]);                                                        \
+    else                                                                                 \
+      locked.push_back(value[i]);                                                        \
+  }                                                                                      \
+                                                                                         \
+  FUNC;                                                                                  \
+                                                                                         \
+  size_t activeIndex = 0;                                                                \
+  size_t lockedIndex = 0;                                                                \
+  for (size_t i = START; i < value.size(); ++i) {                                        \
+    if (barState[i] == BarState::active) {                                               \
+      value[i] = active[activeIndex];                                                    \
+      ++activeIndex;                                                                     \
+    } else {                                                                             \
+      value[i] = locked[lockedIndex];                                                    \
+      ++lockedIndex;                                                                     \
+    }                                                                                    \
+  }
+
   void handleKey(const KeyboardEvent &ev)
   {
     size_t index = calcIndex(mousePosition);
     if (ev.key == 'a') {
       alternateSign(index);
-    } else if (ev.key == 'd') { // reset to Default.
-      value = defaultValue;
-      updateValue();
-    } else if (ev.key == 'D') { // Alternative default. (toggle min/mid/max)
-      std::fill(
-        value.begin() + index, value.end(),
-        value[index] == 0 ? 0.5 : value[index] == 0.5 ? 1.0 : 0.0);
-      updateValue();
+    } else if (ev.key == 'd') {
+      resetToDefault();
+    } else if (ev.key == 'D') {
+      toggleMinMidMax(index);
     } else if (ev.key == 'e') {
       emphasizeLow(index);
     } else if (ev.key == 'E') {
@@ -367,15 +389,20 @@ public:
     } else if (ev.key == 'N') {
       normalizeFull(index);
     } else if (ev.key == 'p') { // Permute.
-      permute(index);
+      APPLY_ALGORITHM(index, {
+        std::random_device device;
+        std::mt19937 rng(device());
+        std::shuffle(active.begin(), active.end(), rng);
+      });
     } else if (ev.key == 'r') {
       totalRandomize(index);
     } else if (ev.key == 'R') {
       sparseRandomize(index);
     } else if (ev.key == 's') { // Sort descending order.
-      std::sort(value.begin() + index, value.end(), std::greater<>());
+      APPLY_ALGORITHM(
+        index, { std::sort(active.begin(), active.end(), std::greater<>()); });
     } else if (ev.key == 'S') { // Sort ascending order.
-      std::sort(value.begin() + index, value.end());
+      APPLY_ALGORITHM(index, { std::sort(active.begin(), active.end()); });
     } else if (ev.key == 't') { // subTle randomize. Random walk.
       randomize(index, 0.02);
     } else if (ev.key == 'T') { // subTle randomize. Converge to sliderZero.
@@ -391,11 +418,11 @@ public:
       repaint();
       return;
     } else if (ev.key == ',') { // Rotate back.
-      if (index == value.size() - 1) index = 0;
-      std::rotate(value.begin() + index, value.begin() + index + 1, value.end());
+      APPLY_ALGORITHM(
+        index, { std::rotate(active.begin(), active.begin() + 1, active.end()); });
     } else if (ev.key == '.') { // Rotate forward.
-      size_t rIndex = index == 0 ? 0 : value.size() - 1 - index;
-      std::rotate(value.rbegin() + rIndex, value.rbegin() + rIndex + 1, value.rend());
+      APPLY_ALGORITHM(
+        index, { std::rotate(active.rbegin(), active.rbegin() + 1, active.rend()); });
     } else if (ev.key == '1') { // Decrease.
       multiplySkip(index, 1);
     } else if (ev.key == '2') { // Decrease even.
@@ -427,6 +454,28 @@ public:
 
     std::rotate(undoValue.begin(), undoValue.begin() + 1, undoValue.end());
     undoValue.back() = value;
+  }
+
+  void resetToDefault()
+  {
+    for (size_t i = 0; i < value.size(); ++i) {
+      if (barState[i] == BarState::active) value[i] = defaultValue[i];
+    }
+  }
+
+  void toggleMinMidMax(size_t start)
+  {
+    double filler = 0;
+    for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] != BarState::active) continue;
+      filler = value[i] == 0 ? 0.5 : value[i] == 0.5 ? 1.0 : 0.0;
+      start = i;
+      break;
+    }
+
+    for (size_t i = start; i < value.size(); ++i) {
+      if (barState[i] == BarState::active) value[i] = filler;
+    }
   }
 
   void undo()
@@ -529,13 +578,6 @@ public:
       if (barState[i] != BarState::active) continue;
       if (dist(rng) < 0.1f) value[i] = dist(rng);
     }
-  }
-
-  void permute(size_t start)
-  {
-    std::random_device device;
-    std::mt19937 rng(device());
-    std::shuffle(value.begin() + start, value.end(), rng);
   }
 
   struct ValuePeak {

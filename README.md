@@ -158,15 +158,6 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 
 Toggle Lock functionality behaves as line edit. When right mouse button (RMB) is pressed, it holds the opposite state of the bar below mouse cursor, then use the state for the rest of bars. For example, if RMB is pressed on a locked bar, dragging unlocks bars while holding down RMB.
 
-Lock doesn't work for following shortcuts.
-
-- Reset Everything to Default
-- Toggle Min/Mid/Max
-- Permute
-- Sort Ascending/Descending Order
-- Undo/Redo
-- Rotate Back/Forward
-
 Some dense BarBoxes has scroll bar to zoom in. Scroll bar has handles on left and right end. To control zoom, use <kbd>Left Drag</kbd> on one of the handle, or roll <kbd>Mouse Wheel</kbd> on scroll bar region. <kbd>Right Click</kbd> can be used to reset the zoom. When plugin window is closed, zoom will be reset. Following image shows a scroll bar under a BarBox.
 
 <figure>
