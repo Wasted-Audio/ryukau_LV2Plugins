@@ -133,9 +133,12 @@ void Palette::load()
   loadString(data, "fontPath", _fontPath);
   loadColor(data, "foreground", _foreground);
   loadColor(data, "foregroundButtonOn", _foregroundButtonOn);
+  loadColor(data, "foregroundInactive", _foregroundInactive);
   loadColor(data, "background", _background);
   loadColor(data, "boxBackground", _boxBackground);
   loadColor(data, "border", _border);
+  loadColor(data, "borderCheckbox", _borderCheckbox);
+  loadColor(data, "borderLabel", _borderLabel);
   loadColor(data, "unfocused", _unfocused);
   loadColor(data, "highlightMain", _highlightMain);
   loadColor(data, "highlightAccent", _highlightAccent);
@@ -143,7 +146,4 @@ void Palette::load()
   loadColor(data, "highlightWarning", _highlightWarning);
   loadColor(data, "overlay", _overlay);
   loadColor(data, "overlayHighlight", _overlayHighlight);
-  loadColor(data, "borderCheckbox", _borderCheckbox);
-  loadColor(data, "borderLabel", _borderLabel);
-  loadColor(data, "foregroundInactive", _foregroundInactive);
 }

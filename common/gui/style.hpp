@@ -34,9 +34,12 @@ public:
   const std::string &fontPath() { return _fontPath; }
   const DGL::Color &foreground() { return _foreground; }
   const DGL::Color &foregroundButtonOn() { return _foregroundButtonOn; }
+  const DGL::Color &foregroundInactive() { return _foregroundInactive; }
   const DGL::Color &background() { return _background; }
   const DGL::Color &boxBackground() { return _boxBackground; }
   const DGL::Color &border() { return _border; }
+  const DGL::Color &borderCheckbox() { return _borderCheckbox; }
+  const DGL::Color &borderLabel() { return _borderLabel; }
   const DGL::Color &unfocused() { return _unfocused; }
   const DGL::Color &highlightMain() { return _highlightMain; }
   const DGL::Color &highlightAccent() { return _highlightAccent; }
@@ -44,17 +47,17 @@ public:
   const DGL::Color &highlightWarning() { return _highlightWarning; }
   const DGL::Color &overlay() { return _overlay; }
   const DGL::Color &overlayHighlight() { return _overlayHighlight; }
-  const DGL::Color &borderCheckbox() { return _borderCheckbox; }
-  const DGL::Color &borderLabel() { return _borderLabel; }
-  const DGL::Color &foregroundInactive() { return _foregroundInactive; }
 
 private:
   std::string _fontPath;
   DGL::Color _foreground{0x00, 0x00, 0x00};
   DGL::Color _foregroundButtonOn{0x00, 0x00, 0x00};
+  DGL::Color _foregroundInactive{0x00, 0x00, 0x00};
   DGL::Color _background{0xff, 0xff, 0xff};
   DGL::Color _boxBackground{0xff, 0xff, 0xff};
   DGL::Color _border{0x00, 0x00, 0x00};
+  DGL::Color _borderCheckbox{0x00, 0x00, 0x00};
+  DGL::Color _borderLabel{0x00, 0x00, 0x00};
   DGL::Color _unfocused{0xdd, 0xdd, 0xdd};
   DGL::Color _highlightMain{0x0b, 0xa4, 0xf1};
   DGL::Color _highlightAccent{0x13, 0xc1, 0x36};
@@ -62,6 +65,4 @@ private:
   DGL::Color _highlightWarning{0xfc, 0x80, 0x80};
   DGL::Color _overlay{0x00, 0x00, 0x00, 0x88};
   DGL::Color _overlayHighlight{0x00, 0xff, 0x00, 0x33};
-  DGL::Color _borderCheckbox{0x00, 0x00, 0x00};
-  DGL::Color _foregroundInactive{0x00, 0x00, 0x00};
 };
