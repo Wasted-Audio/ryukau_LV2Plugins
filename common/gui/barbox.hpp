@@ -297,6 +297,18 @@ public:
     undoValue.back() = value;
   }
 
+  void undo()
+  {
+    std::rotate(undoValue.rbegin(), undoValue.rbegin() + 1, undoValue.rend());
+    value = undoValue.back();
+  }
+
+  void redo()
+  {
+    std::rotate(undoValue.begin(), undoValue.begin() + 1, undoValue.end());
+    value = undoValue.back();
+  }
+
   void resetToDefault()
   {
     for (size_t i = 0; i < value.size(); ++i) {
@@ -317,18 +329,6 @@ public:
     for (size_t i = start; i < value.size(); ++i) {
       if (barState[i] == BarState::active) value[i] = filler;
     }
-  }
-
-  void undo()
-  {
-    std::rotate(undoValue.rbegin(), undoValue.rbegin() + 1, undoValue.rend());
-    value = undoValue.back();
-  }
-
-  void redo()
-  {
-    std::rotate(undoValue.begin(), undoValue.begin() + 1, undoValue.end());
-    value = undoValue.back();
   }
 
   void alternateSign(size_t start)
