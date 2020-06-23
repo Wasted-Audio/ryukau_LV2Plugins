@@ -81,8 +81,8 @@ public:
 
     if (type == typeGate)
       open = isNoteOn;
-    else
-      open = type == typeDC;
+    else if (type == typeDC)
+      open = 1;
   }
 
   void reset()
