@@ -87,7 +87,9 @@ void DSPCORE_NAME::setParameters(float tempo)
   float lfoFreq;
   if (param.value[ParameterID::tempoSync]->getInt()) {
     // tempo / 60 is Hz for a 1/4 beat.
-    // 128 * 500 / 240
+    //
+    // Output blows up when lfoFreq is greater than 128 * 500 / 240 ~= 266.6..
+    // So limiting maximum of lfoFreq to 256 Hz.
     const float beat = float(param.value[ParameterID::tempoNumerator]->getInt() + 1)
       / float(param.value[ParameterID::tempoDenominator]->getInt() + 1);
     const float multiplier = Scales::frequencyMultiplier.map(
