@@ -22,7 +22,7 @@ void DSPCore::setup(double sampleRate)
   this->sampleRate = sampleRate;
 
   SmootherCommon<float>::setSampleRate(sampleRate);
-  SmootherCommon<float>::setTime(0.01f);
+  SmootherCommon<float>::setTime(0.002f);
 
   noteStack.reserve(128);
   noteStack.resize(0);
@@ -36,9 +36,11 @@ void DSPCore::reset()
   for (auto &gate : gates) gate.reset();
 }
 
-void DSPCore::setParameters()
+void DSPCore::setParameters(double tempo)
 {
   using ID = ParameterID::ID;
+
+  this->tempo = tempo;
 
   bool isNoteOn = noteStack.size() != 0;
   for (size_t idx = 0; idx < nGate; ++idx) {
@@ -66,14 +68,17 @@ void DSPCore::process(const size_t length, float **outputs)
 void DSPCore::noteOn(
   int32_t noteId, int16_t /* pitch */, float /* tuning */, float /* velocity */)
 {
+  using ID = ParameterID::ID;
+
   NoteInfo info;
   info.id = noteId;
   noteStack.push_back(info);
 
-  auto delayMul = param.value[ParameterID::delayMultiply]->getFloat();
-  for (size_t idx = 0; idx < gates.size(); ++idx)
-    gates[idx].trigger(
-      sampleRate, delayMul * param.value[ParameterID::delay1 + idx]->getFloat());
+  auto delayMul = param.value[ID::delayMultiply]->getFloat();
+  if (param.value[ID::delayTempoSync]->getInt()) delayMul *= 240 / tempo;
+  for (size_t idx = 0; idx < gates.size(); ++idx) {
+    gates[idx].trigger(sampleRate, delayMul * param.value[ID::delay1 + idx]->getFloat());
+  }
 }
 
 void DSPCore::noteOff(int32_t noteId)

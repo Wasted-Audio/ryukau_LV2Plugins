@@ -142,7 +142,9 @@ protected:
     for (size_t i = 0; i < midiEventCount; ++i) handleMidi(midiEvents[i]);
     alreadyRecievedNote.resize(0);
 
-    dsp.setParameters();
+    const auto timePos = getTimePosition();
+
+    dsp.setParameters(timePos.bbt.beatsPerMinute);
     dsp.process(frames, outputs);
   }
 

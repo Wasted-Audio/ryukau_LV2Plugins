@@ -79,6 +79,7 @@ public:
     const auto top0 = 20.0f;
     const auto left0 = 20.0f;
 
+    // Gain section.
     addGroupLabel(left0, top0, barboxWidth, labelHeight, midTextSize, "Gain");
     addLabel(left0, top0 + labelY, knobX, labelHeight, uiTextSize, "MasterGain");
     addTextKnob(
@@ -87,21 +88,31 @@ public:
     addBarBox(
       left0, top0 + 2 * labelY, barboxWidth, barboxHeight, ID::gain1, 16, Scales::gain);
 
+    // Delay section.
     const auto top1 = top0 + 8 * labelY + 2 * margin;
     addGroupLabel(left0, top1, barboxWidth, labelHeight, midTextSize, "Delay");
+
     addLabel(left0, top1 + labelY, knobX, labelHeight, uiTextSize, "Multiply");
     addTextKnob(
       left0 + knobX, top1 + labelY, knobX, labelHeight, uiTextSize, ID::delayMultiply,
       Scales::delayMultiply, false, 4);
-    addBarBox(
-      left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16, Scales::delay);
 
+    addCheckbox(
+      left0 + 2.5 * knobX, top1 + labelY, knobX, labelHeight, uiTextSize, "TempoSync",
+      ID::delayTempoSync);
+
+    auto barboxDelay = addBarBox(
+      left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16, Scales::delay);
+    barboxDelay->altScrollSensitivity = 1.0 / 64.0;
+
+    // Plugin name.
     const auto top2 = top1 + 8 * labelY + 2 * margin;
     std::stringstream ssPluginName;
     ssPluginName << "CV_Gate16  " << std::to_string(MAJOR_VERSION) << "."
                  << std::to_string(MINOR_VERSION) << "." << std::to_string(PATCH_VERSION);
     addTextView(left0, top2, barboxWidth, labelY, midTextSize, ssPluginName.str());
 
+    // Type section.
     const auto left1 = left0 + barboxWidth + 4 * margin;
     const auto left2 = left1 + 6 * margin;
     const auto typeTop1 = top0 + labelY;

@@ -17,64 +17,13 @@
 
 #pragma once
 
-#include "../../../common/dsp/constants.hpp"
-#include "../../../common/dsp/smoother.hpp"
-#include "../../../common/dsp/somemath.hpp"
 #include "../parameter.hpp"
+#include "gate.hpp"
 
 #include <algorithm>
 #include <array>
 
 using namespace SomeDSP;
-
-enum GateType : uint32_t { typeTrigger, typeGate, typeDC };
-
-template<typename Sample> class Gate {
-public:
-  bool open = false;
-  uint32_t type = 0;
-  uint32_t delay = 0;
-  LinearSmoother<Sample> gain;
-
-  void setType(uint32_t type, bool isNoteOn)
-  {
-    this->type = type;
-
-    if (type == typeGate)
-      open = isNoteOn;
-    else
-      open = type == typeDC;
-  }
-
-  void reset()
-  {
-    open = false;
-    delay = 0;
-    gain.reset(0);
-  }
-
-  void trigger(Sample sampleRate, Sample delaySeconds)
-  {
-    open = true;
-    delay = type == typeDC ? 0 : uint32_t(delaySeconds * sampleRate);
-  }
-
-  void release()
-  {
-    if (type == typeGate) open = false;
-  }
-
-  Sample process()
-  {
-    if (delay > 0) {
-      --delay;
-      return 0;
-    }
-    Sample out = open * gain.process();
-    if (type == typeTrigger) open = false;
-    return out;
-  }
-};
 
 struct NoteInfo {
   int32_t id;
@@ -88,7 +37,7 @@ public:
 
   void setup(double sampleRate);
   void reset(); // Stop sounds.
-  void setParameters();
+  void setParameters(double tempo);
   void process(const size_t length, float **outputs);
   void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);
   void noteOff(int32_t noteId);
@@ -139,6 +88,7 @@ public:
 
 private:
   float sampleRate = 44100.0f;
+  double tempo = 120.0f;
 
   std::vector<NoteInfo> noteStack; // Top of this stack is current note.
 

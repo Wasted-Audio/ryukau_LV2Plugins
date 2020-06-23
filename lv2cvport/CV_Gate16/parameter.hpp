@@ -40,12 +40,14 @@ enum ID {
 
   masterGain = 48,
   delayMultiply,
+  delayTempoSync,
 
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
 
 struct Scales {
+  static SomeDSP::IntScale<double> boolScale;
   static SomeDSP::LinearScale<double> gain;
   static SomeDSP::LinearScale<double> delay;
   static SomeDSP::IntScale<double> type;
@@ -83,6 +85,9 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::delayMultiply] = std::make_unique<LogValue>(
       Scales::delayMultiply.invmap(1.0), Scales::delayMultiply, "delayMultiply",
       kParameterIsAutomable);
+    value[ID::delayTempoSync] = std::make_unique<IntValue>(
+      false, Scales::boolScale, "delayTempoSync",
+      kParameterIsAutomable | kParameterIsBoolean);
   }
 
 #ifndef TEST_BUILD
