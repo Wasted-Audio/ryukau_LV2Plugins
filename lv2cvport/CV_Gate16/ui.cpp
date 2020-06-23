@@ -85,8 +85,9 @@ public:
     addTextKnob(
       left0 + knobX, top0 + labelY, knobX, labelHeight, uiTextSize, ID::masterGain,
       Scales::masterGain, false, 4);
-    addBarBox(
+    auto barboxGain = addBarBox(
       left0, top0 + 2 * labelY, barboxWidth, barboxHeight, ID::gain1, 16, Scales::gain);
+    barboxGain->indexOffset = 1;
 
     // Delay section.
     const auto top1 = top0 + 8 * labelY + 2 * margin;
@@ -103,6 +104,7 @@ public:
 
     auto barboxDelay = addBarBox(
       left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16, Scales::delay);
+    barboxDelay->indexOffset = 1;
     barboxDelay->altScrollSensitivity = 1.0 / 64.0;
 
     // Plugin name.
@@ -115,16 +117,16 @@ public:
     // Type section.
     const auto left1 = left0 + barboxWidth + 4 * margin;
     const auto left2 = left1 + 6 * margin;
-    const auto typeTop1 = top0 + labelY;
     std::string typeLabel("Type");
     addGroupLabel(left1, top0, labelY + knobX, labelHeight, midTextSize, "Type");
     std::vector<std::string> typeItems{"Trigger", "Gate", "DC"};
     for (size_t idx = 0; idx < nGate; ++idx) {
+      const auto fixed = idx + 1;
       addLabel(
-        left1, typeTop1 + idx * labelY, 4 * margin, labelHeight, uiTextSize,
-        std::to_string(idx), ALIGN_RIGHT | ALIGN_MIDDLE);
+        left1, top0 + fixed * labelY, 4 * margin, labelHeight, uiTextSize,
+        std::to_string(fixed), ALIGN_RIGHT | ALIGN_MIDDLE);
       addOptionMenu(
-        left2, typeTop1 + idx * labelY, knobX, labelHeight, uiTextSize, ID::type1 + idx,
+        left2, top0 + fixed * labelY, knobX, labelHeight, uiTextSize, ID::type1 + idx,
         typeItems);
     }
   }
