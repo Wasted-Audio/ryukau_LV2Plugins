@@ -60,6 +60,8 @@ public:
   float sliderZero = 0.0f;
   int32_t indexOffset = 0;
   bool liveUpdateLineEdit = true; // Set this false when line edit is slow.
+  double scrollSensitivity = 0.01;
+  double altScrollSensitivity = 0.001;
 
   explicit BarBox(
     NanoWidget *group,
@@ -630,9 +632,9 @@ public:
     if (barState[index] != BarState::active) return true;
 
     if (ev.mod & kModifierShift)
-      setValueAt(index, value[index] + 0.003 * ev.delta.getY());
+      setValueAt(index, value[index] + altScrollSensitivity * ev.delta.getY());
     else
-      setValueAt(index, value[index] + 0.01 * ev.delta.getY());
+      setValueAt(index, value[index] + scrollSensitivity * ev.delta.getY());
 
     updateValueAt(index);
     repaint();
