@@ -88,9 +88,22 @@ Beware that increasing `curve` parameter may lead to very loud output.
 - `Gate`: Outputs gate signal while at least 1 MIDI note is on.
 - `DC`: Outputs DC signal. Ignores MIDI notes.
 
-Unit of `Delay` is in seconds.
+`Delay` behavior:
 
-Note that delay time resets for each note-on.
+- When `Tempo Sync` is checked, unit of `Delay` is in bar.
+- When `Tempo Sync` is not checked, unit of `Delay` is in seconds.
+
+Quick reference table for bar to beat conversion:
+
+| Bar        | Beat |
+| ---------- | ---- |
+| n * 0.0625 | n/16 |
+| n * 0.125  | n/8  |
+| n * 0.25   | n/4  |
+
+**Info**: <kbd>Shift</kbd> + <kbd>Mouse Wheel</kbd> increase/decrease `Delay` by 1 / 64. This is useful to snap the `Delay` value when `Tempo Sync` is checked.
+
+**Note**: Delay time resets for each note-on.
 
 ## CV_HoldFilter
 Step decimator combined with resonance filter. Using PolyBLEP residual to reduce aliasing noise.
