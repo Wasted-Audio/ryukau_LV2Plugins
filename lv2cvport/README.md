@@ -101,6 +101,8 @@ Quick reference table for bar to beat conversion:
 | n * 0.125  | n/8  |
 | n * 0.25   | n/4  |
 
+**Info**: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Left Drag</kbd> and <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Right Drag</kbd> will snap the value to n / 16.
+
 **Info**: <kbd>Shift</kbd> + <kbd>Mouse Wheel</kbd> increase/decrease `Delay` by 1 / 64. This is useful to snap the `Delay` value when `Tempo Sync` is checked.
 
 **Note**: Delay time resets for each note-on.
