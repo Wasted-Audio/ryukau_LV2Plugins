@@ -126,39 +126,48 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 <img src="docs/img/barbox.png" alt="Image of BarBox." style="padding-bottom: 12px;"/>
 </figure>
 
-| Input                                    | Control                          |
-| ---------------------------------------- | -------------------------------- |
-| <kbd>Ctrl</kbd> + <kbd>Left Click</kbd>  | Reset to Default                 |
-| <kbd>Right Drag</kbd>                    | Draw Line                        |
-| <kbd>Shift</kbd> + <kbd>Right Drag</kbd> | Toggle Lock                      |
-| <kbd>a</kbd>                             | Alternate Sign                   |
-| <kbd>d</kbd>                             | Reset Everything to Default      |
-| <kbd>D</kbd>                             | Toggle Min/Mid/Max               |
-| <kbd>e</kbd>                             | Emphasize Low                    |
-| <kbd>E</kbd>                             | Emphasize High                   |
-| <kbd>f</kbd>                             | Low-pass Filter                  |
-| <kbd>F</kbd>                             | High-pass Filter                 |
-| <kbd>i</kbd>                             | Invert Value (Preserve minimum)  |
-| <kbd>I</kbd>                             | Invert Value (Minimum to 0)      |
-| <kbd>n</kbd>                             | Normalize (Preserve minimum)     |
-| <kbd>N</kbd>                             | Normalize (Minimum to 0)         |
-| <kbd>p</kbd>                             | Permute                          |
-| <kbd>r</kbd>                             | Randomize                        |
-| <kbd>R</kbd>                             | Sparse Randomize                 |
-| <kbd>s</kbd>                             | Sort Descending Order            |
-| <kbd>S</kbd>                             | Sort Ascending Order             |
-| <kbd>t</kbd>                             | Subtle Randomize (Random walk)   |
-| <kbd>T</kbd>                             | Subtle Randomize (Converge to 0) |
-| <kbd>z</kbd>                             | Undo                             |
-| <kbd>Z</kbd>                             | Redo                             |
-| <kbd>,</kbd> (Comma)                     | Rotate Back                      |
-| <kbd>.</kbd> (Period)                    | Rotate Forward                   |
-| <kbd>1</kbd>                             | Decrease                         |
-| <kbd>2</kbd>-<kbd>9</kbd>                | Decrease 2n-9n                   |
+| Input                                                      | Control                            |
+| ---------------------------------------------------------- | ---------------------------------- |
+| <kbd>Left Drag</kbd>                                       | Change Value                       |
+| <kbd>Shift</kbd> + <kbd>Left Drag</kbd>                    | Change Value (Snapped)             |
+| <kbd>Ctrl</kbd> + <kbd>Left Drag</kbd>                     | Reset to Default                   |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Left Drag</kbd>  | Change Value (Skip Between Frames) |
+| <kbd>Right Drag</kbd>                                      | Draw Line                          |
+| <kbd>Shift</kbd> + <kbd>Right Drag</kbd>                   | Draw Line (Snapped)                |
+| <kbd>Ctrl</kbd> + <kbd>Right Drag</kbd>                    | Reset to Default                   |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Right Drag</kbd> | Toggle Lock                        |
+| <kbd>a</kbd>                                               | Alternate Sign                     |
+| <kbd>d</kbd>                                               | Reset Everything to Default        |
+| <kbd>D</kbd>                                               | Toggle Min/Mid/Max                 |
+| <kbd>e</kbd>                                               | Emphasize Low                      |
+| <kbd>E</kbd>                                               | Emphasize High                     |
+| <kbd>f</kbd>                                               | Low-pass Filter                    |
+| <kbd>F</kbd>                                               | High-pass Filter                   |
+| <kbd>i</kbd>                                               | Invert Value (Preserve minimum)    |
+| <kbd>I</kbd>                                               | Invert Value (Minimum to 0)        |
+| <kbd>l</kbd>                                               | Toggle Lock under Mouse Cursor     |
+| <kbd>L</kbd>                                               | Toggle Lock for All                |
+| <kbd>n</kbd>                                               | Normalize (Preserve minimum)       |
+| <kbd>N</kbd>                                               | Normalize (Minimum to 0)           |
+| <kbd>p</kbd>                                               | Permute                            |
+| <kbd>r</kbd>                                               | Randomize                          |
+| <kbd>R</kbd>                                               | Sparse Randomize                   |
+| <kbd>s</kbd>                                               | Sort Descending Order              |
+| <kbd>S</kbd>                                               | Sort Ascending Order               |
+| <kbd>t</kbd>                                               | Subtle Randomize (Random walk)     |
+| <kbd>T</kbd>                                               | Subtle Randomize (Converge to 0)   |
+| <kbd>z</kbd>                                               | Undo                               |
+| <kbd>Z</kbd>                                               | Redo                               |
+| <kbd>,</kbd> (Comma)                                       | Rotate Back                        |
+| <kbd>.</kbd> (Period)                                      | Rotate Forward                     |
+| <kbd>1</kbd>                                               | Decrease                           |
+| <kbd>2</kbd>-<kbd>9</kbd>                                  | Decrease 2n-9n                     |
 
-Toggle Lock functionality behaves as line edit. When right mouse button (RMB) is pressed, it holds the opposite state of the bar below mouse cursor, then use the state for the rest of bars. For example, if RMB is pressed on a locked bar, dragging unlocks bars while holding down RMB.
+Snapping is not available for all BarBox. If you'd like to have snapping for certain BarBox, feel free to open issue.
 
-Some dense BarBoxes has scroll bar to zoom in. Scroll bar has handles on left and right end. To control zoom, use <kbd>Left Drag</kbd> on one of the handle, or roll <kbd>Mouse Wheel</kbd> on scroll bar region. <kbd>Right Click</kbd> can be used to reset the zoom. When plugin window is closed, zoom will be reset. Following image shows a scroll bar under a BarBox.
+Toggle Lock with <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Right Drag</kbd> behaves as line edit. When right mouse button (RMB) is pressed, it holds the opposite state of the bar below mouse cursor, then use the state for the rest of bars. For example, if RMB is pressed on a locked bar, dragging unlocks bars while holding down RMB.
+
+Some dense BarBox has scroll bar to zoom in. Scroll bar has handles on left and right end. To control zoom, use <kbd>Left Drag</kbd> on one of the handle, or roll <kbd>Mouse Wheel</kbd> on scroll bar region. <kbd>Right Click</kbd> can be used to reset the zoom. When plugin window is closed, zoom will be reset. Following image shows a scroll bar under a BarBox.
 
 <figure>
 <img src="docs/img/barbox_dense.png" alt="Image of scroll bar under BarBox." style="padding-bottom: 12px;"/>

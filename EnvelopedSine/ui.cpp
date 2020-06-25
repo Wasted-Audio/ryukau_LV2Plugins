@@ -78,8 +78,9 @@ void CreditSplash::onNanoDisplay()
 
   std::string leftText = R"(- Overtone -
 Ctrl + Left Drag|Reset to Default
-Shift + Left Drag|Skip Between Frames
+Ctrl + Shift + Left Drag|Skip Between Frames
 Right Drag|Draw Line
+Ctrl + Shift + Right Drag|Toggle Lock
 D|Reset to Default
 Shift + D|Toggle Min/Mid/Max
 E|Emphasize Low
@@ -88,6 +89,8 @@ F|Low-pass Filter
 Shift + F|High-pass Filter
 I|Invert
 Shift + I|Full Invert
+L|Toggle Lock
+Shift + L|Toggle Lock for All
 N|Normalize (Preserve Min)
 Shift + N|Normalize
 P|Permute
@@ -117,7 +120,7 @@ Have a nice day!)";
   const float top0 = 140.0f;
   const float mid = (defaultWidth - 2 * 20) / 2;
   const float lineHeight = 20.0f;
-  const float blockWidth = 160.0f;
+  const float blockWidth = 180.0f;
   drawTextBlock(20.0f, top0, lineHeight, blockWidth, leftText);
   drawTextBlock(mid, top0, lineHeight, blockWidth, rightText);
 }

@@ -89,8 +89,9 @@ void CreditSplash::onNanoDisplay()
 
   std::string barboxTextLeft = R"(- BarBox -
 Ctrl + Left Drag|Reset to Default
-Shift + Left Drag|Skip Between Frames
+Ctrl + Shift + Left Drag|Skip Between Frames
 Right Drag|Draw Line
+Ctrl + Shift + Right Drag|Toggle Lock
 A|Alternate Sign
 D|Reset to Default
 Shift + D|Toggle Min/Mid/Max
@@ -100,17 +101,19 @@ F|Low-pass Filter
 Shift + F|High-pass Filter
 I|Invert
 Shift + I|Full Invert
+L|Toggle Lock
+Shift + L|Toggle Lock for All
 N|Normalize (Preserve Min)
 Shift + N|Normalize
 P|Permute
 R|Randomize
 Shift + R|Sparse Randomize
 S|Sort Decending Order
-Shift + S|Sort Ascending Order
-T|Random Walk
-Shift + T|Random Walk to 0)";
+Shift + S|Sort Ascending Order)";
 
-  std::string barboxTextRight = R"(Z|Undo
+  std::string barboxTextRight = R"(T|Random Walk
+Shift + T|Random Walk to 0
+Z|Undo
 Shift + Z|Redo
 , (Comma)|Rotate Back
 . (Period)|Rotate Forward
@@ -134,17 +137,10 @@ Have a nice day!)";
 
   const float top0 = 140.0f;
   const float lineHeight = 20.0f;
-  const float blockWidth = 160.0f;
+  const float blockWidth = 180.0f;
   drawTextBlock(20.0f, top0, lineHeight, blockWidth, barboxTextLeft);
   drawTextBlock(400.0f, top0, lineHeight, blockWidth, barboxTextRight);
   drawTextBlock(780.0f, top0, lineHeight, blockWidth, miscText);
-
-  // text(mid, 140.0f, "Changing InnerFeed or OuterFeed may outputs", nullptr);
-  // text(mid, 160.0f, "loud signal.", nullptr);
-
-  // text(mid, 200.0f, "Use Panic! button in case of blow up.", nullptr);
-
-  // text(mid, 240.0f, "Have a nice day!", nullptr);
 }
 
 START_NAMESPACE_DISTRHO

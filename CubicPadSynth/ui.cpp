@@ -733,8 +733,9 @@ public:
 
     auto textOvertoneControl = R"(- Overtone & LFO Wave -
 Ctrl + Left Drag|Reset to Default
-Shift + Left Drag|Skip Between Frames
+Ctrl + Shift + Left Drag|Skip Between Frames
 Right Drag|Draw Line
+Ctrl + Shift + Right Drag|Toggle Lock
 D|Reset to Default
 Shift + D|Toggle Min/Mid/Max
 E|Emphasize Low
@@ -743,6 +744,8 @@ F|Low-pass Filter
 Shift + F|High-pass Filter
 I|Invert
 Shift + I|Full Invert
+L|Toggle Lock
+Shift + L|Toggle Lock for All
 N|Normalize (Preserve Min)
 Shift + N|Normalize
 P|Permute
@@ -762,7 +765,7 @@ Shift + Z|Redo
       tabInfo,
       addTextTableView(
         tabInsideLeft0, tabInsideTop0, 400.0f, 400.0f, infoTextSize, textOvertoneControl,
-        150.0f));
+        200.0f));
 
     const auto tabInfoLeft1 = tabInsideLeft0 + tabWidth / 2.0f;
 
@@ -773,7 +776,7 @@ Ctrl + Left Click|Reset to Default)";
       tabInfo,
       addTextTableView(
         tabInfoLeft1, tabInsideTop0, 400.0f, 400.0f, infoTextSize, textKnobControl,
-        150.0f));
+        200.0f));
 
     auto textNumberControl = R"(- Number -
 Shares same controls with knob, and:
@@ -782,7 +785,7 @@ Right Click|Toggle Min/Mid/Max)";
       tabInfo,
       addTextTableView(
         tabInfoLeft1, tabInsideTop0 + 80.0f, 400.0f, 400.0f, infoTextSize,
-        textNumberControl, 150.0f));
+        textNumberControl, 200.0f));
 
     auto textRefreshNotice = R"(Wavetables do not refresh automatically.
 Press following button to apply changes.
