@@ -106,6 +106,7 @@ public:
       left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16, Scales::delay);
     barboxDelay->indexOffset = 1;
     barboxDelay->altScrollSensitivity = 1.0 / 64.0;
+    for (int idx = 0; idx <= 16; ++idx) barboxDelay->snapValue.push_back(idx / 16.0);
 
     // Plugin name.
     const auto top2 = top1 + 8 * labelY + 2 * margin;

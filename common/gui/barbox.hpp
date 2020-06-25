@@ -62,6 +62,7 @@ public:
   bool liveUpdateLineEdit = true; // Set this false when line edit is slow.
   double scrollSensitivity = 0.01;
   double altScrollSensitivity = 0.001;
+  std::vector<double> snapValue;
 
   explicit BarBox(
     NanoWidget *group,
@@ -209,6 +210,8 @@ public:
   void handleKey(const KeyboardEvent &ev)
   {
     size_t index = calcIndex(mousePosition);
+    if (index >= value.size()) index = value.size() - 1;
+
     if (ev.key == 'a') {
       alternateSign(index);
     } else if (ev.key == 'd') {
@@ -227,6 +230,11 @@ public:
       invertInRange(index);
     } else if (ev.key == 'I') {
       invertFull(index);
+    } else if (ev.key == 'l') {
+      barState[index]
+        = barState[index] == BarState::active ? BarState::lock : BarState::active;
+    } else if (ev.key == 'L') {
+      lockAll(index);
     } else if (ev.key == 'n') {
       normalizeInRange(index);
     } else if (ev.key == 'N') {
@@ -331,6 +339,13 @@ public:
     for (size_t i = start; i < value.size(); ++i) {
       if (barState[i] == BarState::active) value[i] = filler;
     }
+  }
+
+  void lockAll(size_t index)
+  {
+    std::fill(
+      barState.begin(), barState.end(),
+      barState[index] == BarState::active ? BarState::lock : BarState::active);
   }
 
   void alternateSign(size_t start)
@@ -595,7 +610,7 @@ public:
     else if (ev.button == 3)
       isMouseRightDown = true;
 
-    if (ev.button == 3 && ev.mod & kModifierShift)
+    if (ev.button == 3 && ev.mod & kModifierControl && ev.mod & kModifierShift)
       anchorState = setStateFromPosition(ev.pos, BarState::lock);
     else
       setValueFromPosition(ev.pos, ev.mod);
@@ -607,14 +622,14 @@ public:
     isMouseEntered = contains(ev.pos);
     mousePosition = ev.pos;
     if (isMouseLeftDown) {
-      if (ev.mod & kModifierShift)
+      if (ev.mod & kModifierControl && ev.mod & kModifierShift)
         setValueFromPosition(ev.pos, ev.mod);
       else
         setValueFromLine(anchor, ev.pos, ev.mod);
       anchor = ev.pos;
       return true;
     } else if (isMouseRightDown) {
-      if (ev.mod & kModifierShift)
+      if (ev.mod & kModifierControl && ev.mod & kModifierShift)
         setStateFromLine(anchor, ev.pos, anchorState);
       else
         setValueFromLine(anchor, ev.pos, ev.mod);
@@ -667,6 +682,18 @@ private:
     sliderMargin = sliderWidth <= 4.0f ? 1.0f : 2.0f;
   }
 
+  double snap(double val)
+  {
+    if (snapValue.size() <= 0) return val;
+
+    size_t idx = 0;
+    for (; idx < snapValue.size(); ++idx) {
+      if (snapValue[idx] < val) continue;
+      break;
+    }
+    return idx < snapValue.size() ? snapValue[idx] : 1.0;
+  }
+
   BarState setStateFromPosition(Point<int> position, BarState state)
   {
     size_t index = calcIndex(position);
@@ -701,10 +728,17 @@ private:
     size_t index = calcIndex(position);
     if (index >= value.size()) return;
     if (barState[index] != BarState::active) return;
-    if (modifier & kModifierControl)
+
+    bool ctrl = modifier & kModifierControl;
+    bool shift = modifier & kModifierShift;
+
+    if (ctrl && !shift)
       setValueAt(index, defaultValue[index]);
+    else if (!ctrl && shift)
+      setValueAt(index, snap(1.0 - double(position.getY()) / getHeight()));
     else
       setValueAt(index, 1.0 - double(position.getY()) / getHeight());
+
     updateValueAt(index);
     repaint();
   }
@@ -729,10 +763,14 @@ private:
 
     if (left == right) { // p0 and p1 are in a same bar.
       if (barState[left] != BarState::active) return;
+
       if (modifier & kModifierControl)
         setValueAt(left, defaultValue[left]);
+      else if (modifier & kModifierShift)
+        setValueAt(left, snap(1.0f - (p0y + p1y) * 0.5f / getHeight()));
       else
         setValueAt(left, 1.0f - (p0y + p1y) * 0.5f / getHeight());
+
       updateValueAt(left);
       repaint();
       return;
@@ -745,18 +783,24 @@ private:
       return;
     }
 
+    const bool isSnapping = modifier & kModifierShift;
+
+    if (barState[left] == BarState::active) {
+      auto val = 1.0f - p0y / getHeight();
+      setValueAt(left, isSnapping ? snap(val) : val);
+    }
+    if (barState[right] == BarState::active) {
+      auto val = 1.0f - p1y / getHeight();
+      setValueAt(right, isSnapping ? snap(val) : val);
+    }
+
+    // In between.
     const float xL = sliderWidth * (left + 1);
     const float xR = sliderWidth * right;
-
-    if (fabs(xR - xL) >= 1e-5) {
+    if (fabs(xR - xL) >= 1e-5) { // Avoid 0 division on slope.
       p0.setX(xL);
       p1.setX(xR);
     }
-
-    if (barState[left] == BarState::active) setValueAt(left, 1.0f - p0y / getHeight());
-    if (barState[right] == BarState::active) setValueAt(right, 1.0f - p1y / getHeight());
-
-    // In between.
     const float p0x = p0.getX();
     const float p1x = p1.getX();
     const float slope = (p1y - p0y) / (p1x - p0x);
@@ -764,7 +808,8 @@ private:
     float y = slope * (sliderWidth * (left + 1) - p0x) + p0y;
     for (int idx = left + 1; idx >= 0 && idx < right; ++idx) {
       if (barState[idx] != BarState::active) continue;
-      setValueAt(idx, 1.0f - (y + 0.5f * yInc) / getHeight());
+      auto val = 1.0f - (y + 0.5f * yInc) / getHeight();
+      setValueAt(idx, isSnapping ? snap(val) : val);
       y += yInc;
     }
 
