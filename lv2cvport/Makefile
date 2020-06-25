@@ -27,6 +27,7 @@ build: \
 	CV_RateLimiter \
 	CV_Sin \
 	CV_StereoGain \
+	CV_TimeInfo \
 
 .PHONY: CV_3PoleLP
 CV_3PoleLP:
@@ -139,3 +140,7 @@ CV_Sin:
 .PHONY: CV_StereoGain
 CV_StereoGain:
 	$(MAKE) -C CV_StereoGain
+
+.PHONY: CV_TimeInfo
+CV_TimeInfo:
+	$(MAKE) -C CV_TimeInfo

@@ -279,6 +279,20 @@ phase = fmodf(phase + twopi * freq / sampleRate + cvPhase, twopi);
 return sinf(phase);
 ```
 
+## CV_TimeInfo
+CV_TimeInfo provides time information as CV signal.
+
+- Playing: Gate signal that opens when playing.
+- BPM: Directly outputs the value of BPM (Beats Per Minute).
+- TimeSignatureUpper: Directly outputs upper numeral of time signature.
+- TimeSignatureLower: Directly outputs lower numeral of time signature.
+
+**Caution**: Do not connect following output to audio input port:
+
+- BPM
+- TimeSignatureUpper
+- TimeSignatureLower
+
 # Quick Setup
 First, install `qjackctl`, `jack-keyboard`, `a2jmidid` and `Carla`.
 
