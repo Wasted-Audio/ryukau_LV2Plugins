@@ -58,7 +58,11 @@ protected:
 
   void initAudioPort(bool input, uint32_t index, AudioPort &port)
   {
-    if (!input && index < 16) {
+    if (input && index == 0) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("Gate") + String(index);
+      port.symbol = String("cv_gate") + String(index);
+    } else if (!input && index < 16) {
       port.hints = kAudioPortIsCV;
       port.name = String("Output") + String(index);
       port.symbol = String("cv_out_") + String(index);
@@ -131,12 +135,13 @@ protected:
   }
 
   void run(
-    const float ** /* inputs */,
+    const float **inputs,
     float **outputs,
     uint32_t frames,
     const MidiEvent *midiEvents,
     uint32_t midiEventCount) override
   {
+    if (inputs == nullptr) return;
     if (outputs == nullptr) return;
 
     for (size_t i = 0; i < midiEventCount; ++i) handleMidi(midiEvents[i]);
@@ -145,7 +150,7 @@ protected:
     const auto timePos = getTimePosition();
 
     dsp.setParameters(timePos.bbt.beatsPerMinute);
-    dsp.process(frames, outputs);
+    dsp.process(frames, inputs, outputs);
   }
 
 private:

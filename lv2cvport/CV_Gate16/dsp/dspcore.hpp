@@ -38,7 +38,7 @@ public:
   void setup(double sampleRate);
   void reset(); // Stop sounds.
   void setParameters(double tempo);
-  void process(const size_t length, float **outputs);
+  void process(const size_t length, const float **inputs, float **outputs);
   void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);
   void noteOff(int32_t noteId);
 
@@ -89,6 +89,7 @@ public:
 private:
   float sampleRate = 44100.0f;
   double tempo = 120.0f;
+  bool gateOpen = false;
 
   std::vector<NoteInfo> noteStack; // Top of this stack is current note.
 

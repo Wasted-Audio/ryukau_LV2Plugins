@@ -51,12 +51,22 @@ void DSPCore::setParameters(double tempo)
   interpMasterGain.push(param.value[ID::masterGain]->getFloat());
 }
 
-void DSPCore::process(const size_t length, float **outputs)
+void DSPCore::process(const size_t length, const float **inputs, float **outputs)
 {
+  constexpr float gateThreshold = 1e-5f;
+
   SmootherCommon<float>::setBufferSize(length);
 
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
+
+    if (!gateOpen && inputs[0][i] >= gateThreshold) {
+      gateOpen = true;
+      noteOn(-1, 0, 0, 0);
+    } else if (gateOpen && inputs[0][i] < gateThreshold) {
+      gateOpen = false;
+      noteOff(-1);
+    }
 
     const float gain = interpMasterGain.process();
 
@@ -89,6 +99,6 @@ void DSPCore::noteOff(int32_t noteId)
   if (it == noteStack.end()) return;
   noteStack.erase(it);
 
-  if (noteStack.size() == 0)
+  if (noteStack.size() == 0 && !gateOpen)
     for (auto &gate : gates) gate.release();
 }
