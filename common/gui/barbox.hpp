@@ -635,6 +635,7 @@ public:
         setValueFromLine(anchor, ev.pos, ev.mod);
       return true;
     }
+    repaint();
     return false;
   }
 
