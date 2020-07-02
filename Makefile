@@ -3,7 +3,6 @@ all: build generate_ttl
 build: common \
 	experimental \
 	lv2cvport \
-	BubbleSynth \
 	CubicPadSynth \
 	EnvelopedSine \
 	EsPhaser \
@@ -68,10 +67,6 @@ experimental: common
 .PHONY: lv2cvport
 lv2cvport: common
 	$(MAKE) -C lv2cvport
-
-.PHONY: BubbleSynth
-BubbleSynth: common
-	$(MAKE) -C BubbleSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: CubicPadSynth
 CubicPadSynth: common
