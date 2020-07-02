@@ -1,8 +1,6 @@
-# build: \
-# 	BubbleSynth
-# 	RingDelaySynth
-
-build: RingDelaySynth
+build: \
+	BubbleSynth
+	RingDelaySynth
 
 .PHONY: BubbleSynth
 BubbleSynth:
