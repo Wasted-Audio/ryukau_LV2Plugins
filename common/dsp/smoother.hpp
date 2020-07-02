@@ -104,6 +104,7 @@ public:
   inline Vec16f getValue() { return value; }
   inline float getValue(int index) { return value[index]; }
   void reset(float value = 0.0f) { this->value = value; }
+  void reset(Vec16f value = 0.0f) { this->value = value; }
   void reset(int index, float value = 0.0f) { this->value.insert(index, value); }
   void push(Vec16f newTarget) { target = newTarget; }
   void push(int index, float newTarget) { target.insert(index, newTarget); }
