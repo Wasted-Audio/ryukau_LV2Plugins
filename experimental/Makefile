@@ -1,6 +1,6 @@
 build: \
-	BubbleSynth
-	RingDelaySynth
+	BubbleSynth \
+	RingDelaySynth \
 
 .PHONY: BubbleSynth
 BubbleSynth:
