@@ -19,6 +19,7 @@
 
 #include "../../../common/dsp/constants.hpp"
 #include "../../../common/dsp/smoother.hpp"
+#include "../../../lib/vcl/vectormath_trig.h"
 
 #include <complex>
 
@@ -48,37 +49,9 @@ private:
   Sample ramp = 0;
 };
 
-template<typename Sample> class alignas(64) ExpDecayCurve {
-public:
-  void reset(Sample sampleRate, Sample seconds)
-  {
-    value = Sample(1);
-    set(sampleRate, seconds);
-  }
-
-  void set(Sample sampleRate, Sample seconds)
-  {
-    alpha = somepow<Sample>(threshold, Sample(1) / (seconds * sampleRate));
-  }
-
-  bool isTerminated() { return value <= threshold; }
-
-  Sample process()
-  {
-    if (value <= threshold) return Sample(0);
-    value *= alpha;
-    return value - threshold;
-  }
-
-protected:
-  const Sample threshold = 1e-5;
-  Sample value = 0;
-  Sample alpha = 0;
-};
-
-template<typename Sample, uint16_t size> struct KuramotoOsc {
+template<typename Sample, uint16_t size, uint8_t overtone> struct KuramotoOsc {
   std::array<Sample, size> frequency{}; // In radian per sample.
-  std::array<Sample, size> phase{};
+  std::array<std::array<Sample, size>, overtone> phase{};
   std::array<Sample, size> coupling{};
   std::array<Sample, size> couplingDecay{};
   std::array<Sample, size> gain{};
@@ -86,30 +59,72 @@ template<typename Sample, uint16_t size> struct KuramotoOsc {
 
   void setup(Sample sampleRate) {}
 
-  void trigger() { phase.fill(0); }
+  void trigger()
+  {
+    for (auto &ph : phase) ph.fill(0);
+  }
 
   void set() {}
 
   Sample process()
   {
-    std::complex<Sample> sum(0, 0);
-
-    for (uint16_t idx = 0; idx < size; ++idx)
-      sum += gain[idx] * std::polar(Sample(1), phase[idx]);
-
-    sum /= Sample(size);
-    auto amp = std::abs(sum);
-    auto angle = std::arg(sum);
-
     Sample output = 0;
-    for (uint16_t idx = 0; idx < size; ++idx) {
-      auto cpl = coupling[idx] * (Sample(1) - gain[idx] * couplingDecay[idx]);
-      phase[idx] += frequency[idx] + cpl * amp * somesin(angle - phase[idx]);
-      output += gain[idx] * somesin(phase[idx]);
-      gain[idx] *= decay[idx];
-    }
+    for (uint8_t ot = 0; ot < overtone; ++ot) {
+      std::complex<Sample> sum(0, 0);
 
-    return output / size;
+      for (uint16_t idx = 0; idx < size; ++idx)
+        sum += gain[idx] * std::polar(Sample(1), phase[ot][idx]);
+
+      sum /= Sample(size);
+      auto amp = std::abs(sum);
+      auto angle = std::arg(sum);
+      auto nWave = ot + 1;
+
+      for (uint16_t idx = 0; idx < size; ++idx) {
+        auto cpl = coupling[idx] * (Sample(1) - gain[idx] * couplingDecay[idx]);
+        phase[ot][idx]
+          += nWave * frequency[idx] + cpl * amp * somesin(angle - phase[ot][idx]);
+        output += gain[idx] * somesin(phase[ot][idx]);
+        gain[idx] *= decay[idx];
+      }
+    }
+    return output / (size * overtone);
+  }
+};
+
+template<uint8_t overtone> struct alignas(64) KuramotoOsc16 {
+  std::array<Vec16f, overtone> phase;
+  Vec16f frequency = 0; // In radian per sample.
+  Vec16f coupling = 0;
+  Vec16f couplingDecay = 0;
+  Vec16f gain = 0;
+  Vec16f decay = 0;
+
+  void setup(float sampleRate) {}
+
+  void trigger()
+  {
+    for (auto &ph : phase) ph = 0;
+  }
+
+  void set() {}
+
+  float process()
+  {
+    float output = 0;
+    for (uint8_t ot = 0; ot < overtone; ++ot) {
+      float real = horizontal_add(gain * cos(phase[ot])) / 16;
+      float imag = horizontal_add(gain * sin(phase[ot])) / 16;
+
+      float amp = sqrtf(real * real + imag * imag);
+      float angle = atan2f(imag, real);
+
+      phase[ot] += (ot + 1) * frequency
+        + coupling * (1.0f - gain * couplingDecay) * amp * sin(angle - phase[ot]);
+      output += horizontal_add(gain * sin(phase[ot]));
+      gain *= decay;
+    }
+    return output / (16 * overtone);
   }
 };
 

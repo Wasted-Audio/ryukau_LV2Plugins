@@ -137,7 +137,7 @@ struct NoteInfo {
     ExpSmoother<float> smoothMasterGain;                                                 \
                                                                                          \
     AttackGate<float> gate;                                                              \
-    KuramotoOsc<float, nOscillator> oscillator;                                          \
+    KuramotoOsc16<16> oscillator;                                                        \
                                                                                          \
     std::vector<float> transitionBuffer;                                                 \
     bool isTransitioning = false;                                                        \
