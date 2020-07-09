@@ -31,7 +31,7 @@ static const uint32_t kParameterIsInteger = 0x04;
 static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
-constexpr uint16_t nOscillator = 32;
+constexpr uint16_t nOscillator = 16;
 
 namespace ParameterID {
 enum ID {
@@ -115,7 +115,7 @@ struct GlobalParameter : public ParameterInterface {
       Scales::boost.invmap(1.0), Scales::boost, "boost",
       kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::attack] = std::make_unique<LogValue>(
-      0.5, Scales::attack, "attack", kParameterIsAutomable | kParameterIsLogarithmic);
+      0.0, Scales::attack, "attack", kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::decayMultiply] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "decayMultiply", kParameterIsAutomable);
 
