@@ -1,7 +1,6 @@
 all: build generate_ttl
 
 build: common \
-	experimental \
 	lv2cvport \
 	CubicPadSynth \
 	EnvelopedSine \
