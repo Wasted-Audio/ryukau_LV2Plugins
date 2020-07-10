@@ -1,5 +1,6 @@
 build: \
 	BubbleSynth \
+	KSCymbal \
 	KuramotoModel \
 	NoiseTester \
 	RingDelaySynth \
@@ -7,6 +8,10 @@ build: \
 .PHONY: BubbleSynth
 BubbleSynth:
 	$(MAKE) -C BubbleSynth
+
+.PHONY: KSCymbal
+KSCymbal:
+	$(MAKE) -C KSCymbal
 
 .PHONY: KuramotoModel
 KuramotoModel:
