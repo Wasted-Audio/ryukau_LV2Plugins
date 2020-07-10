@@ -133,18 +133,12 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
     float oscPitch = pv[ID::pitch0 + idx]->getFloat();
     float oscFreq = notePitchToFrequency(fabsf(oscPitch) + notePitch, eqTemp, a4Hz);
     if (oscFreq > 20000) oscFreq = 0;
-    float freq = copysignf(1.0f, oscPitch) * twopi * oscFreq / sampleRate;
-    float decay
-      = powf(1e-5, 1.0f / (sampleRate * decayMul * pv[ID::decay0 + idx]->getFloat()));
-    float coupling = pv[ID::coupling0 + idx]->getFloat();
-    float couplingDecay = pv[ID::couplingDecay0 + idx]->getFloat();
-    float gain = pv[ID::gain0 + idx]->getFloat();
-
-    oscillator.frequency.insert(idx, freq);
-    oscillator.decay.insert(idx, decay);
-    oscillator.coupling.insert(idx, coupling);
-    oscillator.couplingDecay.insert(idx, couplingDecay);
-    oscillator.gain.insert(idx, gain);
+    oscillator.frequency.insert(idx, copysignf(1.0f, oscPitch) * oscFreq / sampleRate);
+    oscillator.decay.insert(
+      idx, powf(1e-5, 1.0f / (sampleRate * decayMul * pv[ID::decay0 + idx]->getFloat())));
+    oscillator.coupling.insert(idx, pv[ID::coupling0 + idx]->getFloat());
+    oscillator.couplingDecay.insert(idx, pv[ID::couplingDecay0 + idx]->getFloat());
+    oscillator.gain.insert(idx, pv[ID::gain0 + idx]->getFloat());
   }
   oscillator.trigger();
 }

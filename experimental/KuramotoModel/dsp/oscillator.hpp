@@ -94,7 +94,7 @@ template<typename Sample, uint16_t size, uint8_t overtone> struct KuramotoOsc {
 
 template<uint8_t overtone> struct alignas(64) KuramotoOsc16 {
   std::array<Vec16f, overtone> phase;
-  Vec16f frequency = 0; // In radian per sample.
+  Vec16f frequency = 0; // Normalized frequency in [0, 1).
   Vec16f coupling = 0;
   Vec16f couplingDecay = 0;
   Vec16f gain = 0;
@@ -120,8 +120,9 @@ template<uint8_t overtone> struct alignas(64) KuramotoOsc16 {
       float angle = atan2f(imag, real);
 
       phase[ot] += (ot + 1) * frequency
-        + coupling * (1.0f - gain * couplingDecay) * amp * sin(angle - phase[ot]);
-      output += horizontal_add(gain * sin(phase[ot]));
+        + coupling * (1.0f - gain * couplingDecay) * amp * sin(angle - twopi * phase[ot]);
+      phase[ot] -= floor(phase[ot]); // Wrap around.
+      output += horizontal_add(gain * sin(twopi * phase[ot]));
       gain *= decay;
     }
     return output / (16 * overtone);
