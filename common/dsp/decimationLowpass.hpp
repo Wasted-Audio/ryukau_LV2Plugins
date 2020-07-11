@@ -22,6 +22,75 @@
 namespace SomeDSP {
 
 /**
+Lowpass filter specialized for 4x oversampling.
+
+```python
+import numpy
+from scipy import signal
+sos = signal.ellip(12, 0.01, 20000, "low", output="sos", fs=48000 * 4)
+```
+*/
+template<typename Sample> class DecimationLowpass4 {
+public:
+  void reset()
+  {
+    x0.fill(0);
+    x1.fill(0);
+    x2.fill(0);
+    y0.fill(0);
+    y1.fill(0);
+    y2.fill(0);
+  }
+
+  void push(Sample input)
+  {
+    x0[0] = input;
+    x0[1] = y0[0];
+    x0[2] = y0[1];
+    x0[3] = y0[2];
+    x0[4] = y0[3];
+    x0[5] = y0[4];
+
+    y0[0] = co[0][0] * x0[0] + co[0][1] * x1[0] + co[0][2] * x2[0] - co[0][3] * y1[0]
+      - co[0][4] * y2[0];
+    y0[1] = co[1][0] * x0[1] + co[1][1] * x1[1] + co[1][2] * x2[1] - co[1][3] * y1[1]
+      - co[1][4] * y2[1];
+    y0[2] = co[2][0] * x0[2] + co[2][1] * x1[2] + co[2][2] * x2[2] - co[2][3] * y1[2]
+      - co[2][4] * y2[2];
+    y0[3] = co[3][0] * x0[3] + co[3][1] * x1[3] + co[3][2] * x2[3] - co[3][3] * y1[3]
+      - co[3][4] * y2[3];
+    y0[4] = co[4][0] * x0[4] + co[4][1] * x1[4] + co[4][2] * x2[4] - co[4][3] * y1[4]
+      - co[4][4] * y2[4];
+    y0[5] = co[5][0] * x0[5] + co[5][1] * x1[5] + co[5][2] * x2[5] - co[5][3] * y1[5]
+      - co[5][4] * y2[5];
+
+    x2 = x1;
+    x1 = x0;
+    y2 = y1;
+    y1 = y0;
+  }
+
+  inline Sample output() { return y0[5]; }
+
+  std::array<Sample, 6> x0{};
+  std::array<Sample, 6> x1{};
+  std::array<Sample, 6> x2{};
+  std::array<Sample, 6> y0{};
+  std::array<Sample, 6> y1{};
+  std::array<Sample, 6> y2{};
+  const std::array<std::array<Sample, 5>, 6> co{{
+    {1.8962325065645265e-05, 3.0161593772139253e-05, 1.8962325065645265e-05,
+     -1.5339729166201197, 0.596808299228963},
+    {1.0, 0.07181094309402987, 1.0, -1.526238515988428, 0.6522153815545144},
+    {1.0, -0.7343770990770223, 1.0000000000000002, -1.5163788604342205,
+     0.7379736448756895},
+    {1.0, -1.0778208713346062, 1.0, -1.5116183483295338, 0.8262310871860012},
+    {1.0, -1.228591485885313, 1.0, -1.5181707406672897, 0.9030031335775344},
+    {1.0, -1.2874647661724223, 1.0, -1.5421020836579435, 0.9686986574713192},
+  }};
+};
+
+/**
 Lowpass filter specialized for 16x oversampling.
 
 ```python
