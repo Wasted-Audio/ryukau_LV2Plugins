@@ -138,11 +138,13 @@ struct NoteInfo {
     ExpSmoother<float> smoothMasterGain;                                                 \
                                                                                          \
     int32_t noiseCounter = 0;                                                            \
-    std::minstd_rand rng;                                                                \
+    std::minstd_rand rngNoise;                                                           \
+    std::minstd_rand rngComb;                                                            \
+    std::minstd_rand rngCymbal;                                                          \
                                                                                          \
     AttackGate<float> gate;                                                              \
-    std::array<ShortComb<float>, 8> comb;                                                \
-    KsHat<float, 32> cymbal;                                                             \
+    std::array<ShortComb<float>, nComb> comb;                                            \
+    KsHat<float, nDelay> cymbal;                                                         \
                                                                                          \
     std::vector<float> transitionBuffer;                                                 \
     bool isTransitioning = false;                                                        \

@@ -139,9 +139,11 @@ public:
 template<typename Sample> class KsString {
 public:
   NaiveDelay<Sample> delay;
-  OneZeroLP<Sample> lowpass;
+  PController<Sample> lowpass;
   RCHP<Sample> highpass;
   Sample feedback = 0;
+
+  void setup(Sample sampleRate) { lowpass.setCutoff(sampleRate, 1000); }
 
   void reset()
   {
@@ -165,28 +167,20 @@ public:
   std::array<Sample, size> buf{};
   Sample distance = 1;
 
+  void setup(Sample sampleRate)
+  {
+    for (auto &str : string) str.setup(sampleRate);
+  }
+
   void reset()
   {
     for (auto &str : string) str.reset();
     buf.fill(0);
   }
 
-  void trigger(
-    std::minstd_rand &rng,
-    Sample sampleRate,
-    Sample minFrequency,
-    Sample maxFrequency,
-    Sample distance)
+  void trigger(Sample distance)
   {
-    std::uniform_real_distribution<float> dist(0, 1);
-    auto diffFrequency = somefabs(maxFrequency - minFrequency);
-    for (auto &str : string) {
-      str.delay.setTime(
-        sampleRate, Sample(1) / (minFrequency + diffFrequency * (Sample(1) - dist(rng))));
-    }
-
     this->distance = distance;
-    // buf.fill(0);
     reset();
   }
 

@@ -45,6 +45,11 @@ notePitchToFrequency(float notePitch, float equalTemperament = 12.0f, float a4Hz
   return a4Hz * powf(2.0f, (notePitch - 69.0f) / equalTemperament);
 }
 
+inline float calcNotePitch(float notePitch, float equalTemperament = 12.0f)
+{
+  return powf(2.0f, (notePitch - 69.0f) / equalTemperament);
+}
+
 void DSPCORE_NAME::setup(double sampleRate)
 {
   this->sampleRate = sampleRate;
@@ -58,6 +63,8 @@ void DSPCORE_NAME::setup(double sampleRate)
   // 10 msec + 1 sample transition time.
   transitionBuffer.resize(1 + size_t(sampleRate * 0.01), 0.0f);
 
+  cymbal.setup(sampleRate);
+
   reset();
 }
 
@@ -68,7 +75,9 @@ void DSPCORE_NAME::reset()
   using ID = ParameterID::ID;
   auto &pv = param.value;
 
-  rng.seed(pv[ID::seed]->getInt());
+  rngNoise.seed(pv[ID::seed]->getInt());
+  rngComb.seed(pv[ID::seed]->getInt() + 16777216);
+  rngCymbal.seed(pv[ID::seed]->getInt() + 33554432);
   cymbal.reset();
 
   smoothMasterGain.reset(pv[ID::gain]->getFloat() * pv[ID::boost]->getFloat());
@@ -95,7 +104,7 @@ void DSPCORE_NAME::process(const size_t length, float *out0)
     processMidiNote(i);
 
     if (noiseCounter > 0) {
-      sig = dist(rng);
+      sig = dist(rngNoise);
       --noiseCounter;
     } else {
       sig = 0;
@@ -125,20 +134,39 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
 
   fillTransitionBuffer();
 
-  // TODO: Implement retrigger.
-  // if (pv[ID::retrigger]->getInt()) rng.seed(pv[ID::seed]->getInt());
+  if (pv[ID::retriggerNoise]->getInt()) rngNoise.seed(pv[ID::seed]->getInt());
+  if (pv[ID::retriggerComb]->getInt()) rngComb.seed(pv[ID::seed]->getInt() + 16777216);
+  if (pv[ID::retriggerCymbal]->getInt())
+    rngCymbal.seed(pv[ID::seed]->getInt() + 33554432);
 
   this->velocity = velocityMap.map(velocity);
 
   noiseCounter = int32_t(pv[ID::attack]->getFloat() * sampleRate);
   gate.reset(sampleRate, pv[ID::attack]->getFloat());
 
-  std::uniform_real_distribution<float> distCombTime(0.0f, 0.002f);
-  for (auto &cmb : comb) cmb.setTime(sampleRate, distCombTime(rng));
+  for (size_t idx = 0; idx < nComb; ++idx) {
+    const auto combTime = pv[ID::combTime0 + idx]->getFloat();
+    const auto spread = combTime * pv[ID::randomComb]->getFloat();
+    std::uniform_real_distribution<float> distCombTime(
+      combTime - spread, combTime + spread);
+    comb[idx].setTime(sampleRate, distCombTime(rngComb));
+  }
 
-  cymbal.trigger(
-    rng, sampleRate, pv[ID::minFrequency]->getFloat(), pv[ID::maxFrequency]->getFloat(),
-    pv[ID::distance]->getFloat());
+  const auto eqTemp = pv[ID::equalTemperament]->getFloat() + 1;
+  const auto semitone = pv[ID::semitone]->getInt() - 120;
+  const auto octave = eqTemp * (int32_t(pv[ID::octave]->getInt()) - 12);
+  const auto milli = 0.001f * (pv[ID::milli]->getInt() - 1000);
+  const auto notePitch
+    = calcNotePitch(octave + semitone + milli + pitch + tuning, eqTemp);
+  for (size_t idx = 0; idx < nDelay; ++idx) {
+    const auto freq = notePitch * pv[ID::frequency0 + idx]->getFloat();
+    const auto spread
+      = (freq - Scales::frequency.getMin()) * pv[ID::randomFrequency]->getFloat();
+    std::uniform_real_distribution<float> distFreq(freq - spread, freq + spread);
+    cymbal.string[idx].delay.setTime(sampleRate, 1.0f / distFreq(rngCymbal));
+    cymbal.string[idx].lowpass.setCutoff(sampleRate, pv[ID::lowpassCutoffHz]->getFloat());
+  }
+  cymbal.trigger(pv[ID::distance]->getFloat());
 }
 
 void DSPCORE_NAME::noteOff(int32_t noteId)
@@ -164,6 +192,7 @@ void DSPCORE_NAME::fillTransitionBuffer()
     sig = 0;
     for (auto &cmb : comb) sig -= cmb.process(sig);
     sig = gain * cymbal.process(sig * gate.process());
+
     auto idx = (trIndex + bufIdx) % transitionBuffer.size();
     auto interp = 1.0f - float(bufIdx) / transitionBuffer.size();
     transitionBuffer[idx] += sig * interp;

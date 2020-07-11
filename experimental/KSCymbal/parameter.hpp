@@ -31,31 +31,40 @@ static const uint32_t kParameterIsInteger = 0x04;
 static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
-constexpr uint16_t nOscillator = 16;
+constexpr uint16_t nDelay = 32;
+constexpr uint16_t nComb = 8;
 
 namespace ParameterID {
 enum ID {
   bypass,
 
-  octave,
-  semitone,
-  milli,
-  equalTemperament,
-  pitchA4Hz,
-  pitchBend,
+  frequency0 = 1,
 
-  gain,
+  combTime0 = 1 + nDelay,
+
+  gain = 1 + nDelay + nComb,
   boost,
 
   attack,
   decay,
 
-  minFrequency,
-  maxFrequency,
+  lowpassCutoffHz,
 
   distance,
-  stack,
   seed,
+
+  randomComb,
+  randomFrequency,
+
+  retriggerNoise,
+  retriggerComb,
+  retriggerCymbal,
+
+  octave,
+  semitone,
+  milli,
+  equalTemperament,
+  pitchBend,
 
   ID_ENUM_LENGTH,
 };
@@ -65,23 +74,23 @@ struct Scales {
   static SomeDSP::IntScale<double> boolScale;
   static SomeDSP::LinearScale<double> defaultScale;
 
-  static SomeDSP::IntScale<double> octave;
-  static SomeDSP::IntScale<double> semitone;
-  static SomeDSP::IntScale<double> milli;
-  static SomeDSP::IntScale<double> equalTemperament;
-  static SomeDSP::IntScale<double> pitchA4Hz;
-
   static SomeDSP::LogScale<double> gain;
   static SomeDSP::LinearScale<double> boost;
 
   static SomeDSP::LogScale<double> attack;
   static SomeDSP::LogScale<double> decay;
 
+  static SomeDSP::LinearScale<double> combTime;
   static SomeDSP::LogScale<double> frequency;
+  static SomeDSP::LogScale<double> lowpassCutoffHz;
 
   static SomeDSP::LogScale<double> distance;
-  static SomeDSP::IntScale<double> stack;
   static SomeDSP::IntScale<double> seed;
+
+  static SomeDSP::IntScale<double> octave;
+  static SomeDSP::IntScale<double> semitone;
+  static SomeDSP::IntScale<double> milli;
+  static SomeDSP::IntScale<double> equalTemperament;
 };
 
 struct GlobalParameter : public ParameterInterface {
@@ -98,19 +107,20 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::bypass] = std::make_unique<IntValue>(
       false, Scales::boolScale, "bypass", kParameterIsAutomable | kParameterIsBoolean);
 
-    value[ID::octave] = std::make_unique<IntValue>(
-      12, Scales::octave, "octave", kParameterIsAutomable | kParameterIsInteger);
-    value[ID::semitone] = std::make_unique<IntValue>(
-      120, Scales::semitone, "semitone", kParameterIsAutomable | kParameterIsInteger);
-    value[ID::milli] = std::make_unique<IntValue>(
-      1000, Scales::milli, "milli", kParameterIsAutomable | kParameterIsInteger);
-    value[ID::equalTemperament] = std::make_unique<IntValue>(
-      11, Scales::equalTemperament, "equalTemperament",
-      kParameterIsAutomable | kParameterIsInteger);
-    value[ID::pitchA4Hz] = std::make_unique<IntValue>(
-      340, Scales::pitchA4Hz, "pitchA4Hz", kParameterIsAutomable | kParameterIsInteger);
-    value[ID::pitchBend] = std::make_unique<LinearValue>(
-      0.5, Scales::defaultScale, "pitchBend", kParameterIsAutomable);
+    std::string frequencyLabel("frequency");
+    for (size_t idx = 0; idx < nDelay; ++idx) {
+      auto indexStr = std::to_string(idx);
+      value[ID::frequency0 + idx] = std::make_unique<LogValue>(
+        0.5, Scales::frequency, (frequencyLabel + indexStr).c_str(),
+        kParameterIsAutomable);
+    }
+
+    std::string combTimeLabel("combTime");
+    for (size_t idx = 0; idx < nComb; ++idx) {
+      auto indexStr = std::to_string(idx);
+      value[ID::combTime0 + idx] = std::make_unique<LinearValue>(
+        0.5, Scales::combTime, (combTimeLabel + indexStr).c_str(), kParameterIsAutomable);
+    }
 
     value[ID::gain] = std::make_unique<LogValue>(
       0.5, Scales::gain, "gain", kParameterIsAutomable | kParameterIsLogarithmic);
@@ -122,19 +132,42 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::decay] = std::make_unique<LogValue>(
       0.5, Scales::decay, "decay", kParameterIsAutomable | kParameterIsLogarithmic);
 
-    value[ID::minFrequency] = std::make_unique<LogValue>(
-      0.0, Scales::frequency, "minFrequency",
-      kParameterIsAutomable | kParameterIsLogarithmic);
-    value[ID::maxFrequency] = std::make_unique<LogValue>(
-      Scales::frequency.invmap(200.0), Scales::frequency, "maxFrequency",
+    value[ID::lowpassCutoffHz] = std::make_unique<LogValue>(
+      0.5, Scales::lowpassCutoffHz, "lowpassCutoffHz",
       kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::distance] = std::make_unique<LogValue>(
       0.5, Scales::distance, "distance", kParameterIsAutomable | kParameterIsLogarithmic);
-    value[ID::stack] = std::make_unique<IntValue>(
-      22, Scales::stack, "stack", kParameterIsAutomable | kParameterIsInteger);
     value[ID::seed] = std::make_unique<IntValue>(
       0, Scales::seed, "seed", kParameterIsAutomable | kParameterIsInteger);
+
+    value[ID::randomComb] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "randomComb", kParameterIsAutomable);
+    value[ID::randomFrequency] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "randomFrequency", kParameterIsAutomable);
+
+    value[ID::retriggerNoise] = std::make_unique<IntValue>(
+      true, Scales::boolScale, "retriggerNoise",
+      kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::retriggerComb] = std::make_unique<IntValue>(
+      true, Scales::boolScale, "retriggerComb",
+      kParameterIsAutomable | kParameterIsBoolean);
+    value[ID::retriggerCymbal] = std::make_unique<IntValue>(
+      true, Scales::boolScale, "retriggerCymbal",
+      kParameterIsAutomable | kParameterIsBoolean);
+
+    value[ID::octave] = std::make_unique<IntValue>(
+      12, Scales::octave, "octave", kParameterIsAutomable | kParameterIsInteger);
+    value[ID::semitone] = std::make_unique<IntValue>(
+      120, Scales::semitone, "semitone", kParameterIsAutomable | kParameterIsInteger);
+    value[ID::milli] = std::make_unique<IntValue>(
+      1000, Scales::milli, "milli", kParameterIsAutomable | kParameterIsInteger);
+    value[ID::equalTemperament] = std::make_unique<IntValue>(
+      11, Scales::equalTemperament, "equalTemperament",
+      kParameterIsAutomable | kParameterIsInteger);
+
+    value[ID::pitchBend] = std::make_unique<LinearValue>(
+      0.5, Scales::defaultScale, "pitchBend", kParameterIsAutomable);
   }
 
 #ifndef TEST_BUILD

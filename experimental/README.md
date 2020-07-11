@@ -16,12 +16,22 @@ build: experimental
 ## KSCymbal
 Porting of [web version](https://ryukau.github.io/KSCymbal/).
 
+The idea is to collide Karplus-Strong string model.
+
+Max 192kHz sample rate is supported.
+
 TODO list:
-- Add envelope.
-- Add frequency randomize strategy.
+- Add gate while note-on.
 - Add termination mechanism.
 - Experiment with other excitation.
-- Experiment with other filters.
+- Properly tune highpass filter.
+
+Note:
+- Changed one-zero lowpass to one-pole lowpass.
+- Frequency randomization is must for cymbal-ish sound.
+- Increasing K-S string makes dense decay.
+- Increasing comb filter didn't sound good for this model.
+- Oversampling kind of improved sound, but too heavy.
 
 ## KuramotoModel
 Based on [Kuramoto model](https://en.wikipedia.org/wiki/Kuramoto_model) of synchronization.
@@ -36,7 +46,7 @@ TODO list:
 - Improve UI. Especially for oscillator pitch control.
 - Tune parameter.
 
-Some results:
+Note:
 - Adding overtone is inefficient.
 - Oversampling didn't help much to reduce noise.
 - Strong coupling tends to converge too fast.

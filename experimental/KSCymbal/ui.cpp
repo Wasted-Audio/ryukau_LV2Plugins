@@ -83,19 +83,49 @@ public:
     const auto left0 = 20.0f;
     const auto left1 = left0 + knobX;
     const auto left2 = left1 + knobX;
-    const auto left3 = left2 + knobX;
 
     // Knobs.
     addGroupLabel(left1, top0, innerWidth, labelHeight, midTextSize, "KSCymbal");
 
-    addKnob(left1, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Gain", ID::gain);
-    addKnob(left1, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Boost", ID::boost);
+    addKnob(left0, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Gain", ID::gain);
+    addKnob(left0, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Boost", ID::boost);
 
-    addKnob(left1, top1 + 2 * knobY, knobWidth, margin, uiTextSize, "Attack", ID::attack);
-    addKnob(left1, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "Decay", ID::decay);
+    addKnob(left1, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Attack", ID::attack);
+    addKnob(left1, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Decay", ID::decay);
+
+    addKnob(
+      left0, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "Rnd.Comb", ID::randomComb);
+    addKnob(
+      left1, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "Rnd.Freq",
+      ID::randomFrequency);
+
+    addKnob(
+      left0, top1 + 4 * knobY, knobWidth, margin, uiTextSize, "Distance", ID::distance);
+
+    const auto miscTop1 = top1 + 5 * knobY;
+    addLabel(left0, miscTop1, knobWidth, labelHeight, uiTextSize, "Seed");
+    addTextKnob(
+      left1, miscTop1, knobWidth, labelHeight, uiTextSize, ID::seed, Scales::seed);
+
+    const auto miscTop2 = miscTop1 + labelY;
+    addLabel(left0, miscTop2, knobWidth, labelHeight, uiTextSize, "LP Cutoff");
+    addTextKnob(
+      left1, miscTop2, knobWidth, labelHeight, uiTextSize, ID::lowpassCutoffHz,
+      Scales::lowpassCutoffHz, false, 2);
+
+    const auto miscTop3 = miscTop2 + labelY;
+    addCheckbox(
+      left0, miscTop3, knobWidth, labelHeight, uiTextSize, "Retrig.Noise",
+      ID::retriggerNoise);
+    addCheckbox(
+      left0, miscTop3 + labelY, knobWidth, labelHeight, uiTextSize, "Retrig.Comb",
+      ID::retriggerComb);
+    addCheckbox(
+      left0, miscTop3 + 2 * labelY, knobWidth, labelHeight, uiTextSize, "Retrig.Cymbal",
+      ID::retriggerCymbal);
 
     // Tuning.
-    const auto tuningTop1 = top1 + 4 * knobY;
+    const auto tuningTop1 = miscTop3 + 3 * labelY;
     addLabel(left0, tuningTop1, knobWidth, labelHeight, uiTextSize, "Octave");
     addTextKnob(
       left1, tuningTop1, knobWidth, labelHeight, uiTextSize, ID::octave, Scales::octave,
@@ -121,39 +151,20 @@ public:
       left1, tuningTop4, knobWidth, labelHeight, uiTextSize, ID::equalTemperament,
       Scales::equalTemperament, false, 0, 1);
 
-    const auto tuningTop5 = tuningTop4 + labelY;
-    addLabel(left0, tuningTop5, knobWidth, labelHeight, uiTextSize, "A4 [Hz]");
-    addTextKnob(
-      left1, tuningTop5, knobWidth, labelHeight, uiTextSize, ID::pitchA4Hz,
-      Scales::pitchA4Hz, false, 0, 100);
+    // Comb.
+    addGroupVerticalLabel(
+      left2, top1, barboxHeight, labelHeight, uiTextSize, "Comb Time");
+    addBarBox(
+      left2 + labelY, top1, barboxWidth, barboxHeight, ID::combTime0, nComb,
+      Scales::combTime);
 
-    // Cymbal
-
-    const auto freqTop1 = top1 + 0 * knobY;
-    addLabel(left2, freqTop1, knobWidth, labelHeight, uiTextSize, "MinFreq");
-    addTextKnob(
-      left3, freqTop1, knobWidth, labelHeight, uiTextSize, ID::minFrequency,
-      Scales::frequency, false, 3);
-
-    const auto freqTop2 = top1 + 1 * knobY;
-    addLabel(left2, freqTop2, knobWidth, labelHeight, uiTextSize, "MaxFreq");
-    addTextKnob(
-      left3, freqTop2, knobWidth, labelHeight, uiTextSize, ID::maxFrequency,
-      Scales::frequency, false, 3);
-
-    addKnob(
-      left2, top1 + 2 * knobY, knobWidth, margin, uiTextSize, "Distance", ID::distance);
-
-    const auto cymbalTop1 = top1 + 3 * knobY;
-    addLabel(left2, cymbalTop1, knobWidth, labelHeight, uiTextSize, "Stack");
-    addTextKnob(
-      left3, cymbalTop1, knobWidth, labelHeight, uiTextSize, ID::stack, Scales::stack,
-      false, 0, 2);
-
-    const auto cymbalTop2 = cymbalTop1 + labelY;
-    addLabel(left2, cymbalTop2, knobWidth, labelHeight, uiTextSize, "Seed");
-    addTextKnob(
-      left3, cymbalTop2, knobWidth, labelHeight, uiTextSize, ID::seed, Scales::seed);
+    // Cymbal.
+    const auto cymbalTop1 = top1 + barboxHeight + labelHeight;
+    addGroupVerticalLabel(
+      left2, cymbalTop1, barboxHeight, labelHeight, uiTextSize, "Frequency");
+    addBarBox(
+      left2 + labelY, cymbalTop1, barboxWidth, barboxHeight, ID::frequency0, nDelay,
+      Scales::frequency);
   }
 };
 
