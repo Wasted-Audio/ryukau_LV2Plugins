@@ -102,7 +102,8 @@ public: // DSP.
 
   void release()
   {
-    if (loopEnd < State::release) state = State::release;
+    if (loopEnd >= State::release) return;
+    state = State::release;
     counter = 0;
     prevLevel = value;
   }
