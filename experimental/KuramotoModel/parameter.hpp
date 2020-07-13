@@ -32,16 +32,19 @@ static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
 constexpr uint16_t nOscillator = 16;
+constexpr uint16_t nWaveform = 64;
 
 namespace ParameterID {
 enum ID {
   gain0 = 0,
-  decay0 = nOscillator,
+  decay0 = 1 * nOscillator,
   pitch0 = 2 * nOscillator,
   coupling0 = 3 * nOscillator,
   couplingDecay0 = 4 * nOscillator,
 
-  bypass = 5 * nOscillator,
+  waveform0 = 5 * nOscillator,
+
+  bypass = 5 * nOscillator + nWaveform,
 
   boost,
   attack,
@@ -54,6 +57,8 @@ enum ID {
   pitchA4Hz,
   pitchBend,
 
+  refreshTable,
+
   ID_ENUM_LENGTH,
 };
 } // namespace ParameterID
@@ -61,6 +66,8 @@ enum ID {
 struct Scales {
   static SomeDSP::IntScale<double> boolScale;
   static SomeDSP::LinearScale<double> defaultScale;
+
+  static SomeDSP::LinearScale<double> waveform;
 
   static SomeDSP::LogScale<double> gain;
   static SomeDSP::LogScale<double> decay;
@@ -108,6 +115,14 @@ struct GlobalParameter : public ParameterInterface {
         kParameterIsAutomable);
     }
 
+    std::string waveformLabel("waveform");
+    for (size_t idx = 0; idx < nWaveform; ++idx) {
+      auto indexStr = std::to_string(idx);
+      value[ID::waveform0 + idx] = std::make_unique<LinearValue>(
+        Scales::waveform.invmap(sin(SomeDSP::twopi * idx / double(nWaveform))),
+        Scales::waveform, (waveformLabel + indexStr).c_str(), kParameterIsAutomable);
+    }
+
     value[ID::bypass] = std::make_unique<IntValue>(
       false, Scales::boolScale, "bypass", kParameterIsAutomable | kParameterIsBoolean);
 
@@ -132,6 +147,9 @@ struct GlobalParameter : public ParameterInterface {
       340, Scales::pitchA4Hz, "pitchA4Hz", kParameterIsAutomable | kParameterIsInteger);
     value[ID::pitchBend] = std::make_unique<LinearValue>(
       0.5, Scales::defaultScale, "pitchBend", kParameterIsAutomable);
+
+    value[ID::refreshTable] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "refreshTable", kParameterIsAutomable | kParameterIsBoolean);
   }
 
 #ifndef TEST_BUILD

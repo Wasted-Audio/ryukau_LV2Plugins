@@ -42,7 +42,7 @@ constexpr float knobY = knobHeight + labelY;
 constexpr float barboxWidth = 512;
 constexpr float barboxHeight = 2.0f * knobY;
 constexpr float innerWidth = barboxWidth + labelY + 2 * knobX;
-constexpr float innerHeight = labelY + 5 * barboxHeight;
+constexpr float innerHeight = labelY + 6 * barboxHeight;
 constexpr uint32_t defaultWidth = uint32_t(innerWidth + 2 * uiMargin);
 constexpr uint32_t defaultHeight = uint32_t(innerHeight + 2 * uiMargin);
 
@@ -126,6 +126,11 @@ public:
       left1, tuningTop5, knobWidth, labelHeight, uiTextSize, ID::pitchA4Hz,
       Scales::pitchA4Hz, false, 0, 100);
 
+    const auto refreshTop = tuningTop5 + labelY;
+    addKickButton(
+      left0, refreshTop, 2.0f * knobX, 2.0f * labelHeight, midTextSize, "Refresh Table",
+      ID::refreshTable);
+
     // BarBox.
     addGroupVerticalLabel(left2, top1, barboxHeight, labelHeight, uiTextSize, "Gain");
     addBarBox(
@@ -157,6 +162,13 @@ public:
     addBarBox(
       left2 + labelY, top1 + 4 * barboxHeight, barboxWidth, barboxHeight,
       ID::couplingDecay0, nOscillator, Scales::defaultScale);
+
+    addGroupVerticalLabel(
+      left2, top1 + 5 * barboxHeight, barboxHeight, labelHeight, uiTextSize, "Waveform");
+    auto barboxWaveform = addBarBox(
+      left2 + labelY, top1 + 5 * barboxHeight, barboxWidth, barboxHeight, ID::waveform0,
+      nWaveform, Scales::waveform);
+    barboxWaveform->sliderZero = 0.5f;
   }
 };
 

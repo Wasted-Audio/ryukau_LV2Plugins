@@ -59,6 +59,7 @@ void DSPCORE_NAME::setup(double sampleRate)
   transitionBuffer.resize(1 + size_t(sampleRate * 0.01), 0.0f);
 
   reset();
+  prepareRefresh = true;
 }
 
 void DSPCORE_NAME::reset()
@@ -79,6 +80,12 @@ void DSPCORE_NAME::setParameters(float tempo)
   auto &pv = param.value;
 
   smoothMasterGain.push(pv[ID::boost]->getFloat());
+
+  if (prepareRefresh || (!isTableRefeshed && param.value[ID::refreshTable]->getInt()))
+    refreshTable();
+  isTableRefeshed = param.value[ID::refreshTable]->getInt();
+
+  prepareRefresh = false;
 }
 
 void DSPCORE_NAME::process(const size_t length, float *out0)
@@ -98,8 +105,8 @@ void DSPCORE_NAME::process(const size_t length, float *out0)
       if (trIndex == trStop) isTransitioning = false;
     }
 
-    frame
-      += velocity * smoothMasterGain.process() * gate.process() * oscillator.process();
+    frame += velocity * smoothMasterGain.process() * gate.process()
+      * oscillator.process(sampleRate, wavetable.table);
 
     out0[i] = frame;
   }
@@ -133,12 +140,12 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
     float oscPitch = pv[ID::pitch0 + idx]->getFloat();
     float oscFreq = notePitchToFrequency(fabsf(oscPitch) + notePitch, eqTemp, a4Hz);
     if (oscFreq > 20000) oscFreq = 0;
-    oscillator.frequency.insert(idx, copysignf(1.0f, oscPitch) * oscFreq / sampleRate);
-    oscillator.decay.insert(
-      idx, powf(1e-5, 1.0f / (sampleRate * decayMul * pv[ID::decay0 + idx]->getFloat())));
-    oscillator.coupling.insert(idx, pv[ID::coupling0 + idx]->getFloat());
-    oscillator.couplingDecay.insert(idx, pv[ID::couplingDecay0 + idx]->getFloat());
-    oscillator.gain.insert(idx, pv[ID::gain0 + idx]->getFloat());
+    oscillator.frequency[idx] = copysignf(1.0f, oscPitch) * oscFreq / sampleRate;
+    oscillator.decay[idx]
+      = powf(1e-5, 1.0f / (sampleRate * decayMul * pv[ID::decay0 + idx]->getFloat()));
+    oscillator.coupling[idx] = pv[ID::coupling0 + idx]->getFloat();
+    oscillator.couplingDecay[idx] = pv[ID::couplingDecay0 + idx]->getFloat();
+    oscillator.gain[idx] = pv[ID::gain0 + idx]->getFloat();
   }
   oscillator.trigger();
 }
@@ -162,9 +169,22 @@ void DSPCORE_NAME::fillTransitionBuffer()
 
   float gain = velocity * smoothMasterGain.getValue();
   for (size_t bufIdx = 0; bufIdx < transitionBuffer.size(); ++bufIdx) {
-    auto oscOut = gain * gate.process() * oscillator.process();
+    auto oscOut = gain * gate.process() * oscillator.process(sampleRate, wavetable.table);
     auto idx = (trIndex + bufIdx) % transitionBuffer.size();
     auto interp = 1.0f - float(bufIdx) / transitionBuffer.size();
     transitionBuffer[idx] += oscOut * interp;
   }
+}
+
+void DSPCORE_NAME::refreshTable()
+{
+  using ID = ParameterID::ID;
+
+  reset();
+
+  std::vector<float> table(nWaveform);
+  for (size_t idx = 0; idx < nWaveform; ++idx)
+    table[idx] = param.value[ID::waveform0 + idx]->getFloat();
+
+  wavetable.refreshTable(table, 1); // TODO: Add interpolation type parameter.
 }

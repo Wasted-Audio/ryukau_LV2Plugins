@@ -25,6 +25,17 @@
 
 namespace SomeDSP {
 
+// Range of t is in [0, 1]. Interpoltes between y1 and y2.
+inline float cubicInterp(float y0, float y1, float y2, float y3, float t)
+{
+  auto t2 = t * t;
+  auto c0 = y1 - y2;
+  auto c1 = (y2 - y0) * 0.5f;
+  auto c2 = c0 + c1;
+  auto c3 = c0 + c2 + (y3 - y1) * 0.5f;
+  return c3 * t * t2 - (c2 + c3) * t2 + c1 * t + y1;
+}
+
 template<typename Sample> class AttackGate {
 public:
   void reset(Sample sampleRate, Sample seconds)
@@ -126,6 +137,121 @@ template<uint8_t overtone> struct alignas(64) KuramotoOsc16 {
       gain *= decay;
     }
     return output / (16 * overtone);
+  }
+};
+
+template<size_t tableSize> struct alignas(64) LfoWavetable {
+  std::array<float, tableSize + 1> table;
+
+  enum InterpType : int32_t { interpStep, interpLinear, interpCubic };
+
+  void refreshTable(std::vector<float> &uiTable, int interpType)
+  {
+    const size_t last = table.size() - 1;
+    switch (interpType) {
+      case interpStep: {
+        for (size_t idx = 0; idx < last; ++idx) {
+          size_t uiIdx = uiTable.size() * idx / float(last);
+          table[idx] = uiTable[uiIdx];
+        }
+      } break;
+
+      case interpLinear: {
+        uiTable.push_back(uiTable[0]);
+        const size_t uiTableLast = uiTable.size() - 1;
+        for (size_t idx = 0; idx < last; ++idx) {
+          float targetIdx = uiTableLast * idx / float(last);
+          float frac = targetIdx - floorf(targetIdx);
+          size_t uiIdx = size_t(targetIdx);
+          table[idx] = uiTable[uiIdx] + frac * (uiTable[uiIdx + 1] - uiTable[uiIdx]);
+        }
+      } break;
+
+      case interpCubic:
+      default: {
+        uiTable.insert(uiTable.begin(), uiTable.back());
+        uiTable.push_back(uiTable[1]);
+        uiTable.push_back(uiTable[2]);
+        const size_t uiTableLast = uiTable.size() - 3;
+        for (size_t idx = 0; idx < last; ++idx) {
+          float targetIdx = 1 + uiTableLast * idx / float(last);
+          float frac = targetIdx - floorf(targetIdx);
+          size_t uiIdx = size_t(targetIdx);
+          table[idx] = cubicInterp(
+            uiTable[uiIdx - 1], uiTable[uiIdx], uiTable[uiIdx + 1], uiTable[uiIdx + 2],
+            frac);
+        }
+      } break;
+    }
+    table[last] = table[0];
+  }
+};
+
+template<uint16_t tableSize, uint16_t nOsc> struct KuramotoTableOsc {
+  std::array<float, nOsc> frequency{}; // Normalized frequency in [0, 1).
+  std::array<float, nOsc> approxFreq{};
+  std::array<float, nOsc> prevPhase{};
+  std::array<float, nOsc> phase{};
+  std::array<float, nOsc> coupling{};
+  std::array<float, nOsc> couplingDecay{};
+  std::array<float, nOsc> gain{};
+  std::array<float, nOsc> decay{};
+
+  void setup(float sampleRate) {}
+
+  void trigger()
+  {
+    prevPhase.fill(0);
+    phase.fill(0);
+  }
+
+  void set() {}
+
+  // phase must be in [0, 1).
+  float
+  interpTable(float sampleRate, float phase, std::array<float, tableSize + 1> &table)
+  {
+    phase *= tableSize;
+
+    auto L = uint16_t(phase);
+    float frac = phase - floorf(phase);
+    return table[L] + frac * (table[L + 1] - table[L]);
+  }
+
+  float process(float sampleRate, std::array<float, tableSize + 1> &table)
+  {
+    float output = 0;
+
+    std::complex<float> sum(0, 0);
+
+    for (uint16_t idx = 0; idx < nOsc; ++idx)
+      sum += gain[idx] * std::polar<float>(1, float(twopi) * phase[idx]);
+
+    sum /= float(nOsc);
+    float angle = std::arg(sum) / float(twopi);
+
+    float cosAngle = angle + 0.25;
+    float real = interpTable(sampleRate, cosAngle - floorf(cosAngle), table);
+    float imag = interpTable(sampleRate, angle - floorf(angle), table);
+    float amp = sqrtf(real * real + imag * imag);
+
+    for (uint16_t idx = 0; idx < nOsc; ++idx) {
+      if (prevPhase[idx] > phase[idx]) prevPhase[idx] -= 1.0f;
+      approxFreq[idx] = (phase[idx] - prevPhase[idx]) * sampleRate / 2.0f;
+    }
+
+    for (uint16_t idx = 0; idx < nOsc; ++idx) {
+      float diffPhase = angle - phase[idx];
+      float tableOut = interpTable(sampleRate, diffPhase - floorf(diffPhase), table);
+      float cpl = coupling[idx] * (float(1) - gain[idx] * couplingDecay[idx]);
+      phase[idx] += frequency[idx] + cpl * amp * tableOut;
+      phase[idx] -= floorf(phase[idx]);
+      output += gain[idx] * interpTable(sampleRate, phase[idx], table);
+      gain[idx] *= decay[idx];
+    }
+    prevPhase = phase;
+
+    return output / nOsc;
   }
 };
 

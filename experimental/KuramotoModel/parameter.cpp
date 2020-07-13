@@ -23,6 +23,8 @@ using namespace SomeDSP;
 IntScale<double> Scales::boolScale(1);
 LinearScale<double> Scales::defaultScale(0.0, 1.0);
 
+LinearScale<double> Scales::waveform(-1.0, 1.0);
+
 LogScale<double> Scales::gain(0.0, 1.0, 0.5, 0.2);
 LogScale<double> Scales::decay(0.0, 8.0, 0.5, 1.0);
 LinearScale<double> Scales::pitch(-128.0, 128.0);

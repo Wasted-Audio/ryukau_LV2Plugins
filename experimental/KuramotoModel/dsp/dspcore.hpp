@@ -29,6 +29,8 @@
 
 using namespace SomeDSP;
 
+constexpr uint16_t wavetableSize = 2047;
+
 class DSPInterface {
 public:
   virtual ~DSPInterface(){};
@@ -43,6 +45,7 @@ public:
   virtual void process(const size_t length, float *out0) = 0;
   virtual void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity) = 0;
   virtual void noteOff(int32_t noteId) = 0;
+  virtual void refreshTable() = 0;
 
   struct MidiNote {
     bool isNoteOn;
@@ -82,6 +85,7 @@ struct NoteInfo {
     void noteOn(int32_t noteId, int16_t pitch, float tuning, float velocity);            \
     void noteOff(int32_t noteId);                                                        \
     void fillTransitionBuffer();                                                         \
+    void refreshTable();                                                                 \
                                                                                          \
     struct MidiNote {                                                                    \
       bool isNoteOn;                                                                     \
@@ -136,8 +140,12 @@ struct NoteInfo {
                                                                                          \
     ExpSmoother<float> smoothMasterGain;                                                 \
                                                                                          \
+    bool prepareRefresh = true;                                                          \
+    bool isTableRefeshed = false;                                                        \
+    LfoWavetable<wavetableSize> wavetable;                                               \
+                                                                                         \
     AttackGate<float> gate;                                                              \
-    KuramotoOsc16<16> oscillator;                                                        \
+    KuramotoTableOsc<wavetableSize, nOscillator> oscillator;                             \
                                                                                          \
     std::vector<float> transitionBuffer;                                                 \
     bool isTransitioning = false;                                                        \
