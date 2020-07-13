@@ -29,7 +29,7 @@ TODO list:
 Note:
 - Changed one-zero lowpass to one-pole lowpass.
 - Frequency randomization is must for cymbal-ish sound.
-- Increasing K-S string makes dense decay.
+- Increasing K-S string makes dense decay. 24 or higher is better.
 - Increasing comb filter didn't sound good for this model.
 - Oversampling kind of improved sound, but too heavy.
 
@@ -41,7 +41,6 @@ Original Kuramoto model is a bit too naive for musical application. Adding decay
 The sound is similar to FM.
 
 TODO list:
-- Change oscillator to use wavetable.
 - Implement full pitch bend.
 - Improve UI. Especially for oscillator pitch control.
 - Tune parameter.
@@ -51,6 +50,9 @@ Note:
 - Oversampling didn't help much to reduce noise.
 - Strong coupling tends to converge too fast.
 - VCL helps to speed up.
+- Wavetable is hard to use with Kuramoto model.
+  - Antialiasing isn't working because of phase modulation.
+  - Naive wavetable tends to be too noisy.
 
 ## BubbleSynth
 It sounds like bubble when turning up `Xi` parameter.

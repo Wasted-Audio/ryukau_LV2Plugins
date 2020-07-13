@@ -186,5 +186,5 @@ void DSPCORE_NAME::refreshTable()
   for (size_t idx = 0; idx < nWaveform; ++idx)
     table[idx] = param.value[ID::waveform0 + idx]->getFloat();
 
-  wavetable.refreshTable(table, 1); // TODO: Add interpolation type parameter.
+  wavetable.refreshTable(sampleRate, table, 1); // TODO: Add interpolation type parameter.
 }

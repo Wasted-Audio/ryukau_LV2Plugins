@@ -142,7 +142,7 @@ struct NoteInfo {
                                                                                          \
     bool prepareRefresh = true;                                                          \
     bool isTableRefeshed = false;                                                        \
-    LfoWavetable<wavetableSize> wavetable;                                               \
+    Wavetable<wavetableSize> wavetable;                                                  \
                                                                                          \
     AttackGate<float> gate;                                                              \
     KuramotoTableOsc<wavetableSize, nOscillator> oscillator;                             \
