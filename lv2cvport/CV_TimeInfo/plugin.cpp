@@ -29,6 +29,9 @@ enum PortIndex : uint8_t {
   BPM,
   TimeSignatureUpper,
   TimeSignatureLower,
+  BarTrigger,
+  BeatTrigger,
+  TickTrigger,
 
   PORT_INDEX_LENGTH,
 };
@@ -75,6 +78,18 @@ protected:
       port.hints = kAudioPortIsCV;
       port.name = String("TimeSignatureLower");
       port.symbol = String("TimeSignatureLower");
+    } else if (!input && index == BarTrigger) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("BarTrigger");
+      port.symbol = String("BarTrigger");
+    } else if (!input && index == BeatTrigger) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("BeatTrigger");
+      port.symbol = String("BeatTrigger");
+    } else if (!input && index == TickTrigger) {
+      port.hints = kAudioPortIsCV;
+      port.name = String("TickTrigger");
+      port.symbol = String("TickTrigger");
     } else {
       Plugin::initAudioPort(input, index, port);
     }
@@ -83,7 +98,7 @@ protected:
   void initParameter(uint32_t /* index */, Parameter & /*parameter*/) override {}
   float getParameterValue(uint32_t /* index */) const override { return 0; }
   void setParameterValue(uint32_t /* index */, float /* value */) override {}
-  void sampleRateChanged(double /* newSampleRate */) {}
+  void sampleRateChanged(double newSampleRate) { sampleRate = newSampleRate; }
   void activate() {}
   void deactivate() {}
 
@@ -93,25 +108,74 @@ protected:
 
     const auto timePos = getTimePosition();
 
-    for (uint32_t i = 0; i < frames; ++i)
-      outputs[Playing][i] = timePos.playing ? 1.0f : 0.0f;
+    float playing = timePos.playing ? 1.0f : 0.0f;
+    for (uint32_t i = 0; i < frames; ++i) outputs[Playing][i] = playing;
 
     if (timePos.bbt.valid) {
+      auto &bbt = timePos.bbt;
+
       for (uint32_t i = 0; i < frames; ++i) {
-        outputs[BPM][i] = float(timePos.bbt.beatsPerMinute);
-        outputs[TimeSignatureUpper][i] = float(timePos.bbt.beatsPerBar);
-        outputs[TimeSignatureLower][i] = float(timePos.bbt.beatType);
+        outputs[BPM][i] = float(bbt.beatsPerMinute);
+        outputs[TimeSignatureUpper][i] = float(bbt.beatsPerBar);
+        outputs[TimeSignatureLower][i] = float(bbt.beatType);
+      }
+
+      if (timePos.playing) {
+        auto secondsPerTick = 60.0 / (bbt.ticksPerBeat * bbt.beatsPerMinute);
+        tickLength = uint32_t(sampleRate * secondsPerTick);
+        beatLength = tickLength * bbt.ticksPerBeat;
+        barLength = beatLength * bbt.beatsPerBar;
+
+        if (!wasPlaying) {
+          barCounter = barLength;
+          beatCounter = beatLength;
+          tickCounter = tickLength;
+        }
+
+        for (uint32_t i = 0; i < frames; ++i) {
+          ++barCounter;
+          ++beatCounter;
+          ++tickCounter;
+
+          outputs[BarTrigger][i] = barCounter >= barLength ? 1 : 0;
+          outputs[BeatTrigger][i] = beatCounter >= beatLength ? 1 : 0;
+          outputs[TickTrigger][i] = tickCounter >= tickLength ? 1 : 0;
+
+          if (barCounter >= barLength) barCounter = 0;
+          if (beatCounter >= beatLength) beatCounter = 0;
+          if (tickCounter >= tickLength) tickCounter = 0;
+        }
+      } else {
+        for (uint32_t i = 0; i < frames; ++i) {
+          outputs[BarTrigger][i] = 0.0;
+          outputs[BeatTrigger][i] = 0.0;
+          outputs[TickTrigger][i] = 0.0;
+        }
       }
     } else {
       for (uint32_t i = 0; i < frames; ++i) {
         outputs[BPM][i] = 0.0;
         outputs[TimeSignatureUpper][i] = 0.0;
         outputs[TimeSignatureLower][i] = 0.0;
+        outputs[BarTrigger][i] = 0.0;
+        outputs[BeatTrigger][i] = 0.0;
+        outputs[TickTrigger][i] = 0.0;
       }
     }
+
+    wasPlaying = timePos.playing;
   }
 
 private:
+  bool wasPlaying = false;
+  double sampleRate = 44100;
+  uint32_t barCounter = 0;
+  uint32_t beatCounter = 0;
+  uint32_t tickCounter = 0;
+  uint32_t barLength = 1;
+  uint32_t beatLength = 1;
+  uint32_t tickLength = 1;
+
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_TimeInfo)
 };
 
