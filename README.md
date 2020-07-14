@@ -133,7 +133,7 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 | <kbd>Ctrl</kbd> + <kbd>Left Drag</kbd>                     | Reset to Default                   |
 | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Left Drag</kbd>  | Change Value (Skip Between Frames) |
 | <kbd>Right Drag</kbd>                                      | Draw Line                          |
-| <kbd>Shift</kbd> + <kbd>Right Drag</kbd>                   | Draw Line (Snapped)                |
+| <kbd>Shift</kbd> + <kbd>Right Drag</kbd>                   | Edit One Bar                       |
 | <kbd>Ctrl</kbd> + <kbd>Right Drag</kbd>                    | Reset to Default                   |
 | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Right Drag</kbd> | Toggle Lock                        |
 | <kbd>a</kbd>                                               | Alternate Sign                     |
@@ -164,6 +164,8 @@ BarBox controls which is shown in the image below have keyboard shortcuts. Short
 | <kbd>2</kbd>-<kbd>9</kbd>                                  | Decrease 2n-9n                     |
 
 Snapping is not available for all BarBox. If you'd like to have snapping for certain BarBox, feel free to open issue.
+
+Edit One Bar with <kbd>Shift</kbd> + <kbd>Right Drag</kbd> holds a bar under the cursor when mouse right button is pressed. Then only changes that one bar while holding down mouse right button.
 
 Toggle Lock with <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Right Drag</kbd> behaves as line edit. When right mouse button (RMB) is pressed, it holds the opposite state of the bar below mouse cursor, then use the state for the rest of bars. For example, if RMB is pressed on a locked bar, dragging unlocks bars while holding down RMB.
 

@@ -629,10 +629,15 @@ public:
       anchor = ev.pos;
       return true;
     } else if (isMouseRightDown) {
-      if (ev.mod & kModifierControl && ev.mod & kModifierShift)
+      if (ev.mod & kModifierControl && ev.mod & kModifierShift) {
         setStateFromLine(anchor, ev.pos, anchorState);
-      else
+      } else if (ev.mod & kModifierShift) {
+        mousePosition
+          = Point<int>(anchor.getX(), std::clamp<int>(ev.pos.getY(), 0, getHeight()));
+        setValueFromPosition(mousePosition, 0);
+      } else {
         setValueFromLine(anchor, ev.pos, ev.mod);
+      }
       return true;
     }
     repaint();
