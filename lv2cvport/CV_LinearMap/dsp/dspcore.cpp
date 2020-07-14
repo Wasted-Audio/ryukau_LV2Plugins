@@ -36,9 +36,11 @@ void DSPCore::setParameters()
   using ID = ParameterID::ID;
 
   interpAdd.push(
-    (param.value[ID::addInt]->getInt() - 128) + param.value[ID::addFrac]->getFloat());
+    (int32_t(param.value[ID::addInt]->getInt()) - 128)
+    + param.value[ID::addFrac]->getFloat());
   interpMul.push(
-    (param.value[ID::mulInt]->getInt() - 128) + param.value[ID::mulFrac]->getFloat());
+    (int32_t(param.value[ID::mulInt]->getInt()) - 128)
+    + param.value[ID::mulFrac]->getFloat());
 }
 
 void DSPCore::process(const size_t length, const float *in0, float *out0)
