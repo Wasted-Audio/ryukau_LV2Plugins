@@ -122,7 +122,7 @@ protected:
 
       if (timePos.playing) {
         auto secondsPerTick = 60.0 / (bbt.ticksPerBeat * bbt.beatsPerMinute);
-        tickLength = uint32_t(sampleRate * secondsPerTick);
+        tickLength = sampleRate * secondsPerTick;
         beatLength = tickLength * bbt.ticksPerBeat;
         barLength = beatLength * bbt.beatsPerBar;
 
@@ -169,12 +169,12 @@ protected:
 private:
   bool wasPlaying = false;
   double sampleRate = 44100;
-  uint32_t barCounter = 0;
-  uint32_t beatCounter = 0;
-  uint32_t tickCounter = 0;
-  uint32_t barLength = 1;
-  uint32_t beatLength = 1;
-  uint32_t tickLength = 1;
+  double barCounter = 0;
+  double beatCounter = 0;
+  double tickCounter = 0;
+  double barLength = 1;
+  double beatLength = 1;
+  double tickLength = 1;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_TimeInfo)
 };
