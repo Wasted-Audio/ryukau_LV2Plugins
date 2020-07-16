@@ -592,7 +592,6 @@ public:
 
   bool onMouse(const MouseEvent &ev) override
   {
-    // Note: Specific to this plugin.
     if (!ev.press && (ev.button == 1 || ev.button == 3)) {
       updateValue();
     }
@@ -773,9 +772,9 @@ private:
       if (modifier & kModifierControl)
         setValueAt(left, defaultValue[left]);
       else if (modifier & kModifierShift)
-        setValueAt(left, snap(1.0f - (p0y + p1y) * 0.5f / getHeight()));
+        setValueAt(left, snap(1.0f - double(anchor.getY()) / getHeight()));
       else
-        setValueAt(left, 1.0f - (p0y + p1y) * 0.5f / getHeight());
+        setValueAt(left, 1.0f - double(anchor.getY()) / getHeight());
 
       updateValueAt(left);
       repaint();
