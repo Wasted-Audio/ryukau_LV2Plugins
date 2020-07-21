@@ -50,6 +50,16 @@ inline float calcNotePitch(float notePitch, float equalTemperament = 12.0f)
   return powf(2.0f, (notePitch - 69.0f) / equalTemperament);
 }
 
+// Fast approximation of PController::cutoffToP().
+// x is normalized frequency. Range is [0, 0.5).
+template<typename T> inline T cutoffToPApprox(T x)
+{
+  return (T(-0.0004930424721520979) + T(2.9650003823571467) * x
+          + T(1.8250079928630534) * x * x)
+    / (T(0.4649282844668299) + T(1.8754712250208077) * x + T(3.7307819672604023) * x * x)
+    + T(0.0010604699447733293);
+}
+
 void DSPCORE_NAME::setup(double sampleRate)
 {
   this->sampleRate = sampleRate;
@@ -66,8 +76,6 @@ void DSPCORE_NAME::setup(double sampleRate)
   cymbalLowpassEnvelope.setup(sampleRate);
   cymbal.setup(sampleRate);
 
-  limiter.prepare(sampleRate, 0.8f, 1.0f, 0.01f);
-
   reset();
 }
 
@@ -82,7 +90,7 @@ void DSPCORE_NAME::reset()
   rngComb.seed(pv[ID::seed]->getInt() + 16777216);
   rngCymbal.seed(pv[ID::seed]->getInt() + 33554432);
   cymbal.reset();
-  limiter.reset();
+  dcKiller.reset();
 
   smoothMasterGain.reset(pv[ID::gain]->getFloat() * pv[ID::boost]->getFloat());
 }
@@ -118,15 +126,12 @@ void DSPCORE_NAME::process(const size_t length, float *out0)
       sig = 0;
     }
     for (auto &cmb : comb) sig -= cmb.process(sig);
-    // frame = velocity * smoothMasterGain.process()
-    //   * limiter.process(cymbal.process(sig * gate.process()));
 
     float lpEnv = cymbalLowpassEnvelope.process();
-    for (size_t idx = 0; idx < nDelay; ++idx) {
-      cymbal.string[idx].lowpass.setCutoff(sampleRate, lpEnv * lpCut);
-    }
+    PControllerKSHat<float>::kp = cutoffToPApprox(lpEnv * lpCut / sampleRate);
 
-    frame = velocity * smoothMasterGain.process() * cymbal.process(sig * gate.process());
+    frame = velocity * smoothMasterGain.process()
+      * dcKiller.process(cymbal.process(sig * gate.process()));
 
     if (isTransitioning) {
       frame += transitionBuffer[trIndex];
@@ -180,17 +185,16 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
       = (freq - Scales::frequency.getMin()) * pv[ID::randomFrequency]->getFloat();
     std::uniform_real_distribution<float> distFreq(freq - spread, freq + spread);
     cymbal.string[idx].delay.setTime(sampleRate, 1.0f / distFreq(rngCymbal));
-    cymbal.string[idx].lowpass.setCutoff(sampleRate, pv[ID::lowpassCutoffHz]->getFloat());
-    cymbal.string[idx].highpass.setCutoff(
-      sampleRate, pv[ID::highpassCutoffHz]->getFloat());
   }
+  OnePoleHighpass<float>::setCutoff(sampleRate, pv[ID::highpassCutoffHz]->getFloat());
+  PControllerKSHat<float>::kp = 0;
   cymbal.trigger(pv[ID::distance]->getFloat());
 
   cymbalLowpassEnvelope.reset(
     pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
     pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
 
-  limiter.reset();
+  dcKiller.reset();
 }
 
 void DSPCORE_NAME::noteOff(int32_t noteId)
@@ -217,8 +221,7 @@ void DSPCORE_NAME::fillTransitionBuffer()
   for (size_t bufIdx = 0; bufIdx < transitionBuffer.size(); ++bufIdx) {
     sig = 0;
     for (auto &cmb : comb) sig -= cmb.process(sig);
-    // sig = gain * limiter.process(cymbal.process(sig * gate.process()));
-    sig = gain * cymbal.process(sig * gate.process());
+    sig = gain * dcKiller.process(cymbal.process(sig * gate.process()));
 
     auto idx = (trIndex + bufIdx) % transitionBuffer.size();
     auto interp = 1.0f - float(bufIdx) / transitionBuffer.size();

@@ -23,6 +23,7 @@
 #include "../parameter.hpp"
 #include "delay.hpp"
 #include "envelope.hpp"
+#include "iir.hpp"
 
 #include <algorithm>
 #include <array>
@@ -147,7 +148,7 @@ struct NoteInfo {
     std::array<ShortComb<float>, nComb> comb;                                            \
     KsHat<float, nDelay> cymbal;                                                         \
     ExpADSREnvelopeP<float> cymbalLowpassEnvelope;                                       \
-    InternalLimiter limiter;                                                             \
+    DCKiller<float> dcKiller;                                                            \
                                                                                          \
     std::vector<float> transitionBuffer;                                                 \
     bool isTransitioning = false;                                                        \

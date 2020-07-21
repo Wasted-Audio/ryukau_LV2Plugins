@@ -25,37 +25,6 @@
 
 namespace SomeDSP {
 
-// Convert `tau` in seconds to 1 pole lowpass filter coefficient.
-inline float tau2pole(float sampleRate, float tau)
-{
-  if (fabsf(tau) < FLT_EPSILON) return 0;
-  return expf(-1.0f / (tau * sampleRate));
-}
-
-struct InternalLimiter {
-  float limit = 1; // Must be positive.
-  float clip = 1;  // Must be positive.
-  float pole = 1;
-  float amp = 1;
-
-  void prepare(float sampleRate, float limit, float clip, float time)
-  {
-    this->limit = limit;
-    this->clip = clip;
-    pole = tau2pole(sampleRate, time);
-  }
-
-  void reset(float amp = 1) { this->amp = amp; }
-
-  float process(float input)
-  {
-    auto absed = somefabs(input);
-    auto target = absed > limit ? limit / absed : limit;
-    amp += pole * (target - amp);
-    return std::clamp<float>(input * amp, -clip, clip);
-  }
-};
-
 template<typename Sample> class AttackGate {
 public:
   void reset(Sample sampleRate, Sample seconds)
@@ -79,42 +48,12 @@ private:
   Sample ramp = 0;
 };
 
-// https://ccrma.stanford.edu/~jos/filters/One_Zero.html
-template<typename Sample> struct OneZeroLP {
-  Sample x1 = 0;
-  Sample kp = 0.5;
-
-  void reset() { x1 = 0; }
-
-  Sample process(Sample x0)
-  {
-    Sample out = kp * (x0 - x1) + x1;
-    x1 = x0;
-    return out;
-  }
-};
-
-template<typename Sample> struct RCHP {
-  Sample kp = 0.5;
-  Sample y = 0;
-  Sample x1 = 0;
-
-  void reset() { y = x1 = 0; }
-
-  Sample process(Sample x0)
-  {
-    y = kp * (y + x0 - x1); // y0 = kp * (y1 + x0 - x1).
-    x1 = x0;
-    return y;
-  }
-};
-
 // https://www.earlevel.com/main/2012/12/15/a-one-pole-filter/
 template<typename Sample> struct OnePoleHighpass {
-  Sample b1 = 0;
+  static Sample b1;
   Sample z1 = 0;
 
-  void setCutoff(Sample sampleRate, Sample cutoffHz)
+  static void setCutoff(Sample sampleRate, Sample cutoffHz)
   {
     b1 = exp(-twopi * cutoffHz / sampleRate); // Use double.
   }
@@ -126,6 +65,18 @@ template<typename Sample> struct OnePoleHighpass {
     return input - z1;
   }
 };
+
+template<typename Sample> Sample OnePoleHighpass<Sample>::b1 = 0;
+
+template<typename Sample> struct PControllerKSHat {
+  static Sample kp; // In [0, 1].
+  Sample value = 0;
+
+  void reset(Sample value = 0) { this->value = value; }
+  Sample process(Sample input) { return value += kp * (input - value); }
+};
+
+template<typename Sample> Sample PControllerKSHat<Sample>::kp = 1;
 
 template<typename Sample> class ShortComb {
 public:
@@ -189,15 +140,11 @@ public:
 template<typename Sample> class KsString {
 public:
   NaiveDelay<Sample> delay;
-  PController<Sample> lowpass;
+  PControllerKSHat<Sample> lowpass;
   OnePoleHighpass<Sample> highpass;
   Sample feedback = 0;
 
-  void setup(Sample sampleRate)
-  {
-    lowpass.setCutoff(sampleRate, 1000);
-    highpass.setCutoff(sampleRate, 20);
-  }
+  void setup(Sample sampleRate) { highpass.setCutoff(sampleRate, 20); }
 
   void reset()
   {
