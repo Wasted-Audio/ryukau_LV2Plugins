@@ -22,6 +22,7 @@
 #include "../../../common/dsp/somemath.hpp"
 #include "../parameter.hpp"
 #include "delay.hpp"
+#include "envelope.hpp"
 
 #include <algorithm>
 #include <array>
@@ -145,6 +146,8 @@ struct NoteInfo {
     AttackGate<float> gate;                                                              \
     std::array<ShortComb<float>, nComb> comb;                                            \
     KsHat<float, nDelay> cymbal;                                                         \
+    ExpADSREnvelopeP<float> cymbalLowpassEnvelope;                                       \
+    InternalLimiter limiter;                                                             \
                                                                                          \
     std::vector<float> transitionBuffer;                                                 \
     bool isTransitioning = false;                                                        \

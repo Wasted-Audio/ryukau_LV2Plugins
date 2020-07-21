@@ -63,7 +63,10 @@ void DSPCORE_NAME::setup(double sampleRate)
   // 10 msec + 1 sample transition time.
   transitionBuffer.resize(1 + size_t(sampleRate * 0.01), 0.0f);
 
+  cymbalLowpassEnvelope.setup(sampleRate);
   cymbal.setup(sampleRate);
+
+  limiter.prepare(sampleRate, 0.8f, 1.0f, 0.01f);
 
   reset();
 }
@@ -79,6 +82,7 @@ void DSPCORE_NAME::reset()
   rngComb.seed(pv[ID::seed]->getInt() + 16777216);
   rngCymbal.seed(pv[ID::seed]->getInt() + 33554432);
   cymbal.reset();
+  limiter.reset();
 
   smoothMasterGain.reset(pv[ID::gain]->getFloat() * pv[ID::boost]->getFloat());
 }
@@ -99,6 +103,10 @@ void DSPCORE_NAME::process(const size_t length, float *out0)
 
   std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
 
+  using ID = ParameterID::ID;
+  auto &pv = param.value;
+  float lpCut = pv[ID::lowpassCutoffHz]->getFloat();
+
   float frame, sig;
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
@@ -110,6 +118,14 @@ void DSPCORE_NAME::process(const size_t length, float *out0)
       sig = 0;
     }
     for (auto &cmb : comb) sig -= cmb.process(sig);
+    // frame = velocity * smoothMasterGain.process()
+    //   * limiter.process(cymbal.process(sig * gate.process()));
+
+    float lpEnv = cymbalLowpassEnvelope.process();
+    for (size_t idx = 0; idx < nDelay; ++idx) {
+      cymbal.string[idx].lowpass.setCutoff(sampleRate, lpEnv * lpCut);
+    }
+
     frame = velocity * smoothMasterGain.process() * cymbal.process(sig * gate.process());
 
     if (isTransitioning) {
@@ -165,8 +181,16 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
     std::uniform_real_distribution<float> distFreq(freq - spread, freq + spread);
     cymbal.string[idx].delay.setTime(sampleRate, 1.0f / distFreq(rngCymbal));
     cymbal.string[idx].lowpass.setCutoff(sampleRate, pv[ID::lowpassCutoffHz]->getFloat());
+    cymbal.string[idx].highpass.setCutoff(
+      sampleRate, pv[ID::highpassCutoffHz]->getFloat());
   }
   cymbal.trigger(pv[ID::distance]->getFloat());
+
+  cymbalLowpassEnvelope.reset(
+    pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
+    pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
+
+  limiter.reset();
 }
 
 void DSPCORE_NAME::noteOff(int32_t noteId)
@@ -176,6 +200,8 @@ void DSPCORE_NAME::noteOff(int32_t noteId)
   });
   if (it == noteStack.end()) return;
   noteStack.erase(it);
+
+  if (noteStack.size() == 0) cymbalLowpassEnvelope.release();
 }
 
 void DSPCORE_NAME::fillTransitionBuffer()
@@ -191,6 +217,7 @@ void DSPCORE_NAME::fillTransitionBuffer()
   for (size_t bufIdx = 0; bufIdx < transitionBuffer.size(); ++bufIdx) {
     sig = 0;
     for (auto &cmb : comb) sig -= cmb.process(sig);
+    // sig = gain * limiter.process(cymbal.process(sig * gate.process()));
     sig = gain * cymbal.process(sig * gate.process());
 
     auto idx = (trIndex + bufIdx) % transitionBuffer.size();

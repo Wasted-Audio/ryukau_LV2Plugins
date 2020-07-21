@@ -31,7 +31,7 @@ static const uint32_t kParameterIsInteger = 0x04;
 static const uint32_t kParameterIsLogarithmic = 0x08;
 #endif
 
-constexpr uint16_t nDelay = 32;
+constexpr uint16_t nDelay = 24;
 constexpr uint16_t nComb = 8;
 
 namespace ParameterID {
@@ -49,6 +49,12 @@ enum ID {
   decay,
 
   lowpassCutoffHz,
+  highpassCutoffHz,
+
+  lowpassA,
+  lowpassD,
+  lowpassS,
+  lowpassR,
 
   distance,
   seed,
@@ -83,6 +89,12 @@ struct Scales {
   static SomeDSP::LinearScale<double> combTime;
   static SomeDSP::LogScale<double> frequency;
   static SomeDSP::LogScale<double> lowpassCutoffHz;
+  static SomeDSP::LogScale<double> highpassCutoffHz;
+
+  static SomeDSP::LogScale<double> envelopeA;
+  static SomeDSP::LogScale<double> envelopeD;
+  static SomeDSP::LogScale<double> envelopeS;
+  static SomeDSP::LogScale<double> envelopeR;
 
   static SomeDSP::LogScale<double> distance;
   static SomeDSP::IntScale<double> seed;
@@ -134,6 +146,22 @@ struct GlobalParameter : public ParameterInterface {
 
     value[ID::lowpassCutoffHz] = std::make_unique<LogValue>(
       0.5, Scales::lowpassCutoffHz, "lowpassCutoffHz",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::highpassCutoffHz] = std::make_unique<LogValue>(
+      0.5, Scales::highpassCutoffHz, "highpassCutoffHz",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+
+    value[ID::lowpassA] = std::make_unique<LogValue>(
+      0.0, Scales::envelopeA, "lowpassA",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::lowpassD] = std::make_unique<LogValue>(
+      0.5, Scales::envelopeD, "lowpassD",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::lowpassS] = std::make_unique<LogValue>(
+      0.5, Scales::envelopeS, "lowpassS",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::lowpassR] = std::make_unique<LogValue>(
+      0.5, Scales::envelopeR, "lowpassR",
       kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::distance] = std::make_unique<LogValue>(

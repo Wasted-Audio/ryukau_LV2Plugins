@@ -41,7 +41,7 @@ constexpr float knobX = 60.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
 constexpr float barboxWidth = 512;
 constexpr float barboxHeight = 2.0f * knobY;
-constexpr float innerWidth = barboxWidth + labelY + 2 * knobX;
+constexpr float innerWidth = barboxWidth + labelY + 4 * knobX;
 constexpr float innerHeight = labelY + 5 * barboxHeight;
 constexpr uint32_t defaultWidth = uint32_t(innerWidth + 2 * uiMargin);
 constexpr uint32_t defaultHeight = uint32_t(innerHeight + 2 * uiMargin);
@@ -83,6 +83,7 @@ public:
     const auto left0 = 20.0f;
     const auto left1 = left0 + knobX;
     const auto left2 = left1 + knobX;
+    const auto left3 = left2 + knobX;
 
     // Knobs.
     addGroupLabel(left1, top0, innerWidth, labelHeight, midTextSize, "KSCymbal");
@@ -114,18 +115,30 @@ public:
       Scales::lowpassCutoffHz, false, 2);
 
     const auto miscTop3 = miscTop2 + labelY;
+    addLabel(left0, miscTop3, knobWidth, labelHeight, uiTextSize, "HP Cutoff");
+    addTextKnob(
+      left1, miscTop3, knobWidth, labelHeight, uiTextSize, ID::highpassCutoffHz,
+      Scales::highpassCutoffHz, false, 2);
+
+    const auto miscTop4 = miscTop3 + labelY;
     addCheckbox(
-      left0, miscTop3, knobWidth, labelHeight, uiTextSize, "Retrig.Noise",
+      left0, miscTop4, knobWidth, labelHeight, uiTextSize, "Retrig.Noise",
       ID::retriggerNoise);
     addCheckbox(
-      left0, miscTop3 + labelY, knobWidth, labelHeight, uiTextSize, "Retrig.Comb",
+      left0, miscTop4 + labelY, knobWidth, labelHeight, uiTextSize, "Retrig.Comb",
       ID::retriggerComb);
     addCheckbox(
-      left0, miscTop3 + 2 * labelY, knobWidth, labelHeight, uiTextSize, "Retrig.Cymbal",
+      left0, miscTop4 + 2 * labelY, knobWidth, labelHeight, uiTextSize, "Retrig.Cymbal",
       ID::retriggerCymbal);
 
+    // Envelope.
+    addKnob(left2, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "A", ID::lowpassA);
+    addKnob(left2, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "D", ID::lowpassD);
+    addKnob(left2, top1 + 2 * knobY, knobWidth, margin, uiTextSize, "S", ID::lowpassS);
+    addKnob(left2, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "R", ID::lowpassR);
+
     // Tuning.
-    const auto tuningTop1 = miscTop3 + 3 * labelY;
+    const auto tuningTop1 = miscTop4 + 3 * labelY;
     addLabel(left0, tuningTop1, knobWidth, labelHeight, uiTextSize, "Octave");
     addTextKnob(
       left1, tuningTop1, knobWidth, labelHeight, uiTextSize, ID::octave, Scales::octave,
@@ -153,17 +166,17 @@ public:
 
     // Comb.
     addGroupVerticalLabel(
-      left2, top1, barboxHeight, labelHeight, uiTextSize, "Comb Time");
+      left3, top1, barboxHeight, labelHeight, uiTextSize, "Comb Time");
     addBarBox(
-      left2 + labelY, top1, barboxWidth, barboxHeight, ID::combTime0, nComb,
+      left3 + labelY, top1, barboxWidth, barboxHeight, ID::combTime0, nComb,
       Scales::combTime);
 
     // Cymbal.
     const auto cymbalTop1 = top1 + barboxHeight + labelHeight;
     addGroupVerticalLabel(
-      left2, cymbalTop1, barboxHeight, labelHeight, uiTextSize, "Frequency");
+      left3, cymbalTop1, barboxHeight, labelHeight, uiTextSize, "Frequency");
     addBarBox(
-      left2 + labelY, cymbalTop1, barboxWidth, barboxHeight, ID::frequency0, nDelay,
+      left3 + labelY, cymbalTop1, barboxWidth, barboxHeight, ID::frequency0, nDelay,
       Scales::frequency);
   }
 };
