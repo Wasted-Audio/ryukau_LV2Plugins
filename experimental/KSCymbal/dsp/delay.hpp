@@ -107,35 +107,62 @@ public:
   }
 };
 
-template<typename Sample> class NaiveDelay {
+// 2x oversampled delay.
+template<typename Sample> class Delay {
 public:
-  std::array<Sample, 16384> buf; // Min ~11.72Hz when samplerate is 192kHz.
+  std::array<Sample, 32768> buf; // Min ~11.72Hz when samplerate is 192kHz.
+  Sample w1 = 0;
+  Sample rFraction = 0;
   int wptr = 0;
   int rptr = 0;
 
-  void reset() { buf.fill(0); }
+  void reset()
+  {
+    w1 = 0;
+    buf.fill(0);
+  }
 
   void setTime(Sample sampleRate, Sample seconds)
   {
-    rptr = wptr - std::clamp<int>(sampleRate * seconds, 0, buf.size());
+    Sample timeInSample
+      = std::clamp<Sample>(Sample(2) * sampleRate * seconds, 0, buf.size());
+    auto timeInt = int(timeInSample);
+
+    rFraction = timeInSample - Sample(timeInt);
+
+    rptr = wptr - timeInt;
     if (rptr < 0) rptr += int(buf.size());
   }
 
   Sample process(Sample input)
   {
+    // Write to buffer.
     ++wptr;
-    wptr &= 16383; // 16383 = 2^14 - 1. 0x3fff.
+    wptr &= 32767; // 32767 = 2^15 - 1. 0x7fff.
+    buf[wptr] = Sample(0.5) * (input + w1);
+
+    ++wptr;
+    wptr &= 32767; // 32767 = 2^15 - 1. 0x7fff.
     buf[wptr] = input;
 
+    w1 = input;
+
+    // Read from buffer.
     ++rptr;
-    rptr &= 16383;
-    return buf[rptr];
+    rptr &= 32767;
+    const unsigned int i1 = rptr;
+
+    ++rptr;
+    rptr &= 32767;
+    const unsigned int i0 = rptr;
+
+    return buf[i0] - rFraction * (buf[i0] - buf[i1]);
   }
 };
 
 template<typename Sample> class KsString {
 public:
-  NaiveDelay<Sample> delay;
+  Delay<Sample> delay;
   PControllerKSHat<Sample> lowpass;
   OnePoleHighpass<Sample> highpass;
   Sample feedback = 0;
