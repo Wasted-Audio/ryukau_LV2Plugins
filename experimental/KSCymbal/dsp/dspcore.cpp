@@ -85,8 +85,8 @@ void NOTE_NAME::noteOn(
   this->pan = pan;
   gain = 1.0f;
 
-  noiseCounter = int32_t(pv[ID::attack]->getFloat() * sampleRate);
-  gate.reset(sampleRate, pv[ID::attack]->getFloat());
+  noiseCounter = int32_t(pv[ID::exciterAttack]->getFloat() * sampleRate);
+  gate.reset(sampleRate, pv[ID::exciterAttack]->getFloat());
 
   releaseLength = 0.01f * sampleRate;
   releaseCounter = int32_t(releaseLength);
@@ -117,17 +117,17 @@ void NOTE_NAME::noteOn(
   cymbal.trigger(pv[ID::distance]->getFloat());
 
   cymbalLowpassEnvelope.reset(
-    pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
+    sampleRate, pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
     pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
 
   dcKiller.reset();
 }
 
-void NOTE_NAME::release()
+void NOTE_NAME::release(float sampleRate)
 {
   if (state == NoteState::rest) return;
   state = NoteState::release;
-  cymbalLowpassEnvelope.release();
+  cymbalLowpassEnvelope.release(sampleRate);
 }
 
 void NOTE_NAME::rest() { state = NoteState::rest; }
@@ -142,17 +142,19 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
 
   float sig;
   if (noiseCounter > 0) {
-    sig = dist(info.rngNoise);
+    sig = info.noiseGain.getValue() * dist(info.rngNoise);
     --noiseCounter;
   } else {
     sig = 0;
   }
   for (auto &cmb : comb) sig -= cmb.process(sig);
 
-  float lpEnv = cymbalLowpassEnvelope.process();
+  float lpEnv = cymbalLowpassEnvelope.process(sampleRate);
   gain = velocity * lpEnv; // Used to determin most quiet note.
 
-  cymbal.kp = cutoffToPApprox(0.5f * (1 + lpEnv) * info.lowpassCutoffHz / sampleRate);
+  const float lpEnvOffset = info.lowpassEnvelopeOffset.getValue();
+  lpEnv = (lpEnv + lpEnvOffset) / (1.0f + lpEnvOffset);
+  cymbal.kp = cutoffToPApprox(lpEnv * info.lowpassCutoffHz.getValue() / sampleRate);
 
   sig = velocity * dcKiller.process(cymbal.process(sig * gate.process()));
 
@@ -192,10 +194,7 @@ void DSPCORE_NAME::reset()
   using ID = ParameterID::ID;
   auto &pv = param.value;
 
-  info.rngNoise.seed(pv[ID::seed]->getInt());
-  info.rngComb.seed(pv[ID::seed]->getInt() + rngOffset);
-  info.rngCymbal.seed(pv[ID::seed]->getInt() + 2 * rngOffset);
-  info.rngUnison.seed(pv[ID::seed]->getInt() + 3 * rngOffset);
+  info.reset(param);
 
   for (auto &note : notes) note.rest();
 
@@ -209,9 +208,16 @@ void DSPCORE_NAME::setParameters(float tempo)
   using ID = ParameterID::ID;
   auto &pv = param.value;
 
+  info.setParameters(param);
+
   interpMasterGain.push(pv[ID::gain]->getFloat() * pv[ID::boost]->getFloat());
 
-  info.lowpassCutoffHz = pv[ID::lowpassCutoffHz]->getFloat();
+  for (auto &note : notes) {
+    if (note.state == NoteState::rest) continue;
+    note.cymbalLowpassEnvelope.set(
+      sampleRate, pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
+      pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
+  }
 }
 
 void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
@@ -221,6 +227,8 @@ void DSPCORE_NAME::process(const size_t length, float *out0, float *out1)
   std::array<float, 2> frame{};
   for (size_t i = 0; i < length; ++i) {
     processMidiNote(i);
+
+    info.process();
 
     frame.fill(0.0f);
 
@@ -251,9 +259,7 @@ void DSPCORE_NAME::setUnisonPan(size_t nUnison)
 
   unisonPan.resize(nUnison);
 
-  // TODO: Add unisonPan parameter.
-  // const auto unisonPanRange = param.value[ID::unisonPan]->getFloat();
-  const float unisonPanRange = 1;
+  const float unisonPanRange = param.value[ID::unisonPan]->getFloat();
   const float panRange = unisonPanRange / float(nUnison - 1);
   const float panOffset = 0.5f - 0.5f * unisonPanRange;
 
@@ -266,7 +272,6 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
   using ID = ParameterID::ID;
   auto &pv = param.value;
 
-  // TODO: Add nUnison.
   const size_t nUnison = 1 + pv[ID::nUnison]->getInt();
 
   noteIndices.resize(0);
@@ -312,23 +317,16 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
 
   setUnisonPan(nUnison);
 
-  for (size_t i = 0; i < unisonPan.size(); ++i) {
-  }
-
-  // TODO: Add unison parameters.
-  // const auto unisonDetune = param.value[ID::unisonDetune]->getFloat();
-  // const auto unisonGainRandom = param.value[ID::unisonGainRandom]->getFloat();
-  // const bool randomizeDetune = param.value[ID::unisonDetuneRandom]->getInt();
-  // std::uniform_real_distribution<float> distDetune(0.0f, 1.0f);
-  // std::uniform_real_distribution<float> distGain(1.0f - unisonGainRandom, 1.0f);
+  const float unisonDetune = param.value[ID::unisonDetune]->getFloat();
+  const float unisonGainRandom = param.value[ID::unisonGainRandom]->getFloat();
+  const bool randomizeDetune = param.value[ID::unisonDetuneRandom]->getInt();
+  std::uniform_real_distribution<float> distDetune(randomizeDetune ? 1.0f : 0.0f, 1.0f);
+  std::uniform_real_distribution<float> distGain(1.0f - unisonGainRandom, 1.0f);
   for (size_t unison = 0; unison < nUnison; ++unison) {
     if (noteIndices.size() <= unison) break;
-    // auto detune
-    //   = unison * unisonDetune * (randomizeDetune ? distDetune(info.rngUnison) : 1.0f);
-    // auto notePitch = (float(pitch) + tuning) * (1.0f + detune);
-    // auto vel = distGain(info.rngUnison) * velocity;
-    auto notePitch = float(pitch) + tuning;
-    auto vel = velocity;
+    auto detune = unison * unisonDetune * distDetune(info.rngUnison);
+    auto notePitch = (float(pitch) + tuning) * (1.0f + detune);
+    auto vel = distGain(info.rngUnison) * velocity;
     notes[noteIndices[unison]].noteOn(
       noteId, notePitch, vel, unisonPan[unison], sampleRate, info, param);
   }
@@ -337,7 +335,7 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
 void DSPCORE_NAME::noteOff(int32_t noteId)
 {
   for (size_t i = 0; i < notes.size(); ++i)
-    if (notes[i].id == noteId) notes[i].release();
+    if (notes[i].id == noteId) notes[i].release(sampleRate);
 }
 
 void DSPCORE_NAME::fillTransitionBuffer(size_t noteIndex)

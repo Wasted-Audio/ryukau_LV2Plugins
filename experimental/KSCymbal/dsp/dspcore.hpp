@@ -42,7 +42,41 @@ struct NoteProcessInfo {
   std::minstd_rand rngCymbal{2 * rngOffset};
   std::minstd_rand rngUnison{3 * rngOffset};
 
-  float lowpassCutoffHz = 0;
+  ExpSmoother<float> lowpassCutoffHz;
+  ExpSmoother<float> noiseGain;
+  ExpSmoother<float> lowpassEnvelopeOffset;
+
+  void reset(GlobalParameter &param)
+  {
+    using ID = ParameterID::ID;
+    auto &pv = param.value;
+
+    rngNoise.seed(pv[ID::seed]->getInt());
+    rngComb.seed(pv[ID::seed]->getInt() + rngOffset);
+    rngCymbal.seed(pv[ID::seed]->getInt() + 2 * rngOffset);
+    rngUnison.seed(pv[ID::seed]->getInt() + 3 * rngOffset);
+
+    lowpassCutoffHz.reset(pv[ID::lowpassCutoffHz]->getFloat());
+    noiseGain.reset(pv[ID::exciterGain]->getFloat());
+    lowpassEnvelopeOffset.reset(pv[ID::lowpassEnvelopeOffset]->getFloat());
+  }
+
+  void setParameters(GlobalParameter &param)
+  {
+    using ID = ParameterID::ID;
+    auto &pv = param.value;
+
+    lowpassCutoffHz.push(pv[ID::lowpassCutoffHz]->getFloat());
+    noiseGain.push(pv[ID::exciterGain]->getFloat());
+    lowpassEnvelopeOffset.push(pv[ID::lowpassEnvelopeOffset]->getFloat());
+  }
+
+  void process()
+  {
+    lowpassCutoffHz.process();
+    noiseGain.process();
+    lowpassEnvelopeOffset.process();
+  }
 };
 
 #define NOTE_CLASS(INSTRSET)                                                             \
@@ -75,7 +109,7 @@ struct NoteProcessInfo {
       float sampleRate,                                                                  \
       NoteProcessInfo &info,                                                             \
       GlobalParameter &param);                                                           \
-    void release();                                                                      \
+    void release(float sampleRate);                                                      \
     void rest();                                                                         \
     bool isAttacking();                                                                  \
     float getGain();                                                                     \

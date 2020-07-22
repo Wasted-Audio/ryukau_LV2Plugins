@@ -45,8 +45,8 @@ enum ID {
   gain = 1 + nDelay + nComb,
   boost,
 
-  attack,
-  decay,
+  exciterGain,
+  exciterAttack,
 
   lowpassCutoffHz,
   highpassCutoffHz,
@@ -55,6 +55,7 @@ enum ID {
   lowpassD,
   lowpassS,
   lowpassR,
+  lowpassEnvelopeOffset,
 
   distance,
   seed,
@@ -67,6 +68,10 @@ enum ID {
   retriggerCymbal,
 
   nUnison,
+  unisonDetune,
+  unisonPan,
+  unisonGainRandom,
+  unisonDetuneRandom,
 
   octave,
   semitone,
@@ -83,10 +88,10 @@ struct Scales {
   static SomeDSP::LinearScale<double> defaultScale;
 
   static SomeDSP::LogScale<double> gain;
-  static SomeDSP::LinearScale<double> boost;
+  static SomeDSP::LogScale<double> boost;
 
-  static SomeDSP::LogScale<double> attack;
-  static SomeDSP::LogScale<double> decay;
+  static SomeDSP::LogScale<double> exciterGain;
+  static SomeDSP::LogScale<double> exciterAttack;
 
   static SomeDSP::LinearScale<double> combTime;
   static SomeDSP::LogScale<double> frequency;
@@ -97,11 +102,13 @@ struct Scales {
   static SomeDSP::LogScale<double> envelopeD;
   static SomeDSP::LogScale<double> envelopeS;
   static SomeDSP::LogScale<double> envelopeR;
+  static SomeDSP::LogScale<double> lowpassEnvelopeOffset;
 
   static SomeDSP::LogScale<double> distance;
   static SomeDSP::IntScale<double> seed;
 
   static SomeDSP::IntScale<double> nUnison;
+  static SomeDSP::LogScale<double> unisonDetune;
 
   static SomeDSP::IntScale<double> octave;
   static SomeDSP::IntScale<double> semitone;
@@ -140,13 +147,16 @@ struct GlobalParameter : public ParameterInterface {
 
     value[ID::gain] = std::make_unique<LogValue>(
       0.5, Scales::gain, "gain", kParameterIsAutomable | kParameterIsLogarithmic);
-    value[ID::boost] = std::make_unique<LinearValue>(
-      Scales::boost.invmap(1.0), Scales::boost, "boost", kParameterIsAutomable);
+    value[ID::boost] = std::make_unique<LogValue>(
+      Scales::boost.invmap(1.0), Scales::boost, "boost",
+      kParameterIsAutomable | kParameterIsLogarithmic);
 
-    value[ID::attack] = std::make_unique<LogValue>(
-      0.0, Scales::attack, "attack", kParameterIsAutomable | kParameterIsLogarithmic);
-    value[ID::decay] = std::make_unique<LogValue>(
-      0.5, Scales::decay, "decay", kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::exciterGain] = std::make_unique<LogValue>(
+      0.0, Scales::exciterGain, "exciterGain",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::exciterAttack] = std::make_unique<LogValue>(
+      0.0, Scales::exciterAttack, "exciterAttack",
+      kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::lowpassCutoffHz] = std::make_unique<LogValue>(
       0.5, Scales::lowpassCutoffHz, "lowpassCutoffHz",
@@ -166,6 +176,9 @@ struct GlobalParameter : public ParameterInterface {
       kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::lowpassR] = std::make_unique<LogValue>(
       0.5, Scales::envelopeR, "lowpassR",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::lowpassEnvelopeOffset] = std::make_unique<LogValue>(
+      0.0, Scales::lowpassEnvelopeOffset, "lowpassEnvelopeOffset",
       kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::distance] = std::make_unique<LogValue>(
@@ -190,6 +203,15 @@ struct GlobalParameter : public ParameterInterface {
 
     value[ID::nUnison] = std::make_unique<IntValue>(
       12, Scales::nUnison, "nUnison", kParameterIsAutomable | kParameterIsInteger);
+    value[ID::unisonDetune] = std::make_unique<LogValue>(
+      0.2, Scales::unisonDetune, "unisonDetune", kParameterIsAutomable);
+    value[ID::unisonPan] = std::make_unique<LinearValue>(
+      1.0, Scales::defaultScale, "unisonPan", kParameterIsAutomable);
+    value[ID::unisonGainRandom] = std::make_unique<LinearValue>(
+      0.0, Scales::defaultScale, "unisonGainRandom", kParameterIsAutomable);
+    value[ID::unisonDetuneRandom] = std::make_unique<IntValue>(
+      1, Scales::boolScale, "unisonDetuneRandom",
+      kParameterIsAutomable | kParameterIsBoolean);
 
     value[ID::octave] = std::make_unique<IntValue>(
       12, Scales::octave, "octave", kParameterIsAutomable | kParameterIsInteger);

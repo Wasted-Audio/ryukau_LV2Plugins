@@ -91,8 +91,11 @@ public:
     addKnob(left0, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Gain", ID::gain);
     addKnob(left0, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Boost", ID::boost);
 
-    addKnob(left1, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Attack", ID::attack);
-    addKnob(left1, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Decay", ID::decay);
+    addKnob(
+      left1, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Attack",
+      ID::exciterAttack);
+    addKnob(
+      left1, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Gain", ID::exciterGain);
 
     addKnob(
       left0, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "Rnd.Comb", ID::randomComb);
@@ -137,14 +140,30 @@ public:
       left1, miscTop5, knobWidth, labelHeight, uiTextSize, ID::nUnison, Scales::nUnison,
       false, 0, 1);
 
+    addCheckbox(
+      left0, miscTop5 + labelY, knobWidth, labelHeight, uiTextSize, "Random Detune",
+      ID::unisonDetuneRandom);
+
     // Envelope.
     addKnob(left2, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "A", ID::lowpassA);
     addKnob(left2, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "D", ID::lowpassD);
     addKnob(left2, top1 + 2 * knobY, knobWidth, margin, uiTextSize, "S", ID::lowpassS);
     addKnob(left2, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "R", ID::lowpassR);
+    addKnob(
+      left2, top1 + 4 * knobY, knobWidth, margin, uiTextSize, "Offset",
+      ID::lowpassEnvelopeOffset);
+
+    // Unison.
+    const auto unisonTop1 = top1 + 6 * knobY;
+    addKnob(left2, unisonTop1, knobWidth, margin, uiTextSize, "Detune", ID::unisonDetune);
+    addKnob(
+      left2, unisonTop1 + 1 * knobY, knobWidth, margin, uiTextSize, "Pan", ID::unisonPan);
+    addKnob(
+      left2, unisonTop1 + 2 * knobY, knobWidth, margin, uiTextSize, "Gain",
+      ID::unisonGainRandom);
 
     // Tuning.
-    const auto tuningTop1 = miscTop5 + labelY;
+    const auto tuningTop1 = miscTop5 + 2 * labelY;
     addLabel(left0, tuningTop1, knobWidth, labelHeight, uiTextSize, "Octave");
     addTextKnob(
       left1, tuningTop1, knobWidth, labelHeight, uiTextSize, ID::octave, Scales::octave,

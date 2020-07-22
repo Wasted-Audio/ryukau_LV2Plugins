@@ -24,13 +24,14 @@ namespace SomeDSP {
 
 template<typename Sample> class ExpADSREnvelopeP {
 public:
-  void setup(Sample sampleRate)
-  {
-    this->sampleRate = sampleRate;
-    tailLength = uint32_t(0.01 * sampleRate);
-  }
+  void setup(Sample sampleRate) { tailLength = uint32_t(0.01 * sampleRate); }
 
-  void reset(Sample attackTime, Sample decayTime, Sample sustainLevel, Sample releaseTime)
+  void reset(
+    Sample sampleRate,
+    Sample attackTime,
+    Sample decayTime,
+    Sample sustainLevel,
+    Sample releaseTime)
   {
     state = State::attack;
     sustain = std::clamp<Sample>(sustainLevel, Sample(0), Sample(1));
@@ -40,7 +41,12 @@ public:
     pController.setCutoff(sampleRate, Sample(1) / attackTime);
   }
 
-  void set(Sample attackTime, Sample decayTime, Sample sustainLevel, Sample releaseTime)
+  void set(
+    Sample sampleRate,
+    Sample attackTime,
+    Sample decayTime,
+    Sample sustainLevel,
+    Sample releaseTime)
   {
     switch (state) {
       case State::attack:
@@ -67,7 +73,7 @@ public:
       pController.setCutoff(sampleRate, Sample(1) / releaseTime);
   }
 
-  void release()
+  void release(Sample sampleRate)
   {
     state = State::release;
     pController.setCutoff(sampleRate, Sample(1) / relTime);
@@ -77,7 +83,7 @@ public:
   bool isReleasing() { return state == State::release; }
   bool isTerminated() { return state == State::terminated; }
 
-  Sample process()
+  Sample process(Sample sampleRate)
   {
     switch (state) {
       case State::attack: {
@@ -131,7 +137,6 @@ private:
   uint32_t atk = 0;
   Sample decTime = 0;
   Sample relTime = 0;
-  Sample sampleRate = 44100;
   Sample sustain = 1;
   Sample value = 0;
 };
