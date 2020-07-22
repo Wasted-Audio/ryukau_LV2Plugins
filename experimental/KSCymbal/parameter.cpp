@@ -42,6 +42,8 @@ LogScale<double> Scales::envelopeR(0.001, 16.0, 0.5, 2.0);
 LogScale<double> Scales::distance(0.002, 0.2, 0.5, 0.02);
 IntScale<double> Scales::seed(16777215); // 2^24 - 1
 
+IntScale<double> Scales::nUnison(7);
+
 IntScale<double> Scales::octave(16);
 IntScale<double> Scales::semitone(168);
 IntScale<double> Scales::milli(2000);

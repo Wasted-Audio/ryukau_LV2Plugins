@@ -50,33 +50,29 @@ private:
 
 // https://www.earlevel.com/main/2012/12/15/a-one-pole-filter/
 template<typename Sample> struct OnePoleHighpass {
-  static Sample b1;
   Sample z1 = 0;
 
-  static void setCutoff(Sample sampleRate, Sample cutoffHz)
+  // Used to set b1 in process().
+  static Sample setCutoff(Sample sampleRate, Sample cutoffHz)
   {
-    b1 = exp(-twopi * cutoffHz / sampleRate); // Use double.
+    return exp(-twopi * cutoffHz / sampleRate); // Use double.
   }
 
   void reset() { z1 = 0; }
-  Sample process(Sample input)
+
+  Sample process(Sample input, Sample b1)
   {
     z1 = input * (Sample(1) - b1) + z1 * b1;
     return input - z1;
   }
 };
 
-template<typename Sample> Sample OnePoleHighpass<Sample>::b1 = 0;
-
 template<typename Sample> struct PControllerKSHat {
-  static Sample kp; // In [0, 1].
   Sample value = 0;
 
   void reset(Sample value = 0) { this->value = value; }
-  Sample process(Sample input) { return value += kp * (input - value); }
+  Sample process(Sample input, Sample kp) { return value += kp * (input - value); }
 };
-
-template<typename Sample> Sample PControllerKSHat<Sample>::kp = 1;
 
 template<typename Sample> class ShortComb {
 public:
@@ -154,11 +150,11 @@ public:
     feedback = 0;
   }
 
-  Sample process(Sample in)
+  Sample process(Sample in, Sample kp, Sample b1)
   {
     Sample out = delay.process(in + feedback);
-    feedback = lowpass.process(out);
-    return highpass.process(out);
+    feedback = lowpass.process(out, kp);
+    return highpass.process(out, b1);
   }
 };
 
@@ -167,6 +163,9 @@ public:
   std::array<KsString<Sample>, size> string;
   std::array<Sample, size> buf{};
   Sample distance = 1;
+
+  Sample kp = 0; // Lowpass coefficient.
+  Sample b1 = 1; // Highpass coefficient.
 
   void setup(Sample sampleRate)
   {
@@ -192,7 +191,7 @@ public:
       Sample dist = (idx < 1) ? distance : distance - buf[idx - 1];
       Sample leftover = (input <= dist) ? 0 : input - dist;
       input -= Sample(0.9) * leftover;
-      buf[idx] = string[idx].process(input);
+      buf[idx] = string[idx].process(input, kp, b1);
       out += buf[idx];
     }
     return out / size;

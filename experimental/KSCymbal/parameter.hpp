@@ -66,6 +66,8 @@ enum ID {
   retriggerComb,
   retriggerCymbal,
 
+  nUnison,
+
   octave,
   semitone,
   milli,
@@ -98,6 +100,8 @@ struct Scales {
 
   static SomeDSP::LogScale<double> distance;
   static SomeDSP::IntScale<double> seed;
+
+  static SomeDSP::IntScale<double> nUnison;
 
   static SomeDSP::IntScale<double> octave;
   static SomeDSP::IntScale<double> semitone;
@@ -183,6 +187,9 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::retriggerCymbal] = std::make_unique<IntValue>(
       true, Scales::boolScale, "retriggerCymbal",
       kParameterIsAutomable | kParameterIsBoolean);
+
+    value[ID::nUnison] = std::make_unique<IntValue>(
+      12, Scales::nUnison, "nUnison", kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::octave] = std::make_unique<IntValue>(
       12, Scales::octave, "octave", kParameterIsAutomable | kParameterIsInteger);

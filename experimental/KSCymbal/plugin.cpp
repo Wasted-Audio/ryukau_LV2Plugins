@@ -154,7 +154,7 @@ protected:
     alreadyRecievedNote.resize(0);
 
     dsp->setParameters(timePos.bbt.beatsPerMinute);
-    dsp->process(frames, outputs[0]);
+    dsp->process(frames, outputs[0], outputs[1]);
   }
 
 private:

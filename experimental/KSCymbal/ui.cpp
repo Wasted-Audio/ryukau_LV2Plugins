@@ -131,6 +131,12 @@ public:
       left0, miscTop4 + 2 * labelY, knobWidth, labelHeight, uiTextSize, "Retrig.Cymbal",
       ID::retriggerCymbal);
 
+    const auto miscTop5 = miscTop4 + 3 * labelY;
+    addLabel(left0, miscTop5, knobWidth, labelHeight, uiTextSize, "Unison");
+    addTextKnob(
+      left1, miscTop5, knobWidth, labelHeight, uiTextSize, ID::nUnison, Scales::nUnison,
+      false, 0, 1);
+
     // Envelope.
     addKnob(left2, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "A", ID::lowpassA);
     addKnob(left2, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "D", ID::lowpassD);
@@ -138,7 +144,7 @@ public:
     addKnob(left2, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "R", ID::lowpassR);
 
     // Tuning.
-    const auto tuningTop1 = miscTop4 + 3 * labelY;
+    const auto tuningTop1 = miscTop5 + labelY;
     addLabel(left0, tuningTop1, knobWidth, labelHeight, uiTextSize, "Octave");
     addTextKnob(
       left1, tuningTop1, knobWidth, labelHeight, uiTextSize, ID::octave, Scales::octave,
