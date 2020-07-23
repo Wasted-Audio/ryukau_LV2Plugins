@@ -723,7 +723,7 @@ private:
     left = std::clamp(left, 0, last);
     right = std::clamp(right, 0, last);
 
-    for (int idx = left + 1; idx >= 0 && idx < right; ++idx) barState[idx] = state;
+    for (int idx = left; idx >= 0 && idx <= right; ++idx) barState[idx] = state;
 
     repaint();
   }
