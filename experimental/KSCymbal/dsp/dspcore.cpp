@@ -121,6 +121,11 @@ void NOTE_NAME::noteOn(
     pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
 
   dcKiller.reset();
+
+  compressor.prepare(
+    sampleRate, pv[ID::compressorTime]->getFloat(),
+    pv[ID::compressorThreshold]->getFloat());
+  compressor.reset();
 }
 
 void NOTE_NAME::release(float sampleRate)
@@ -156,7 +161,8 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
   lpEnv = (lpEnv + lpEnvOffset) / (1.0f + lpEnvOffset);
   cymbal.kp = cutoffToPApprox(lpEnv * info.lowpassCutoffHz.getValue() / sampleRate);
 
-  sig = velocity * dcKiller.process(cymbal.process(sig * gate.process()));
+  sig = velocity
+    * compressor.process(dcKiller.process(cymbal.process(sig * gate.process())));
 
   if (cymbalLowpassEnvelope.isTerminated()) {
     --releaseCounter;

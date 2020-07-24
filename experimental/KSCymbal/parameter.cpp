@@ -43,6 +43,9 @@ LogScale<double> Scales::lowpassEnvelopeOffset(0.0, 1.0, 0.5, 0.1);
 LogScale<double> Scales::distance(0.002, 0.2, 0.5, 0.02);
 IntScale<double> Scales::seed(16777215); // 2^24 - 1
 
+LogScale<double> Scales::compressorTime(0.001, 1.0, 0.5, 0.1);
+LogScale<double> Scales::compressorThreshold(0.01, 2.0, 0.5, 0.5);
+
 IntScale<double> Scales::nUnison(7);
 LogScale<double> Scales::unisonDetune(0.0, 1.0, 0.5, 0.05);
 

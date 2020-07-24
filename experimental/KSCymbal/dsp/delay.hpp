@@ -25,6 +25,51 @@
 
 namespace SomeDSP {
 
+template<typename Sample> struct EasyCompressor {
+  PController<float> smoother;
+  Sample threshold = 0.1;
+  Sample targetAmp = 1;
+  Sample inHold = 0;
+  int32_t counter = 0;
+  int32_t holdFrames = 100;
+
+  void prepare(Sample sampleRate, Sample holdSeconds, Sample threshold)
+  {
+    smoother.setCutoff(sampleRate, Sample(2) / holdSeconds);
+    holdFrames = int32_t(sampleRate * holdSeconds);
+    this->threshold = threshold;
+  }
+
+  void reset()
+  {
+    smoother.reset(Sample(1));
+    targetAmp = Sample(1);
+    inHold = 0;
+    counter = 0;
+  }
+
+  Sample process(Sample input)
+  {
+    auto inAbs = somefabs(input);
+
+    if (inAbs > inHold) {
+      inHold = inAbs;
+      counter = holdFrames;
+      targetAmp = threshold / inAbs;
+    }
+
+    if (counter <= 0) {
+      inHold = threshold;
+      targetAmp *= Sample(1.01);
+      if (targetAmp > Sample(1)) targetAmp = Sample(1);
+    } else {
+      --counter;
+    }
+
+    return smoother.process(targetAmp) * input;
+  }
+};
+
 template<typename Sample> class AttackGate {
 public:
   void reset(Sample sampleRate, Sample seconds)

@@ -99,6 +99,7 @@ struct NoteProcessInfo {
     KsHat<float, nDelay> cymbal;                                                         \
     ExpADSREnvelopeP<float> cymbalLowpassEnvelope;                                       \
     DCKiller<float> dcKiller;                                                            \
+    EasyCompressor<float> compressor;                                                    \
                                                                                          \
     void setup(float sampleRate);                                                        \
     void noteOn(                                                                         \

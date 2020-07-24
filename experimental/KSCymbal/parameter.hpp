@@ -67,6 +67,9 @@ enum ID {
   retriggerComb,
   retriggerCymbal,
 
+  compressorTime,
+  compressorThreshold,
+
   nUnison,
   unisonDetune,
   unisonPan,
@@ -106,6 +109,9 @@ struct Scales {
 
   static SomeDSP::LogScale<double> distance;
   static SomeDSP::IntScale<double> seed;
+
+  static SomeDSP::LogScale<double> compressorTime;
+  static SomeDSP::LogScale<double> compressorThreshold;
 
   static SomeDSP::IntScale<double> nUnison;
   static SomeDSP::LogScale<double> unisonDetune;
@@ -200,6 +206,13 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::retriggerCymbal] = std::make_unique<IntValue>(
       true, Scales::boolScale, "retriggerCymbal",
       kParameterIsAutomable | kParameterIsBoolean);
+
+    value[ID::compressorTime] = std::make_unique<LogValue>(
+      Scales::compressorTime.invmap(0.1), Scales::compressorTime, "compressorTime",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::compressorThreshold] = std::make_unique<LogValue>(
+      Scales::compressorThreshold.invmap(0.1), Scales::compressorThreshold,
+      "compressorThreshold", kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::nUnison] = std::make_unique<IntValue>(
       12, Scales::nUnison, "nUnison", kParameterIsAutomable | kParameterIsInteger);

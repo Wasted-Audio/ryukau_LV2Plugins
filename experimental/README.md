@@ -21,13 +21,14 @@ The idea is to collide Karplus-Strong string model.
 Max 192kHz sample rate is supported.
 
 TODO list:
-- Add gate while note-on.
-- Add termination mechanism.
 - Experiment with other excitation.
-- Properly tune highpass filter.
 
 Note:
+- Added per note compressor.
+- Added lowpass cutoff envelope to gate and terminate note.
 - Changed one-zero lowpass to one-pole lowpass.
+- Changed from RCHP to one-pole highpass.
+- Changed to 8 voice polyphonic.
 - Frequency randomization is must for cymbal-ish sound.
 - Increasing K-S string makes dense decay. 24 or higher is better.
 - Increasing comb filter didn't sound good for this model.

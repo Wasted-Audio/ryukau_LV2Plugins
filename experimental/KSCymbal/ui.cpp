@@ -91,6 +91,18 @@ public:
     addKnob(left0, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Gain", ID::gain);
     addKnob(left0, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Boost", ID::boost);
 
+    const auto compressorTop1 = top1 + 2 * knobY;
+    addLabel(left0, compressorTop1, knobWidth, labelHeight, uiTextSize, "Time");
+    addTextKnob(
+      left1, compressorTop1, knobWidth, labelHeight, uiTextSize, ID::compressorTime,
+      Scales::compressorTime, false, 5);
+
+    const auto compressorTop2 = compressorTop1 + labelY;
+    addLabel(left0, compressorTop2, knobWidth, labelHeight, uiTextSize, "Threshold");
+    addTextKnob(
+      left1, compressorTop2, knobWidth, labelHeight, uiTextSize, ID::compressorThreshold,
+      Scales::compressorThreshold, false, 5);
+
     addKnob(
       left1, top1 + 0 * knobY, knobWidth, margin, uiTextSize, "Attack",
       ID::exciterAttack);
