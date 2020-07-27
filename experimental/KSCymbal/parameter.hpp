@@ -47,15 +47,17 @@ enum ID {
 
   exciterGain,
   exciterAttack,
+  exciterLowpassCutoff,
 
-  lowpassCutoffHz,
-  highpassCutoffHz,
+  lowpassCutoff,
+  highpassCutoff,
 
   lowpassA,
   lowpassD,
   lowpassS,
   lowpassR,
   lowpassEnvelopeOffset,
+  highpassReleaseAmount,
 
   distance,
   seed,
@@ -70,6 +72,7 @@ enum ID {
   compressorTime,
   compressorThreshold,
 
+  nVoice,
   nUnison,
   unisonDetune,
   unisonPan,
@@ -95,17 +98,18 @@ struct Scales {
 
   static SomeDSP::LogScale<double> exciterGain;
   static SomeDSP::LogScale<double> exciterAttack;
+  static SomeDSP::LogScale<double> exciterLowpassCutoff;
 
   static SomeDSP::LinearScale<double> combTime;
   static SomeDSP::LogScale<double> frequency;
-  static SomeDSP::LogScale<double> lowpassCutoffHz;
-  static SomeDSP::LogScale<double> highpassCutoffHz;
+  static SomeDSP::LogScale<double> lowpassCutoff;
+  static SomeDSP::LogScale<double> highpassCutoff;
 
   static SomeDSP::LogScale<double> envelopeA;
   static SomeDSP::LogScale<double> envelopeD;
   static SomeDSP::LogScale<double> envelopeS;
   static SomeDSP::LogScale<double> envelopeR;
-  static SomeDSP::LogScale<double> lowpassEnvelopeOffset;
+  static SomeDSP::LogScale<double> envelopeAmount;
 
   static SomeDSP::LogScale<double> distance;
   static SomeDSP::IntScale<double> seed;
@@ -113,6 +117,7 @@ struct Scales {
   static SomeDSP::LogScale<double> compressorTime;
   static SomeDSP::LogScale<double> compressorThreshold;
 
+  static SomeDSP::IntScale<double> nVoice;
   static SomeDSP::IntScale<double> nUnison;
   static SomeDSP::LogScale<double> unisonDetune;
 
@@ -163,12 +168,15 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::exciterAttack] = std::make_unique<LogValue>(
       0.0, Scales::exciterAttack, "exciterAttack",
       kParameterIsAutomable | kParameterIsLogarithmic);
-
-    value[ID::lowpassCutoffHz] = std::make_unique<LogValue>(
-      0.5, Scales::lowpassCutoffHz, "lowpassCutoffHz",
+    value[ID::exciterLowpassCutoff] = std::make_unique<LogValue>(
+      0.5, Scales::exciterLowpassCutoff, "exciterLowpassCutoff",
       kParameterIsAutomable | kParameterIsLogarithmic);
-    value[ID::highpassCutoffHz] = std::make_unique<LogValue>(
-      0.5, Scales::highpassCutoffHz, "highpassCutoffHz",
+
+    value[ID::lowpassCutoff] = std::make_unique<LogValue>(
+      0.5, Scales::lowpassCutoff, "lowpassCutoff",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::highpassCutoff] = std::make_unique<LogValue>(
+      0.5, Scales::highpassCutoff, "highpassCutoff",
       kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::lowpassA] = std::make_unique<LogValue>(
@@ -184,7 +192,10 @@ struct GlobalParameter : public ParameterInterface {
       0.5, Scales::envelopeR, "lowpassR",
       kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::lowpassEnvelopeOffset] = std::make_unique<LogValue>(
-      0.0, Scales::lowpassEnvelopeOffset, "lowpassEnvelopeOffset",
+      0.0, Scales::envelopeAmount, "lowpassEnvelopeOffset",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::highpassReleaseAmount] = std::make_unique<LogValue>(
+      0.0, Scales::envelopeAmount, "highpassReleaseAmount",
       kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::distance] = std::make_unique<LogValue>(
@@ -214,8 +225,10 @@ struct GlobalParameter : public ParameterInterface {
       Scales::compressorThreshold.invmap(0.1), Scales::compressorThreshold,
       "compressorThreshold", kParameterIsAutomable | kParameterIsLogarithmic);
 
+    value[ID::nVoice] = std::make_unique<IntValue>(
+      7, Scales::nVoice, "nVoice", kParameterIsAutomable | kParameterIsInteger);
     value[ID::nUnison] = std::make_unique<IntValue>(
-      12, Scales::nUnison, "nUnison", kParameterIsAutomable | kParameterIsInteger);
+      0, Scales::nUnison, "nUnison", kParameterIsAutomable | kParameterIsInteger);
     value[ID::unisonDetune] = std::make_unique<LogValue>(
       0.2, Scales::unisonDetune, "unisonDetune", kParameterIsAutomable);
     value[ID::unisonPan] = std::make_unique<LinearValue>(

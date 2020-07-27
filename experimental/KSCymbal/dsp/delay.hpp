@@ -93,6 +93,39 @@ private:
   Sample ramp = 0;
 };
 
+template<typename Sample> class HighpassReleaseGate {
+public:
+  void reset(Sample sampleRate, Sample seconds)
+  {
+    rel = false;
+    value = threshold;
+    set(sampleRate, seconds);
+  }
+
+  void set(Sample sampleRate, Sample seconds)
+  {
+    alpha = std::pow(Sample(1) / threshold, Sample(1) / (seconds * sampleRate));
+  }
+
+  void release() { rel = true; }
+  bool isReleasing() { return rel; }
+  bool isTerminated() { return value >= Sample(1); }
+
+  Sample process()
+  {
+    if (!rel) return Sample(0);
+    value *= alpha;
+    if (value >= Sample(1)) return Sample(1 - threshold);
+    return value - threshold;
+  }
+
+protected:
+  bool rel = false;
+  const Sample threshold = 1e-5;
+  Sample value = 0;
+  Sample alpha = 0;
+};
+
 // https://www.earlevel.com/main/2012/12/15/a-one-pole-filter/
 template<typename Sample> struct OnePoleHighpass {
   Sample z1 = 0;

@@ -36,15 +36,24 @@ constexpr uint64_t rngOffset = 16777216;
 
 enum class NoteState { active, release, rest };
 
+#define NOTE_PROCESS_INFO_SMOOTHER(METHOD)                                               \
+  lowpassCutoff.METHOD(pv[ID::lowpassCutoff]->getFloat());                               \
+  lowpassEnvelopeOffset.METHOD(pv[ID::lowpassEnvelopeOffset]->getFloat());               \
+  highpassCutoff.METHOD(pv[ID::highpassCutoff]->getFloat());                             \
+  highpassReleaseAmount.METHOD(pv[ID::highpassReleaseAmount]->getFloat());               \
+  noiseGain.METHOD(pv[ID::exciterGain]->getFloat());
+
 struct NoteProcessInfo {
   std::minstd_rand rngNoise{0};
   std::minstd_rand rngComb{rngOffset};
   std::minstd_rand rngCymbal{2 * rngOffset};
   std::minstd_rand rngUnison{3 * rngOffset};
 
-  ExpSmoother<float> lowpassCutoffHz;
-  ExpSmoother<float> noiseGain;
+  ExpSmoother<float> lowpassCutoff;
   ExpSmoother<float> lowpassEnvelopeOffset;
+  ExpSmoother<float> highpassCutoff;
+  ExpSmoother<float> highpassReleaseAmount;
+  ExpSmoother<float> noiseGain;
 
   void reset(GlobalParameter &param)
   {
@@ -56,9 +65,7 @@ struct NoteProcessInfo {
     rngCymbal.seed(pv[ID::seed]->getInt() + 2 * rngOffset);
     rngUnison.seed(pv[ID::seed]->getInt() + 3 * rngOffset);
 
-    lowpassCutoffHz.reset(pv[ID::lowpassCutoffHz]->getFloat());
-    noiseGain.reset(pv[ID::exciterGain]->getFloat());
-    lowpassEnvelopeOffset.reset(pv[ID::lowpassEnvelopeOffset]->getFloat());
+    NOTE_PROCESS_INFO_SMOOTHER(reset);
   }
 
   void setParameters(GlobalParameter &param)
@@ -66,16 +73,16 @@ struct NoteProcessInfo {
     using ID = ParameterID::ID;
     auto &pv = param.value;
 
-    lowpassCutoffHz.push(pv[ID::lowpassCutoffHz]->getFloat());
-    noiseGain.push(pv[ID::exciterGain]->getFloat());
-    lowpassEnvelopeOffset.push(pv[ID::lowpassEnvelopeOffset]->getFloat());
+    NOTE_PROCESS_INFO_SMOOTHER(push);
   }
 
   void process()
   {
-    lowpassCutoffHz.process();
-    noiseGain.process();
+    lowpassCutoff.process();
     lowpassEnvelopeOffset.process();
+    highpassCutoff.process();
+    highpassReleaseAmount.process();
+    noiseGain.process();
   }
 };
 
@@ -94,10 +101,12 @@ struct NoteProcessInfo {
     int32_t releaseCounter = 0;                                                          \
     float releaseLength = 0;                                                             \
                                                                                          \
+    PController<float> exciterLowpass;                                                   \
     AttackGate<float> gate;                                                              \
     std::array<ShortComb<float>, nComb> comb;                                            \
     KsHat<float, nDelay> cymbal;                                                         \
     ExpADSREnvelopeP<float> cymbalLowpassEnvelope;                                       \
+    HighpassReleaseGate<float> cymbalHighpassEnvelope;                                   \
     DCKiller<float> dcKiller;                                                            \
     EasyCompressor<float> compressor;                                                    \
                                                                                          \
@@ -126,7 +135,7 @@ class DSPInterface {
 public:
   virtual ~DSPInterface(){};
 
-  constexpr static size_t maxVoice = 8;
+  constexpr static uint8_t maxVoice = 16;
   GlobalParameter param;
 
   virtual void setup(double sampleRate) = 0;
@@ -225,6 +234,7 @@ public:
     float velocity = 0.0f;                                                               \
     DecibelScale<float> velocityMap{-30, 0, true};                                       \
                                                                                          \
+    uint8_t nVoice = 8;                                                                  \
     int32_t panCounter = 0;                                                              \
     std::vector<size_t> noteIndices;                                                     \
     std::vector<size_t> voiceIndices;                                                    \

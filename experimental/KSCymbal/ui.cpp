@@ -109,6 +109,18 @@ public:
     addKnob(
       left1, top1 + 1 * knobY, knobWidth, margin, uiTextSize, "Gain", ID::exciterGain);
 
+    const auto excitorTop1 = top1 + 2 * (barboxHeight + labelHeight);
+    addLabel(left3, excitorTop1, knobWidth, labelHeight, uiTextSize, "Exciter LP");
+    addTextKnob(
+      left3 + knobX, excitorTop1, knobWidth, labelHeight, uiTextSize,
+      ID::exciterLowpassCutoff, Scales::exciterLowpassCutoff, false, 3);
+
+    const auto voiceTop = excitorTop1 + labelY;
+    addLabel(left3, voiceTop, knobWidth, labelHeight, uiTextSize, "nVoice");
+    addTextKnob(
+      left3 + knobX, voiceTop, knobWidth, labelHeight, uiTextSize, ID::nVoice,
+      Scales::nVoice, false, 0, 1);
+
     addKnob(
       left0, top1 + 3 * knobY, knobWidth, margin, uiTextSize, "Rnd.Comb", ID::randomComb);
     addKnob(
@@ -126,14 +138,14 @@ public:
     const auto miscTop2 = miscTop1 + labelY;
     addLabel(left0, miscTop2, knobWidth, labelHeight, uiTextSize, "LP Cutoff");
     addTextKnob(
-      left1, miscTop2, knobWidth, labelHeight, uiTextSize, ID::lowpassCutoffHz,
-      Scales::lowpassCutoffHz, false, 2);
+      left1, miscTop2, knobWidth, labelHeight, uiTextSize, ID::lowpassCutoff,
+      Scales::lowpassCutoff, false, 2);
 
     const auto miscTop3 = miscTop2 + labelY;
     addLabel(left0, miscTop3, knobWidth, labelHeight, uiTextSize, "HP Cutoff");
     addTextKnob(
-      left1, miscTop3, knobWidth, labelHeight, uiTextSize, ID::highpassCutoffHz,
-      Scales::highpassCutoffHz, false, 2);
+      left1, miscTop3, knobWidth, labelHeight, uiTextSize, ID::highpassCutoff,
+      Scales::highpassCutoff, false, 2);
 
     const auto miscTop4 = miscTop3 + labelY;
     addCheckbox(
@@ -164,6 +176,9 @@ public:
     addKnob(
       left2, top1 + 4 * knobY, knobWidth, margin, uiTextSize, "Offset",
       ID::lowpassEnvelopeOffset);
+    addKnob(
+      left2, top1 + 5 * knobY, knobWidth, margin, uiTextSize, "HP.Release",
+      ID::highpassReleaseAmount);
 
     // Unison.
     const auto unisonTop1 = top1 + 6 * knobY;

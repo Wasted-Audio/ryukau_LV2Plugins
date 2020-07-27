@@ -60,6 +60,15 @@ template<typename T> inline T cutoffToPApprox(T x)
     + T(0.0010604699447733293);
 }
 
+// Fast approximation of OnePoleHighpass::setCutoff().
+// x is normalized frequency. Range is [0, 0.5).
+template<typename T> T onepoleHighpassPoleApprox(T x)
+{
+  return (T(5.476984559402437) + T(-13.572160512877103) * x
+          + T(9.553503352240815) * x * x)
+    / (T(5.479174921068828) + T(20.63587495820437) * x + T(36.02138404173517) * x * x);
+}
+
 void NOTE_NAME::setup(float sampleRate)
 {
   cymbalLowpassEnvelope.setup(sampleRate);
@@ -87,6 +96,8 @@ void NOTE_NAME::noteOn(
 
   noiseCounter = int32_t(pv[ID::exciterAttack]->getFloat() * sampleRate);
   gate.reset(sampleRate, pv[ID::exciterAttack]->getFloat());
+  exciterLowpass.reset();
+  exciterLowpass.setCutoff(sampleRate, pv[ID::exciterLowpassCutoff]->getFloat());
 
   releaseLength = 0.01f * sampleRate;
   releaseCounter = int32_t(releaseLength);
@@ -111,14 +122,12 @@ void NOTE_NAME::noteOn(
     std::uniform_real_distribution<float> distFreq(freq - spread, freq + spread);
     cymbal.string[idx].delay.setTime(sampleRate, 1.0f / distFreq(info.rngCymbal));
   }
-  cymbal.b1
-    = OnePoleHighpass<float>::setCutoff(sampleRate, pv[ID::highpassCutoffHz]->getFloat());
-  cymbal.kp = 0;
   cymbal.trigger(pv[ID::distance]->getFloat());
 
   cymbalLowpassEnvelope.reset(
     sampleRate, pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
     pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
+  cymbalHighpassEnvelope.reset(sampleRate, pv[ID::lowpassR]->getFloat());
 
   dcKiller.reset();
 
@@ -133,6 +142,7 @@ void NOTE_NAME::release(float sampleRate)
   if (state == NoteState::rest) return;
   state = NoteState::release;
   cymbalLowpassEnvelope.release(sampleRate);
+  cymbalHighpassEnvelope.release();
 }
 
 void NOTE_NAME::rest() { state = NoteState::rest; }
@@ -147,7 +157,7 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
 
   float sig;
   if (noiseCounter > 0) {
-    sig = info.noiseGain.getValue() * dist(info.rngNoise);
+    sig = info.noiseGain.getValue() * exciterLowpass.process(dist(info.rngNoise));
     --noiseCounter;
   } else {
     sig = 0;
@@ -159,7 +169,13 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
 
   const float lpEnvOffset = info.lowpassEnvelopeOffset.getValue();
   lpEnv = (lpEnv + lpEnvOffset) / (1.0f + lpEnvOffset);
-  cymbal.kp = cutoffToPApprox(lpEnv * info.lowpassCutoffHz.getValue() / sampleRate);
+  cymbal.kp = cutoffToPApprox(lpEnv * info.lowpassCutoff.getValue() / sampleRate);
+
+  const float diffCutoff = info.highpassReleaseAmount.getValue()
+    * (info.lowpassCutoff.getValue() - info.highpassCutoff.getValue());
+  cymbal.b1 = onepoleHighpassPoleApprox(
+    (info.highpassCutoff.getValue() + cymbalHighpassEnvelope.process() * diffCutoff)
+    / sampleRate);
 
   sig = velocity
     * compressor.process(dcKiller.process(cymbal.process(sig * gate.process())));
@@ -216,6 +232,8 @@ void DSPCORE_NAME::setParameters(float tempo)
 
   info.setParameters(param);
 
+  nVoice = pv[ID::nVoice]->getInt() + 1;
+
   interpMasterGain.push(pv[ID::gain]->getFloat() * pv[ID::boost]->getFloat());
 
   for (auto &note : notes) {
@@ -223,6 +241,7 @@ void DSPCORE_NAME::setParameters(float tempo)
     note.cymbalLowpassEnvelope.set(
       sampleRate, pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
       pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
+    note.cymbalHighpassEnvelope.set(sampleRate, pv[ID::lowpassR]->getFloat());
   }
 }
 
@@ -283,7 +302,7 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
   noteIndices.resize(0);
 
   // Pick up note from resting one.
-  for (size_t index = 0; index < maxVoice; ++index) {
+  for (uint8_t index = 0; index < nVoice; ++index) {
     if (notes[index].id == noteId) noteIndices.push_back(index);
     if (notes[index].state == NoteState::rest) noteIndices.push_back(index);
     if (noteIndices.size() >= nUnison) break;
@@ -291,7 +310,7 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
 
   // If there aren't enought resting note, pick up from most quiet one.
   if (noteIndices.size() < nUnison) {
-    voiceIndices.resize(maxVoice);
+    voiceIndices.resize(nVoice);
     std::iota(voiceIndices.begin(), voiceIndices.end(), 0);
     std::sort(voiceIndices.begin(), voiceIndices.end(), [&](size_t lhs, size_t rhs) {
       return !notes[lhs].isAttacking() && (notes[lhs].getGain() < notes[rhs].getGain());

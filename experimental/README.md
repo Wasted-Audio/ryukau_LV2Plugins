@@ -21,7 +21,10 @@ The idea is to collide Karplus-Strong string model.
 Max 192kHz sample rate is supported.
 
 TODO list:
+- Add decay to exciter.
 - Experiment with other excitation.
+- Experiment with higher upper bound for HP Cutoff.
+- Tune Rnd.Freq and Distance.
 
 Note:
 - Added per note compressor.
