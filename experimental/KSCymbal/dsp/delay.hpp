@@ -70,6 +70,74 @@ template<typename Sample> struct EasyCompressor {
   }
 };
 
+struct ADNoise {
+  int32_t counter = 0;
+  int32_t releaseFrames = 0;
+  bool isReleasing = false;
+  bool isTerminated = false;
+
+  float mix = 0;
+  float tick = 0;
+  float phase = 0;
+  float pw = 0; // Tri-saw morphing amount. In [0, 1). Tri wave at 0.5.
+
+  void reset(
+    float sampleRate,
+    float attackSeconds,
+    float releaseSeconds,
+    float frequency,
+    float noiseMix)
+  {
+    counter = int32_t(sampleRate * attackSeconds);
+    releaseFrames = int32_t(sampleRate * releaseSeconds);
+
+    isReleasing = false;
+    isTerminated = false;
+
+    tick = std::clamp<float>(frequency / sampleRate, 0, sampleRate / 2);
+    mix = noiseMix;
+
+    constexpr float dampThreshold = 1000.0f; // In Hz.
+    constexpr float dampMax = 4000.0f;       // In Hz.
+    constexpr float dampDiff = dampMax - dampThreshold;
+    if (frequency <= dampThreshold) {
+      pw = 0;
+    } else {
+      auto diff = frequency - dampThreshold;
+      if (diff >= dampMax)
+        pw = 0.5f;
+      else
+        pw = 0.5f * diff / dampDiff;
+    }
+  }
+
+  template<typename RNG> float process(RNG &rng)
+  {
+    phase += tick;
+    if (phase >= pw) phase -= 1.0f;
+
+    float sig = phase < 0 ? -phase / (1.0f - pw) : phase / pw;
+    sig -= 0.5f;
+
+    if (isTerminated) return 0;
+
+    std::normal_distribution<float> dist(0.0f, 0.1666f);
+    sig += mix * (dist(rng) - sig);
+
+    if (isReleasing) {
+      if (--counter <= 0) isTerminated = true;
+      return sig * float(counter) / releaseFrames;
+    }
+
+    // Attack section.
+    if (--counter <= 0) {
+      isReleasing = true;
+      counter = releaseFrames;
+    }
+    return sig;
+  }
+};
+
 template<typename Sample> class AttackGate {
 public:
   void reset(Sample sampleRate, Sample seconds)
@@ -104,7 +172,7 @@ public:
 
   void set(Sample sampleRate, Sample seconds)
   {
-    alpha = std::pow(Sample(1) / threshold, Sample(1) / (seconds * sampleRate));
+    alpha = somepow(Sample(1) / threshold, Sample(1) / (seconds * sampleRate));
   }
 
   void release() { rel = true; }
@@ -120,8 +188,8 @@ public:
   }
 
 protected:
+  constexpr static Sample threshold = 1e-5;
   bool rel = false;
-  const Sample threshold = 1e-5;
   Sample value = 0;
   Sample alpha = 0;
 };

@@ -32,27 +32,23 @@
 
 using namespace SomeDSP;
 
-constexpr uint64_t rngOffset = 16777216;
-
 enum class NoteState { active, release, rest };
 
 #define NOTE_PROCESS_INFO_SMOOTHER(METHOD)                                               \
   lowpassCutoff.METHOD(pv[ID::lowpassCutoff]->getFloat());                               \
   lowpassEnvelopeOffset.METHOD(pv[ID::lowpassEnvelopeOffset]->getFloat());               \
   highpassCutoff.METHOD(pv[ID::highpassCutoff]->getFloat());                             \
-  highpassReleaseAmount.METHOD(pv[ID::highpassReleaseAmount]->getFloat());               \
   noiseGain.METHOD(pv[ID::exciterGain]->getFloat());
 
 struct NoteProcessInfo {
   std::minstd_rand rngNoise{0};
-  std::minstd_rand rngComb{rngOffset};
-  std::minstd_rand rngCymbal{2 * rngOffset};
-  std::minstd_rand rngUnison{3 * rngOffset};
+  std::minstd_rand rngComb{0};
+  std::minstd_rand rngString{0};
+  std::minstd_rand rngUnison{0};
 
   ExpSmoother<float> lowpassCutoff;
   ExpSmoother<float> lowpassEnvelopeOffset;
   ExpSmoother<float> highpassCutoff;
-  ExpSmoother<float> highpassReleaseAmount;
   ExpSmoother<float> noiseGain;
 
   void reset(GlobalParameter &param)
@@ -60,10 +56,10 @@ struct NoteProcessInfo {
     using ID = ParameterID::ID;
     auto &pv = param.value;
 
-    rngNoise.seed(pv[ID::seed]->getInt());
-    rngComb.seed(pv[ID::seed]->getInt() + rngOffset);
-    rngCymbal.seed(pv[ID::seed]->getInt() + 2 * rngOffset);
-    rngUnison.seed(pv[ID::seed]->getInt() + 3 * rngOffset);
+    rngNoise.seed(pv[ID::seedNoise]->getInt());
+    rngComb.seed(pv[ID::seedComb]->getInt());
+    rngString.seed(pv[ID::seedString]->getInt());
+    rngUnison.seed(pv[ID::seedUnison]->getInt());
 
     NOTE_PROCESS_INFO_SMOOTHER(reset);
   }
@@ -81,7 +77,6 @@ struct NoteProcessInfo {
     lowpassCutoff.process();
     lowpassEnvelopeOffset.process();
     highpassCutoff.process();
-    highpassReleaseAmount.process();
     noiseGain.process();
   }
 };
@@ -97,16 +92,16 @@ struct NoteProcessInfo {
     float pan = 0.5f;                                                                    \
     float gain = 0;                                                                      \
                                                                                          \
-    int32_t noiseCounter = 0;                                                            \
+    bool isCompressorOn = true;                                                          \
     int32_t releaseCounter = 0;                                                          \
     float releaseLength = 0;                                                             \
                                                                                          \
+    ADNoise noise;                                                                       \
     PController<float> exciterLowpass;                                                   \
     AttackGate<float> gate;                                                              \
     std::array<ShortComb<float>, nComb> comb;                                            \
     KsHat<float, nDelay> cymbal;                                                         \
     ExpADSREnvelopeP<float> cymbalLowpassEnvelope;                                       \
-    HighpassReleaseGate<float> cymbalHighpassEnvelope;                                   \
     DCKiller<float> dcKiller;                                                            \
     EasyCompressor<float> compressor;                                                    \
                                                                                          \

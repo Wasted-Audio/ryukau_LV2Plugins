@@ -94,10 +94,20 @@ void NOTE_NAME::noteOn(
   this->pan = pan;
   gain = 1.0f;
 
-  noiseCounter = int32_t(pv[ID::exciterAttack]->getFloat() * sampleRate);
-  gate.reset(sampleRate, pv[ID::exciterAttack]->getFloat());
+  const float eqTemp = pv[ID::equalTemperament]->getFloat() + 1;
+  const auto semitone = int32_t(pv[ID::semitone]->getInt()) - 120;
+  const auto octave = eqTemp * (int32_t(pv[ID::octave]->getInt()) - 12);
+  const auto milli = 0.001f * (int32_t(pv[ID::milli]->getInt()) - 1000);
+  const float a4Hz = pv[ID::pitchA4Hz]->getFloat() + 100;
+  const auto pitch = calcNotePitch(octave + semitone + milli + notePitch, eqTemp);
+  const auto frequency = a4Hz * pitch;
+
+  noise.reset(
+    sampleRate, pv[ID::exciterAttack]->getFloat(), pv[ID::exciterDecay]->getFloat(),
+    frequency, pv[ID::exciterNoiseMix]->getFloat());
   exciterLowpass.reset();
   exciterLowpass.setCutoff(sampleRate, pv[ID::exciterLowpassCutoff]->getFloat());
+  gate.reset(sampleRate, pv[ID::exciterAttack]->getFloat());
 
   releaseLength = 0.01f * sampleRate;
   releaseCounter = int32_t(releaseLength);
@@ -110,27 +120,22 @@ void NOTE_NAME::noteOn(
     comb[idx].setTime(sampleRate, distCombTime(info.rngComb));
   }
 
-  const auto eqTemp = pv[ID::equalTemperament]->getFloat() + 1;
-  const auto semitone = pv[ID::semitone]->getInt() - 120;
-  const auto octave = eqTemp * (int32_t(pv[ID::octave]->getInt()) - 12);
-  const auto milli = 0.001f * (pv[ID::milli]->getInt() - 1000);
-  const auto pitch = calcNotePitch(octave + semitone + milli + notePitch, eqTemp);
   for (size_t idx = 0; idx < nDelay; ++idx) {
     const auto freq = pitch * pv[ID::frequency0 + idx]->getFloat();
     const auto spread
       = (freq - Scales::frequency.getMin()) * pv[ID::randomFrequency]->getFloat();
     std::uniform_real_distribution<float> distFreq(freq - spread, freq + spread);
-    cymbal.string[idx].delay.setTime(sampleRate, 1.0f / distFreq(info.rngCymbal));
+    cymbal.string[idx].delay.setTime(sampleRate, 1.0f / distFreq(info.rngString));
   }
   cymbal.trigger(pv[ID::distance]->getFloat());
 
   cymbalLowpassEnvelope.reset(
     sampleRate, pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
     pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
-  cymbalHighpassEnvelope.reset(sampleRate, pv[ID::lowpassR]->getFloat());
 
   dcKiller.reset();
 
+  isCompressorOn = pv[ID::compressor]->getInt();
   compressor.prepare(
     sampleRate, pv[ID::compressorTime]->getFloat(),
     pv[ID::compressorThreshold]->getFloat());
@@ -142,7 +147,6 @@ void NOTE_NAME::release(float sampleRate)
   if (state == NoteState::rest) return;
   state = NoteState::release;
   cymbalLowpassEnvelope.release(sampleRate);
-  cymbalHighpassEnvelope.release();
 }
 
 void NOTE_NAME::rest() { state = NoteState::rest; }
@@ -153,16 +157,12 @@ float NOTE_NAME::getGain() { return gain; }
 
 std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
 {
-  std::uniform_real_distribution<float> dist(-0.5f, 0.5f);
+  float sig = noise.isTerminated
+    ? 0
+    : info.noiseGain.getValue() * exciterLowpass.process(noise.process(info.rngNoise));
 
-  float sig;
-  if (noiseCounter > 0) {
-    sig = info.noiseGain.getValue() * exciterLowpass.process(dist(info.rngNoise));
-    --noiseCounter;
-  } else {
-    sig = 0;
-  }
   for (auto &cmb : comb) sig -= cmb.process(sig);
+  sig *= gate.process();
 
   float lpEnv = cymbalLowpassEnvelope.process(sampleRate);
   gain = velocity * lpEnv; // Used to determin most quiet note.
@@ -170,15 +170,10 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
   const float lpEnvOffset = info.lowpassEnvelopeOffset.getValue();
   lpEnv = (lpEnv + lpEnvOffset) / (1.0f + lpEnvOffset);
   cymbal.kp = cutoffToPApprox(lpEnv * info.lowpassCutoff.getValue() / sampleRate);
+  cymbal.b1 = onepoleHighpassPoleApprox(info.highpassCutoff.getValue() / sampleRate);
+  sig = dcKiller.process(cymbal.process(sig));
 
-  const float diffCutoff = info.highpassReleaseAmount.getValue()
-    * (info.lowpassCutoff.getValue() - info.highpassCutoff.getValue());
-  cymbal.b1 = onepoleHighpassPoleApprox(
-    (info.highpassCutoff.getValue() + cymbalHighpassEnvelope.process() * diffCutoff)
-    / sampleRate);
-
-  sig = velocity
-    * compressor.process(dcKiller.process(cymbal.process(sig * gate.process())));
+  if (isCompressorOn) sig = compressor.process(sig);
 
   if (cymbalLowpassEnvelope.isTerminated()) {
     --releaseCounter;
@@ -186,6 +181,7 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
     if (releaseCounter <= 0) state = NoteState::rest;
   }
 
+  sig *= velocity;
   return {(1.0f - pan) * sig, pan * sig};
 }
 
@@ -241,7 +237,6 @@ void DSPCORE_NAME::setParameters(float tempo)
     note.cymbalLowpassEnvelope.set(
       sampleRate, pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
       pv[ID::lowpassS]->getFloat(), pv[ID::lowpassR]->getFloat());
-    note.cymbalHighpassEnvelope.set(sampleRate, pv[ID::lowpassR]->getFloat());
   }
 }
 
@@ -284,9 +279,9 @@ void DSPCORE_NAME::setUnisonPan(size_t nUnison)
 
   unisonPan.resize(nUnison);
 
-  const float unisonPanRange = param.value[ID::unisonPan]->getFloat();
-  const float panRange = unisonPanRange / float(nUnison - 1);
-  const float panOffset = 0.5f - 0.5f * unisonPanRange;
+  const float unisonSpread = param.value[ID::unisonSpread]->getFloat();
+  const float panRange = unisonSpread / float(nUnison - 1);
+  const float panOffset = 0.5f - 0.5f * unisonSpread;
 
   for (size_t idx = 0; idx < unisonPan.size(); ++idx)
     unisonPan[idx] = panRange * idx + panOffset;
@@ -326,13 +321,12 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
   // Parameters must be set after transition buffer is filled.
   velocity = velocityMap.map(velocity);
 
-  if (pv[ID::retriggerNoise]->getInt()) info.rngNoise.seed(pv[ID::seed]->getInt());
-  if (pv[ID::retriggerComb]->getInt())
-    info.rngComb.seed(pv[ID::seed]->getInt() + rngOffset);
-  if (pv[ID::retriggerCymbal]->getInt())
-    info.rngCymbal.seed(pv[ID::seed]->getInt() + 2 * rngOffset);
-  if (pv[ID::retriggerCymbal]->getInt())
-    info.rngCymbal.seed(pv[ID::seed]->getInt() + 3 * rngOffset);
+  if (pv[ID::retriggerNoise]->getInt()) info.rngNoise.seed(pv[ID::seedNoise]->getInt());
+  if (pv[ID::retriggerComb]->getInt()) info.rngComb.seed(pv[ID::seedComb]->getInt());
+  if (pv[ID::retriggerString]->getInt())
+    info.rngString.seed(pv[ID::seedString]->getInt());
+  if (pv[ID::retriggerUnison]->getInt())
+    info.rngUnison.seed(pv[ID::seedUnison]->getInt());
 
   if (nUnison <= 1) {
     notes[noteIndices[0]].noteOn(

@@ -21,17 +21,20 @@ The idea is to collide Karplus-Strong string model.
 Max 192kHz sample rate is supported.
 
 TODO list:
-- Add decay to exciter.
-- Experiment with other excitation.
-- Experiment with higher upper bound for HP Cutoff.
+- Change name.
+- Review internal parameter names.
+- Test random number retrigger.
 - Tune Rnd.Freq and Distance.
 
 Note:
-- Added per note compressor.
+- Added decay to exciter.
 - Added lowpass cutoff envelope to gate and terminate note.
+- Added per note compressor.
+- Added naive tri-saw to excitation.
 - Changed one-zero lowpass to one-pole lowpass.
 - Changed from RCHP to one-pole highpass.
 - Changed to 8 voice polyphonic.
+- Changed upper bound of HP Cutoff from 4000Hz to 20000Hz.
 - Frequency randomization is must for cymbal-ish sound.
 - Increasing K-S string makes dense decay. 24 or higher is better.
 - Increasing comb filter didn't sound good for this model.
