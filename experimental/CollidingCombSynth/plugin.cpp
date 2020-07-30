@@ -5,20 +5,20 @@
 // Modified by:
 // (c) 2020 Takamitsu Endo
 //
-// This file is part of KSCymbal.
+// This file is part of CollidingCombSynth.
 //
-// KSCymbal is free software: you can redistribute it and/or modify
+// CollidingCombSynth is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// KSCymbal is distributed in the hope that it will be useful,
+// CollidingCombSynth is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with KSCymbal.  If not, see <https://www.gnu.org/licenses/>.
+// along with CollidingCombSynth.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <memory>
@@ -29,9 +29,9 @@
 
 START_NAMESPACE_DISTRHO
 
-class KSCymbal : public Plugin {
+class CollidingCombSynth : public Plugin {
 public:
-  KSCymbal() : Plugin(ParameterID::ID_ENUM_LENGTH, 0, 0)
+  CollidingCombSynth() : Plugin(ParameterID::ID_ENUM_LENGTH, 0, 0)
   {
     auto iset = instrset_detect();
     if (iset >= 10) {
@@ -54,7 +54,7 @@ public:
   }
 
 protected:
-  const char *getLabel() const override { return "KSCymbal"; }
+  const char *getLabel() const override { return "CollidingCombSynth"; }
   const char *getDescription() const override { return "Bubble synthesizer."; }
   const char *getMaker() const override { return "Uhhyou"; }
   const char *getHomePage() const override
@@ -164,9 +164,9 @@ private:
   std::vector<std::pair<uint8_t, uint32_t>> lastNoteId;
   std::vector<uint8_t> alreadyRecievedNote;
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KSCymbal)
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CollidingCombSynth)
 };
 
-Plugin *createPlugin() { return new KSCymbal(); }
+Plugin *createPlugin() { return new CollidingCombSynth(); }
 
 END_NAMESPACE_DISTRHO

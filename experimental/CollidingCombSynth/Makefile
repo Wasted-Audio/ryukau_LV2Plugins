@@ -1,5 +1,5 @@
 # Project name, used for binaries
-NAME = KSCymbal
+NAME = CollidingCombSynth
 
 # SIMD related variables.
 FILES_SIMD = dsp/dspcore.cpp

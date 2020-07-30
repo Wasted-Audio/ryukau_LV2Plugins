@@ -5,20 +5,20 @@
 // Modified by:
 // (c) 2020 Takamitsu Endo
 //
-// This file is part of KSCymbal.
+// This file is part of CollidingCombSynth.
 //
-// KSCymbal is free software: you can redistribute it and/or modify
+// CollidingCombSynth is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// KSCymbal is distributed in the hope that it will be useful,
+// CollidingCombSynth is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with KSCymbal.  If not, see <https://www.gnu.org/licenses/>.
+// along with CollidingCombSynth.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../../common/uibase.hpp"
 #include "parameter.hpp"
@@ -39,7 +39,7 @@ constexpr float knobHeight = 40.0f;
 constexpr float knobX = 60.0f; // With margin.
 constexpr float knobY = knobHeight + labelY;
 constexpr float barboxHeight = 3.0f * knobY - 2 * margin;
-constexpr float innerWidth = 11 * knobX + 6 * margin;
+constexpr float innerWidth = 12 * knobX + 6 * margin;
 constexpr float innerHeight = 15 * labelY + 2 * knobY + 14 * margin;
 constexpr uint32_t defaultWidth = uint32_t(innerWidth + 2 * uiMargin);
 constexpr uint32_t defaultHeight = uint32_t(innerHeight + 2 * uiMargin);
@@ -119,9 +119,9 @@ Shares same controls with knob, and:
 Right Click|Toggle Min/Mid/Max
 
 
-KSCymbal outputs peaky signal. Recommend
-to insert limiter, even if compressor is
-turned on.
+CollidingCombSynth outputs peaky signal.
+Recommend to insert limiter, even if
+compressor is turned on.
 
 
 Have a nice day!)";
@@ -138,7 +138,7 @@ START_NAMESPACE_DISTRHO
 
 enum tabIndex { tabMain, tabPadSynth, tabInfo };
 
-class KSCymbalUI : public PluginUIBase {
+class CollidingCombSynthUI : public PluginUIBase {
 protected:
   void onNanoDisplay() override
   {
@@ -148,10 +148,10 @@ protected:
     fill();
   }
 
-  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KSCymbalUI)
+  DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CollidingCombSynthUI)
 
 public:
-  KSCymbalUI() : PluginUIBase(defaultWidth, defaultHeight)
+  CollidingCombSynthUI() : PluginUIBase(defaultWidth, defaultHeight)
   {
     param = std::make_unique<GlobalParameter>();
 
@@ -348,7 +348,7 @@ public:
     constexpr auto exciterLeft0 = left0 + 4 * knobX + labelY;
     constexpr auto exciterTop0 = top0;
 
-    constexpr auto exciterWidth = 7 * knobX;
+    constexpr auto exciterWidth = 8 * knobX;
     addGroupLabel(
       exciterLeft0, exciterTop0, exciterWidth, labelHeight, midTextSize, "Exciter");
 
@@ -394,7 +394,7 @@ public:
     constexpr auto stringLeft0 = exciterLeft0;
     constexpr auto stringTop0 = exciterTop0 + labelY + knobY + barboxHeight + 6 * margin;
 
-    constexpr auto stringWidth = 7 * knobX;
+    constexpr auto stringWidth = 8 * knobX;
     addGroupLabel(
       stringLeft0, stringTop0, stringWidth, labelHeight, midTextSize, "String");
 
@@ -454,10 +454,10 @@ public:
     addSplashScreen(
       splashLeft, splashTop, 4 * knobX, splashHeight, 20.0f, 20.0f,
       defaultWidth - splashHeight, defaultHeight - splashHeight, pluginNameTextSize,
-      "KSCymbal");
+      "CollidingCombSynth");
   }
 };
 
-UI *createUI() { return new KSCymbalUI(); }
+UI *createUI() { return new CollidingCombSynthUI(); }
 
 END_NAMESPACE_DISTRHO
