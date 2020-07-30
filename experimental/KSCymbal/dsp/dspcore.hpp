@@ -36,7 +36,6 @@ enum class NoteState { active, release, rest };
 
 #define NOTE_PROCESS_INFO_SMOOTHER(METHOD)                                               \
   lowpassCutoff.METHOD(pv[ID::lowpassCutoff]->getFloat());                               \
-  lowpassEnvelopeOffset.METHOD(pv[ID::lowpassEnvelopeOffset]->getFloat());               \
   highpassCutoff.METHOD(pv[ID::highpassCutoff]->getFloat());                             \
   noiseGain.METHOD(pv[ID::exciterGain]->getFloat());
 
@@ -47,7 +46,6 @@ struct NoteProcessInfo {
   std::minstd_rand rngUnison{0};
 
   ExpSmoother<float> lowpassCutoff;
-  ExpSmoother<float> lowpassEnvelopeOffset;
   ExpSmoother<float> highpassCutoff;
   ExpSmoother<float> noiseGain;
 
@@ -75,7 +73,6 @@ struct NoteProcessInfo {
   void process()
   {
     lowpassCutoff.process();
-    lowpassEnvelopeOffset.process();
     highpassCutoff.process();
     noiseGain.process();
   }

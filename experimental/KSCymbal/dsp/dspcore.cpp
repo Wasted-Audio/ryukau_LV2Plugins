@@ -167,8 +167,6 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
   float lpEnv = cymbalLowpassEnvelope.process(sampleRate);
   gain = velocity * lpEnv; // Used to determin most quiet note.
 
-  const float lpEnvOffset = info.lowpassEnvelopeOffset.getValue();
-  lpEnv = (lpEnv + lpEnvOffset) / (1.0f + lpEnvOffset);
   cymbal.kp = cutoffToPApprox(lpEnv * info.lowpassCutoff.getValue() / sampleRate);
   cymbal.b1 = onepoleHighpassPoleApprox(info.highpassCutoff.getValue() / sampleRate);
   sig = dcKiller.process(cymbal.process(sig));
@@ -339,7 +337,7 @@ void DSPCORE_NAME::noteOn(int32_t noteId, int16_t pitch, float tuning, float vel
   const float unisonDetune = param.value[ID::unisonDetune]->getFloat();
   const float unisonGainRandom = param.value[ID::unisonGainRandom]->getFloat();
   const bool randomizeDetune = param.value[ID::unisonDetuneRandom]->getInt();
-  std::uniform_real_distribution<float> distDetune(randomizeDetune ? 1.0f : 0.0f, 1.0f);
+  std::uniform_real_distribution<float> distDetune(randomizeDetune ? 0.0f : 1.0f, 1.0f);
   std::uniform_real_distribution<float> distGain(1.0f - unisonGainRandom, 1.0f);
   for (size_t unison = 0; unison < nUnison; ++unison) {
     if (noteIndices.size() <= unison) break;

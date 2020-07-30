@@ -81,6 +81,8 @@ struct ADNoise {
   float phase = 0;
   float pw = 0; // Tri-saw morphing amount. In [0, 1). Tri wave at 0.5.
 
+  static constexpr float minPw = 1e-5f;
+
   void reset(
     float sampleRate,
     float attackSeconds,
@@ -88,26 +90,28 @@ struct ADNoise {
     float frequency,
     float noiseMix)
   {
+    if (fabsf(frequency) > sampleRate / 2.0f) frequency = 0;
+
     counter = int32_t(sampleRate * attackSeconds);
     releaseFrames = int32_t(sampleRate * releaseSeconds);
 
     isReleasing = false;
     isTerminated = false;
 
-    tick = std::clamp<float>(frequency / sampleRate, 0, sampleRate / 2);
+    tick = std::clamp<float>(frequency / sampleRate, 0, 0.99999f);
     mix = noiseMix;
 
     constexpr float dampThreshold = 1000.0f; // In Hz.
     constexpr float dampMax = 4000.0f;       // In Hz.
     constexpr float dampDiff = dampMax - dampThreshold;
     if (frequency <= dampThreshold) {
-      pw = 0;
+      pw = minPw;
     } else {
       auto diff = frequency - dampThreshold;
       if (diff >= dampMax)
         pw = 0.5f;
       else
-        pw = 0.5f * diff / dampDiff;
+        pw = std::clamp<float>(0.5f * diff / dampDiff, minPw, 0.5f);
     }
   }
 
@@ -256,7 +260,9 @@ public:
 // 2x oversampled delay.
 template<typename Sample> class Delay {
 public:
-  std::array<Sample, 32768> buf; // Min ~11.72Hz when samplerate is 192kHz.
+  constexpr static int bufEnd = 32767; // 2^15 - 1. 0x7fff.
+
+  std::array<Sample, bufEnd + 1> buf; // Min ~11.72Hz when samplerate is 192kHz.
   Sample w1 = 0;
   Sample rFraction = 0;
   int wptr = 0;
@@ -270,36 +276,35 @@ public:
 
   void setTime(Sample sampleRate, Sample seconds)
   {
-    Sample timeInSample
-      = std::clamp<Sample>(Sample(2) * sampleRate * seconds, 0, buf.size());
+    Sample timeInSample = std::clamp<Sample>(Sample(2) * sampleRate * seconds, 0, bufEnd);
     auto timeInt = int(timeInSample);
 
     rFraction = timeInSample - Sample(timeInt);
 
     rptr = wptr - timeInt;
-    if (rptr < 0) rptr += int(buf.size());
+    rptr &= bufEnd;
   }
 
   Sample process(Sample input)
   {
     // Write to buffer.
     ++wptr;
-    wptr &= 32767; // 32767 = 2^15 - 1. 0x7fff.
+    wptr &= bufEnd;
     buf[wptr] = Sample(0.5) * (input + w1);
 
     ++wptr;
-    wptr &= 32767; // 32767 = 2^15 - 1. 0x7fff.
+    wptr &= bufEnd;
     buf[wptr] = input;
 
     w1 = input;
 
     // Read from buffer.
     ++rptr;
-    rptr &= 32767;
+    rptr &= bufEnd;
     const unsigned int i1 = rptr;
 
     ++rptr;
-    rptr &= 32767;
+    rptr &= bufEnd;
     const unsigned int i0 = rptr;
 
     return buf[i0] - rFraction * (buf[i0] - buf[i1]);

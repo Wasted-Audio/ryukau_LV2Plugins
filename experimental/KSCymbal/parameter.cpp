@@ -40,17 +40,18 @@ LogScale<double> Scales::envelopeA(0.0001, 16.0, 0.5, 2.0);
 LogScale<double> Scales::envelopeD(0.0001, 16.0, 0.5, 4.0);
 LogScale<double> Scales::envelopeS(0.0, 0.9995, 0.5, 0.3);
 LogScale<double> Scales::envelopeR(0.001, 16.0, 0.5, 2.0);
-LogScale<double> Scales::envelopeAmount(0.0, 1.0, 0.5, 0.1);
 
-LogScale<double> Scales::distance(0.002, 0.2, 0.5, 0.02);
+LogScale<double> Scales::distance(0.001, 1.0, 0.5, 0.2);
 IntScale<double> Scales::seed(16777215); // 2^24 - 1
 
-LogScale<double> Scales::compressorTime(0.001, 1.0, 0.5, 0.1);
+LogScale<double> Scales::randomFrequency(0.0, 1.0, 0.5, 0.05);
+
+LogScale<double> Scales::compressorTime(0.001, 8.0, 0.5, 1.0);
 LogScale<double> Scales::compressorThreshold(0.01, 2.0, 0.5, 0.5);
 
 IntScale<double> Scales::nVoice(15);
 IntScale<double> Scales::nUnison(7);
-LogScale<double> Scales::unisonDetune(0.0, 1.0, 0.5, 0.05);
+LogScale<double> Scales::unisonDetune(0.0, 0.3, 0.2, 0.001);
 
 IntScale<double> Scales::octave(16);
 IntScale<double> Scales::semitone(168);

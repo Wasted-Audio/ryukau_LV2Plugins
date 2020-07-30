@@ -58,7 +58,6 @@ enum ID {
   lowpassD,
   lowpassS,
   lowpassR,
-  lowpassEnvelopeOffset,
 
   distance,
 
@@ -118,10 +117,11 @@ struct Scales {
   static SomeDSP::LogScale<double> envelopeD;
   static SomeDSP::LogScale<double> envelopeS;
   static SomeDSP::LogScale<double> envelopeR;
-  static SomeDSP::LogScale<double> envelopeAmount;
 
   static SomeDSP::LogScale<double> distance;
   static SomeDSP::IntScale<double> seed;
+
+  static SomeDSP::LogScale<double> randomFrequency;
 
   static SomeDSP::LogScale<double> compressorTime;
   static SomeDSP::LogScale<double> compressorThreshold;
@@ -155,8 +155,8 @@ struct GlobalParameter : public ParameterInterface {
     for (size_t idx = 0; idx < nDelay; ++idx) {
       auto indexStr = std::to_string(idx);
       value[ID::frequency0 + idx] = std::make_unique<LogValue>(
-        0.5, Scales::frequency, (frequencyLabel + indexStr).c_str(),
-        kParameterIsAutomable);
+        Scales::frequency.invmap(100.0 + 20.0 * idx), Scales::frequency,
+        (frequencyLabel + indexStr).c_str(), kParameterIsAutomable);
     }
 
     std::string combTimeLabel("combTime");
@@ -182,13 +182,13 @@ struct GlobalParameter : public ParameterInterface {
       0.0, Scales::exciterDecay, "exciterDecay",
       kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::exciterNoiseMix] = std::make_unique<LinearValue>(
-      0.5, Scales::defaultScale, "exciterNoiseMix", kParameterIsAutomable);
+      1.0, Scales::defaultScale, "exciterNoiseMix", kParameterIsAutomable);
     value[ID::exciterLowpassCutoff] = std::make_unique<LogValue>(
       0.5, Scales::exciterLowpassCutoff, "exciterLowpassCutoff",
       kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::lowpassCutoff] = std::make_unique<LogValue>(
-      0.5, Scales::lowpassCutoff, "lowpassCutoff",
+      Scales::lowpassCutoff.invmap(12000.0), Scales::lowpassCutoff, "lowpassCutoff",
       kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::highpassCutoff] = std::make_unique<LogValue>(
       0.5, Scales::highpassCutoff, "highpassCutoff",
@@ -206,17 +206,14 @@ struct GlobalParameter : public ParameterInterface {
     value[ID::lowpassR] = std::make_unique<LogValue>(
       0.5, Scales::envelopeR, "lowpassR",
       kParameterIsAutomable | kParameterIsLogarithmic);
-    value[ID::lowpassEnvelopeOffset] = std::make_unique<LogValue>(
-      0.0, Scales::envelopeAmount, "lowpassEnvelopeOffset",
-      kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::distance] = std::make_unique<LogValue>(
       0.5, Scales::distance, "distance", kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::randomComb] = std::make_unique<LinearValue>(
-      0.0, Scales::defaultScale, "randomComb", kParameterIsAutomable);
-    value[ID::randomFrequency] = std::make_unique<LinearValue>(
-      0.0, Scales::defaultScale, "randomFrequency", kParameterIsAutomable);
+      0.01, Scales::defaultScale, "randomComb", kParameterIsAutomable);
+    value[ID::randomFrequency] = std::make_unique<LogValue>(
+      0.0, Scales::randomFrequency, "randomFrequency", kParameterIsAutomable);
 
     value[ID::seedNoise] = std::make_unique<IntValue>(
       11467559, Scales::seed, "seedNoise", kParameterIsAutomable | kParameterIsInteger);
@@ -228,16 +225,16 @@ struct GlobalParameter : public ParameterInterface {
       2060287, Scales::seed, "seedUnison", kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::retriggerNoise] = std::make_unique<IntValue>(
-      true, Scales::boolScale, "retriggerNoise",
+      false, Scales::boolScale, "retriggerNoise",
       kParameterIsAutomable | kParameterIsBoolean);
     value[ID::retriggerComb] = std::make_unique<IntValue>(
-      true, Scales::boolScale, "retriggerComb",
+      false, Scales::boolScale, "retriggerComb",
       kParameterIsAutomable | kParameterIsBoolean);
     value[ID::retriggerString] = std::make_unique<IntValue>(
       true, Scales::boolScale, "retriggerString",
       kParameterIsAutomable | kParameterIsBoolean);
     value[ID::retriggerUnison] = std::make_unique<IntValue>(
-      true, Scales::boolScale, "retriggerUnison",
+      false, Scales::boolScale, "retriggerUnison",
       kParameterIsAutomable | kParameterIsBoolean);
 
     value[ID::compressor] = std::make_unique<IntValue>(
@@ -246,17 +243,17 @@ struct GlobalParameter : public ParameterInterface {
       Scales::compressorTime.invmap(0.1), Scales::compressorTime, "compressorTime",
       kParameterIsAutomable | kParameterIsLogarithmic);
     value[ID::compressorThreshold] = std::make_unique<LogValue>(
-      Scales::compressorThreshold.invmap(0.1), Scales::compressorThreshold,
+      Scales::compressorThreshold.invmap(0.5), Scales::compressorThreshold,
       "compressorThreshold", kParameterIsAutomable | kParameterIsLogarithmic);
 
     value[ID::nVoice] = std::make_unique<IntValue>(
       7, Scales::nVoice, "nVoice", kParameterIsAutomable | kParameterIsInteger);
     value[ID::nUnison] = std::make_unique<IntValue>(
-      0, Scales::nUnison, "nUnison", kParameterIsAutomable | kParameterIsInteger);
+      1, Scales::nUnison, "nUnison", kParameterIsAutomable | kParameterIsInteger);
     value[ID::unisonDetune] = std::make_unique<LogValue>(
-      0.2, Scales::unisonDetune, "unisonDetune", kParameterIsAutomable);
+      0.25, Scales::unisonDetune, "unisonDetune", kParameterIsAutomable);
     value[ID::unisonSpread] = std::make_unique<LinearValue>(
-      1.0, Scales::defaultScale, "unisonSpread", kParameterIsAutomable);
+      0.5, Scales::defaultScale, "unisonSpread", kParameterIsAutomable);
     value[ID::unisonGainRandom] = std::make_unique<LinearValue>(
       0.0, Scales::defaultScale, "unisonGainRandom", kParameterIsAutomable);
     value[ID::unisonDetuneRandom] = std::make_unique<IntValue>(
