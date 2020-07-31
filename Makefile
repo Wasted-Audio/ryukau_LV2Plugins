@@ -1,4 +1,4 @@
-all: build generate_ttl
+all: patch build generate_ttl
 
 build: common \
 	lv2cvport \
@@ -19,6 +19,10 @@ build: common \
 	SyncSawSynth \
 	TrapezoidSynth \
 	WaveCymbal \
+
+.PHONY: patch
+patch:
+	$(MAKE) -C patch
 
 .PHONY: generate_ttl
 generate_ttl: build

@@ -29,9 +29,6 @@ sudo apt install \
 git clone --recursive <this repository url>
 cd LV2Plugins
 
-# Temporary patch to DPF. See: https://github.com/DISTRHO/DPF/issues/216
-cp patch/NanoVG.cpp lib/DPF/dgl/src/NanoVG.cpp
-
 make -j8 # If build process goes out of memory, try removing the -j option.
 
 make installHome     # Copy *.lv2 to ~/.lv2
@@ -93,6 +90,14 @@ make install DESTDIR="test"
 
 - [Directory Variables (GNU Coding Standards)](https://www.gnu.org/prep/standards/html_node/Directory-Variables.html)
 - [Practical Makefiles, by example](http://nuclear.mutantstargoat.com/articles/make/#going-the-extra-mile-for-release)
+
+## Patch
+Temporary patches to libraries are placed under `patch` directory. Patches are automatically applied with `make`.
+
+See following issues for details.
+
+- https://github.com/DISTRHO/DPF/issues/216
+- https://github.com/DISTRHO/DPF/pull/218
 
 # Plugins
 Note that some parameter configuration leads to massive DC offset. To stay safe, it's better to insert high-pass filter after these plugins. Monitoring output with oscilloscope is recommended.
