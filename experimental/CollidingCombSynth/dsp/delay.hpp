@@ -226,7 +226,9 @@ template<typename Sample> struct PControllerKSHat {
 
 template<typename Sample> class ShortComb {
 public:
-  std::array<Sample, 512> buf; // At least 20ms when samplerate is 192kHz.
+  constexpr static int bufEnd = 511;
+
+  std::array<Sample, bufEnd + 1> buf; // At least 20ms when samplerate is 192kHz.
   int wptr = 0;
   int rptr = 0;
   Sample r1 = 0;
@@ -239,7 +241,7 @@ public:
 
   void setTime(Sample sampleRate, Sample seconds)
   {
-    rptr = wptr - std::clamp<int>(sampleRate * seconds, 0, buf.size());
+    rptr = wptr - std::clamp<int>(sampleRate * seconds, 0, bufEnd);
     if (rptr < 0) rptr += int(buf.size());
   }
 
@@ -248,11 +250,11 @@ public:
     input -= Sample(0.3) * r1;
 
     ++wptr;
-    wptr &= 511;
+    wptr &= bufEnd;
     buf[wptr] = input;
 
     ++rptr;
-    rptr &= 511;
+    rptr &= bufEnd;
     return r1 = buf[rptr];
   }
 };
@@ -282,7 +284,7 @@ public:
     rFraction = timeInSample - Sample(timeInt);
 
     rptr = wptr - timeInt;
-    rptr &= bufEnd;
+    if (rptr < 0) rptr += int(buf.size());
   }
 
   Sample process(Sample input)
