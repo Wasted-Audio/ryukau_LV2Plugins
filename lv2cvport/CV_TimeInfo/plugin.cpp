@@ -22,6 +22,8 @@
 
 #include "DistrhoPlugin.hpp"
 
+#include <iostream> // debug
+
 START_NAMESPACE_DISTRHO
 
 enum PortIndex : uint8_t {
@@ -31,7 +33,6 @@ enum PortIndex : uint8_t {
   TimeSignatureLower,
   BarTrigger,
   BeatTrigger,
-  TickTrigger,
 
   PORT_INDEX_LENGTH,
 };
@@ -86,10 +87,6 @@ protected:
       port.hints = kAudioPortIsCV;
       port.name = String("BeatTrigger");
       port.symbol = String("BeatTrigger");
-    } else if (!input && index == TickTrigger) {
-      port.hints = kAudioPortIsCV;
-      port.name = String("TickTrigger");
-      port.symbol = String("TickTrigger");
     } else {
       Plugin::initAudioPort(input, index, port);
     }
@@ -116,40 +113,39 @@ protected:
 
       for (uint32_t i = 0; i < frames; ++i) {
         outputs[BPM][i] = float(bbt.beatsPerMinute);
-        outputs[TimeSignatureUpper][i] = float(bbt.beatsPerBar);
-        outputs[TimeSignatureLower][i] = float(bbt.beatType);
+        outputs[TimeSignatureUpper][i] = bbt.beatsPerBar;
+        outputs[TimeSignatureLower][i] = bbt.beatType;
       }
 
       if (timePos.playing) {
-        auto secondsPerTick = 60.0 / (bbt.ticksPerBeat * bbt.beatsPerMinute);
-        tickLength = sampleRate * secondsPerTick;
-        beatLength = tickLength * bbt.ticksPerBeat;
-        barLength = beatLength * bbt.beatsPerBar;
+        double secondsPerBeat = 60.0 / bbt.beatsPerMinute;
+        double framesPerBeat = sampleRate * secondsPerBeat;
+        double beatFraction = bbt.tick / bbt.ticksPerBeat;
 
-        if (!wasPlaying) {
-          barCounter = barLength;
-          beatCounter = beatLength;
-          tickCounter = tickLength;
-        }
+        beatCounter
+          = beatFraction == 0.0 ? 0 : int32_t(framesPerBeat * (1.0 - beatFraction));
+
+        int32_t beatsPerBar = int32_t(bbt.beatsPerBar);
+        beatInBar = !wasPlaying ? beatsPerBar : bbt.beat;
 
         for (uint32_t i = 0; i < frames; ++i) {
-          ++barCounter;
-          ++beatCounter;
-          ++tickCounter;
+          --beatCounter;
+          bool beatTrigger = beatCounter <= 0;
 
-          outputs[BarTrigger][i] = barCounter >= barLength ? 1 : 0;
-          outputs[BeatTrigger][i] = beatCounter >= beatLength ? 1 : 0;
-          outputs[TickTrigger][i] = tickCounter >= tickLength ? 1 : 0;
+          outputs[BarTrigger][i] = beatInBar == beatsPerBar && beatTrigger ? 1 : 0;
+          outputs[BeatTrigger][i] = beatTrigger ? 1 : 0;
 
-          if (barCounter >= barLength) barCounter = 0;
-          if (beatCounter >= beatLength) beatCounter = 0;
-          if (tickCounter >= tickLength) tickCounter = 0;
+          if (beatTrigger) {
+            beatCounter = int32_t(framesPerBeat);
+
+            ++beatInBar;
+            if (beatInBar > beatsPerBar) beatInBar = 1;
+          }
         }
       } else {
         for (uint32_t i = 0; i < frames; ++i) {
           outputs[BarTrigger][i] = 0.0;
           outputs[BeatTrigger][i] = 0.0;
-          outputs[TickTrigger][i] = 0.0;
         }
       }
     } else {
@@ -159,7 +155,6 @@ protected:
         outputs[TimeSignatureLower][i] = 0.0;
         outputs[BarTrigger][i] = 0.0;
         outputs[BeatTrigger][i] = 0.0;
-        outputs[TickTrigger][i] = 0.0;
       }
     }
 
@@ -167,14 +162,10 @@ protected:
   }
 
 private:
-  bool wasPlaying = false;
   double sampleRate = 44100;
-  double barCounter = 0;
-  double beatCounter = 0;
-  double tickCounter = 0;
-  double barLength = 1;
-  double beatLength = 1;
-  double tickLength = 1;
+  int32_t beatInBar = 0;
+  int32_t beatCounter = 0;
+  bool wasPlaying = false;
 
   DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CV_TimeInfo)
 };
