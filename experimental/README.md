@@ -13,21 +13,21 @@ Change `build` rule in the top level `Makefile` in this repository as following.
 build: experimental
 ```
 
-## KSCymbal
-Porting of [web version](https://ryukau.github.io/KSCymbal/).
-
-The idea is to collide Karplus-Strong string model.
+## CollidingCombSynth
+Based on [web version](https://ryukau.github.io/KSCymbal/). The idea is to collide Karplus-Strong string model.
 
 Max 192kHz sample rate is supported.
 
-TODO list:
-- Add gate while note-on.
-- Add termination mechanism.
-- Experiment with other excitation.
-- Properly tune highpass filter.
-
 Note:
+- Added decay to exciter.
+- Added lowpass cutoff envelope to gate and terminate note.
+- Added per note compressor.
+- Added naive tri-saw to excitation.
+- Changed name from KSCymbal to CollidingCombSynth.
 - Changed one-zero lowpass to one-pole lowpass.
+- Changed from RCHP to one-pole highpass.
+- Changed to 8 voice polyphonic.
+- Changed upper bound of HP Cutoff from 4000Hz to 20000Hz.
 - Frequency randomization is must for cymbal-ish sound.
 - Increasing K-S string makes dense decay. 24 or higher is better.
 - Increasing comb filter didn't sound good for this model.

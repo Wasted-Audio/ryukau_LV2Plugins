@@ -87,7 +87,6 @@ public:
       Scales::masterGain, false, 4);
     auto barboxGain = addBarBox(
       left0, top0 + 2 * labelY, barboxWidth, barboxHeight, ID::gain1, 16, Scales::gain);
-    barboxGain->indexOffset = 1;
 
     // Delay section.
     const auto top1 = top0 + 8 * labelY + 2 * margin;
@@ -104,7 +103,6 @@ public:
 
     auto barboxDelay = addBarBox(
       left0, top1 + 2 * labelY, barboxWidth, barboxHeight, ID::delay1, 16, Scales::delay);
-    barboxDelay->indexOffset = 1;
     barboxDelay->altScrollSensitivity = 1.0 / 64.0;
     for (int idx = 0; idx <= 16; ++idx) barboxDelay->snapValue.push_back(idx / 16.0);
 
@@ -125,7 +123,7 @@ public:
       const auto fixed = idx + 1;
       addLabel(
         left1, top0 + fixed * labelY, 4 * margin, labelHeight, uiTextSize,
-        std::to_string(fixed), ALIGN_RIGHT | ALIGN_MIDDLE);
+        std::to_string(idx), ALIGN_RIGHT | ALIGN_MIDDLE);
       addOptionMenu(
         left2, top0 + fixed * labelY, knobX, labelHeight, uiTextSize, ID::type1 + idx,
         typeItems);
