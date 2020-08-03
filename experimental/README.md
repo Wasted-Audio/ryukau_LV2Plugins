@@ -1,5 +1,5 @@
 # Experimental Plugins
-Experimental Plugins is not well tuned. They are also unstable in term of development. Expect breaking changes in future.
+Experimental Plugins are not well tuned. They are also unstable in term of development. Expect breaking changes in future.
 
 ## Building
 Change `build` rule in the top level `Makefile` in this repository as following.
