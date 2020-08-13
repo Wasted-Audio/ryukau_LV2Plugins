@@ -127,7 +127,7 @@ void NOTE_NAME::noteOn(
     std::uniform_real_distribution<float> distFreq(freq - spread, freq + spread);
     cymbal.string[idx].delay.setTime(sampleRate, 1.0f / distFreq(info.rngString));
   }
-  cymbal.trigger(pv[ID::distance]->getFloat());
+  cymbal.trigger(pv[ID::distance]->getFloat(), pv[ID::connection]->getInt());
 
   cymbalLowpassEnvelope.reset(
     sampleRate, pv[ID::lowpassA]->getFloat(), pv[ID::lowpassD]->getFloat(),
@@ -169,7 +169,7 @@ std::array<float, 2> NOTE_NAME::process(float sampleRate, NoteProcessInfo &info)
 
   cymbal.kp = cutoffToPApprox(lpEnv * info.lowpassCutoff.getValue() / sampleRate);
   cymbal.b1 = onepoleHighpassPoleApprox(info.highpassCutoff.getValue() / sampleRate);
-  sig = dcKiller.process(cymbal.process(sig));
+  sig = dcKiller.process(cymbal.process(sig, info.propagation.getValue()));
 
   if (isCompressorOn) sig = compressor.process(sig);
 

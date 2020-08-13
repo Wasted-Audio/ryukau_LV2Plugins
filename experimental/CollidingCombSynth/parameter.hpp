@@ -60,6 +60,8 @@ enum ID {
   lowpassR,
 
   distance,
+  propagation,
+  connection,
 
   randomComb,
   randomFrequency,
@@ -119,6 +121,7 @@ struct Scales {
   static SomeDSP::LogScale<double> envelopeR;
 
   static SomeDSP::LogScale<double> distance;
+  static SomeDSP::LogScale<double> propagation;
   static SomeDSP::IntScale<double> seed;
 
   static SomeDSP::LogScale<double> randomFrequency;
@@ -209,6 +212,11 @@ struct GlobalParameter : public ParameterInterface {
 
     value[ID::distance] = std::make_unique<LogValue>(
       0.5, Scales::distance, "distance", kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::propagation] = std::make_unique<LogValue>(
+      Scales::propagation.invmap(0.9), Scales::propagation, "propagation",
+      kParameterIsAutomable | kParameterIsLogarithmic);
+    value[ID::connection] = std::make_unique<IntValue>(
+      0, Scales::boolScale, "connection", kParameterIsAutomable | kParameterIsInteger);
 
     value[ID::randomComb] = std::make_unique<LinearValue>(
       0.01, Scales::defaultScale, "randomComb", kParameterIsAutomable);
