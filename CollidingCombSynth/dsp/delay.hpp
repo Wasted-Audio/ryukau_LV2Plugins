@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "../../../common/dsp/constants.hpp"
-#include "../../../common/dsp/smoother.hpp"
+#include "../../common/dsp/constants.hpp"
+#include "../../common/dsp/smoother.hpp"
 
 #include <cfloat>
 #include <random>

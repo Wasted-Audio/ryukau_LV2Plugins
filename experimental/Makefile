@@ -1,6 +1,5 @@
 build: \
 	BubbleSynth \
-	CollidingCombSynth \
 	KuramotoModel \
 	NoiseTester \
 	RingDelaySynth \
@@ -8,10 +7,6 @@ build: \
 .PHONY: BubbleSynth
 BubbleSynth:
 	$(MAKE) -C BubbleSynth
-
-.PHONY: CollidingCombSynth
-CollidingCombSynth:
-	$(MAKE) -C CollidingCombSynth
 
 .PHONY: KuramotoModel
 KuramotoModel:

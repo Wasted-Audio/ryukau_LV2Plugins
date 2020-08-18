@@ -24,7 +24,7 @@ OBJS_DSP += $(OBJ_SIMD)
 
 # Files to build
 FILES_DSP = \
-	../../lib/vcl/instrset_detect.cpp \
+	../lib/vcl/instrset_detect.cpp \
 	plugin.cpp \
 	parameter.cpp \
 #	parameter_preset.cpp \
@@ -35,14 +35,14 @@ FILES_UI  = \
 #	parameter_preset.cpp \
 
 OBJS_UI = \
-	../../build/common/gui/style.o \
-	../../build/common/gui/TinosBoldItalic.o \
+	../build/common/gui/style.o \
+	../build/common/gui/TinosBoldItalic.o \
 
 # Do some magic
-DPF_PATH ::= ../../lib/DPF
-TARGET_DIR ::= ../../bin
-BUILD_DIR ::= ../../build/$(NAME)
-include ../../Makefile.plugins.mk
+DPF_PATH ::= ../lib/DPF
+TARGET_DIR ::= ../bin
+BUILD_DIR ::= ../build/$(NAME)
+include ../Makefile.plugins.mk
 
 # Enable c++17 and avx2.
 ifeq ($(DEBUG),true)

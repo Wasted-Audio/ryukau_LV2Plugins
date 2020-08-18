@@ -16,7 +16,7 @@
 // along with CollidingCombSynth.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "parameter.hpp"
-#include "../../common/dsp/constants.hpp"
+#include "../common/dsp/constants.hpp"
 
 using namespace SomeDSP;
 

@@ -21,8 +21,8 @@
 #include <memory>
 #include <vector>
 
-#include "../../common/parameterinterface.hpp"
-#include "../../common/value.hpp"
+#include "../common/parameterinterface.hpp"
+#include "../common/value.hpp"
 
 #ifdef TEST_BUILD
 static const uint32_t kParameterIsAutomable = 0x01;

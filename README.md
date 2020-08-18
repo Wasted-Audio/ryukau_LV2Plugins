@@ -180,6 +180,21 @@ Some dense BarBox has scroll bar to zoom in. Scroll bar has handles on left and 
 <img src="docs/img/barbox_dense.png" alt="Image of scroll bar under BarBox." style="padding-bottom: 12px;"/>
 </figure>
 
+## CollidingCombSynth
+<figure>
+<img src="docs/img/lv2_collidingcombsynth.png" alt="Image of CollidingCombSynth GUI."/>
+</figure>
+
+CollidingCombSynth (CCS) is an experimental synthesizer which sounds like bowed string. Tuning of pitch is difficult, so mostly suitable for sound effects.
+
+CCS is based on [KSCymbal](https://ryukau.github.io/KSCymbal/). The idea is to collide Karplus-Strong string model to each other. "Collision" in CCS works like a kind of oscillator sync.
+
+Up to 192kHz sample rate is supported.
+
+**Caution**:
+- Output may be loud. Recommend to always insert limiter after CCS, even when `Compressor` is turned on.
+- DSP load spikes at note-on.
+
 ## L4Reverb/L3Reverb
 <figure>
 <img src="docs/img/lv2_l4reverb.png" alt="Image of L4Reverb GUI."/>

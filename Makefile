@@ -2,6 +2,7 @@ all: patch build generate_ttl
 
 build: common \
 	lv2cvport \
+	CollidingCombSynth \
 	CubicPadSynth \
 	EnvelopedSine \
 	EsPhaser \
@@ -70,6 +71,10 @@ experimental: common
 .PHONY: lv2cvport
 lv2cvport: common
 	$(MAKE) -C lv2cvport
+
+.PHONY: CollidingCombSynth
+CollidingCombSynth: common
+	$(MAKE) -C CollidingCombSynth LV2=$(LV2) VST2=$(VST2) JACK=$(JACK)
 
 .PHONY: CubicPadSynth
 CubicPadSynth: common
