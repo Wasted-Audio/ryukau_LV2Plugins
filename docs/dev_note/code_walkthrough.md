@@ -335,3 +335,36 @@ void SomePlugin::run(/* ... */) {
 ```
 
 Suppose that thread A is calling `Plugin::run()`, and thread B calls `Plugin::sampleRateChanged()`. It's possible that `dsp` in thread A will points destructed address.
+
+## Difference to VST 3 Repository
+Below is the list of the maintainance concerns on my [VST 3 repo](https://github.com/ryukau/VSTPlugins) and [LV2 repo](https://github.com/ryukau/LV2Plugins):
+
+- Build system
+- GUI library
+- MIDI handling
+- [Note expression](https://youtu.be/zXnHaoN2Cig?t=1352)
+- Host context menu support
+- Parameter abstraction
+- SIMD support
+- Tests
+
+Build system and GUI library are the tedious parts if merging 2 repository.
+
+On build system, VST 3 uses CMake and DPF uses make. The easiest way is to call make from CMake, or the opposite. But coexisting 2 different build system is bad in my opinion. DPF has a [PR for CMake port](https://github.com/DISTRHO/DPF/pull/213), but I haven't checked it.
+
+On GUI library, I prefer NanoVG on DPF. VSTGUI provides OpenGL context, so It's possible to setup NanoVG on it and merge the GUI widget code. However, this probably requires to implement input propagation on top of OpenGL context running on VSTGUI. This can be hard.
+
+VST 3 abstracts away MIDI, but DPF requires to write MIDI parsing.
+
+Note expression is only available on VST 3 for now. MIDI 2 provides low resolution version of this feature ([comparison](https://steinbergmedia.github.io/vst3_doc/vstinterfaces/MidiVst3About.html#Midi2IncreasedResolution)), so it may be possible to implement almost same thing on DPF in future.
+
+Host context menu support is only available on VST 3. See [here](https://steinbergmedia.github.io/vst3_doc/vstinterfaces/contextmenu.html) for details.
+
+On Parameter abstraction, VST 3 and DPF provides different enum for parameter property. See documentations below.
+
+- [DISTRHO Plugin Framework: Parameter Hints](https://distrho.github.io/DPF/group__ParameterHints.html)
+- [VST 3 Interfaces: ParameterInfo Struct Reference](https://steinbergmedia.github.io/vst3_doc/vstinterfaces/structSteinberg_1_1Vst_1_1ParameterInfo.html#ae3a5143ca8d0e271dbc259645a4ae645)
+
+I have to check again on things around SIMD. Last time I checked, macOS environment on GitHub Actions was failing to build with SSE2. This is why my VST 3 plugins only supports AVX or later. Also it might be better to add non-SIMD code path for platforms other than x86_64.
+
+All of the changes above probably breaks something. I'm planning to add DSP tests when next plugin is finished. I have no idea how to test GUI for now.
