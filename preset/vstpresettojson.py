@@ -108,12 +108,13 @@ def vstpreset_to_json(preset_plugin_dir,
     preset_list = []
     for vstpreset_path in sorted(preset_plugin_dir.glob("**/*.vstpreset")):
         data = read_vstpreset(vstpreset_path, endian)
-        if debug_print_data:  # For debug.
+        if debug_print_data: # For debug.
             print(f"-- filename\n{vstpreset_path}\n")
             print_data(data)
 
         # type_data = {"name0": "type0", ... }
-        with open(json_dir / Path(f"{plugin_name}.type.json"), "r") as fi:
+        with open(json_dir / Path(f"{plugin_name}.type.json"), "r",
+                  encoding="utf-8") as fi:
             type_data = json.load(fi)
 
         comp_data = data["Comp"]
@@ -133,7 +134,8 @@ def vstpreset_to_json(preset_plugin_dir,
         preset_list.append(preset)
 
     if dump_json:
-        with open(json_dir / Path(f"{plugin_name}.preset.json"), "w") as fi:
+        with open(json_dir / Path(f"{plugin_name}.preset.json"), "w",
+                  encoding="utf-8") as fi:
             json.dump(preset_list, fi, indent=2)
     return preset_list
 

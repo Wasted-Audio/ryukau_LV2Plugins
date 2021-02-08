@@ -6,7 +6,7 @@ def json_to_cpp(type_json_path, preset_json_path, prefix="preset"):
     """
     Add prefix to preset name because C++ identifier couldn't start with number, symbols etc.
     """
-    with open(preset_json_path, "r") as fi:
+    with open(preset_json_path, "r", encoding="utf-8") as fi:
         preset_list = json.load(fi)
     default_index = next(
         idx for idx, it in enumerate(preset_list) if it["name"] == "Default")
@@ -14,7 +14,7 @@ def json_to_cpp(type_json_path, preset_json_path, prefix="preset"):
     preset_list = sorted(preset_list, key=lambda it: it["name"])
     preset_list.insert(0, default_preset)
 
-    with open(type_json_path) as fi:
+    with open(type_json_path, "r", encoding="utf-8") as fi:
         parameter_type = json.load(fi)
 
     indent = "  "

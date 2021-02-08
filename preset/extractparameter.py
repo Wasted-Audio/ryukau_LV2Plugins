@@ -43,7 +43,7 @@ def get_enum_range(code):
     index = 0
     for idx in range(len(enum) - 1):
         temp[idx]["range"] = temp[idx + 1]["index"] - temp[idx]["index"]
-    temp.pop()  # Delete ID_ENUM_LENGTH
+    temp.pop() # Delete ID_ENUM_LENGTH
 
     enum = {}
     for elem in temp:
@@ -52,7 +52,7 @@ def get_enum_range(code):
     return enum
 
 def extract_parameter(parameter_hpp_path):
-    with open(parameter_hpp_path, "r") as fi:
+    with open(parameter_hpp_path, "r", encoding="utf-8") as fi:
         code = fi.read()
 
     plugin_name = re.findall(r"This file is part of (.*)\n", code)[0][:-1]
@@ -72,9 +72,9 @@ def extract_parameter(parameter_hpp_path):
         else:
             datatype = "d"
 
-        if matched[0].find(" + i") != -1:  # TODO: Change this to regex.
+        if matched[0].find(" + i") != -1:                 # TODO: Change this to regex.
             name, _, _ = matched[0].rpartition(" + i")
-            basename = name[0:-1]  # remove '0'.
+            basename = name[0:-1]                         # remove '0'.
             for i in range(enum[name]["range"]):
                 code = f"{name} + {i}"
                 default = matched[2].replace("idx", str(i))
@@ -96,7 +96,7 @@ def extract_parameter(parameter_hpp_path):
 
     json_dir = Path(__file__).parent / Path("json")
     json_dir.mkdir(parents=True, exist_ok=True)
-    with open(json_dir / Path(f"{plugin_name}.type.json"), "w") as fi:
+    with open(json_dir / Path(f"{plugin_name}.type.json"), "w", encoding="utf-8") as fi:
         json.dump(data, fi, indent=2)
 
 if __name__ == "__main__":
