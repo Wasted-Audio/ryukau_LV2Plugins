@@ -1,3 +1,7 @@
+**Important**: Development is freezed.
+
+In recent years, more hosts started supporting VST 3, or they support VST 3 better than before. So there's less reason to port my plugins to LV2. This decision is mostly to reduce maintainance on my side. See [this link](https://github.com/ryukau/LV2Plugins/blob/master/docs/dev_note/code_walkthrough.md#difference-to-vst-3-repository) for the problems I faced.
+
 # Uhhyou Plugins LV2
 Audio plugins for Linux.
 
